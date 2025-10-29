@@ -34,7 +34,6 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: 'Space Grotesk', sans-serif;
       }
 
       body {
@@ -263,7 +262,7 @@
       // Hide loader when page fully loaded
       window.addEventListener("load", () => {
         const loader = document.getElementById("loader");
-        setTimeout(() => loader.classList.add("hidden"), 500);
+        setTimeout(() => loader.classList.add("hidden"), 10);
       });
 
       // Auto-collapse navbar on mobile after clicking link
