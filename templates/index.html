@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Army Personnel System{% endblock %}</title>
-
+{% extends "base.html" %}
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
@@ -15,21 +9,18 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    {% block extra_css %}
     <style>
+      
       :root {
         --primary-color: #2c5aa0;
         --secondary-color: #8a0a0a;
         --light-bg: #f8f9fa;
         --accent-color: #d4af37;
       }
-
-      body {
-        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        min-height: 100vh;
-        padding: 20px 0;
-      }
-
+      
+     
+      
       .form-container {
         background-color: white;
         border-radius: 12px;
@@ -38,7 +29,7 @@
         margin: 20px auto;
         border: 1px solid #e1e5eb;
       }
-
+      
       .header-section {
         background: linear-gradient(135deg, var(--primary-color), #1a3a7a);
         color: white;
@@ -49,7 +40,7 @@
         position: relative;
         overflow: hidden;
       }
-
+      
       .header-section::before {
         content: "";
         position: absolute;
@@ -59,18 +50,18 @@
         height: 5px;
         background: var(--accent-color);
       }
-
+      
       .header-section h1 {
         font-weight: 700;
         margin-bottom: 10px;
         font-size: 2.2rem;
       }
-
+      
       .header-section p {
         font-size: 1.1rem;
         opacity: 0.9;
       }
-
+      
       .form-section {
         margin-bottom: 35px;
         padding: 25px;
@@ -80,11 +71,11 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         transition: all 0.3s ease;
       }
-
+      
       .form-section:hover {
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
       }
-
+      
       .section-header {
         color: var(--primary-color);
         border-bottom: 2px solid var(--secondary-color);
@@ -95,11 +86,11 @@
         align-items: center;
         gap: 10px;
       }
-
+      
       .section-header i {
         color: var(--secondary-color);
       }
-
+      
       .required::after {
         content: " *";
         color: red;
@@ -110,11 +101,11 @@
         margin-bottom: 8px;
         color: #444;
       }
-
+      
       .dynamic-table {
         margin-top: 15px;
       }
-
+      
       .dynamic-table .btn-add-row {
         margin-top: 10px;
         background-color: var(--primary-color);
@@ -125,12 +116,12 @@
         font-weight: 600;
         transition: all 0.3s ease;
       }
-
+      
       .dynamic-table .btn-add-row:hover {
         background-color: #1a3a7a;
         transform: translateY(-2px);
       }
-
+      
       .photo-upload-area {
         border: 2px dashed #ccc;
         border-radius: 8px;
@@ -141,12 +132,12 @@
         transition: all 0.3s ease;
         cursor: pointer;
       }
-
+      
       .photo-upload-area:hover {
         border-color: var(--primary-color);
         background-color: #f0f4ff;
       }
-
+      
       .photo-preview {
         max-width: 150px;
         max-height: 150px;
@@ -155,7 +146,7 @@
         border-radius: 5px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
-
+      
       .conditional-section {
         display: none;
         margin-top: 15px;
@@ -165,7 +156,7 @@
         border-left: 4px solid var(--secondary-color);
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
       }
-
+      
       .btn-submit {
         background: linear-gradient(135deg, var(--secondary-color), #6a0505);
         color: white;
@@ -189,12 +180,12 @@
         border-color: var(--primary-color);
         box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
       }
-
+      
       .nav-tabs {
         border-bottom: 2px solid var(--primary-color);
         margin-bottom: 25px;
       }
-
+      
       .nav-tabs .nav-link {
         color: var(--primary-color);
         font-weight: 600;
@@ -204,29 +195,29 @@
         margin-right: 5px;
         transition: all 0.3s ease;
       }
-
+      
       .nav-tabs .nav-link:hover {
         background-color: rgba(44, 90, 160, 0.1);
       }
-
+      
       .nav-tabs .nav-link.active {
         background-color: var(--primary-color);
         color: white;
         border: none;
       }
-
+      
       .error-message {
         color: red;
         font-size: 0.875em;
         display: none;
         margin-top: 5px;
       }
-
+      
       .form-control.is-invalid {
         border-color: #dc3545;
         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
       }
-
+      
       .card-style {
         border: none;
         border-radius: 10px;
@@ -234,7 +225,7 @@
         margin-bottom: 20px;
         transition: all 0.3s ease;
       }
-
+      
       .card-style:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
@@ -249,20 +240,20 @@
         font-weight: 600;
         transition: all 0.3s ease;
       }
-
+      
       .btn-navigation:hover {
         background-color: #1a3a7a;
         transform: translateY(-2px);
       }
-
+      
       .progress-container {
         margin-bottom: 30px;
       }
-
+      
       .progress-bar {
         background-color: var(--primary-color);
       }
-
+      
       .info-box {
         background: linear-gradient(135deg, #e3f2fd, #f0f4ff);
         border-left: 4px solid var(--primary-color);
@@ -270,17 +261,17 @@
         border-radius: 5px;
         margin-bottom: 20px;
       }
-
+      
       .info-box i {
         color: var(--primary-color);
         margin-right: 10px;
       }
-
+      
       .table th {
         background-color: var(--primary-color);
         color: white;
       }
-
+      
       .footer-note {
         text-align: center;
         margin-top: 30px;
@@ -290,7 +281,10 @@
         font-size: 0.9rem;
       }
     </style>
+    {% endblock %}
   </head>
+
+  {% block content %}
   <body>
     <div class="container">
       <div class="row justify-content-center">
@@ -2677,6 +2671,8 @@
         </div>
       </div>
     </div>
+{%endblock%}
+{% block extra_js %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -3462,5 +3458,6 @@
         }
       });
     </script>
+    {%endblock%}
   </body>
 </html>

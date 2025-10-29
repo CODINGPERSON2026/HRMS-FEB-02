@@ -6,6 +6,8 @@
     <title>
       {% block title %}Army Personnel Management System{% endblock %}
     </title>
+
+    <!-- Bootstrap & Font Awesome -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -14,353 +16,220 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
       :root {
-          --primary: #667eea;
-          --secondary: #764ba2;
-          --accent: #4a90e2;
-          --success: #43e97b;
-          --warning: #f39c12;
-          --danger: #f5576c;
-          --dark-bg: #0f2027;
-          --dark-bg-2: #203a43;
-          --dark-bg-3: #2c5364;
+        --saffron: #ff9933;
+        --white: #ffffff;
+        --green: #138808;
+        --accent: #000080;
+        --dark-bg: #0f2027;
+        --dark-bg-2: #203a43;
+        --dark-bg-3: #2c5364;
       }
 
       * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family:sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Space Grotesk', sans-serif;
       }
 
       body {
-          background: linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-bg-2) 50%, var(--dark-bg-3) 100%);
-          min-height: 100vh;
-          color: #333;
-          position: relative;
-          overflow-x: hidden;
+        background: linear-gradient(
+          135deg,
+          var(--dark-bg) 0%,
+          var(--dark-bg-2) 50%,
+          var(--dark-bg-3) 100%
+        );
+        min-height: 100vh;
+        overflow-x: hidden;
       }
 
-      /* Animated Background Pattern */
+      /* Background Decorative Layers */
       body::before {
-          content: '';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background:
-              radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 40% 20%, rgba(67, 233, 123, 0.1) 0%, transparent 40%);
-          pointer-events: none;
-          z-index: 0;
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(
+            circle at 20% 50%,
+            rgba(102, 126, 234, 0.15),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 80%,
+            rgba(118, 75, 162, 0.15),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 20%,
+            rgba(67, 233, 123, 0.1),
+            transparent 40%
+          );
+        pointer-events: none;
+        z-index: 0;
       }
 
-      /* Ultra Modern Navbar */
+      /* Navbar */
       .navbar-custom {
-          background: rgba(15, 32, 39, 0.85);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-          padding: 1.2rem 0;
-          position: sticky;
-          top: 0;
-          z-index: 1000;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          transition: all 0.3s ease;
-      }
-
-      .navbar-custom.scrolled {
-          background: rgba(15, 32, 39, 0.95);
-          padding: 0.8rem 0;
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        background: linear-gradient(
+          180deg,
+          var(--saffron),
+          var(--white) 50%,
+          var(--green)
+        );
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        padding: 1.2rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        transition: all 0.3s ease;
       }
 
       .navbar-brand {
-          font-weight: 700;
-          font-size: 1.6rem;
-          color: #fff !important;
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-          letter-spacing: -0.5px;
-      }
-
-      .navbar-brand:hover {
-          transform: translateX(5px);
+        font-weight: 700;
+        font-size: 1.6rem;
+        color: #000 !important;
+        display: flex;
+        align-items: center;
+        gap: 15px;
       }
 
       .navbar-brand i {
-          font-size: 2rem;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: brandPulse 3s ease-in-out infinite;
+        font-size: 2rem;
+        background: linear-gradient(135deg, var(--saffron), var(--green));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: brandPulse 3s ease-in-out infinite;
       }
 
       @keyframes brandPulse {
-          0%, 100% {
-              opacity: 1;
-              transform: scale(1);
-          }
-          50% {
-              opacity: 0.8;
-              transform: scale(1.05);
-          }
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.8;
+          transform: scale(1.05);
+        }
       }
 
       .navbar-toggler {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 10px;
-          padding: 0.5rem 0.75rem;
-          transition: all 0.3s ease;
-      }
-
-      .navbar-toggler:hover {
-          background: rgba(255, 255, 255, 0.15);
-          border-color: rgba(255, 255, 255, 0.3);
-      }
-
-      .navbar-toggler:focus {
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-      }
-
-      .navbar-toggler-icon {
-          filter: invert(1);
-      }
-
-      .navbar-nav {
-          gap: 0.5rem;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
       }
 
       .nav-link {
-          color: rgba(255, 255, 255, 0.7) !important;
-          font-weight: 500;
-          font-size: 1rem;
-          padding: 0.7rem 1.5rem !important;
-          border-radius: 12px;
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-          position: relative;
-          overflow: hidden;
-      }
-
-      .nav-link::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-          transition: left 0.6s ease;
-      }
-
-      .nav-link:hover::before {
-          left: 100%;
+        color: #000 !important;
+        font-weight: 500;
+        font-size: 1rem;
+        padding: 0.7rem 1.5rem !important;
+        border-radius: 12px;
+        transition: all 0.3s ease;
       }
 
       .nav-link:hover {
-          color: #fff !important;
-          background: rgba(102, 126, 234, 0.2);
-          transform: translateY(-2px);
+        color: var(--accent) !important;
+        background: rgba(255, 255, 255, 0.4);
+        transform: translateY(-2px);
       }
 
       .nav-link.active {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: #fff !important;
-          box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        background: var(--accent);
+        color: #fff !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
       }
 
-      .nav-link i {
-          font-size: 1.1rem;
-          transition: transform 0.3s ease;
+      .brand-logo {
+        width: 45px;
+        height: 45px;
+        object-fit: contain;
+        animation: brandPulse 3s ease-in-out infinite;
       }
 
-      .nav-link:hover i {
-          transform: scale(1.1);
+      /* Loader */
+      #loader {
+        position: fixed;
+        inset: 0;
+        background: var(--white); /* Clean white background while loading */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        transition: opacity 0.6s ease, visibility 0.6s ease;
       }
 
-      /* Main Content Area */
-      .main-content {
-          padding: 2rem;
-          min-height: calc(100vh - 80px);
-          position: relative;
-          z-index: 1;
+      #loader.hidden {
+        opacity: 0;
+        visibility: hidden;
       }
 
-      /* Global Animations */
-      @keyframes fadeIn {
-          from {
-              opacity: 0;
-              transform: translateY(30px);
-          }
-          to {
-              opacity: 1;
-              transform: translateY(0);
-          }
-      }
-
-      @keyframes slideInFromLeft {
-          from {
-              opacity: 0;
-              transform: translateX(-50px);
-          }
-          to {
-              opacity: 1;
-              transform: translateX(0);
-          }
-      }
-
-      @keyframes slideInFromRight {
-          from {
-              opacity: 0;
-              transform: translateX(50px);
-          }
-          to {
-              opacity: 1;
-              transform: translateX(0);
-          }
-      }
-
-      .animated {
-          animation: fadeIn 0.6s ease;
-      }
-
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-          width: 12px;
-          height: 12px;
-      }
-
-      ::-webkit-scrollbar-track {
-          background: rgba(0, 0, 0, 0.1);
-          border-radius: 10px;
-      }
-
-      ::-webkit-scrollbar-thumb {
-          background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-          border-radius: 10px;
-          border: 2px solid rgba(0, 0, 0, 0.1);
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(180deg, #764ba2 0%, #667eea 100%);
-      }
-
-      /* Loading Animation */
-      .loading-spinner {
-          display: inline-block;
-          width: 40px;
-          height: 40px;
-          border: 4px solid rgba(255, 255, 255, 0.1);
-          border-radius: 50%;
-          border-top-color: var(--primary);
-          animation: spin 1s linear infinite;
+      .loader-spinner {
+        border: 6px solid rgba(0, 0, 0, 0.1);
+        border-top: 6px solid var(--accent);
+        border-radius: 50%;
+        width: 70px;
+        height: 70px;
+        animation: spin 1.2s linear infinite;
       }
 
       @keyframes spin {
-          to { transform: rotate(360deg); }
+        to {
+          transform: rotate(360deg);
+        }
       }
 
-      /* Utility Classes */
-      .gradient-text {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+      .main-content {
+        padding: 2rem;
+        min-height: calc(100vh - 80px);
+        position: relative;
+        z-index: 1;
       }
 
-      .glass-card {
-          background: rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 20px;
-          padding: 2rem;
-      }
-
-      .hover-lift {
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-
-      .hover-lift:hover {
-          transform: translateY(-10px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-      }
-
-      /* Responsive Design */
-      @media (max-width: 991px) {
-          .navbar-brand {
-              font-size: 1.3rem;
-          }
-
-          .navbar-brand i {
-              font-size: 1.5rem;
-          }
-
-          .navbar-collapse {
-              margin-top: 1rem;
-              padding: 1rem;
-              background: rgba(255, 255, 255, 0.05);
-              border-radius: 15px;
-          }
-
-          .nav-link {
-              margin: 0.3rem 0;
-          }
-      }
-
-      @media (max-width: 768px) {
-          .main-content {
-              padding: 1rem;
-          }
-      }
-
-      /* Print Styles */
       @media print {
-          body {
-              background: white;
-          }
-
-          .navbar-custom,
-          .nav-link,
-          body::before {
-              display: none;
-          }
-
-          .main-content {
-              padding: 0;
-          }
+        .navbar-custom,
+        #loader {
+          display: none !important;
+        }
       }
+    </style>
 
-      </style>
-      {% block extra_css %}{% endblock %}
+    {% block extra_css %}{% endblock %}
   </head>
+
   <body>
-    <!-- Ultra Modern Navbar -->
+    <!-- Loader -->
+    {% block loader %}
+    <div id="loader">
+      <div class="loader-spinner"></div>
+    </div>
+    {% endblock %}
+
+    
+
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-custom">
-      <div class="container-fluid">
+      <div class="container">
         <a class="navbar-brand" href="/">
-          <i class="fas fa-shield-alt"></i>
+          <img
+            src="{{ url_for('static', filename='logo1.png') }}"
+            alt="Army Logo"
+            class="brand-logo"
+          />
           <span>Army Personnel System</span>
         </a>
+
         <button
           class="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
         >
           <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
@@ -379,79 +248,31 @@
                 <i class="fas fa-user-plus me-2"></i>Add Personnel
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/personnel">
-                <i class="fas fa-users me-2"></i>View Data
-              </a>
-            </li>
-            
           </ul>
         </div>
       </div>
     </nav>
 
-    <!-- Main Content Area -->
-    <div class="main-content animated">{% block content %}{% endblock %}</div>
+    <!-- Main Content -->
+    <div class="main-content">{% block content %}{% endblock %}</div>
 
-    <!-- Bootstrap JS -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Global JavaScript -->
     <script>
-      // Navbar scroll effect
-      window.addEventListener("scroll", function () {
-        const navbar = document.querySelector(".navbar-custom");
-        if (window.scrollY > 50) {
-          navbar.classList.add("scrolled");
-        } else {
-          navbar.classList.remove("scrolled");
-        }
+      // Hide loader when page fully loaded
+      window.addEventListener("load", () => {
+        const loader = document.getElementById("loader");
+        setTimeout(() => loader.classList.add("hidden"), 500);
       });
 
-      // Smooth scroll for anchor links
-      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-        anchor.addEventListener("click", function (e) {
-          e.preventDefault();
-          const target = document.querySelector(this.getAttribute("href"));
-          if (target) {
-            target.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            });
-          }
-        });
-      });
-
-      // Auto-close navbar on mobile after clicking a link
+      // Auto-collapse navbar on mobile after clicking link
       const navLinks = document.querySelectorAll(".nav-link");
       const navbarCollapse = document.querySelector(".navbar-collapse");
-
-      navLinks.forEach((link) => {
+      navLinks.forEach(link => {
         link.addEventListener("click", () => {
-          if (
-            window.innerWidth < 992 &&
-            navbarCollapse.classList.contains("show")
-          ) {
-            const bsCollapse = new bootstrap.Collapse(navbarCollapse);
-            bsCollapse.hide();
-          }
-        });
-      });
-
-      // Add loading state to buttons on click
-      document.querySelectorAll('button[type="submit"]').forEach((button) => {
-        button.addEventListener("click", function () {
-          if (this.form && this.form.checkValidity()) {
-            this.disabled = true;
-            const originalHTML = this.innerHTML;
-            this.innerHTML =
-              '<span class="loading-spinner"></span> Processing...';
-
-            // Re-enable after 5 seconds as fallback
-            setTimeout(() => {
-              this.disabled = false;
-              this.innerHTML = originalHTML;
-            }, 5000);
+          if (window.innerWidth < 992 && navbarCollapse.classList.contains("show")) {
+            new bootstrap.Collapse(navbarCollapse).hide();
           }
         });
       });
