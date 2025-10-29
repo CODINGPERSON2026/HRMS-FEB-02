@@ -11,8 +11,8 @@ CORS(app)
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'qaz123QAZ!@#',
-    'database': 'army_personnel_db',
+    'password': 'yawar@123',
+    'database': 'biodata_personnel',
     'autocommit': True
 }
 

@@ -2,7 +2,7 @@
 {% block title %}View Data - Medical Cases - Army Personnel System{% endblock %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% block extra_css %}
-<!-- <link href="https://cdn.jsdelivr.net/npm/chart.js" rel="stylesheet"> -->
+
 
 <style>
   :root {
@@ -94,12 +94,14 @@
   }
 
   .stats-number {
+    /* color:red; */
+    color: chocolate;
     font-size: 3.5rem;
     font-weight: 800;
     margin-bottom: 0.5rem;
     background: linear-gradient(135deg, var(--danger), var(--warning));
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    /* -webkit-text-fill-color: transparent; */
     background-clip: text;
   }
 
@@ -140,7 +142,7 @@
 
   .btn-view-details {
     background: linear-gradient(135deg, var(--danger), var(--warning));
-    color: white;
+    color: rgb(111, 16, 16);
     border: none;
     padding: 1rem 2.5rem;
     border-radius: 50px;
