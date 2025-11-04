@@ -11,8 +11,8 @@ CORS(app)
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'yawar@123',
-    'database': 'biodata_personnel',
+    'password': 'qaz123QAZ!@#',
+    'database': 'army_personnel_db',
     'autocommit': True
 }
 
@@ -34,34 +34,154 @@ def dashboard():
     cursor = connection.cursor(dictionary=True)
     
     try:
-        # Get total personnel
+           # Get recent personnel (last 5)
+        cursor.execute("""
+            SELECT name, army_number, `rank`, date_of_enrollment
+            FROM personnel 
+            ORDER BY id DESC 
+            LIMIT 5
+        """)
+        recent_personnel = cursor.fetchall()
+        
+        return render_template('dashboard.html', 
+                        
+                             recent_personnel=recent_personnel,
+                             active_tab='dashboard')
+    
+    except Error as e:
+        print(f"Database error: {e}")
+        return f"Database error: {e}", 500
+    finally:
+        cursor.close()
+        connection.close()
+
+
+
+@app.route('/get_total_personnel_count_and_courses')
+def total_army_personnel__and_courses():
+    connection =  get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    try:
         cursor.execute("SELECT COUNT(*) as total FROM personnel")
         total_personnel = cursor.fetchone()['total']
-        
-        # Get this month's additions
-        cursor.execute("""
-            SELECT COUNT(*) as count FROM personnel 
-            WHERE MONTH(date_of_enrollment) = MONTH(CURRENT_DATE())
-            AND YEAR(date_of_enrollment) = YEAR(CURRENT_DATE())
-        """)
-        this_month = cursor.fetchone()['count']
-        
-        # Get total courses
+        print(total_personnel,"thse are total personal")
         cursor.execute("SELECT COUNT(*) as count FROM courses")
         total_courses = cursor.fetchone()['count']
+        return jsonify({"total_army_personnel":total_personnel,'total_courses': total_courses}),200
+    except Exception as e :
+        print('Server error',str(e))
+        return jsonify({'error':e}),500
+
+
+
+# View Data route - Lists personnel with med_cat = 'Yes'
+@app.route('/personnel')
+def view_personnel():
+    connection = get_db_connection()
+    if not connection:
+        return "Database connection failed", 500
+    
+    cursor = connection.cursor(dictionary=True)
+    
+    try:
+        # Get total medical cases
+        cursor.execute("SELECT COUNT(*) as total FROM personnel WHERE med_cat = 'Yes'")
+        total_medical = cursor.fetchone()['total']
         
-        # Get medical cases (personnel with med_cat = 'Yes')
-        cursor.execute("SELECT COUNT(*) as count FROM personnel WHERE med_cat = 'Yes'")
-        medical_cases = cursor.fetchone()['count']
+        # Get company-wise distribution
+        cursor.execute("""
+            SELECT company, COUNT(*) as count 
+            FROM personnel 
+            WHERE med_cat = 'Yes'
+            GROUP BY company
+            ORDER BY company
+        """)
+        company_distribution = cursor.fetchall()
         
-        stats = {
-            'total_personnel': total_personnel,
-            'this_month': this_month,
-            'total_courses': total_courses,
-            'medical_cases': medical_cases
-        }
-        
-        # Get age distribution
+        # Get list of medical personnel
+        cursor.execute("""
+    SELECT id, name, army_number, date_of_birth, `rank`, trade, date_of_enrollment, med_cat, company
+    FROM personnel 
+    WHERE med_cat = 'Yes'
+    ORDER BY company, id DESC
+""")
+        medical_personnel = cursor.fetchall()
+
+       
+        print(f'this is total medical category {total_medical}')
+        return render_template('personnel.html', 
+                             total_medical=total_medical,
+                             medical_personnel=medical_personnel,
+                             company_distribution=company_distribution,
+                             active_tab='view-data')
+    
+    except Error as e:
+        print(f"Database error: {e}")
+        return f"Database error: {e}", 500
+    finally:
+        cursor.close()
+        connection.close()
+
+@app.route('/get_medical_category_count', methods=['GET'])
+def get_total_medical_category_count():
+    try:
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'error': 'Database connection failed'}), 500
+
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT COUNT(*) AS total_count
+            FROM personnel
+            WHERE med_cat = %s
+        """, ('Yes',))
+
+        result = cursor.fetchone()
+        total_count = result['total_count'] if result else 0
+        print("this is total medical count",total_count)
+        return jsonify({'total_medical_category_count': total_count}), 200
+
+    except Exception as e:
+        print("Error fetching total medical category count:", e)
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+@app.route('/rank_based_bar_graph_')
+def rank_graph():
+    connection = get_db_connection()
+    cursor =connection.cursor(dictionary=True)
+    try:
+    # Get rank distribution
+        cursor.execute("""
+            SELECT `rank`, COUNT(*) as count 
+            FROM personnel 
+            GROUP BY `rank`
+            ORDER BY count DESC
+            LIMIT 10
+        """)
+        rank_distribution = cursor.fetchall()
+        return jsonify({'rank_distribution':rank_distribution}),200
+    except Exception as e:
+        print('Internal server error',str(e))
+        return jsonify({'message':"internal server error"}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+
+@app.route('/age_bar_graph')
+def age_graph():
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT COUNT(*) as total FROM personnel")
+        total_personnel = cursor.fetchone()['total']
         cursor.execute("""
             SELECT 
                 CASE 
@@ -90,85 +210,16 @@ def dashboard():
                 'count': row['count'],
                 'percentage': percentage
             })
-        
-        # Get rank distribution
-        cursor.execute("""
-            SELECT `rank`, COUNT(*) as count 
-            FROM personnel 
-            GROUP BY `rank`
-            ORDER BY count DESC
-            LIMIT 10
-        """)
-        rank_distribution = cursor.fetchall()
-        
-        # Get recent personnel (last 5)
-        cursor.execute("""
-            SELECT name, army_number, `rank`, date_of_enrollment
-            FROM personnel 
-            ORDER BY id DESC 
-            LIMIT 5
-        """)
-        recent_personnel = cursor.fetchall()
-        
-        return render_template('dashboard.html', 
-                             stats=stats, 
-                             age_distribution=age_distribution,
-                             rank_distribution=rank_distribution,
-                             recent_personnel=recent_personnel,
-                             active_tab='dashboard')
-    
-    except Error as e:
-        print(f"Database error: {e}")
-        return f"Database error: {e}", 500
+        return jsonify({'age_distribution':age_distribution}),200
+    except Exception as e:
+        print(str(e))
+        return jsonify({'error',e}), 500
     finally:
         cursor.close()
         connection.close()
 
-# View Data route - Lists personnel with med_cat = 'Yes'
-@app.route('/personnel')
-def view_personnel():
-    connection = get_db_connection()
-    if not connection:
-        return "Database connection failed", 500
-    
-    cursor = connection.cursor(dictionary=True)
-    
-    try:
-        # Get total medical cases
-        cursor.execute("SELECT COUNT(*) as total FROM personnel WHERE med_cat = 'Yes'")
-        total_medical = cursor.fetchone()['total']
-        
-        # Get company-wise distribution
-        cursor.execute("""
-            SELECT company, COUNT(*) as count 
-            FROM personnel 
-            WHERE med_cat = 'Yes'
-            GROUP BY company
-            ORDER BY company
-        """)
-        company_distribution = cursor.fetchall()
-        
-        # Get list of medical personnel
-        cursor.execute("""
-            SELECT id, name, army_number, date_of_birth, `rank`, trade, date_of_enrollment, med_cat, company
-            FROM personnel 
-            WHERE med_cat = 'Yes'
-            ORDER BY company, id DESC
-        """)
-        medical_personnel = cursor.fetchall()
-        
-        return render_template('personnel.html', 
-                             total_medical=total_medical,
-                             medical_personnel=medical_personnel,
-                             company_distribution=company_distribution,
-                             active_tab='view-data')
-    
-    except Error as e:
-        print(f"Database error: {e}")
-        return f"Database error: {e}", 500
-    finally:
-        cursor.close()
-        connection.close()
+
+
 
 # API endpoint to get medical personnel details
 @app.route('/api/medical-personnel')
@@ -644,5 +695,115 @@ def api_all_personnel():
         cursor.close()
         connection.close()
 
+
+
+@app.route('/religion_donut_chart')
+def religion_chart():
+    connection = get_db_connection()
+    cursor= connection.cursor(dictionary=True)
+    try:
+        cursor.execute("""SELECT religion,count(religion) as religion_count FROM army_personnel_db.personnel group by religion""")
+        result = cursor.fetchall()
+        # religion_distribution  = []
+        # for row in result:
+        #     religion_distribution.append({
+        #         'religion':row['religion'],
+        #         "religion_count" : row['religion_count']
+        #     })
+        # print(religion_distribution)
+        print(result)
+        return jsonify({'data':result}),200
+    except Exception as e :
+        print(str(e))
+        return jsonify({"error":e})
+
+
+# Add these new routes to your app.py
+
+@app.route('/employment_type_chart')
+def employment_type_chart():
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    try:
+        # Count Agniveer vs Regular personnel based on rank
+        cursor.execute("""
+            SELECT 
+                CASE 
+                    WHEN LOWER(`rank`) LIKE '%agniveer%' THEN 'Agniveer'
+                    ELSE 'Regular'
+                END as employment_type,
+                COUNT(*) as count
+            FROM personnel
+            GROUP BY employment_type
+        """)
+        result = cursor.fetchall()
+        
+        employment_distribution = []
+        for row in result:
+            employment_distribution.append({
+                'type': row['employment_type'],
+                'count': row['count']
+            })
+        
+        return jsonify({'employment_distribution': employment_distribution}), 200
+        
+    except Exception as e:
+        print(f"Error in employment type chart: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+@app.route('/years_in_service_chart')
+def years_in_service_chart():
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT 
+                CASE 
+                    WHEN TIMESTAMPDIFF(YEAR, date_of_enrollment, CURDATE()) BETWEEN 0 AND 5 THEN '0-5 Years'
+                    WHEN TIMESTAMPDIFF(YEAR, date_of_enrollment, CURDATE()) BETWEEN 5 AND 15 THEN '5-15 Years'
+                    WHEN TIMESTAMPDIFF(YEAR, date_of_enrollment, CURDATE()) BETWEEN 15 AND 25 THEN '15-25 Years'
+                    WHEN TIMESTAMPDIFF(YEAR, date_of_enrollment, CURDATE()) BETWEEN 25 AND 35 THEN '25-35 Years'
+                    WHEN TIMESTAMPDIFF(YEAR, date_of_enrollment, CURDATE()) BETWEEN 35 AND 45 THEN '35-45 Years'
+                    WHEN TIMESTAMPDIFF(YEAR, date_of_enrollment, CURDATE()) BETWEEN 45 AND 50 THEN '45-50 Years'
+                    WHEN TIMESTAMPDIFF(YEAR, date_of_enrollment, CURDATE()) BETWEEN 50 AND 64 THEN '50-64 Years'
+                    ELSE 'Unknown'
+                END as service_range,
+                COUNT(*) as count
+            FROM personnel
+            WHERE date_of_enrollment IS NOT NULL
+            GROUP BY service_range
+            ORDER BY 
+                CASE service_range
+                    WHEN '0-5 Years' THEN 1
+                    WHEN '5-15 Years' THEN 2
+                    WHEN '15-25 Years' THEN 3
+                    WHEN '25-35 Years' THEN 4
+                    WHEN '35-45 Years' THEN 5
+                    WHEN '45-50 Years' THEN 6
+                    WHEN '50-64 Years' THEN 7
+                    ELSE 8
+                END
+        """)
+        result = cursor.fetchall()
+        
+        service_distribution = []
+        for row in result:
+            service_distribution.append({
+                'range': row['service_range'],
+                'count': row['count']
+            })
+        
+        return jsonify({'service_distribution': service_distribution}), 200
+        
+    except Exception as e:
+        print(f"Error in years in service chart: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
+        
 if __name__ == '__main__':
     app.run(debug=True, port=3500)

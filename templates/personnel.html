@@ -485,7 +485,6 @@
     <!-- Modal Navigation -->
     <div class="modal-nav">
       <ul class="nav-tabs">
-        <li class="nav-tab active" data-tab="statistics">Statistics</li>
         <li class="nav-tab" data-tab="tabular">Tabular Data</li>
       </ul>
     </div>
@@ -493,14 +492,6 @@
     <!-- Modal Body -->
     <div class="modal-body">
       <!-- Statistics Tab -->
-      <div class="tab-content active" id="statisticsTab">
-        <div class="statistics-content">
-          <div class="chart-title">Company-wise Distribution of Medical Cases</div>
-          <div class="statistics-chart">
-            <canvas id="modalCompanyChart"></canvas>
-          </div>
-        </div>
-      </div>
 
       <!-- Tabular Tab -->
       <div class="tab-content" id="tabularTab">
@@ -534,7 +525,6 @@
                     <th>Trade</th>
                     <th>Company</th>
                     <th>Enrollment Date</th>
-                    <th>Medical Status</th>
                   </tr>
                 </thead>
                 <tbody id="modalTableBody">
@@ -556,62 +546,92 @@
   let modalCompanyChart = null;
 
   // Initialize Company Distribution Chart
-  function initCompanyChart() {
-    const ctx = document.getElementById('companyChart').getContext('2d');
-    
-    if (companyChart) {
-      companyChart.destroy();
-    }
-    
-    const companyData = {
-      {% for company in company_distribution %}
-        '{{ company.company }}': {{ company.count }},
-      {% endfor %}
-    };
-
-    const companies = ['1 Company', '2 Company', '3 Company', '4 Company'];
-    const counts = companies.map(company => companyData[company] || 0);
-    const colors = ['#667eea', '#f093fb', '#4ecdc4', '#ff6b6b'];
-
-    companyChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: companies,
-        datasets: [{
-          data: counts,
-          backgroundColor: colors,
-          borderColor: colors.map(color => color + 'CC'),
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 20,
-              usePointStyle: true,
-              font: { size: 12, weight: '600' }
+  async function initCompanyChart() {
+    try {
+      const response = await fetch("/api/medical-personnel");
+      if (!response.ok) {
+        throw new Error("Failed to fetch medical personnel data");
+      }
+  
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error("API returned unsuccessful response");
+      }
+  
+      // Extract data
+      const companyDistribution = data.company_distribution;
+      const totalMedical = data.total_medical;
+  
+      // Build company name list dynamically
+      const companies = companyDistribution.map(item => item.company);
+      const counts = companyDistribution.map(item => item.count);
+  
+      const ctx = document.getElementById("companyChart").getContext("2d");
+  
+      // Destroy previous chart if it exists
+     
+  
+      // Color palette
+      const colors = [
+        "#667eea",
+        "#f093fb",
+        "#4ecdc4",
+        "#ff6b6b",
+        "#ffcc00",
+        "#00b894"
+      ];
+  
+      // Create new Chart.js instance
+      window.companyChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: companies,
+          datasets: [
+            {
+              data: counts,
+              backgroundColor: colors.slice(0, companies.length),
+              borderColor: colors.slice(0, companies.length).map(color => color + "CC"),
+              borderWidth: 2
             }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.raw || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                return `${label}: ${value} (${percentage}%)`;
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                padding: 20,
+                usePointStyle: true,
+                font: { size: 12, weight: "600" }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const label = context.label || "";
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                  return `${label}: ${value} (${percentage}%)`;
+                }
               }
             }
-          }
-        },
-        cutout: '65%'
-      }
-    });
+          },
+          cutout: "65%"
+        }
+      });
+  
+      // Update total count display (optional)
+      const totalEl = document.getElementById("totalMedicalCount");
+      if (totalEl) totalEl.textContent = totalMedical;
+  
+    } catch (error) {
+      console.error("Error initializing company chart:", error);
+    }
   }
+  
 
   // Initialize Modal Company Chart
   function initModalCompanyChart() {
@@ -621,11 +641,7 @@
       modalCompanyChart.destroy();
     }
     
-    const companyData = {
-  {% for company in company_distribution %}
-    "{{ company.company }}": {{ company.count }}{% if not loop.last %},{% endif %}
-  {% endfor %}
-};
+
 
     const companies = ['1 Company', '2 Company', '3 Company', '4 Company'];
     const counts = companies.map(company => companyData[company] || 0);
@@ -677,11 +693,23 @@
     document.body.classList.add('modal-open');
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
+
+    // Activate the Tabular tab and content
+  const tabularTab = document.querySelector('.nav-tab[data-tab="tabular"]');
+  const tabularContent = document.getElementById('tabularTab');
+
+  if (tabularTab && tabularContent) {
+    // Activate the tab
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    tabularTab.classList.add('active');
+
+    // Show the content
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tabularContent.classList.add('active');
+  }
     
-    setTimeout(() => {
-      initModalCompanyChart();
-      loadAllPersonnelData();
-    }, 100);
+    loadAllPersonnelData();
+    
   }
 
   function closeModal() {
@@ -707,23 +735,8 @@
   });
 
   // Tab Navigation
-  function setupTabNavigation() {
-    const tabs = document.querySelectorAll('.nav-tab');
-    
-    tabs.forEach(tab => {
-      tab.addEventListener('click', function() {
-        const tabId = this.dataset.tab;
-        
-        tabs.forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        
-        document.querySelectorAll('.tab-content').forEach(content => {
-          content.classList.remove('active');
-        });
-        document.getElementById(tabId + 'Tab').classList.add('active');
-      });
-    });
-  }
+  
+  
 
   // Load all personnel data for modal
   async function loadAllPersonnelData() {
@@ -773,18 +786,16 @@
       `;
       return;
     }
-
+  
     tableBody.innerHTML = personnel.map(person => {
       const name = person.name || 'N/A';
       const armyNumber = person.army_number || 'N/A';
       const rank = person.rank || 'N/A';
       const trade = person.trade || 'N/A';
       const company = person.company || 'Unknown';
-      const enrollmentDate = person.date_of_enrollment ? 
-        new Date(person.date_of_enrollment).toLocaleDateString('en-GB') : 'N/A';
-      
-      const medicalStatus = person.med_cat === 'Yes' ? 'Below Shape I' : 'Shape I';
-      const medicalBadgeClass = person.med_cat === 'Yes' ? 'badge-medical-yes' : 'badge-medical-no';
+      const enrollmentDate = person.date_of_enrollment
+        ? new Date(person.date_of_enrollment).toLocaleDateString('en-GB')
+        : 'N/A';
       
       let companyBadge = '';
       if (company === '1 Company') {
@@ -798,24 +809,20 @@
       } else {
         companyBadge = `<span class="badge bg-secondary">${company}</span>`;
       }
-      
+  
       return `
         <tr data-company="${company}" data-medical="${person.med_cat || 'No'}">
           <td class="fw-semibold">${name}</td>
           <td class="text-mono fw-bold">${armyNumber}</td>
-          <td><span class="badge bg-primary">${rank}</span></td>
+          <td class="fw-bold text-uppercase">${rank}</td>
           <td>${trade}</td>
           <td>${companyBadge}</td>
           <td>${enrollmentDate}</td>
-          <td>
-            <span class="medical-badge ${medicalBadgeClass}">
-              ${medicalStatus}
-            </span>
-          </td>
         </tr>
       `;
     }).join('');
   }
+  
 
   function setupModalCompanyFilter() {
     const companyFilter = document.getElementById('modalCompanyFilter');
@@ -843,9 +850,9 @@
   }
 
   // Initialize when page loads
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded',async function() {
     initCompanyChart();
-    setupTabNavigation();
+    
     setupModalCompanyFilter();
     
     window.addEventListener('resize', function() {

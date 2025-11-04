@@ -2,31 +2,29 @@
 {% block title %}Dashboard{% endblock %}
 {% block extra_css %}
 <style>
-  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
-
   * {
-   
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
 
   :root {
-    /* Light Theme */
-    --bg-primary: #f8f9fa;
+    /* Light Theme - Professional */
+    --bg-primary: #f8fafc;
     --bg-secondary: #ffffff;
     --bg-accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --text-primary: #1a202c;
-    --text-secondary: #718096;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
     --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.03);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.05);
     --card-bg: #ffffff;
-    --accent-color: #667eea;
-    --success-color: #48bb78;
-    --warning-color: #ed8936;
-    --danger-color: #f56565;
+    --accent-color: #3b82f6;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --grid-gap: 1.25rem;
   }
 
   [data-theme="dark"] {
@@ -44,12 +42,14 @@
   body {
     background: var(--bg-primary);
     color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
   }
 
   .dashboard-container {
-    max-width: 1600px;
+    max-width: 1800px;
     margin: 0 auto;
-    padding: 2rem 1.5rem;
+    padding: 1.5rem;
   }
 
   /* Header Section */
@@ -60,7 +60,7 @@
     margin-bottom: 2rem;
     padding: 1.5rem 2rem;
     background: var(--card-bg);
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
   }
@@ -85,19 +85,24 @@
 
   /* Theme Toggle */
   .theme-toggle {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--accent-color);
   }
 
   .theme-toggle i {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--accent-color);
   }
 
@@ -106,30 +111,42 @@
     background: var(--bg-accent);
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    transition: all 0.2s ease;
+  }
+
+  .refresh-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
   }
 
   /* Stats Grid */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--grid-gap);
     margin-bottom: 2rem;
   }
 
   .stat-card {
     background: var(--card-bg);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 1.5rem;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
     position: relative;
     overflow: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
   }
 
   .stat-card::before {
@@ -138,14 +155,14 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
+    height: 3px;
     background: var(--bg-accent);
   }
 
   .stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
     background: var(--bg-accent);
     display: flex;
     align-items: center;
@@ -154,14 +171,14 @@
   }
 
   .stat-icon i {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     color: white;
   }
 
   .stat-label {
     font-size: 0.85rem;
     color: var(--text-secondary);
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -172,63 +189,88 @@
     font-weight: 800;
     color: var(--text-primary);
     line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .view-btn {
+    padding: 0.5rem 1rem;
+    background: var(--accent-color);
+    color: white;
+    border: 1px solid var(--accent-color);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .view-btn:hover {
+    background: var(--accent-color);
+    color: white;
+    opacity: 0.7;
+    transform: translateY(-1px);
   }
 
   /* Charts Grid */
   .charts-grid {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--grid-gap);
     margin-bottom: 2rem;
   }
 
   .chart-card {
     background: var(--card-bg);
-    border-radius: 16px;
-    padding: 1.5rem;
+    border-radius: 12px;
+    padding: 1.25rem;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
   }
 
-  .col-span-12 { grid-column: span 12; }
-  .col-span-8 { grid-column: span 8; }
-  .col-span-6 { grid-column: span 6; }
-  .col-span-4 { grid-column: span 4; }
+  .chart-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
 
   .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .chart-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
 
   .chart-title i {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     background: var(--bg-accent);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
   .chart-badge {
-    padding: 0.4rem 0.9rem;
-    background: rgba(102, 126, 234, 0.1);
+    padding: 0.3rem 0.7rem;
+    background: rgba(59, 130, 246, 0.1);
     color: var(--accent-color);
-    border-radius: 8px;
-    font-size: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -236,13 +278,7 @@
 
   .chart-container {
     position: relative;
-    height: 350px;
-    width: 100%;
-  }
-
-  .chart-container-small {
-    position: relative;
-    height: 300px;
+    height: 250px; /* Reduced height for professional look */
     width: 100%;
   }
 
@@ -255,7 +291,7 @@
   .recent-table th {
     text-align: left;
     padding: 0.75rem;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-secondary);
     border-bottom: 2px solid var(--border-color);
@@ -264,10 +300,10 @@
   }
 
   .recent-table td {
-    padding: 1rem 0.75rem;
+    padding: 0.75rem;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .recent-table tr:hover {
@@ -276,48 +312,60 @@
 
   .rank-badge {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
-    background: rgba(102, 126, 234, 0.1);
+    padding: 0.25rem 0.5rem;
+    background: rgba(59, 130, 246, 0.1);
     color: var(--accent-color);
-    border-radius: 6px;
-    font-size: 0.8rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
     font-weight: 600;
   }
 
   /* Actions Section */
   .actions-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 
   .action-btn {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.75rem;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     background: var(--card-bg);
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     color: var(--text-primary);
     text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+  }
+
+  .action-btn:hover {
+    border-color: var(--accent-color);
+    transform: translateX(4px);
   }
 
   /* Responsive */
   @media (max-width: 1200px) {
-    .col-span-8, .col-span-6, .col-span-4 {
-      grid-column: span 12;
+    .charts-grid {
+      grid-template-columns: 1fr;
     }
   }
 
   @media (max-width: 768px) {
+    .dashboard-container {
+      padding: 1rem;
+    }
+
     .page-header {
       flex-direction: column;
       gap: 1rem;
       align-items: flex-start;
+      padding: 1.25rem;
     }
 
     .header-right {
@@ -328,6 +376,52 @@
     .stats-grid {
       grid-template-columns: 1fr;
     }
+
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+      height: 220px;
+    }
+  }
+
+  /* Loader styles remain the same */
+  #loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+
+  #loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .loader {
+    height: 4px;
+    width: 130px;
+    --c: no-repeat linear-gradient(#3b82f6 0 0);
+    background: var(--c), var(--c), #dbeafe;
+    background-size: 60% 100%;
+    animation: l16 3s infinite;
+    border-radius: 5px;
+  }
+
+  @keyframes l16 {
+    0%   { background-position: -150% 0, -150% 0; }
+    66%  { background-position: 250% 0, -150% 0; }
+    100% { background-position: 250% 0, 250% 0; }
   }
 </style>
 {% endblock %}
@@ -337,7 +431,7 @@
   <!-- Page Header -->
   <div class="page-header">
     <div class="header-left">
-      <h1>Service Profiles & Analytics</h1>
+      <h1>⚡ 15 CESR Bio-Data Form</h1>
       <p>Real-time personnel analytics and insights</p>
     </div>
     <div class="header-right">
@@ -350,7 +444,6 @@
       </button>
     </div>
   </div>
-
   <!-- Stats Grid -->
   <div class="stats-grid">
     <div class="stat-card">
@@ -358,16 +451,9 @@
         <i class="fas fa-users"></i>
       </div>
       <div class="stat-label">Total Personnel</div>
-      <div class="stat-value">{{ stats.total_personnel }}</div>
+      <div class="stat-value" id="totalPersonnelCount"></div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-graduation-cap"></i>
-      </div>
-      <div class="stat-label">Total Courses</div>
-      <div class="stat-value">{{ stats.total_courses }}</div>
-    </div>
     <div class="stat-card">
       <div class="stat-icon">
         <i class="fas fa-shield-alt"></i>
@@ -381,29 +467,32 @@
         <i class="fas fa-medkit"></i>
       </div>
       <div class="stat-label">Medical Cases</div>
-      <div class="stat-value">{{ stats.medical_cases }}</div>
-      <div><a href="/personnel">More details</a></div>
+      <div class="stat-value" id="medical_count"></div>
+      <button class="view-btn" onclick="window.location.href='/personnel'">
+        <i class="fas fa-eye"></i>
+        View Details
+      </button>
     </div>
   </div>
 
   <!-- Charts Grid -->
   <div class="charts-grid">
-    <!-- Age Distribution Donut Chart -->
-    <div class="chart-card col-span-6">
+    <!-- Age Distribution -->
+    <div class="chart-card">
       <div class="chart-header">
         <h3 class="chart-title">
           <i class="fas fa-chart-pie"></i>
           Age Distribution
         </h3>
-        <span class="chart-badge">Live Data</span>
+        <span class="chart-badge">Live</span>
       </div>
       <div class="chart-container">
         <canvas id="ageDonutChart"></canvas>
       </div>
     </div>
-
-    <!-- Rank Distribution Bar Chart -->
-    <div class="chart-card col-span-6">
+    
+    <!-- Rank Distribution -->
+    <div class="chart-card">
       <div class="chart-header">
         <h3 class="chart-title">
           <i class="fas fa-chart-bar"></i>
@@ -412,76 +501,73 @@
         <span class="chart-badge">Updated</span>
       </div>
       <div class="chart-container">
-        <canvas id="rankBarChart"></canvas>
+        <canvas id="rankChart"></canvas>
+      </div>
+    </div>
+    
+    <!-- Religion Distribution -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <i class="fas fa-pray"></i>
+          Religion Chart
+        </h3>
+        <span class="chart-badge">Live</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="religionChart"></canvas>
       </div>
     </div>
 
-    <!-- Recent Personnel -->
-    <div class="chart-card col-span-8">
+    <!-- Employment Type -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <i class="fas fa-briefcase"></i>
+          Employment Type
+        </h3>
+        <span class="chart-badge">Live</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="employmentChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Years in Service -->
+    <div class="chart-card">
       <div class="chart-header">
         <h3 class="chart-title">
           <i class="fas fa-clock"></i>
-          Recent Personnel
+          Years in Service
         </h3>
+        <span class="chart-badge">Updated</span>
       </div>
-      <div style="overflow-x: auto;">
-        <table class="recent-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Army Number</th>
-              <th>Rank</th>
-              <th>Enrollment Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for person in recent_personnel %}
-            <tr>
-              <td>{{ person.name }}</td>
-              <td>{{ person.army_number }}</td>
-              <td><span class="rank-badge">{{ person.rank }}</span></td>
-              <td>{{ person.date_of_enrollment.strftime('%d %b %Y') if person.date_of_enrollment else 'N/A' }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <div class="chart-container">
+        <canvas id="serviceChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <i class="fas fa-credit-card"></i>
+          Loan Amounts
+        </h3>
+        <span class="chart-badge">Live</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="loanChart"></canvas>
       </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="chart-card col-span-4">
-      <div class="chart-header">
-        <h3 class="chart-title">
-          <i class="fas fa-bolt"></i>
-          Quick Actions
-        </h3>
-      </div>
-      <div class="actions-grid">
-        <a href="/add-personnel" class="action-btn">
-          <i class="fas fa-user-plus"></i>
-          Add Personnel
-        </a>
-        <button class="action-btn" onclick="exportReport()">
-          <i class="fas fa-file-export"></i>
-          Export Report
-        </button>
-        <button class="action-btn" onclick="searchRecords()">
-          <i class="fas fa-search"></i>
-          Search
-        </button>
-        <button class="action-btn" onclick="openSettings()">
-          <i class="fas fa-cog"></i>
-          Settings
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+    
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  // Chart instances
+  let ageChart, rankChart, religionChart, employmentChart, serviceChart;
+
   // Theme Management
   function toggleTheme() {
     const html = document.documentElement;
@@ -497,204 +583,264 @@
       icon.className = 'fas fa-sun';
       localStorage.setItem('theme', 'dark');
     }
-    
-    // Reinitialize charts with new theme
     initializeCharts();
   }
 
-  // Load saved theme
-  document.addEventListener('DOMContentLoaded', function() {
-    const savedTheme = localStorage.getItem('theme');
-    const icon = document.getElementById('theme-icon');
+  // Fetch Medical Cases trade graph , loan info, overweight
+  async function loadMedicalCases() {
+    const countStat = document.getElementById('medical_count');
+    countStat.textContent = 'Loading...';
+
+    try {
+      const response = await fetch('/get_medical_category_count');
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      countStat.innerText = data.total_medical_category_count;
+    } catch (error) {
+      console.error('Error fetching medical category count:', error);
+      countStat.textContent = 'Error';
+    }
+  }
+
+  // Load Total Personnel
+  async function loadTotalPersonal() {
+    const totalPersonnelElement = document.getElementById('totalPersonnelCount');
     
+    if (!totalPersonnelElement) {
+      console.warn("Element with ID 'totalPersonnelCount' not found.");
+      return;
+    }
+  
+    try {
+      const response = await fetch('/get_total_personnel_count_and_courses', { cache: 'no-cache' });
+      
+      if (!response.ok) {
+        throw new Error(`Network response was not ok (status: ${response.status})`);
+      }
+  
+      const data = await response.json();
+      console.log("Personnel count data:", data);
+  
+      if (data && typeof data.total_army_personnel !== 'undefined') {
+        totalPersonnelElement.textContent = data.total_army_personnel;
+      } else {
+        console.warn("Unexpected response format:", data);
+        totalPersonnelElement.textContent = "N/A";
+      }
+  
+    } catch (error) {
+      console.error("Error loading total personnel count:", error);
+      totalPersonnelElement.textContent = "Error";
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', async function() {
+    const icon = document.getElementById('theme-icon');
+    const savedTheme = localStorage.getItem('theme');
+  
     if (savedTheme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
       icon.className = 'fas fa-sun';
     }
-
-    // Initialize Charts
-    initializeCharts();
+  
+    try {
+      await Promise.all([
+        initializeCharts(),
+        loadMedicalCases(),
+        loadTotalPersonal()
+      ]);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
   });
 
   function refreshData() {
-    location.reload();
+    loadTotalPersonal();
+    loadMedicalCases();
+    initializeCharts();
   }
 
-  function exportReport() {
-    alert('Export functionality to be implemented');
-  }
+  function exportReport() { alert('Export functionality to be implemented'); }
+  function searchRecords() { alert('Search functionality to be implemented'); }
+  function openSettings() { alert('Settings functionality to be implemented'); }
 
-  function searchRecords() {
-    alert('Search functionality to be implemented');
-  }
+  // Chart initialization
+  async function initializeCharts() {
+    // Destroy previous instances
+    [ageChart, rankChart, religionChart, employmentChart, serviceChart].forEach(chart => {
+      if (chart) chart.destroy();
+    });
 
-  function openSettings() {
-    alert('Settings functionality to be implemented');
-  }
-
-  let ageChart, rankChart;
-
-  function initializeCharts() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const textColor = isDark ? '#f1f5f9' : '#1a202c';
+    const textColor = isDark ? '#f1f5f9' : '#1e293b';
     const gridColor = isDark ? '#334155' : '#e2e8f0';
 
-    // Prepare age distribution data from backend
-    const ageLabels = {{ age_distribution | map(attribute='range') | list | tojson }};
-    const ageData = {{ age_distribution | map(attribute='count') | list | tojson }};
+    // Chart colors
+    const chartColors = [
+      'rgba(99, 102, 241, 0.8)',   // Indigo
+      'rgba(16, 185, 129, 0.8)',   // Emerald
+      'rgba(239, 68, 68, 0.8)',    // Red
+      'rgba(245, 158, 11, 0.8)',   // Amber
+      'rgba(59, 130, 246, 0.8)',   // Blue
+      'rgba(168, 85, 247, 0.8)',   // Purple
+      'rgba(34, 197, 94, 0.8)',    // Green
+      'rgba(236, 72, 153, 0.8)',   // Pink
+    ];
 
-    // Prepare rank distribution data from backend
-    const rankLabels = {{ rank_distribution | map(attribute='rank') | list | tojson }};
-    const rankData = {{ rank_distribution | map(attribute='count') | list | tojson }};
+    const borderColors = chartColors.map(color => color.replace('0.8', '1'));
 
-    // Destroy existing charts if they exist
-    if (ageChart) ageChart.destroy();
-    if (rankChart) rankChart.destroy();
+    try {
+      // Fetch all chart data in parallel
+      const [ageData, rankData, religionData, employmentData, serviceData] = await Promise.all([
+        fetch('/age_bar_graph').then(r => r.json()),
+        fetch('/rank_based_bar_graph_').then(r => r.json()),
+        fetch('/religion_donut_chart').then(r => r.json()),
+        fetch('/employment_type_chart').then(r => r.json()),
+        fetch('/years_in_service_chart').then(r => r.json())
+      ]);
 
-    // Age Distribution Donut Chart
-    const ageCtx = document.getElementById('ageDonutChart').getContext('2d');
-    ageChart = new Chart(ageCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ageLabels,
-        datasets: [{
-          data: ageData,
-          backgroundColor: [
-          'rgba(10, 173, 249, 0.9)',
-          'rgba(118, 75, 162, 0.9)',
-          'rgba(240, 147, 251, 0.9)',
-          'rgba(13, 46, 74, 0.9)',
-          'rgba(67, 233, 123, 0.9)',
-          'rgba(255, 193, 7, 0.9)',
-          'rgba(252, 4, 4, 0.9)'
-          ],
-          borderWidth: 0,
-          hoverOffset: 15
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: {
-              color: textColor,
-              padding: 15,
-              font: { size: 12 }
-            }
-          },
-          tooltip: {
-            backgroundColor: 'rgba(26, 31, 58, 0.95)',
-            padding: 12,
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = ((value / total) * 100).toFixed(1);
-                return label + ': ' + value + ' (' + percentage + '%)';
-              }
-            }
-          }
+      // Age Distribution Chart
+      const ageCtx = document.getElementById('ageDonutChart').getContext('2d');
+      ageChart = new Chart(ageCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ageData.age_distribution?.map(item => item.range) || [],
+          datasets: [{
+            data: ageData.age_distribution?.map(item => item.count) || [],
+            backgroundColor: chartColors,
+            borderColor: borderColors,
+            borderWidth: 2
+          }]
         },
-        cutout: '65%'
-      }
-    });
-
-    // Rank Distribution Bar Chart
-    const rankCtx = document.getElementById('rankBarChart').getContext('2d');
-    
-    const barColors = rankData.map((_, index) => {
-      const colors = [
-        'rgba(102, 126, 234, 0.8)',
-        'rgba(118, 75, 162, 0.8)',
-        'rgba(240, 147, 251, 0.8)',
-        'rgba(79, 172, 254, 0.8)',
-        'rgba(67, 233, 123, 0.8)',
-        'rgba(255, 193, 7, 0.8)',
-        'rgba(233, 30, 99, 0.8)',
-        'rgba(156, 39, 176, 0.8)',
-        'rgba(63, 81, 181, 0.8)',
-        'rgba(0, 150, 136, 0.8)'
-      ];
-      return colors[index % colors.length];
-    });
-    
-    const borderColors = rankData.map((_, index) => {
-      const colors = [
-        'rgba(102, 126, 234, 1)',
-        'rgba(118, 75, 162, 1)',
-        'rgba(240, 147, 251, 1)',
-        'rgba(79, 172, 254, 1)',
-        'rgba(67, 233, 123, 1)',
-        'rgba(255, 193, 7, 1)',
-        'rgba(233, 30, 99, 1)',
-        'rgba(156, 39, 176, 1)',
-        'rgba(63, 81, 181, 1)',
-        'rgba(0, 150, 136, 1)'
-      ];
-      return colors[index % colors.length];
-    });
-    
-    rankChart = new Chart(rankCtx, {
-      type: 'bar',
-      data: {
-        labels: rankLabels,
-        datasets: [{
-          label: 'Personnel Count',
-          data: rankData,
-          backgroundColor: barColors,
-          borderColor: borderColors,
-          borderWidth: 2,
-          borderRadius: 8,
-          barPercentage: 0.7
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(26, 31, 58, 0.95)',
-            padding: 12,
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            callbacks: {
-              label: function(context) {
-                return 'Personnel: ' + context.parsed.y;
-              }
-            }
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: { 
-              color: gridColor,
-              drawBorder: false
-            },
-            ticks: { 
-              color: textColor, 
-              font: { size: 11 },
-              stepSize: 50
-            }
-          },
-          x: {
-            grid: { display: false },
-            ticks: { 
-              color: textColor, 
-              font: { size: 11 },
-              maxRotation: 45,
-              minRotation: 45
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: textColor, font: { size: 11 } }
             }
           }
         }
-      }
-    });
+      });
+
+      // Rank Distribution Chart
+      const rankCtx = document.getElementById('rankChart').getContext('2d');
+      rankChart = new Chart(rankCtx, {
+        type: 'bar',
+        data: {
+          labels: rankData.rank_distribution?.map(item => item.rank) || [],
+          datasets: [{
+            label: 'Personnel Count',
+            data: rankData.rank_distribution?.map(item => item.count) || [],
+            backgroundColor: chartColors[0],
+            borderColor: borderColors[0],
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { 
+              ticks: { color: textColor, font: { size: 11 } }, 
+              grid: { color: gridColor } 
+            },
+            y: { 
+              ticks: { color: textColor, font: { size: 11 } }, 
+              grid: { color: gridColor } 
+            }
+          }
+        }
+      });
+
+      // Religion Chart
+      const religionCtx = document.getElementById('religionChart').getContext('2d');
+      religionChart = new Chart(religionCtx, {
+        type: 'doughnut',
+        data: {
+          labels: religionData.data?.map(item => item.religion) || [],
+          datasets: [{
+            data: religionData.data?.map(item => item.religion_count) || [],
+            backgroundColor: chartColors,
+            borderColor: borderColors,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: textColor, font: { size: 11 } }
+            }
+          }
+        }
+      });
+
+      // Employment Type Chart
+      const employmentCtx = document.getElementById('employmentChart').getContext('2d');
+      employmentChart = new Chart(employmentCtx, {
+        type: 'pie',
+        data: {
+          labels: employmentData.employment_distribution?.map(item => item.type) || [],
+          datasets: [{
+            data: employmentData.employment_distribution?.map(item => item.count) || [],
+            backgroundColor: [chartColors[0], chartColors[1]],
+            borderColor: [borderColors[0], borderColors[1]],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: textColor, font: { size: 11 } }
+            }
+          }
+        }
+      });
+
+      // Years in Service Chart
+      const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+      serviceChart = new Chart(serviceCtx, {
+        type: 'bar',
+        data: {
+          labels: serviceData.service_distribution?.map(item => item.range) || [],
+          datasets: [{
+            label: 'Personnel Count',
+            data: serviceData.service_distribution?.map(item => item.count) || [],
+            backgroundColor: chartColors[4],
+            borderColor: borderColors[4],
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { 
+              ticks: { color: textColor, font: { size: 11 } }, 
+              grid: { color: gridColor } 
+            },
+            y: { 
+              ticks: { color: textColor, font: { size: 11 } }, 
+              grid: { color: gridColor } 
+            }
+          }
+        }
+      });
+
+    } catch (error) {
+      console.error('Error initializing charts:', error);
+    }
   }
 </script>
 {% endblock %}

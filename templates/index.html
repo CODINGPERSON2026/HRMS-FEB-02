@@ -2677,6 +2677,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+
+        const loader  =  document.getElementById('loader')
+        if(!loader){
+          alert('loader exits')
+        }
         // Tab navigation
         const formTabs = document.getElementById("formTabs");
         const prevBtn = document.getElementById("prevBtn");
@@ -2967,65 +2972,108 @@
         }
 
         const patterns = {
-          name: /^[a-zA-Z\s\-]+$/,
-          armyNumber: /^[a-zA-Z0-9\-_]+$/,
-          rank: /^[a-zA-Z0-9\-_\s]+$/,
-          trade: /^[a-zA-Z0-9\-_\s]+$/,
+          // Personal Information - Text fields
+          name: /^[a-zA-Z\s\-.']+$/,
+          armyNumber: /^[a-zA-Z0-9\-_\/]+$/,
+          rank: /^[a-zA-Z0-9\-_\s.()]+$/,
+          trade: /^[a-zA-Z0-9\-_\s.()\/]+$/,
           religion: /^[a-zA-Z\s\-_]+$/,
-          civQualifications: /^[a-zA-Z0-9\s\-_]+$/,
-          decorationAwards: /^[a-zA-Z0-9\s\-_]+$/,
-          lackingQualifications: /^[a-zA-Z0-9\s\-_]+$/,
-          iCardNo: /^[a-zA-Z0-9\-_]+$/,
-          iCardIssuedBy: /^[a-zA-Z0-9\s\-_]+$/,
-          bpetGrading: /^[a-zA-Z0-9\-_]+$/,
-          pptGrading: /^[a-zA-Z0-9\-_]+$/,
-          panCardNo: /^[a-zA-Z0-9]+$/,
-          panPartII: /^[a-zA-Z0-9\-_]+$/,
-          aadharCardNo: /^[0-9]+$/,
-          aadharPartII: /^[a-zA-Z0-9\-_]+$/,
-          jointAccountNo: /^[a-zA-Z0-9\-_]+$/,
-          jointAccountBank: /^[a-zA-Z0-9\s\-_]+$/,
-          jointAccountIFSC: /^[a-zA-Z0-9]+$/,
-          homeHouseNo: /^[a-zA-Z0-9\s\-_]+$/,
-          homeVillage: /^[a-zA-Z0-9\s\-_]+$/,
-          homePhone: /^[0-9+\-]+$/,
-          homeTO: /^[a-zA-Z0-9\s\-_]+$/,
-          homePO: /^[a-zA-Z0-9\s\-_]+$/,
-          homePS: /^[a-zA-Z0-9\s\-_]+$/,
-          homeTeh: /^[a-zA-Z0-9\s\-_]+$/,
-          homeNRS: /^[a-zA-Z0-9\s\-_]+$/,
-          homeNMH: /^[a-zA-Z0-9\s\-_]+$/,
-          homeDistrict: /^[a-zA-Z0-9\s\-_]+$/,
-          homeState: /^[a-zA-Z0-9\s\-_]+$/,
-          distanceFromIB: /^[0-9.]+$/,
-          height: /^[0-9.]+$/,
-          weight: /^[0-9.]+$/,
-          chest: /^[0-9.]+$/,
-          identificationMarks: /^[a-zA-Z0-9\s\-_]+$/,
-          courtCases: /^[a-zA-Z0-9\s\-_]+$/,
-          lastRecatBDAt: /^[a-zA-Z0-9\s\-_]+$/,
-          medicalProblem: /^[a-zA-Z0-9\s\-_]+$/,
-          restrictions: /^[a-zA-Z0-9\s\-_]+$/,
-          kinName: /^[a-zA-Z\s\-]+$/,
+          
+          // Qualifications and Awards
+          civQualifications: /^[a-zA-Z0-9\s\-_.,()\/]+$/,
+          decorationAwards: /^[a-zA-Z0-9\s\-_.,()\/]+$/,
+          lackingQualifications: /^[a-zA-Z0-9\s\-_.,()\/]+$/,
+          
+          // Card and Document Numbers
+          iCardNo: /^[a-zA-Z0-9\-_\/]+$/,
+          iCardIssuedBy: /^[a-zA-Z0-9\s\-_.,]+$/,
+          panCardNo: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+          panPartII: /^[a-zA-Z0-9\-_\/]+$/,
+          aadharCardNo: /^[0-9]{12}$/,
+          aadharPartII: /^[a-zA-Z0-9\-_\/]+$/,
+          
+          // Grading Fields
+          bpetGrading: /^[A-Z0-9\-+]+$/,
+          pptGrading: /^[A-Z0-9\-+]+$/,
+          
+          // Bank Account Details
+          jointAccountNo: /^[0-9]{9,18}$/,
+          jointAccountBank: /^[a-zA-Z0-9\s\-_.,&]+$/,
+          jointAccountIFSC: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+          
+          // Address Fields
+          homeHouseNo: /^[a-zA-Z0-9\s\-_.,\/]+$/,
+          homeVillage: /^[a-zA-Z\s\-_.']+$/,
+          homePhone: /^[0-9+\-\s()]{10,15}$/,
+          homeTO: /^[a-zA-Z\s\-_.']+$/,
+          homePO: /^[a-zA-Z\s\-_.']+$/,
+          homePS: /^[a-zA-Z\s\-_.']+$/,
+          homeTeh: /^[a-zA-Z\s\-_.']+$/,
+          homeNRS: /^[a-zA-Z\s\-_.']+$/,
+          homeNMH: /^[a-zA-Z\s\-_.']+$/,
+          homeDistrict: /^[a-zA-Z\s\-_.']+$/,
+          homeState: /^[a-zA-Z\s\-_.']+$/,
+          
+          // Physical Measurements
+          distanceFromIB: /^[0-9]+(\.[0-9]{1,2})?$/,
+          height: /^[0-9]+(\.[0-9]{1,2})?$/,
+          weight: /^[0-9]+(\.[0-9]{1,2})?$/,
+          chest: /^[0-9]+(\.[0-9]{1,2})?$/,
+          identificationMarks: /^[a-zA-Z0-9\s\-_.,()]+$/,
+          
+          // Service Details
+          courtCases: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          lastRecatBDAt: /^[a-zA-Z0-9\s\-_.,&]+$/,
+          medicalProblem: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          restrictions: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          participationActivities: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          presentFamilyLocation: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          workedUnitTenure: /^[a-zA-Z0-9\s\-_.,()\/]+$/,
+          
+          // Family Details
+          kinName: /^[a-zA-Z\s\-.']+$/,
           kinRelation: /^[a-zA-Z\s\-]+$/,
-          kinAccountNo: /^[a-zA-Z0-9\-_]+$/,
-          kinBank: /^[a-zA-Z0-9\s\-_]+$/,
-          kinIFSC: /^[a-zA-Z0-9]+$/,
-          kinPartII: /^[a-zA-Z0-9\-_]+$/,
-          vehicleRegNo: /^[a-zA-Z0-9\-_]+$/,
-          vehicleModel: /^[a-zA-Z0-9\s\-_]+$/,
-          drivingLicenseNo: /^[a-zA-Z0-9\-_]+$/,
-          workedUnitTenure: /^[a-zA-Z0-9\s\-_]+$/,
-          participationActivities: /^[a-zA-Z0-9\s\-_]+$/,
-          presentFamilyLocation: /^[a-zA-Z0-9\s\-_]+$/,
-          counselling: /^[a-zA-Z0-9\s\-_]+$/,
-          folderCheckedBy: /^[a-zA-Z\s\-]+$/,
-          domesticIssues: /^[a-zA-Z0-9\s\-_]+$/,
-          otherRequests: /^[a-zA-Z0-9\s\-_]+$/,
-          familyMedicalIssues: /^[a-zA-Z0-9\s\-_]+$/,
-          qualityPoints: /^[a-zA-Z0-9\s\-_]+$/,
-          strengths: /^[a-zA-Z0-9\s\-_]+$/,
-          weaknesses: /^[a-zA-Z0-9\s\-_]+$/,
+          kinAccountNo: /^[0-9]{9,18}$/,
+          kinBank: /^[a-zA-Z0-9\s\-_.,&]+$/,
+          kinIFSC: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+          kinPartII: /^[a-zA-Z0-9\-_\/]+$/,
+          
+          // Vehicle Details
+          vehicleRegNo: /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{1,4}$/,
+          vehicleModel: /^[a-zA-Z0-9\s\-_.,()]+$/,
+          drivingLicenseNo: /^[A-Z]{2}[0-9]{13,15}$/,
+          
+          // Additional Information
+          counselling: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          folderCheckedBy: /^[a-zA-Z\s\-.']+$/,
+          domesticIssues: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          otherRequests: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          familyMedicalIssues: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          qualityPoints: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          strengths: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+          weaknesses: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
+        };
+        
+        // Validation error messages
+        const errorMessages = {
+          name: "Only letters, spaces, hyphens, dots, and apostrophes allowed",
+          armyNumber: "Only alphanumeric characters, hyphens, underscores, and slashes allowed",
+          rank: "Invalid rank format",
+          trade: "Invalid trade format",
+          religion: "Only letters, spaces, hyphens, and underscores allowed",
+          panCardNo: "Invalid PAN format (e.g., ABCDE1234F)",
+          aadharCardNo: "Aadhar must be exactly 12 digits",
+          jointAccountNo: "Account number must be 9-18 digits",
+          jointAccountIFSC: "Invalid IFSC code format (e.g., SBIN0001234)",
+          homePhone: "Invalid phone number format",
+          distanceFromIB: "Only numbers with up to 2 decimal places allowed",
+          height: "Only numbers with up to 2 decimal places allowed",
+          weight: "Only numbers with up to 2 decimal places allowed",
+          chest: "Only numbers with up to 2 decimal places allowed",
+          kinAccountNo: "Account number must be 9-18 digits",
+          kinIFSC: "Invalid IFSC code format (e.g., SBIN0001234)",
+          vehicleRegNo: "Invalid vehicle registration format (e.g., DL01AB1234)",
+          drivingLicenseNo: "Invalid driving license format",
         };
         Object.keys(patterns).forEach((fieldId) => {
           const input = document.getElementById(fieldId);
@@ -3034,6 +3082,7 @@
               validateInput(
                 this,
                 patterns[fieldId],
+
                 document.getElementById(`${fieldId}-error`)
               );
             });
@@ -3456,6 +3505,8 @@
             submitBtn.disabled = false;
           }
         }
+        
+        
       });
     </script>
     {%endblock%}
