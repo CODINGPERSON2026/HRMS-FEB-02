@@ -1,4 +1,5 @@
-{% extends "base.html" %}
+{% extends 'personnel_info/base.html' %}
+
 {% block title %}View Data - Medical Cases - Army Personnel System{% endblock %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% block extra_css %}
@@ -548,7 +549,7 @@
   // Initialize Company Distribution Chart
   async function initCompanyChart() {
     try {
-      const response = await fetch("/api/medical-personnel");
+      const response = await fetch("/personnel_information/api/medical-personnel");
       if (!response.ok) {
         throw new Error("Failed to fetch medical personnel data");
       }
@@ -741,7 +742,7 @@
   // Load all personnel data for modal
   async function loadAllPersonnelData() {
     try {
-      const response = await fetch('/api/all-personnel');
+      const response = await fetch('/personnel_information/api/all-personnel');
       const data = await response.json();
       
       if (data.success) {
