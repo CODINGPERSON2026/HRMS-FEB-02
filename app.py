@@ -146,7 +146,7 @@ def get_total_medical_category_count():
         return jsonify({'error': 'Internal Server Error'}), 500
 
     finally:
-        if cursor:
+        if 'cursor' in locals():
             cursor.close()
         if connection:
             connection.close()
@@ -800,6 +800,53 @@ def years_in_service_chart():
         
     except Exception as e:
         print(f"Error in years in service chart: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+@app.route('/loan_amounts_chart')
+def loan_amounts_chart():
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT 
+                CASE 
+                    WHEN total_amount BETWEEN 0 AND 500000 THEN '0-5 Lakhs'
+                    WHEN total_amount BETWEEN 500001 AND 1000000 THEN '5-10 Lakhs'
+                    WHEN total_amount BETWEEN 1000001 AND 1500000 THEN '10-15 Lakhs'
+                    WHEN total_amount BETWEEN 1500001 AND 2000000 THEN '15-20 Lakhs'
+                    WHEN total_amount > 2000000 THEN '>20 Lakhs'
+                    ELSE 'Unknown'
+                END as loan_range,
+                COUNT(*) as count
+            FROM loans
+            WHERE total_amount IS NOT NULL
+            GROUP BY loan_range
+            ORDER BY 
+                CASE loan_range
+                    WHEN '0-5 Lakhs' THEN 1
+                    WHEN '5-10 Lakhs' THEN 2
+                    WHEN '10-15 Lakhs' THEN 3
+                    WHEN '15-20 Lakhs' THEN 4
+                    WHEN '>20 Lakhs' THEN 5
+                    ELSE 6
+                END
+        """)
+        result = cursor.fetchall()
+        
+        loan_distribution = []
+        for row in result:
+            loan_distribution.append({
+                'range': row['loan_range'],
+                'count': row['count']
+            })
+        
+        return jsonify({'loan_distribution': loan_distribution}), 200
+        
+    except Exception as e:
+        print(f"Error in loan amounts chart: {e}")
         return jsonify({'error': str(e)}), 500
     finally:
         cursor.close()

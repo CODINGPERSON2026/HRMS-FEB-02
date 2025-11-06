@@ -1,1160 +1,1063 @@
 {% extends "base.html" %}
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    {% block extra_css %}
-    <style>
-      
-      :root {
-        --primary-color: #2c5aa0;
-        --secondary-color: #8a0a0a;
-        --light-bg: #f8f9fa;
-        --accent-color: #d4af37;
-      }
-      
-     
-      
-      .form-container {
-        background-color: white;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        padding: 30px;
-        margin: 20px auto;
-        border: 1px solid #e1e5eb;
-      }
-      
-      .header-section {
-        background: linear-gradient(135deg, var(--primary-color), #1a3a7a);
-        color: white;
-        padding: 25px;
-        border-radius: 10px;
-        margin-bottom: 30px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-      }
-      
-      .header-section::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: var(--accent-color);
-      }
-      
-      .header-section h1 {
-        font-weight: 700;
-        margin-bottom: 10px;
-        font-size: 2.2rem;
-      }
-      
-      .header-section p {
-        font-size: 1.1rem;
-        opacity: 0.9;
-      }
-      
-      .form-section {
-        margin-bottom: 35px;
-        padding: 25px;
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
-        background-color: var(--light-bg);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-      }
-      
-      .form-section:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-      }
-      
-      .section-header {
-        color: var(--primary-color);
-        border-bottom: 2px solid var(--secondary-color);
-        padding-bottom: 12px;
-        margin-bottom: 25px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      
-      .section-header i {
-        color: var(--secondary-color);
-      }
-      
-      .required::after {
-        content: " *";
-        color: red;
-      }
+{% block extra_css %}
+<style>
+  :root {
+    --primary-color: #2c5aa0;
+    --secondary-color: #8a0a0a;
+    --light-bg: #f8f9fa;
+    --accent-color: #d4af37;
+  }
+  
+  /* Increased width for the entire page */
+  .container-fluid {
+    max-width: 80%;
+    padding: 0 20px;
+  }
+  
+  .form-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 30px;
+    margin: 20px auto;
+    border: 1px solid #e1e5eb;
+    max-width: 100%;
+  }
+  
+  /* Black color for all input fields */
+  .form-control,
+  .form-select,
+  .form-check-input {
+    color: #000000 !important;
+    border-color: rgba(88, 87, 87, 1) !important;
+  }
+  
+  .form-control:focus,
+  .form-select:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25) !important;
+    color: #000000 !important;
+  }
+  
+  .header-section {
+    background: linear-gradient(135deg, var(--primary-color), #1a3a7a);
+    color: white;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .header-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--accent-color);
+  }
+  
+  .header-section h1 {
+    font-weight: 700;
+    margin-bottom: 10px;
+    font-size: 2.2rem;
+  }
+  
+  .header-section p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+  
+  .form-section {
+    margin-bottom: 35px;
+    padding: 25px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background-color: var(--light-bg);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .form-section:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  .section-header {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 12px;
+    margin-bottom: 25px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .section-header i {
+    color: var(--secondary-color);
+  }
+  
+  .required::after {
+    content: " *";
+    color: red;
+  }
 
-      .form-label {
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #444;
-      }
-      
-      .dynamic-table {
-        margin-top: 15px;
-      }
-      
-      .dynamic-table .btn-add-row {
-        margin-top: 10px;
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 8px 15px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-      }
-      
-      .dynamic-table .btn-add-row:hover {
-        background-color: #1a3a7a;
-        transform: translateY(-2px);
-      }
-      
-      .photo-upload-area {
-        border: 2px dashed #ccc;
-        border-radius: 8px;
-        padding: 25px;
-        text-align: center;
-        margin-bottom: 15px;
-        background-color: #f9f9f9;
-        transition: all 0.3s ease;
-        cursor: pointer;
-      }
-      
-      .photo-upload-area:hover {
-        border-color: var(--primary-color);
-        background-color: #f0f4ff;
-      }
-      
-      .photo-preview {
-        max-width: 150px;
-        max-height: 150px;
-        margin: 10px auto;
-        display: none;
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-      
-      .conditional-section {
-        display: none;
-        margin-top: 15px;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-        border-left: 4px solid var(--secondary-color);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      }
-      
-      .btn-submit {
-        background: linear-gradient(135deg, var(--secondary-color), #6a0505);
-        color: white;
-        padding: 12px 40px;
-        font-weight: 700;
-        border: none;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
+  .form-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+  }
+  
+  .dynamic-table {
+    margin-top: 15px;
+  }
+  
+  .dynamic-table .btn-add-row {
+    margin-top: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .dynamic-table .btn-add-row:hover {
+    background-color: #1a3a7a;
+    transform: translateY(-2px);
+  }
+  
+  .photo-upload-area {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .photo-upload-area:hover {
+    border-color: var(--primary-color);
+    background-color: #f0f4ff;
+  }
+  
+  .photo-preview {
+    max-width: 150px;
+    max-height: 150px;
+    margin: 10px auto;
+    display: none;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .conditional-section {
+    display: none;
+    margin-top: 15px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    border-left: 4px solid var(--secondary-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .btn-submit {
+    background: linear-gradient(135deg, var(--secondary-color), #6a0505);
+    color: white;
+    padding: 12px 40px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 
-      .btn-submit:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        background: linear-gradient(135deg, #9a0a0a, #6a0505);
-      }
+  .btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #9a0a0a, #6a0505);
+  }
+  
+  .nav-tabs {
+    border-bottom: 2px solid var(--primary-color);
+    margin-bottom: 25px;
+  }
+  
+  .nav-tabs .nav-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px 8px 0 0;
+    margin-right: 5px;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-tabs .nav-link:hover {
+    background-color: rgba(44, 90, 160, 0.1);
+  }
+  
+  .nav-tabs .nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 0.875em;
+    display: none;
+    margin-top: 5px;
+  }
+  
+  .form-control.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+  }
+  
+  .card-style {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+  }
+  
+  .card-style:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
 
-      .form-control:focus,
-      .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
-      }
-      
-      .nav-tabs {
-        border-bottom: 2px solid var(--primary-color);
-        margin-bottom: 25px;
-      }
-      
-      .nav-tabs .nav-link {
-        color: var(--primary-color);
-        font-weight: 600;
-        border: none;
-        padding: 12px 25px;
-        border-radius: 8px 8px 0 0;
-        margin-right: 5px;
-        transition: all 0.3s ease;
-      }
-      
-      .nav-tabs .nav-link:hover {
-        background-color: rgba(44, 90, 160, 0.1);
-      }
-      
-      .nav-tabs .nav-link.active {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-      }
-      
-      .error-message {
-        color: red;
-        font-size: 0.875em;
-        display: none;
-        margin-top: 5px;
-      }
-      
-      .form-control.is-invalid {
-        border-color: #dc3545;
-        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-      }
-      
-      .card-style {
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-        margin-bottom: 20px;
-        transition: all 0.3s ease;
-      }
-      
-      .card-style:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-      }
+  .btn-navigation {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-navigation:hover {
+    background-color: #1a3a7a;
+    transform: translateY(-2px);
+  }
+  
+  .progress-container {
+    margin-bottom: 30px;
+  }
+  
+  .progress-bar {
+    background-color: var(--primary-color);
+  }
+  
+  .info-box {
+    background: linear-gradient(135deg, #e3f2fd, #f0f4ff);
+    border-left: 4px solid var(--primary-color);
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .info-box i {
+    color: var(--primary-color);
+    margin-right: 10px;
+  }
+  
+  .table th {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .footer-note {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    color: #666;
+    font-size: 0.9rem;
+  }
 
-      .btn-navigation {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 25px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-      }
-      
-      .btn-navigation:hover {
-        background-color: #1a3a7a;
-        transform: translateY(-2px);
-      }
-      
-      .progress-container {
-        margin-bottom: 30px;
-      }
-      
-      .progress-bar {
-        background-color: var(--primary-color);
-      }
-      
-      .info-box {
-        background: linear-gradient(135deg, #e3f2fd, #f0f4ff);
-        border-left: 4px solid var(--primary-color);
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-      }
-      
-      .info-box i {
-        color: var(--primary-color);
-        margin-right: 10px;
-      }
-      
-      .table th {
-        background-color: var(--primary-color);
-        color: white;
-      }
-      
-      .footer-note {
-        text-align: center;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #e0e0e0;
-        color: #666;
-        font-size: 0.9rem;
-      }
-    </style>
-    {% endblock %}
-  </head>
+  /* Validation styles */
+  .is-valid {
+    border-color: #198754 !important;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25) !important;
+  }
+  
+  .form-check-input.is-valid {
+    border-color: #198754 !important;
+  }
+  
+  .form-select.is-valid {
+    border-color: #198754 !important;
+  }
 
-  {% block content %}
-  <body>
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-lg-12">
-          <div class="form-container">
-            <div class="header-section">
-              <h1>
-                <i class="fas fa-id-card-alt"></i> Army Personnel Information
-                Form
-              </h1>
-              <p>
-                Complete and comprehensive personnel record management system
-              </p>
-            </div>
+  /* Ensure black text in all states */
+  .form-control.is-valid,
+  .form-control.is-invalid {
+    color: #000000 !important;
+  }
 
-            <div class="progress-container">
-              <div class="progress" style="height: 10px">
-                <div
-                  class="progress-bar"
-                  role="progressbar"
-                  style="width: 20%"
-                  aria-valuenow="20"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                ></div>
+  /* Table input styles */
+  .table input.form-control {
+    color: #000000 !important;
+    border-color: #000000 !important;
+  }
+
+  .table input.form-control.is-invalid {
+    border-color: #dc3545 !important;
+  }
+
+  .table input.form-control.is-valid {
+    border-color: #198754 !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-xxl-12">
+      <div class="form-container">
+        <div class="header-section">
+          <h1>
+            <i class="fas fa-id-card-alt"></i> Army Personnel Information Form
+          </h1>
+          <p>
+            Complete and comprehensive personnel record management system
+          </p>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress" style="height: 10px">
+            <div
+              class="progress-bar"
+              role="progressbar"
+              style="width: 20%"
+              aria-valuenow="20"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            ></div>
+          </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-4" id="formTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link active"
+              id="personal-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#personal"
+              type="button"
+              role="tab"
+            >
+              <i class="fas fa-user"></i> Personal Details
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="courses-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#courses"
+              type="button"
+              role="tab"
+            >
+              <i class="fas fa-graduation-cap"></i> Courses & Service
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="medical-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#medical"
+              type="button"
+              role="tab"
+            >
+              <i class="fas fa-heartbeat"></i> Medical Details
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="family-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#family"
+              type="button"
+              role="tab"
+            >
+              <i class="fas fa-users"></i> Family Details
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="additional-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#additional"
+              type="button"
+              role="tab"
+            >
+              <i class="fas fa-info-circle"></i> Additional Info
+            </button>
+          </li>
+        </ul>
+
+        <form id="armyForm">
+          <div class="tab-content" id="formTabsContent">
+            <!-- Personal Details Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="personal"
+              role="tabpanel"
+            >
+              <div class="info-box">
+                <i class="fas fa-info-circle"></i> Please provide accurate
+                personal information as per official records.
               </div>
-            </div>
 
-            <ul class="nav nav-tabs mb-4" id="formTabs" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link active"
-                  id="personal-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#personal"
-                  type="button"
-                  role="tab"
-                >
-                  <i class="fas fa-user"></i> Personal Details
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link"
-                  id="courses-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#courses"
-                  type="button"
-                  role="tab"
-                >
-                  <i class="fas fa-graduation-cap"></i> Courses & Service
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link"
-                  id="medical-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#medical"
-                  type="button"
-                  role="tab"
-                >
-                  <i class="fas fa-heartbeat"></i> Medical Details
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link"
-                  id="family-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#family"
-                  type="button"
-                  role="tab"
-                >
-                  <i class="fas fa-users"></i> Family Details
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link"
-                  id="additional-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#additional"
-                  type="button"
-                  role="tab"
-                >
-                  <i class="fas fa-info-circle"></i> Additional Info
-                </button>
-              </li>
-            </ul>
+              <div class="form-section">
+                <h3 class="section-header">
+                  <i class="fas fa-id-card"></i> Personal Information
+                </h3>
 
-            <form id="armyForm">
-              <div class="tab-content" id="formTabsContent">
-                <!-- Personal Details Tab -->
-                <div
-                  class="tab-pane fade show active"
-                  id="personal"
-                  role="tabpanel"
-                >
-                  <div class="info-box">
-                    <i class="fas fa-info-circle"></i> Please provide accurate
-                    personal information as per official records.
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label required">Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="name"
+                      required
+                    />
+                    <div class="error-message" id="name-error">
+                      Only letters, spaces, and hyphens are allowed
+                    </div>
                   </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="armyNumber" class="form-label required">Army Number</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="armyNumber"
+                      required
+                    />
+                    <div class="error-message" id="armyNumber-error">
+                      Only alphanumeric characters, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
 
-                  <div class="form-section">
-                    <h3 class="section-header">
-                      <i class="fas fa-id-card"></i> Personal Information
-                    </h3>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="rank" class="form-label required">Rank</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="rank"
+                      required
+                    />
+                    <div class="error-message" id="rank-error">
+                      Only letters, numbers, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="trade" class="form-label required">Trade</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="trade"
+                      required
+                    />
+                    <div class="error-message" id="trade-error">
+                      Only letters, numbers, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
 
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="name" class="form-label required"
-                          >Name</label
-                        >
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="dateOfEnrollment" class="form-label required">Date of Enrollment</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="dateOfEnrollment"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="dateOfBirth" class="form-label required">Date of Birth</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="dateOfBirth"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="dateOfTOS" class="form-label">Date of TOS</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="dateOfTOS"
+                    />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="dateOfTORS" class="form-label">Date of TORS</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="dateOfTORS"
+                    />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="bloodGroup" class="form-label required">Blood Group</label>
+                    <select class="form-select" id="bloodGroup" required>
+                      <option value="">Select</option>
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="religion" class="form-label required">Religion</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="religion"
+                      required
+                    />
+                    <div class="error-message" id="religion-error">
+                      Only letters, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label required">Food Preference</label>
+                    <div>
+                      <div class="form-check form-check-inline">
                         <input
-                          type="text"
-                          class="form-control"
-                          id="name"
+                          class="form-check-input"
+                          type="radio"
+                          name="foodPreference"
+                          id="veg"
+                          value="Vegetarian"
                           required
                         />
-                        <div class="error-message" id="name-error">
-                          Only letters, spaces, and hyphens are allowed
-                        </div>
+                        <label class="form-check-label" for="veg">Vegetarian</label>
                       </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="armyNumber" class="form-label required"
-                          >Army Number</label
-                        >
+                      <div class="form-check form-check-inline">
                         <input
-                          type="text"
-                          class="form-control"
-                          id="armyNumber"
-                          required
+                          class="form-check-input"
+                          type="radio"
+                          name="foodPreference"
+                          id="nonVeg"
+                          value="Non-Vegetarian"
                         />
-                        <div class="error-message" id="armyNumber-error">
-                          Only alphanumeric characters, hyphens, and underscores
-                          are allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="rank" class="form-label required"
-                          >Rank</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="rank"
-                          required
-                        />
-                        <div class="error-message" id="rank-error">
-                          Only letters, numbers, hyphens, and underscores are
-                          allowed
-                        </div>
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="trade" class="form-label required"
-                          >Trade</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="trade"
-                          required
-                        />
-                        <div class="error-message" id="trade-error">
-                          Only letters, numbers, hyphens, and underscores are
-                          allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label
-                          for="dateOfEnrollment"
-                          class="form-label required"
-                          >Date of Enrollment</label
-                        >
-                        <input
-                          type="date"
-                          class="form-control"
-                          id="dateOfEnrollment"
-                          required
-                        />
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="dateOfBirth" class="form-label required"
-                          >Date of Birth</label
-                        >
-                        <input
-                          type="date"
-                          class="form-control"
-                          id="dateOfBirth"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="dateOfTOS" class="form-label"
-                          >Date of TOS</label
-                        >
-                        <input
-                          type="date"
-                          class="form-control"
-                          id="dateOfTOS"
-                        />
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="dateOfTORS" class="form-label"
-                          >Date of TORS</label
-                        >
-                        <input
-                          type="date"
-                          class="form-control"
-                          id="dateOfTORS"
-                        />
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="bloodGroup" class="form-label required"
-                          >Blood Group</label
-                        >
-                        <select class="form-select" id="bloodGroup" required>
-                          <option value="">Select</option>
-                          <option value="A+">A+</option>
-                          <option value="A-">A-</option>
-                          <option value="B+">B+</option>
-                          <option value="B-">B-</option>
-                          <option value="O+">O+</option>
-                          <option value="O-">O-</option>
-                          <option value="AB+">AB+</option>
-                          <option value="AB-">AB-</option>
-                        </select>
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="religion" class="form-label required"
-                          >Religion</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="religion"
-                          required
-                        />
-                        <div class="error-message" id="religion-error">
-                          Only letters, spaces, hyphens, and underscores are
-                          allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-4 mb-3">
-                        <label class="form-label required"
-                          >Food Preference</label
-                        >
-                        <div>
-                          <div class="form-check form-check-inline">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="foodPreference"
-                              id="veg"
-                              value="Vegetarian"
-                              required
-                            />
-                            <label class="form-check-label" for="veg"
-                              >Vegetarian</label
-                            >
-                          </div>
-                          <div class="form-check form-check-inline">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="foodPreference"
-                              id="nonVeg"
-                              value="Non-Vegetarian"
-                            />
-                            <label class="form-check-label" for="nonVeg"
-                              >Non-Vegetarian</label
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label class="form-label required">Drinker</label>
-                        <div>
-                          <div class="form-check form-check-inline">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="drinker"
-                              id="drinkerYes"
-                              value="Yes"
-                              required
-                            />
-                            <label class="form-check-label" for="drinkerYes"
-                              >Yes</label
-                            >
-                          </div>
-                          <div class="form-check form-check-inline">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="drinker"
-                              id="drinkerNo"
-                              value="No"
-                            />
-                            <label class="form-check-label" for="drinkerNo"
-                              >No</label
-                            >
-                          </div>
-                        </div>
-                      </div>
-                       <div class="col-md-4 mb-3">
-                        <label for="company" class="form-label required"
-                          >Company</label
-                        >
-                        <select class="form-select" id="bloodGroup" required>
-                          <option value="">Select</option>
-                          <option value="1 Company">1 Company</option>
-                          <option value="2 Company">2 Company</option>
-                          <option value="3 Company">3 Company</option>
-                          <option value="4 Company">4 Company</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                     
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="civQualifications" class="form-label"
-                          >Civil Qualifications</label
-                        >
-                        <textarea
-                          class="form-control"
-                          id="civQualifications"
-                          rows="2"
-                        ></textarea>
-                        <div class="error-message" id="civQualifications-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="decorationAwards" class="form-label"
-                          >Decoration/Awards</label
-                        >
-                        <textarea
-                          class="form-control"
-                          id="decorationAwards"
-                          rows="2"
-                        ></textarea>
-                        <div class="error-message" id="decorationAwards-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="lackingQualifications" class="form-label"
-                          >Lacking Qualifications</label
-                        >
-                        <textarea
-                          class="form-control"
-                          id="lackingQualifications"
-                          rows="2"
-                        ></textarea>
-                        <div
-                          class="error-message"
-                          id="lackingQualifications-error"
-                        >
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label class="form-label required"
-                          >Willing for Future Promotions</label
-                        >
-                        <div>
-                          <div class="form-check form-check-inline">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="willingPromotions"
-                              id="willingYes"
-                              value="Yes"
-                              required
-                            />
-                            <label class="form-check-label" for="willingYes"
-                              >Yes</label
-                            >
-                          </div>
-                          <div class="form-check form-check-inline">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="willingPromotions"
-                              id="willingNo"
-                              value="No"
-                            />
-                            <label class="form-check-label" for="willingNo"
-                              >No</label
-                            >
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-4 mb-3">
-                        <label for="iCardNo" class="form-label"
-                          >I Card No.</label
-                        >
-                        <input type="text" class="form-control" id="iCardNo" />
-                        <div class="error-message" id="iCardNo-error">
-                          Only alphanumeric characters, hyphens, and underscores
-                          are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="iCardDate" class="form-label"
-                          >Date of Issue</label
-                        >
-                        <input
-                          type="date"
-                          class="form-control"
-                          id="iCardDate"
-                        />
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="iCardIssuedBy" class="form-label"
-                          >Issued By</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="iCardIssuedBy"
-                        />
-                        <div class="error-message" id="iCardIssuedBy-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-4 mb-3">
-                        <label for="bpetGrading" class="form-label"
-                          >Grading in BPET</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="bpetGrading"
-                        />
-                        <div class="error-message" id="bpetGrading-error">
-                          Only letters, numbers, hyphens, and underscores are
-                          allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="pptGrading" class="form-label"
-                          >Grading in PPT</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="pptGrading"
-                        />
-                        <div class="error-message" id="pptGrading-error">
-                          Only letters, numbers, hyphens, and underscores are
-                          allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="bpetDate" class="form-label">Date</label>
-                        <input type="date" class="form-control" id="bpetDate" />
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label class="form-label"
-                          >Original Clothing Card Held</label
-                        >
-                        <div>
-                          <div class="form-check form-check-inline">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="clothingCard"
-                              id="clothingYes"
-                              value="Yes"
-                            />
-                            <label class="form-check-label" for="clothingYes"
-                              >Yes</label
-                            >
-                          </div>
-                          <div class="form-check form-check-inline">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="clothingCard"
-                              id="clothingNo"
-                              value="No"
-                            />
-                            <label class="form-check-label" for="clothingNo"
-                              >No</label
-                            >
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <h5 class="mt-4 mb-3" style="color: var(--primary-color)">
-                      <i class="fas fa-file-alt"></i> Document Details
-                    </h5>
-                    <div class="row">
-                      <div class="col-md-4 mb-3">
-                        <label for="panCardNo" class="form-label"
-                          >PAN Card No.</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="panCardNo"
-                        />
-                        <div class="error-message" id="panCardNo-error">
-                          Only alphanumeric characters are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="panPartII" class="form-label"
-                          >Part II Order No.</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="panPartII"
-                        />
-                        <div class="error-message" id="panPartII-error">
-                          Only alphanumeric characters, hyphens, and underscores
-                          are allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-4 mb-3">
-                        <label for="aadharCardNo" class="form-label"
-                          >Aadhar Card No.</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="aadharCardNo"
-                        />
-                        <div class="error-message" id="aadharCardNo-error">
-                          Only numbers are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="aadharPartII" class="form-label"
-                          >Part II Order No.</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="aadharPartII"
-                        />
-                        <div class="error-message" id="aadharPartII-error">
-                          Only alphanumeric characters, hyphens, and underscores
-                          are allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-4 mb-3">
-                        <label for="jointAccountNo" class="form-label"
-                          >Joint A/C No.</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="jointAccountNo"
-                        />
-                        <div class="error-message" id="jointAccountNo-error">
-                          Only alphanumeric characters, hyphens, and underscores
-                          are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="jointAccountBank" class="form-label"
-                          >Bank</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="jointAccountBank"
-                        />
-                        <div class="error-message" id="jointAccountBank-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="jointAccountIFSC" class="form-label"
-                          >IFSC Code</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="jointAccountIFSC"
-                        />
-                        <div class="error-message" id="jointAccountIFSC-error">
-                          Only alphanumeric characters are allowed
-                        </div>
+                        <label class="form-check-label" for="nonVeg">Non-Vegetarian</label>
                       </div>
                     </div>
                   </div>
-
-                  <div class="form-section">
-                    <h3 class="section-header">
-                      <i class="fas fa-home"></i> Permanent Home Address
-                    </h3>
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="homeHouseNo" class="form-label"
-                          >House No./Name</label
-                        >
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label required">Drinker</label>
+                    <div>
+                      <div class="form-check form-check-inline">
                         <input
-                          type="text"
-                          class="form-control"
-                          id="homeHouseNo"
+                          class="form-check-input"
+                          type="radio"
+                          name="drinker"
+                          id="drinkerYes"
+                          value="Yes"
+                          required
                         />
-                        <div class="error-message" id="homeHouseNo-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
+                        <label class="form-check-label" for="drinkerYes">Yes</label>
                       </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="homeVillage" class="form-label"
-                          >Village</label
-                        >
+                      <div class="form-check form-check-inline">
                         <input
-                          type="text"
-                          class="form-control"
-                          id="homeVillage"
+                          class="form-check-input"
+                          type="radio"
+                          name="drinker"
+                          id="drinkerNo"
+                          value="No"
                         />
-                        <div class="error-message" id="homeVillage-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="homePhone" class="form-label"
-                          >Telephone/Mobile No.</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="homePhone"
-                        />
-                        <div class="error-message" id="homePhone-error">
-                          Only numbers, plus, and hyphens are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="homeTO" class="form-label"
-                          >Tehsil Office</label
-                        >
-                        <input type="text" class="form-control" id="homeTO" />
-                        <div class="error-message" id="homeTO-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-4 mb-3">
-                        <label for="homePO" class="form-label"
-                          >Post Office</label
-                        >
-                        <input type="text" class="form-control" id="homePO" />
-                        <div class="error-message" id="homePO-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="homePS" class="form-label"
-                          >Police Station</label
-                        >
-                        <input type="text" class="form-control" id="homePS" />
-                        <div class="error-message" id="homePS-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="homeTeh" class="form-label">Tehsil</label>
-                        <input type="text" class="form-control" id="homeTeh" />
-                        <div class="error-message" id="homeTeh-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-4 mb-3">
-                        <label for="homeNRS" class="form-label">NRS</label>
-                        <input type="text" class="form-control" id="homeNRS" />
-                        <div class="error-message" id="homeNRS-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="homeNMH" class="form-label">NMH</label>
-                        <input type="text" class="form-control" id="homeNMH" />
-                        <div class="error-message" id="homeNMH-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="homeDistrict" class="form-label"
-                          >District</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="homeDistrict"
-                        />
-                        <div class="error-message" id="homeDistrict-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="homeState" class="form-label">State</label>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="homeState"
-                        />
-                        <div class="error-message" id="homeState-error">
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label class="form-label">Belong to Border Area</label>
-                        <div>
-                          <div class="form-check form-check-inline">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="borderArea"
-                              id="borderYes"
-                              value="Yes"
-                            />
-                            <label class="form-check-label" for="borderYes"
-                              >Yes</label
-                            >
-                          </div>
-                          <div class="form-check form-check-inline">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="borderArea"
-                              id="borderNo"
-                              value="No"
-                            />
-                            <label class="form-check-label" for="borderNo"
-                              >No</label
-                            >
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div id="borderDistance" class="conditional-section">
-                      <div class="row">
-                        <div class="col-md-6 mb-3">
-                          <label for="distanceFromIB" class="form-label"
-                            >Distance from IB</label
-                          >
-                          <input
-                            type="text"
-                            class="form-control"
-                            id="distanceFromIB"
-                          />
-                          <div class="error-message" id="distanceFromIB-error">
-                            Only numbers and decimal points are allowed
-                          </div>
-                        </div>
+                        <label class="form-check-label" for="drinkerNo">No</label>
                       </div>
                     </div>
                   </div>
+                   <div class="col-md-4 mb-3">
+                    <label for="company" class="form-label required">Company</label>
+                    <select class="form-select" id="company" required>
+                      <option value="">Select</option>
+                      <option value="1 Company">1 Company</option>
+                      <option value="2 Company">2 Company</option>
+                      <option value="3 Company">3 Company</option>
+                      <option value="4 Company">4 Company</option>
+                    </select>
+                  </div>
+                </div>
 
-                  <div class="form-section">
-                    <h3 class="section-header">
-                      <i class="fas fa-user-circle"></i> Physical Description
-                    </h3>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="civQualifications" class="form-label">Civil Qualifications</label>
+                    <textarea
+                      class="form-control"
+                      id="civQualifications"
+                      rows="2"
+                    ></textarea>
+                    <div class="error-message" id="civQualifications-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="decorationAwards" class="form-label">Decoration/Awards</label>
+                    <textarea
+                      class="form-control"
+                      id="decorationAwards"
+                      rows="2"
+                    ></textarea>
+                    <div class="error-message" id="decorationAwards-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
 
-                    <div class="row">
-                      <div class="col-md-3 mb-3">
-                        <label for="height" class="form-label">Height</label>
-                        <input type="text" class="form-control" id="height" />
-                        <div class="error-message" id="height-error">
-                          Only numbers and decimal points are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-3 mb-3">
-                        <label for="weight" class="form-label">Weight</label>
-                        <input type="text" class="form-control" id="weight" />
-                        <div class="error-message" id="weight-error">
-                          Only numbers and decimal points are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-3 mb-3">
-                        <label for="chest" class="form-label">Chest</label>
-                        <input type="text" class="form-control" id="chest" />
-                        <div class="error-message" id="chest-error">
-                          Only numbers and decimal points are allowed
-                        </div>
-                      </div>
-                      <div class="col-md-3 mb-3">
-                        <label for="identificationMarks" class="form-label"
-                          >Identification Marks</label
-                        >
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="lackingQualifications" class="form-label">Lacking Qualifications</label>
+                    <textarea
+                      class="form-control"
+                      id="lackingQualifications"
+                      rows="2"
+                    ></textarea>
+                    <div class="error-message" id="lackingQualifications-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label required">Willing for Future Promotions</label>
+                    <div>
+                      <div class="form-check form-check-inline">
                         <input
-                          type="text"
-                          class="form-control"
-                          id="identificationMarks"
+                          class="form-check-input"
+                          type="radio"
+                          name="willingPromotions"
+                          id="willingYes"
+                          value="Yes"
+                          required
                         />
-                        <div
-                          class="error-message"
-                          id="identificationMarks-error"
-                        >
-                          Only letters, numbers, spaces, hyphens, and
-                          underscores are allowed
-                        </div>
+                        <label class="form-check-label" for="willingYes">Yes</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="willingPromotions"
+                          id="willingNo"
+                          value="No"
+                        />
+                        <label class="form-check-label" for="willingNo">No</label>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label for="iCardNo" class="form-label">I Card No.</label>
+                    <input type="text" class="form-control" id="iCardNo" />
+                    <div class="error-message" id="iCardNo-error">
+                      Only alphanumeric characters, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="iCardDate" class="form-label">Date of Issue</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="iCardDate"
+                    />
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="iCardIssuedBy" class="form-label">Issued By</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="iCardIssuedBy"
+                    />
+                    <div class="error-message" id="iCardIssuedBy-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label for="bpetGrading" class="form-label">Grading in BPET</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="bpetGrading"
+                    />
+                    <div class="error-message" id="bpetGrading-error">
+                      Only letters, numbers, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="pptGrading" class="form-label">Grading in PPT</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="pptGrading"
+                    />
+                    <div class="error-message" id="pptGrading-error">
+                      Only letters, numbers, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="bpetDate" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="bpetDate" />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Original Clothing Card Held</label>
+                    <div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="clothingCard"
+                          id="clothingYes"
+                          value="Yes"
+                        />
+                        <label class="form-check-label" for="clothingYes">Yes</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="clothingCard"
+                          id="clothingNo"
+                          value="No"
+                        />
+                        <label class="form-check-label" for="clothingNo">No</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h5 class="mt-4 mb-3" style="color: var(--primary-color)">
+                  <i class="fas fa-file-alt"></i> Document Details
+                </h5>
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label for="panCardNo" class="form-label">PAN Card No.</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="panCardNo"
+                    />
+                    <div class="error-message" id="panCardNo-error">
+                      Only alphanumeric characters are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="panPartII" class="form-label">Part II Order No.</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="panPartII"
+                    />
+                    <div class="error-message" id="panPartII-error">
+                      Only alphanumeric characters, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label for="aadharCardNo" class="form-label">Aadhar Card No.</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="aadharCardNo"
+                    />
+                    <div class="error-message" id="aadharCardNo-error">
+                      Only numbers are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="aadharPartII" class="form-label">Part II Order No.</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="aadharPartII"
+                    />
+                    <div class="error-message" id="aadharPartII-error">
+                      Only alphanumeric characters, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label for="jointAccountNo" class="form-label">Joint A/C No.</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="jointAccountNo"
+                    />
+                    <div class="error-message" id="jointAccountNo-error">
+                      Only alphanumeric characters, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="jointAccountBank" class="form-label">Bank</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="jointAccountBank"
+                    />
+                    <div class="error-message" id="jointAccountBank-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="jointAccountIFSC" class="form-label">IFSC Code</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="jointAccountIFSC"
+                    />
+                    <div class="error-message" id="jointAccountIFSC-error">
+                      Only alphanumeric characters are allowed
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h3 class="section-header">
+                  <i class="fas fa-home"></i> Permanent Home Address
+                </h3>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="homeHouseNo" class="form-label">House No./Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="homeHouseNo"
+                    />
+                    <div class="error-message" id="homeHouseNo-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="homeVillage" class="form-label">Village</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="homeVillage"
+                    />
+                    <div class="error-message" id="homeVillage-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="homePhone" class="form-label">Telephone/Mobile No.</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="homePhone"
+                    />
+                    <div class="error-message" id="homePhone-error">
+                      Only numbers, plus, and hyphens are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="homeTO" class="form-label">Tehsil Office</label>
+                    <input type="text" class="form-control" id="homeTO" />
+                    <div class="error-message" id="homeTO-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label for="homePO" class="form-label">Post Office</label>
+                    <input type="text" class="form-control" id="homePO" />
+                    <div class="error-message" id="homePO-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="homePS" class="form-label">Police Station</label>
+                    <input type="text" class="form-control" id="homePS" />
+                    <div class="error-message" id="homePS-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="homeTeh" class="form-label">Tehsil</label>
+                    <input type="text" class="form-control" id="homeTeh" />
+                    <div class="error-message" id="homeTeh-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label for="homeNRS" class="form-label">NRS</label>
+                    <input type="text" class="form-control" id="homeNRS" />
+                    <div class="error-message" id="homeNRS-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="homeNMH" class="form-label">NMH</label>
+                    <input type="text" class="form-control" id="homeNMH" />
+                    <div class="error-message" id="homeNMH-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="homeDistrict" class="form-label">District</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="homeDistrict"
+                    />
+                    <div class="error-message" id="homeDistrict-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="homeState" class="form-label">State</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="homeState"
+                    />
+                    <div class="error-message" id="homeState-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Belong to Border Area</label>
+                    <div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="borderArea"
+                          id="borderYes"
+                          value="Yes"
+                        />
+                        <label class="form-check-label" for="borderYes">Yes</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="borderArea"
+                          id="borderNo"
+                          value="No"
+                        />
+                        <label class="form-check-label" for="borderNo">No</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="borderDistance" class="conditional-section">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="distanceFromIB" class="form-label">Distance from IB</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="distanceFromIB"
+                      />
+                      <div class="error-message" id="distanceFromIB-error">
+                        Only numbers and decimal points are allowed
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h3 class="section-header">
+                  <i class="fas fa-user-circle"></i> Physical Description
+                </h3>
+
+                <div class="row">
+                  <div class="col-md-3 mb-3">
+                    <label for="height" class="form-label">Height</label>
+                    <input type="text" class="form-control" id="height" />
+                    <div class="error-message" id="height-error">
+                      Only numbers and decimal points are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="weight" class="form-label">Weight</label>
+                    <input type="text" class="form-control" id="weight" />
+                    <div class="error-message" id="weight-error">
+                      Only numbers and decimal points are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="chest" class="form-label">Chest</label>
+                    <input type="text" class="form-control" id="chest" />
+                    <div class="error-message" id="chest-error">
+                      Only numbers and decimal points are allowed
+                    </div>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="identificationMarks" class="form-label">Identification Marks</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="identificationMarks"
+                    />
+                    <div class="error-message" id="identificationMarks-error">
+                      Only letters, numbers, spaces, hyphens, and underscores are allowed
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
                 <!-- Courses & Service Tab -->
                 <div class="tab-pane fade" id="courses" role="tabpanel">
@@ -2673,842 +2576,1110 @@
     </div>
 {%endblock%}
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // ========== VALIDATION SYSTEM ==========
+    const validationRules = {
+      // Personal Information
+      name: {
+        pattern: /^[a-zA-Z\s\-.'()]+$/,
+        message: "Only letters, spaces, hyphens, dots, and apostrophes are allowed",
+        required: true
+      },
+      armyNumber: {
+        pattern: /^[a-zA-Z0-9\-_\/]+$/,
+        message: "Only alphanumeric characters, hyphens, underscores, and slashes are allowed",
+        required: true
+      },
+      rank: {
+        pattern: /^[a-zA-Z0-9\-_\s.()]+$/,
+        message: "Only letters, numbers, hyphens, underscores, and spaces are allowed",
+        required: true
+      },
+      trade: {
+        pattern: /^[a-zA-Z0-9\-_\s.()\/]+$/,
+        message: "Only letters, numbers, hyphens, underscores, and spaces are allowed",
+        required: true
+      },
+      religion: {
+        pattern: /^[a-zA-Z\s\-_]+$/,
+        message: "Only letters, spaces, hyphens, and underscores are allowed",
+        required: true
+      },
+      
+      // Qualifications and Awards
+      civQualifications: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      decorationAwards: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      lackingQualifications: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      
+      // Card and Document Numbers
+      iCardNo: {
+        pattern: /^[a-zA-Z0-9\-_\/]*$/,
+        message: "Only alphanumeric characters, hyphens, underscores, and slashes are allowed",
+        required: false
+      },
+      iCardIssuedBy: {
+        pattern: /^[a-zA-Z0-9\s\-_.,]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      panCardNo: {
+        pattern: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+        message: "Invalid PAN format (e.g., ABCDE1234F)",
+        required: false
+      },
+      panPartII: {
+        pattern: /^[a-zA-Z0-9\-_\/]*$/,
+        message: "Only alphanumeric characters, hyphens, underscores, and slashes are allowed",
+        required: false
+      },
+      aadharCardNo: {
+        pattern: /^[0-9]{12}$/,
+        message: "Aadhar must be exactly 12 digits",
+        required: false
+      },
+      aadharPartII: {
+        pattern: /^[a-zA-Z0-9\-_\/]*$/,
+        message: "Only alphanumeric characters, hyphens, underscores, and slashes are allowed",
+        required: false
+      },
+      
+      // Grading Fields
+      bpetGrading: {
+        pattern: /^[A-Z0-9\-+]*$/,
+        message: "Only uppercase letters, numbers, hyphens, and plus signs are allowed",
+        required: false
+      },
+      pptGrading: {
+        pattern: /^[A-Z0-9\-+]*$/,
+        message: "Only uppercase letters, numbers, hyphens, and plus signs are allowed",
+        required: false
+      },
+      
+      // Bank Account Details
+      jointAccountNo: {
+        pattern: /^[0-9]{9,18}$/,
+        message: "Account number must be 9-18 digits",
+        required: false
+      },
+      jointAccountBank: {
+        pattern: /^[a-zA-Z0-9\s\-_.,&]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      jointAccountIFSC: {
+        pattern: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+        message: "Invalid IFSC code format (e.g., SBIN0001234)",
+        required: false
+      },
+      
+      // Address Fields
+      homeHouseNo: {
+        pattern: /^[a-zA-Z0-9\s\-_.,\/]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      homeVillage: {
+        pattern: /^[a-zA-Z\s\-_.']*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      homePhone: {
+        pattern: /^[0-9+\-\s()]{10,15}$/,
+        message: "Invalid phone number format (10-15 digits with optional +, -, spaces, or parentheses)",
+        required: false
+      },
+      homeTO: {
+        pattern: /^[a-zA-Z\s\-_.']*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      homePO: {
+        pattern: /^[a-zA-Z\s\-_.']*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      homePS: {
+        pattern: /^[a-zA-Z\s\-_.']*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      homeTeh: {
+        pattern: /^[a-zA-Z\s\-_.']*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      homeNRS: {
+        pattern: /^[a-zA-Z\s\-_.']*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      homeNMH: {
+        pattern: /^[a-zA-Z\s\-_.']*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      homeDistrict: {
+        pattern: /^[a-zA-Z\s\-_.']*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      homeState: {
+        pattern: /^[a-zA-Z\s\-_.']*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      
+      // Physical Measurements
+      distanceFromIB: {
+        pattern: /^[0-9]+(\.[0-9]{1,2})?$/,
+        message: "Only numbers with up to 2 decimal places allowed",
+        required: false
+      },
+      height: {
+        pattern: /^[0-9]+(\.[0-9]{1,2})?$/,
+        message: "Only numbers with up to 2 decimal places allowed",
+        required: false
+      },
+      weight: {
+        pattern: /^[0-9]+(\.[0-9]{1,2})?$/,
+        message: "Only numbers with up to 2 decimal places allowed",
+        required: false
+      },
+      chest: {
+        pattern: /^[0-9]+(\.[0-9]{1,2})?$/,
+        message: "Only numbers with up to 2 decimal places allowed",
+        required: false
+      },
+      identificationMarks: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      
+      // Service Details
+      courtCases: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      lastRecatBDAt: {
+        pattern: /^[a-zA-Z0-9\s\-_.,&]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      medicalProblem: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      restrictions: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      participationActivities: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      presentFamilyLocation: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      workedUnitTenure: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      
+      // Family Details
+      kinName: {
+        pattern: /^[a-zA-Z\s\-.'()]*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      kinRelation: {
+        pattern: /^[a-zA-Z\s\-]*$/,
+        message: "Only letters, spaces, and hyphens are allowed",
+        required: false
+      },
+      kinAccountNo: {
+        pattern: /^[0-9]{9,18}$/,
+        message: "Account number must be 9-18 digits",
+        required: false
+      },
+      kinBank: {
+        pattern: /^[a-zA-Z0-9\s\-_.,&]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      kinIFSC: {
+        pattern: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+        message: "Invalid IFSC code format (e.g., SBIN0001234)",
+        required: false
+      },
+      kinPartII: {
+        pattern: /^[a-zA-Z0-9\-_\/]*$/,
+        message: "Only alphanumeric characters, hyphens, underscores, and slashes are allowed",
+        required: false
+      },
+      
+      // Vehicle Details
+      vehicleRegNo: {
+        pattern: /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{1,4}$/,
+        message: "Invalid vehicle registration format (e.g., DL01AB1234)",
+        required: false
+      },
+      vehicleModel: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      drivingLicenseNo: {
+        pattern: /^[A-Z]{2}[0-9]{13,15}$/,
+        message: "Invalid driving license format",
+        required: false
+      },
+      
+      // Additional Information
+      counselling: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      folderCheckedBy: {
+        pattern: /^[a-zA-Z\s\-.'()]*$/,
+        message: "Only letters, spaces, and common punctuation are allowed",
+        required: false
+      },
+      domesticIssues: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      otherRequests: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      familyMedicalIssues: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      qualityPoints: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      strengths: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      },
+      weaknesses: {
+        pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
+        message: "Only letters, numbers, spaces, and common punctuation are allowed",
+        required: false
+      }
+    };
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-
-        const loader  =  document.getElementById('loader')
-        if(!loader){
-          alert('loader exits')
+    // Real-time validation function
+    function validateField(fieldId, value) {
+      const rules = validationRules[fieldId];
+      if (!rules) return true;
+      
+      const errorElement = document.getElementById(`${fieldId}-error`);
+      
+     
+      
+      // Check pattern if value exists
+      if (value && value.trim() !== '' && rules.pattern) {
+        if (!rules.pattern.test(value.trim())) {
+          if (errorElement) {
+            errorElement.textContent = rules.message;
+            errorElement.style.display = 'block';
+          }
+          return false;
         }
-        // Tab navigation
-        const formTabs = document.getElementById("formTabs");
-        const prevBtn = document.getElementById("prevBtn");
-        const nextBtn = document.getElementById("nextBtn");
-        const submitBtn = document.querySelector(".btn-submit");
-        const progressBar = document.querySelector(".progress-bar");
+      }
+      
+      // Clear error if validation passes
+      if (errorElement) {
+        errorElement.style.display = 'none';
+      }
+      return true;
+    }
 
-        let currentTab = 0;
-        const tabs = document.querySelectorAll(".tab-pane");
-
-        function showTab(n) {
-          tabs.forEach((tab) => tab.classList.remove("show", "active"));
-          tabs[n].classList.add("show", "active");
-
-          const tabButtons = formTabs.querySelectorAll(".nav-link");
-          tabButtons.forEach((button) => button.classList.remove("active"));
-          tabButtons[n].classList.add("active");
-
-          // Update progress bar
-          const progress = ((n + 1) / tabs.length) * 100;
-          progressBar.style.width = `${progress}%`;
-          progressBar.setAttribute("aria-valuenow", progress);
-
-          // Update buttons
-          if (n === 0) {
-            prevBtn.style.display = "none";
-          } else {
-            prevBtn.style.display = "inline-block";
-          }
-
-          if (n === tabs.length - 1) {
-            nextBtn.style.display = "none";
-            submitBtn.style.display = "inline-block";
-          } else {
-            nextBtn.style.display = "inline-block";
-            submitBtn.style.display = "none";
-          }
-
-          currentTab = n;
+    // Setup real-time validation for all fields
+    function setupRealTimeValidation() {
+      Object.keys(validationRules).forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.addEventListener('input', function() {
+            validateField(fieldId, this.value);
+            updateFieldVisualState(this, fieldId, this.value);
+          });
+          
+          field.addEventListener('blur', function() {
+            validateField(fieldId, this.value);
+            updateFieldVisualState(this, fieldId, this.value);
+          });
+          
+          // Initial validation
+          validateField(fieldId, field.value);
+          updateFieldVisualState(field, fieldId, field.value);
         }
+      });
+      
+      setupSpecialValidation();
+    }
 
-        prevBtn.addEventListener("click", function () {
-          if (currentTab > 0) {
-            showTab(currentTab - 1);
-          }
+    // Update visual state of fields
+    function updateFieldVisualState(field, fieldId, value) {
+      const rules = validationRules[fieldId];
+      if (!rules) return;
+      
+      const isValid = validateField(fieldId, value);
+      
+      if (value && value.trim() !== '') {
+        if (isValid) {
+          field.classList.remove('is-invalid');
+          field.classList.add('is-valid');
+        } else {
+          field.classList.remove('is-valid');
+          field.classList.add('is-invalid');
+        }
+      } else {
+        field.classList.remove('is-valid', 'is-invalid');
+      }
+    }
+
+    // Setup validation for radio buttons, selects, and other special fields
+    function setupSpecialValidation() {
+      // Radio button groups
+      const radioGroups = [
+        'foodPreference', 'drinker', 'willingPromotions', 'clothingCard',
+        'borderArea', 'loan', 'detailedCourse', 'medCat', 'priorStation',
+        'workedIT', 'vehicleAGIF', 'disabilityChild', 'maritalDiscord', 'bringFamily'
+      ];
+      
+      radioGroups.forEach(groupName => {
+        const radios = document.querySelectorAll(`input[name="${groupName}"]`);
+        radios.forEach(radio => {
+          radio.addEventListener('change', function() {
+            const checkedRadio = document.querySelector(`input[name="${groupName}"]:checked`);
+            validateRadioGroup(groupName, checkedRadio ? checkedRadio.value : '');
+          });
         });
+      });
+      
+      // Select elements
+      const selectElements = ['bloodGroup', 'company', 'computerKnowledge', 'itLiterature'];
+      selectElements.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+          select.addEventListener('change', function() {
+            validateSelect(selectId, this.value);
+          });
+        }
+      });
+      
+      // Date validation
+      setupDateValidation();
+    }
 
-        nextBtn.addEventListener("click", function () {
-          if (currentTab < tabs.length - 1) {
-            showTab(currentTab + 1);
-          }
+    // Validate radio button groups
+    function validateRadioGroup(groupName, value) {
+      const radios = document.querySelectorAll(`input[name="${groupName}"]`);
+      const errorElement = document.getElementById(`${groupName}-error`);
+      
+      const isRequired = Array.from(radios).some(radio => radio.hasAttribute('required'));
+      
+      if (isRequired && !value) {
+        if (errorElement) {
+          errorElement.textContent = 'This selection is required';
+          errorElement.style.display = 'block';
+        }
+        radios.forEach(radio => {
+          radio.classList.add('is-invalid');
         });
-        showTab(0);
-        const medCatYes = document.getElementById("medCatYes");
-        const medCatNo = document.getElementById("medCatNo");
-        const medCatDetails = document.getElementById("medCatDetails");
+        return false;
+      } else {
+        if (errorElement) {
+          errorElement.style.display = 'none';
+        }
+        radios.forEach(radio => {
+          radio.classList.remove('is-invalid');
+        });
+        return true;
+      }
+    }
 
-        function toggleMedCatDetails() {
-          if (medCatYes.checked) {
-            medCatDetails.style.display = "block";
-          } else {
-            medCatDetails.style.display = "none";
+    // Validate select elements
+    function validateSelect(selectId, value) {
+      const select = document.getElementById(selectId);
+      const errorElement = document.getElementById(`${selectId}-error`);
+      const isRequired = select.hasAttribute('required');
+      
+      if (isRequired && (!value || value === '')) {
+        if (errorElement) {
+          errorElement.textContent = 'This selection is required';
+          errorElement.style.display = 'block';
+        }
+        select.classList.add('is-invalid');
+        select.classList.remove('is-valid');
+        return false;
+      } else {
+        if (errorElement) {
+          errorElement.style.display = 'none';
+        }
+        select.classList.remove('is-invalid');
+        if (value && value !== '') {
+          select.classList.add('is-valid');
+        }
+        return true;
+      }
+    }
+
+    // Date validation
+    function setupDateValidation() {
+      const dateFields = [
+        'dateOfEnrollment', 'dateOfBirth', 'dateOfTOS', 'dateOfTORS',
+        'iCardDate', 'bpetDate', 'kinMarriageDate', 'vehiclePurchaseDate',
+        'licenseIssueDate', 'licenseExpiryDate', 'folderPreparedOn',
+        'priorStationDate', 'lastRecatBDDate', 'nextRecatDue'
+      ];
+      
+      dateFields.forEach(dateFieldId => {
+        const field = document.getElementById(dateFieldId);
+        if (field) {
+          field.addEventListener('change', function() {
+            validateDateField(dateFieldId, this.value);
+          });
+        }
+      });
+    }
+
+    function validateDateField(fieldId, value) {
+      const field = document.getElementById(fieldId);
+      const errorElement = document.getElementById(`${fieldId}-error`);
+      const isRequired = field.hasAttribute('required');
+      
+      if (isRequired && (!value || value.trim() === '')) {
+        if (errorElement) {
+          errorElement.textContent = 'This date field is required';
+          errorElement.style.display = 'block';
+        }
+        field.classList.add('is-invalid');
+        field.classList.remove('is-valid');
+        return false;
+      }
+      
+      if (value && value.trim() !== '') {
+        const date = new Date(value);
+        if (isNaN(date.getTime())) {
+          if (errorElement) {
+            errorElement.textContent = 'Invalid date format';
+            errorElement.style.display = 'block';
           }
+          field.classList.add('is-invalid');
+          field.classList.remove('is-valid');
+          return false;
         }
-
-        medCatYes.addEventListener("change", toggleMedCatDetails);
-        medCatNo.addEventListener("change", toggleMedCatDetails);
-
-        const borderYes = document.getElementById("borderYes");
-        const borderNo = document.getElementById("borderNo");
-        const borderDistance = document.getElementById("borderDistance");
-
-        function toggleBorderDistance() {
-          if (borderYes.checked) {
-            borderDistance.style.display = "block";
-          } else {
-            borderDistance.style.display = "none";
-          }
-        }
-
-        borderYes.addEventListener("change", toggleBorderDistance);
-        borderNo.addEventListener("change", toggleBorderDistance);
-
-        const loanYes = document.getElementById("loanYes");
-        const loanNo = document.getElementById("loanNo");
-        const loanDetails = document.getElementById("loanDetails");
-
-        function toggleLoanDetails() {
-          if (loanYes.checked) {
-            loanDetails.style.display = "block";
-          } else {
-            loanDetails.style.display = "none";
-          }
-        }
-
-        loanYes.addEventListener("change", toggleLoanDetails);
-        loanNo.addEventListener("change", toggleLoanDetails);
-
-        const detailedYes = document.getElementById("detailedYes");
-        const detailedNo = document.getElementById("detailedNo");
-        const detailedCourseDetails = document.getElementById(
-          "detailedCourseDetails"
-        );
-
-        function toggleDetailedCourseDetails() {
-          if (detailedYes.checked) {
-            detailedCourseDetails.style.display = "block";
-          } else {
-            detailedCourseDetails.style.display = "none";
-          }
-        }
-
-        detailedYes.addEventListener("change", toggleDetailedCourseDetails);
-        detailedNo.addEventListener("change", toggleDetailedCourseDetails);
-
-        const discordYes = document.getElementById("discordYes");
-        const discordNo = document.getElementById("discordNo");
-        const maritalDiscordDetails = document.getElementById(
-          "maritalDiscordDetails"
-        );
-
-        function toggleDiscordDetails() {
-          if (discordYes.checked) {
-            maritalDiscordDetails.style.display = "block";
-          } else {
-            maritalDiscordDetails.style.display = "none";
-          }
-        }
-
-        discordYes.addEventListener("change", toggleDiscordDetails);
-        discordNo.addEventListener("change", toggleDiscordDetails);
-
-        function addTableRow(tableId, buttonId, inputClass = "") {
-          const table = document.getElementById(tableId);
-          const tbody = table.querySelector("tbody");
-          const rows = tbody.querySelectorAll("tr");
-          const newRow = rows[0].cloneNode(true);
-
-          // Clear input values and assign unique IDs
-          newRow.querySelectorAll("input").forEach((input, index) => {
-            input.value = "";
-            input.className = input.className.replace(/is-invalid/g, "");
-            const fieldName = input.name.replace("[]", "");
-            input.id = `${fieldName}-${rows.length + 1}-${index}`; // Unique ID
-          });
-
-          // Update serial number
-          const newSerial = rows.length + 1;
-          newRow.cells[0].textContent = newSerial;
-
-          // Add error message elements for each input
-          newRow.querySelectorAll("td").forEach((td, index) => {
-            if (index > 0) {
-              // Skip serial number column
-              const input = td.querySelector("input");
-              if (input) {
-                // Remove existing error element if any
-                const existingError = td.querySelector(".error-message");
-                if (existingError) existingError.remove();
-                // Add new error element
-                const errorDiv = document.createElement("div");
-                errorDiv.className = "error-message";
-                errorDiv.id = `${input.id}-error`;
-                errorDiv.style.display = "none";
-                errorDiv.textContent = `Invalid ${input.name.replace(
-                  "[]",
-                  ""
-                )}`;
-                td.appendChild(errorDiv);
-              }
-            }
-          });
-
-          // Add delete button
-          const deleteBtn = document.createElement("button");
-          deleteBtn.type = "button";
-          deleteBtn.className = "btn btn-sm btn-danger btn-delete-row";
-          deleteBtn.textContent = "Delete";
-          deleteBtn.addEventListener("click", function () {
-            if (tbody.querySelectorAll("tr").length > 1) {
-              newRow.remove();
-              updateSerialNumbers(tbody);
-            }
-          });
-          newRow.cells[newRow.cells.length - 1].innerHTML = "";
-          newRow.cells[newRow.cells.length - 1].appendChild(deleteBtn);
-
-          if (inputClass) {
-            newRow.querySelectorAll("input").forEach((input) => {
-              if (input.type !== "date" && input.type !== "number") {
-                input.classList.add(inputClass);
-              }
-            });
-          }
-          tbody.appendChild(newRow);
-        }
-
-        function updateSerialNumbers(tbody) {
-          const rows = tbody.querySelectorAll("tr");
-          rows.forEach((row, index) => {
-            row.cells[0].textContent = index + 1;
-          });
-        }
-        document
-          .getElementById("addCourseRow")
-          .addEventListener("click", function () {
-            addTableRow("coursesTable", "addCourseRow", "course-input");
-          });
-        document
-          .getElementById("addUnitRow")
-          .addEventListener("click", function () {
-            addTableRow("unitsTable", "addUnitRow", "unit-input");
-          });
-        document
-          .getElementById("addFamilyRow")
-          .addEventListener("click", function () {
-            addTableRow("familyTable", "addFamilyRow", "family-input");
-          });
-        document
-          .getElementById("addChildRow")
-          .addEventListener("click", function () {
-            addTableRow("childrenTable", "addChildRow", "children-input");
-          });
-        document
-          .getElementById("addLoanRow")
-          .addEventListener("click", function () {
-            addTableRow("loansTable", "addLoanRow", "loan-input");
-          });
-        document
-          .getElementById("addPunishmentRow")
-          .addEventListener("click", function () {
-            addTableRow(
-              "punishmentTable",
-              "addPunishmentRow",
-              "punishment-input"
-            );
-          });
-        document
-          .getElementById("addDetailedCourseRow")
-          .addEventListener("click", function () {
-            addTableRow(
-              "detailedCoursesTable",
-              "addDetailedCourseRow",
-              "detailed-course-input"
-            );
-          });
-        document
-          .getElementById("addLeaveRow")
-          .addEventListener("click", function () {
-            addTableRow("leaveTable", "addLeaveRow");
-          });
-        document
-          .getElementById("addMobileRow")
-          .addEventListener("click", function () {
-            addTableRow("mobileTable", "addMobileRow", "mobile-input");
-          });
-
-        document
-          .getElementById("addDiscordRow")
-          .addEventListener("click", function () {
-            addTableRow("discordTable", "addDiscordRow", "discord-input");
-          });
-
-        function validateInput(input) {
-          const errorElement = document.getElementById(`${input.id}-error`);
-          const isValid =
-            input.value &&
-            (!input.pattern || new RegExp(input.pattern).test(input.value));
-
-          if (!isValid) {
+        
+        // Additional date logic
+        if (fieldId === 'dateOfBirth') {
+          const today = new Date();
+          const birthDate = new Date(value);
+          const age = today.getFullYear() - birthDate.getFullYear();
+          if (age < 18 || age > 60) {
             if (errorElement) {
-              errorElement.style.display = "block";
-              errorElement.textContent = `Invalid ${input.name.replace(
-                "[]",
-                ""
-              )}`;
-            } else {
-              console.warn(`Error element not found for input ID: ${input.id}`);
+              errorElement.textContent = 'Age must be between 18 and 60 years';
+              errorElement.style.display = 'block';
             }
-            input.classList.add("is-invalid");
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
             return false;
           }
-          if (errorElement) {
-            errorElement.style.display = "none";
-          }
-          input.classList.remove("is-invalid");
-          return true;
         }
-
-        const patterns = {
-          // Personal Information - Text fields
-          name: /^[a-zA-Z\s\-.']+$/,
-          armyNumber: /^[a-zA-Z0-9\-_\/]+$/,
-          rank: /^[a-zA-Z0-9\-_\s.()]+$/,
-          trade: /^[a-zA-Z0-9\-_\s.()\/]+$/,
-          religion: /^[a-zA-Z\s\-_]+$/,
-          
-          // Qualifications and Awards
-          civQualifications: /^[a-zA-Z0-9\s\-_.,()\/]+$/,
-          decorationAwards: /^[a-zA-Z0-9\s\-_.,()\/]+$/,
-          lackingQualifications: /^[a-zA-Z0-9\s\-_.,()\/]+$/,
-          
-          // Card and Document Numbers
-          iCardNo: /^[a-zA-Z0-9\-_\/]+$/,
-          iCardIssuedBy: /^[a-zA-Z0-9\s\-_.,]+$/,
-          panCardNo: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
-          panPartII: /^[a-zA-Z0-9\-_\/]+$/,
-          aadharCardNo: /^[0-9]{12}$/,
-          aadharPartII: /^[a-zA-Z0-9\-_\/]+$/,
-          
-          // Grading Fields
-          bpetGrading: /^[A-Z0-9\-+]+$/,
-          pptGrading: /^[A-Z0-9\-+]+$/,
-          
-          // Bank Account Details
-          jointAccountNo: /^[0-9]{9,18}$/,
-          jointAccountBank: /^[a-zA-Z0-9\s\-_.,&]+$/,
-          jointAccountIFSC: /^[A-Z]{4}0[A-Z0-9]{6}$/,
-          
-          // Address Fields
-          homeHouseNo: /^[a-zA-Z0-9\s\-_.,\/]+$/,
-          homeVillage: /^[a-zA-Z\s\-_.']+$/,
-          homePhone: /^[0-9+\-\s()]{10,15}$/,
-          homeTO: /^[a-zA-Z\s\-_.']+$/,
-          homePO: /^[a-zA-Z\s\-_.']+$/,
-          homePS: /^[a-zA-Z\s\-_.']+$/,
-          homeTeh: /^[a-zA-Z\s\-_.']+$/,
-          homeNRS: /^[a-zA-Z\s\-_.']+$/,
-          homeNMH: /^[a-zA-Z\s\-_.']+$/,
-          homeDistrict: /^[a-zA-Z\s\-_.']+$/,
-          homeState: /^[a-zA-Z\s\-_.']+$/,
-          
-          // Physical Measurements
-          distanceFromIB: /^[0-9]+(\.[0-9]{1,2})?$/,
-          height: /^[0-9]+(\.[0-9]{1,2})?$/,
-          weight: /^[0-9]+(\.[0-9]{1,2})?$/,
-          chest: /^[0-9]+(\.[0-9]{1,2})?$/,
-          identificationMarks: /^[a-zA-Z0-9\s\-_.,()]+$/,
-          
-          // Service Details
-          courtCases: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          lastRecatBDAt: /^[a-zA-Z0-9\s\-_.,&]+$/,
-          medicalProblem: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          restrictions: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          participationActivities: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          presentFamilyLocation: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          workedUnitTenure: /^[a-zA-Z0-9\s\-_.,()\/]+$/,
-          
-          // Family Details
-          kinName: /^[a-zA-Z\s\-.']+$/,
-          kinRelation: /^[a-zA-Z\s\-]+$/,
-          kinAccountNo: /^[0-9]{9,18}$/,
-          kinBank: /^[a-zA-Z0-9\s\-_.,&]+$/,
-          kinIFSC: /^[A-Z]{4}0[A-Z0-9]{6}$/,
-          kinPartII: /^[a-zA-Z0-9\-_\/]+$/,
-          
-          // Vehicle Details
-          vehicleRegNo: /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{1,4}$/,
-          vehicleModel: /^[a-zA-Z0-9\s\-_.,()]+$/,
-          drivingLicenseNo: /^[A-Z]{2}[0-9]{13,15}$/,
-          
-          // Additional Information
-          counselling: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          folderCheckedBy: /^[a-zA-Z\s\-.']+$/,
-          domesticIssues: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          otherRequests: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          familyMedicalIssues: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          qualityPoints: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          strengths: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-          weaknesses: /^[a-zA-Z0-9\s\-_.,()\/\n]+$/,
-        };
         
-        // Validation error messages
-        const errorMessages = {
-          name: "Only letters, spaces, hyphens, dots, and apostrophes allowed",
-          armyNumber: "Only alphanumeric characters, hyphens, underscores, and slashes allowed",
-          rank: "Invalid rank format",
-          trade: "Invalid trade format",
-          religion: "Only letters, spaces, hyphens, and underscores allowed",
-          panCardNo: "Invalid PAN format (e.g., ABCDE1234F)",
-          aadharCardNo: "Aadhar must be exactly 12 digits",
-          jointAccountNo: "Account number must be 9-18 digits",
-          jointAccountIFSC: "Invalid IFSC code format (e.g., SBIN0001234)",
-          homePhone: "Invalid phone number format",
-          distanceFromIB: "Only numbers with up to 2 decimal places allowed",
-          height: "Only numbers with up to 2 decimal places allowed",
-          weight: "Only numbers with up to 2 decimal places allowed",
-          chest: "Only numbers with up to 2 decimal places allowed",
-          kinAccountNo: "Account number must be 9-18 digits",
-          kinIFSC: "Invalid IFSC code format (e.g., SBIN0001234)",
-          vehicleRegNo: "Invalid vehicle registration format (e.g., DL01AB1234)",
-          drivingLicenseNo: "Invalid driving license format",
-        };
-        Object.keys(patterns).forEach((fieldId) => {
-          const input = document.getElementById(fieldId);
-          if (input) {
-            input.addEventListener("input", function () {
-              validateInput(
-                this,
-                patterns[fieldId],
+        if (fieldId === 'dateOfEnrollment') {
+          const dobField = document.getElementById('dateOfBirth');
+          if (dobField && dobField.value) {
+            const dob = new Date(dobField.value);
+            const enrollment = new Date(value);
+            if (enrollment < dob) {
+              if (errorElement) {
+                errorElement.textContent = 'Date of enrollment cannot be before date of birth';
+                errorElement.style.display = 'block';
+              }
+              field.classList.add('is-invalid');
+              field.classList.remove('is-valid');
+              return false;
+            }
+          }
+        }
+      }
+      
+      if (errorElement) {
+        errorElement.style.display = 'none';
+      }
+      field.classList.remove('is-invalid');
+      if (value && value.trim() !== '') {
+        field.classList.add('is-valid');
+      }
+      return true;
+    }
 
-                document.getElementById(`${fieldId}-error`)
-              );
-            });
+    // Dynamic table validation
+    function setupDynamicTableValidation() {
+      const tableConfigs = [
+        { className: 'course-input', pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/ },
+        { className: 'unit-input', pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/ },
+        { className: 'loan-input', pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/ },
+        { className: 'punishment-input', pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/ },
+        { className: 'detailed-course-input', pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/ },
+        { className: 'leave-input', pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/ },
+        { className: 'family-input', pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/ },
+        { className: 'children-input', pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/ },
+        { className: 'mobile-input', pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/ },
+        { className: 'discord-input', pattern: /^[a-zA-Z0-9\s\-_.,()\/]*$/ }
+      ];
+      
+      tableConfigs.forEach(config => {
+        document.addEventListener('input', function(e) {
+          if (e.target.classList.contains(config.className)) {
+            validateDynamicInput(e.target, config.pattern);
           }
         });
-        function addValidationToDynamicInputs(className, pattern) {
-          document.addEventListener("input", function (e) {
-            if (e.target.classList.contains(className)) {
-              const value = e.target.value;
-              if (value && !pattern.test(value)) {
-                e.target.classList.add("is-invalid");
-              } else {
-                e.target.classList.remove("is-invalid");
-              }
-            }
-          });
+      });
+    }
+
+    function validateDynamicInput(input, pattern) {
+      const value = input.value;
+      
+      if (value && !pattern.test(value)) {
+        input.classList.add('is-invalid');
+        let errorElement = input.parentNode.querySelector('.error-message');
+        if (!errorElement) {
+          errorElement = document.createElement('div');
+          errorElement.className = 'error-message';
+          input.parentNode.appendChild(errorElement);
         }
-        addValidationToDynamicInputs("course-input", /^[a-zA-Z0-9\s\-_]+$/);
-        addValidationToDynamicInputs("unit-input", /^[a-zA-Z0-9\s\-_]+$/);
-        addValidationToDynamicInputs("loan-input", /^[a-zA-Z0-9\s\-_]+$/);
-        addValidationToDynamicInputs("punishment-input", /^[a-zA-Z0-9\s\-_]+$/);
-        addValidationToDynamicInputs(
-          "detailed-course-input",
-          /^[a-zA-Z0-9\s\-_]+$/
-        );
-        addValidationToDynamicInputs("leave-input", /^[a-zA-Z0-9\s\-_]+$/);
-        addValidationToDynamicInputs("family-input", /^[a-zA-Z0-9\s\-_]+$/);
-        addValidationToDynamicInputs("children-input", /^[a-zA-Z0-9\s\-_]+$/);
-        addValidationToDynamicInputs("mobile-input", /^[a-zA-Z0-9\s\-_]+$/);
-        addValidationToDynamicInputs("discord-input", /^[a-zA-Z0-9\s\-_]+$/);
-
-        document
-          .getElementById("armyForm")
-          .addEventListener("submit", function (e) {
-            e.preventDefault();
-            const requiredFields = this.querySelectorAll("[required]");
-            let valid = true;
-
-            requiredFields.forEach((field) => {
-              if (!field.value) {
-                valid = false;
-                field.classList.add("is-invalid");
-              } else {
-                field.classList.remove("is-invalid");
-              }
-            });
-            Object.keys(patterns).forEach((fieldId) => {
-              const input = document.getElementById(fieldId);
-              if (input && input.value) {
-                if (
-                  !validateInput(
-                    input,
-                    patterns[fieldId],
-                    document.getElementById(`${fieldId}-error`)
-                  )
-                ) {
-                  valid = false;
-                }
-              }
-            });
-
-            if (valid) {
-              alert("Form submitted successfully!");
-            } else {
-              alert("Please correct the errors in the form before submitting.");
-            }
-          });
-        document
-          .getElementById("armyForm")
-          .addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const requiredFields = this.querySelectorAll("[required]");
-            let valid = true;
-
-            requiredFields.forEach((field) => {
-              if (!field.value) {
-                valid = false;
-                field.classList.add("is-invalid");
-              } else {
-                field.classList.remove("is-invalid");
-              }
-            });
-
-            Object.keys(patterns).forEach((fieldId) => {
-              const input = document.getElementById(fieldId);
-              if (input && input.value) {
-                if (
-                  !validateInput(
-                    input,
-                    patterns[fieldId],
-                    document.getElementById(`${fieldId}-error`)
-                  )
-                ) {
-                  valid = false;
-                }
-              }
-            });
-
-            if (valid) {
-              const formData = collectFormData();
-              submitFormData(formData);
-            } else {
-              alert("Please correct the errors in the form before submitting.");
-            }
-          });
-
-        function collectFormData() {
-          const data = {
-            name: document.getElementById("name").value,
-            armyNumber: document.getElementById("armyNumber").value,
-            rank: document.getElementById("rank").value,
-            trade: document.getElementById("trade").value,
-            dateOfEnrollment: document.getElementById("dateOfEnrollment").value,
-            dateOfBirth: document.getElementById("dateOfBirth").value,
-            dateOfTOS: document.getElementById("dateOfTOS").value,
-            dateOfTORS: document.getElementById("dateOfTORS").value,
-            bloodGroup: document.getElementById("bloodGroup").value,
-            religion: document.getElementById("religion").value,
-            foodPreference:
-              document.querySelector('input[name="foodPreference"]:checked')
-                ?.value || "",
-            drinker:
-              document.querySelector('input[name="drinker"]:checked')?.value ||
-              "",
-            civQualifications:
-              document.getElementById("civQualifications").value,
-            decorationAwards: document.getElementById("decorationAwards").value,
-            lackingQualifications: document.getElementById(
-              "lackingQualifications"
-            ).value,
-            willingPromotions:
-              document.querySelector('input[name="willingPromotions"]:checked')
-                ?.value || "",
-            iCardNo: document.getElementById("iCardNo").value,
-            iCardDate: document.getElementById("iCardDate").value,
-            iCardIssuedBy: document.getElementById("iCardIssuedBy").value,
-            bpetGrading: document.getElementById("bpetGrading").value,
-            pptGrading: document.getElementById("pptGrading").value,
-            bpetDate: document.getElementById("bpetDate").value,
-            clothingCard:
-              document.querySelector('input[name="clothingCard"]:checked')
-                ?.value || "",
-            panCardNo: document.getElementById("panCardNo").value,
-            panPartII: document.getElementById("panPartII").value,
-            aadharCardNo: document.getElementById("aadharCardNo").value,
-            aadharPartII: document.getElementById("aadharPartII").value,
-            jointAccountNo: document.getElementById("jointAccountNo").value,
-            jointAccountBank: document.getElementById("jointAccountBank").value,
-            jointAccountIFSC: document.getElementById("jointAccountIFSC").value,
-
-            homeHouseNo: document.getElementById("homeHouseNo").value,
-            homeVillage: document.getElementById("homeVillage").value,
-            homePhone: document.getElementById("homePhone").value,
-            homeTO: document.getElementById("homeTO").value,
-            homePO: document.getElementById("homePO").value,
-            homePS: document.getElementById("homePS").value,
-            homeTeh: document.getElementById("homeTeh").value,
-            homeNRS: document.getElementById("homeNRS").value,
-            homeNMH: document.getElementById("homeNMH").value,
-            homeDistrict: document.getElementById("homeDistrict").value,
-            homeState: document.getElementById("homeState").value,
-            borderArea:
-              document.querySelector('input[name="borderArea"]:checked')
-                ?.value || "",
-            distanceFromIB: document.getElementById("distanceFromIB").value,
-
-            height: document.getElementById("height").value,
-            weight: document.getElementById("weight").value,
-            chest: document.getElementById("chest").value,
-            identificationMarks: document.getElementById("identificationMarks")
-              .value,
-
-            courtCases: document.getElementById("courtCases").value,
-            loan:
-              document.querySelector('input[name="loan"]:checked')?.value || "",
-            totalLeavesEncashed: document.getElementById("totalLeavesEncashed")
-              .value,
-            participationActivities: document.getElementById(
-              "participationActivities"
-            ).value,
-            presentFamilyLocation: document.getElementById(
-              "presentFamilyLocation"
-            ).value,
-            priorStation:
-              document.querySelector('input[name="priorStation"]:checked')
-                ?.value || "",
-            priorStationDate: document.getElementById("priorStationDate").value,
-            workedIT:
-              document.querySelector('input[name="workedIT"]:checked')?.value ||
-              "",
-            workedUnitTenure: document.getElementById("workedUnitTenure").value,
-            detailedCourse:
-              document.querySelector('input[name="detailedCourse"]:checked')
-                ?.value || "",
-
-            medCat:
-              document.querySelector('input[name="medCat"]:checked')?.value ||
-              "",
-            lastRecatBDDate: document.getElementById("lastRecatBDDate").value,
-            lastRecatBDAt: document.getElementById("lastRecatBDAt").value,
-            nextRecatDue: document.getElementById("nextRecatDue").value,
-            medicalProblem: document.getElementById("medicalProblem").value,
-            restrictions: document.getElementById("restrictions").value,
-            computerKnowledge:
-              document.getElementById("computerKnowledge").value,
-            itLiterature: document.getElementById("itLiterature").value,
-
-            kinName: document.getElementById("kinName").value,
-            kinRelation: document.getElementById("kinRelation").value,
-            kinMarriageDate: document.getElementById("kinMarriageDate").value,
-            kinAccountNo: document.getElementById("kinAccountNo").value,
-            kinBank: document.getElementById("kinBank").value,
-            kinIFSC: document.getElementById("kinIFSC").value,
-            kinPartII: document.getElementById("kinPartII").value,
-
-            vehicleRegNo: document.getElementById("vehicleRegNo").value,
-            vehicleModel: document.getElementById("vehicleModel").value,
-            vehiclePurchaseDate: document.getElementById("vehiclePurchaseDate")
-              .value,
-            vehicleAGIF:
-              document.querySelector('input[name="vehicleAGIF"]:checked')
-                ?.value || "",
-            drivingLicenseNo: document.getElementById("drivingLicenseNo").value,
-            licenseIssueDate: document.getElementById("licenseIssueDate").value,
-            licenseExpiryDate:
-              document.getElementById("licenseExpiryDate").value,
-
-            disabilityChild:
-              document.querySelector('input[name="disabilityChild"]:checked')
-                ?.value || "",
-            maritalDiscord:
-              document.querySelector('input[name="maritalDiscord"]:checked')
-                ?.value || "",
-            counselling: document.getElementById("counselling").value,
-            folderPreparedOn: document.getElementById("folderPreparedOn").value,
-            folderCheckedBy: document.getElementById("folderCheckedBy").value,
-            bringFamily:
-              document.querySelector('input[name="bringFamily"]:checked')
-                ?.value || "",
-            domesticIssues: document.getElementById("domesticIssues").value,
-            otherRequests: document.getElementById("otherRequests").value,
-            familyMedicalIssues: document.getElementById("familyMedicalIssues")
-              .value,
-            qualityPoints: document.getElementById("qualityPoints").value,
-            strengths: document.getElementById("strengths").value,
-            weaknesses: document.getElementById("weaknesses").value,
-
-            courses: collectTableData("coursesTable", [
-              "course",
-              "courseFrom",
-              "courseTo",
-              "courseInstitute",
-              "courseGrading",
-              "courseRemarks",
-            ]),
-            units: collectTableData("unitsTable", [
-              "unit",
-              "unitFrom",
-              "unitTo",
-              "unitDuty",
-            ]),
-            loans: collectTableData("loansTable", [
-              "loanType",
-              "loanAmount",
-              "loanBank",
-              "loanEMI",
-              "loanPending",
-              "loanRemarks",
-            ]),
-            punishments: collectTableData("punishmentTable", [
-              "punishmentDate",
-              "punishment",
-              "punishmentAASec",
-              "punishmentRemarks",
-            ]),
-            detailedCourses: collectTableData("detailedCoursesTable", [
-              "detailedCourseName",
-              "detailedCourseFrom",
-              "detailedCourseTo",
-              "detailedCourseRemarks",
-            ]),
-            leaves: collectTableData("leaveTable", [
-              "leaveYear",
-              "leaveAL",
-              "leaveCL",
-              "leaveAAL",
-              "leaveTotal",
-              "leaveRemarks",
-            ]),
-            family: collectTableData("familyTable", [
-              "familyRelation",
-              "familyName",
-              "familyDOB",
-              "familyUID",
-              "familyPartII",
-            ]),
-            children: collectTableData("childrenTable", [
-              "childName",
-              "childDOB",
-              "childClass",
-              "childPartII",
-              "childUID",
-            ]),
-            mobiles: collectTableData("mobileTable", [
-              "mobileType",
-              "mobileNumber",
-              "mobileProvider",
-              "mobileRemarks",
-            ]),
-            discordCases: collectTableData("discordTable", [
-              "discordCaseNo",
-              "discordAmount",
-              "discordSanction",
-            ]),
-          };
-
-          return data;
+        errorElement.textContent = 'Invalid input format';
+        errorElement.style.display = 'block';
+      } else {
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        const errorElement = input.parentNode.querySelector('.error-message');
+        if (errorElement) {
+          errorElement.style.display = 'none';
         }
-        function collectTableData(tableId, fieldNames) {
-          const table = document.getElementById(tableId);
-          const rows = table.querySelectorAll("tbody tr");
-          const data = [];
+      }
+    }
 
-          rows.forEach((row) => {
-            const rowData = {};
-            const inputs = row.querySelectorAll("input, select, textarea");
-
-            inputs.forEach((input, index) => {
-              if (fieldNames[index]) {
-                rowData[fieldNames[index]] = input.value;
-              }
-            });
-            if (Object.values(rowData).some((val) => val !== "")) {
-              data.push(rowData);
-            }
-          });
-
-          return data;
-        }
-        async function submitFormData(formData) {
-          console.log(
-            "Form data to be sent:",
-            JSON.stringify(formData, null, 2)
-          );
-          const submitBtn = document.querySelector(".btn-submit");
-          const originalText = submitBtn.innerHTML;
-          submitBtn.innerHTML =
-            '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-          submitBtn.disabled = true;
-
-          try {
-            // Validate all inputs
-            const inputs = document.querySelectorAll("input, select");
-            let isValid = true;
-            inputs.forEach((input) => {
-              if (!validateInput(input)) {
-                isValid = false;
-              }
-            });
-
-            if (!isValid) {
-              console.error("Form validation failed");
-              const modal = new bootstrap.Modal(
-                document.getElementById("formModal")
-              );
-              document.getElementById("modalTitle").textContent = "Error";
-              document.getElementById("modalMessage").textContent =
-                "Please correct the form errors before submitting.";
-              modal.show();
-              submitBtn.innerHTML = originalText;
-              submitBtn.disabled = false;
-              return;
-            }
-
-            const response = await fetch(
-              "http://localhost:5000/api/personnel",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-              }
-            );
-            const result = await response.json();
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-
-            const modal = new bootstrap.Modal(
-              document.getElementById("formModal")
-            );
-            if (response.ok && result.success) {
-              document.getElementById("modalTitle").textContent = "Success";
-              document.getElementById(
-                "modalMessage"
-              ).textContent = `Form submitted successfully! Personnel ID: ${result.personnel_id}`;
-              modal.show();
-              document.querySelector("form").reset();
-            } else {
-              document.getElementById("modalTitle").textContent = "Error";
-              document.getElementById("modalMessage").textContent =
-                result.message || "Failed to submit form";
-              if (result.errors) {
-                console.error("Backend errors:", result.errors);
-                document.getElementById(
-                  "modalMessage"
-                ).textContent += `\nErrors: ${result.errors.join(", ")}`;
-              }
-              modal.show();
-            }
-          } catch (error) {
-            console.error("Submission error:", error);
-            const modal = new bootstrap.Modal(
-              document.getElementById("formModal")
-            );
-            document.getElementById("modalTitle").textContent = "Error";
-            document.getElementById("modalMessage").textContent =
-              "An unexpected error occurred";
-            modal.show();
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
+    // Form submission validation
+    function setupFormSubmission() {
+      const form = document.getElementById('armyForm');
+      
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (validateForm()) {
+          const formData = collectFormData();
+          submitFormData(formData);
+        } else {
+          alert('Please correct the errors in the form before submitting.');
+          const firstError = document.querySelector('.is-invalid');
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }
-        
-        
       });
-    </script>
-    {%endblock%}
+    }
+
+    // Comprehensive form validation
+    function validateForm() {
+      let isValid = true;
+      
+      // Validate all fields with validation rules
+      Object.keys(validationRules).forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          if (!validateField(fieldId, field.value)) {
+            isValid = false;
+          }
+        }
+      });
+      
+      // Validate radio groups
+      const radioGroups = ['foodPreference', 'drinker', 'willingPromotions'];
+      radioGroups.forEach(group => {
+        if (!validateRadioGroup(group, document.querySelector(`input[name="${group}"]:checked`)?.value)) {
+          isValid = false;
+        }
+      });
+      
+      // Validate select elements
+      const selectElements = ['bloodGroup', 'company'];
+      selectElements.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select && !validateSelect(selectId, select.value)) {
+          isValid = false;
+        }
+      });
+      
+      // Validate date fields
+      const requiredDateFields = ['dateOfEnrollment', 'dateOfBirth'];
+      requiredDateFields.forEach(dateFieldId => {
+        const field = document.getElementById(dateFieldId);
+        if (field && !validateDateField(dateFieldId, field.value)) {
+          isValid = false;
+        }
+      });
+      
+      return isValid;
+    }
+
+    // ========== EXISTING FUNCTIONALITY ==========
+    
+    // Tab navigation
+    const formTabs = document.getElementById("formTabs");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.querySelector(".btn-submit");
+    const progressBar = document.querySelector(".progress-bar");
+
+    let currentTab = 0;
+    const tabs = document.querySelectorAll(".tab-pane");
+
+    function showTab(n) {
+      tabs.forEach((tab) => tab.classList.remove("show", "active"));
+      tabs[n].classList.add("show", "active");
+
+      const tabButtons = formTabs.querySelectorAll(".nav-link");
+      tabButtons.forEach((button) => button.classList.remove("active"));
+      tabButtons[n].classList.add("active");
+
+      // Update progress bar
+      const progress = ((n + 1) / tabs.length) * 100;
+      progressBar.style.width = `${progress}%`;
+      progressBar.setAttribute("aria-valuenow", progress);
+
+      // Update buttons
+      if (n === 0) {
+        prevBtn.style.display = "none";
+      } else {
+        prevBtn.style.display = "inline-block";
+      }
+
+      if (n === tabs.length - 1) {
+        nextBtn.style.display = "none";
+        submitBtn.style.display = "inline-block";
+      } else {
+        nextBtn.style.display = "inline-block";
+        submitBtn.style.display = "none";
+      }
+
+      currentTab = n;
+    }
+
+    prevBtn.addEventListener("click", function () {
+      if (currentTab > 0) {
+        showTab(currentTab - 1);
+      }
+    });
+
+    nextBtn.addEventListener("click", function () {
+      if (currentTab < tabs.length - 1) {
+        showTab(currentTab + 1);
+      }
+    });
+    showTab(0);
+
+    // Conditional sections
+    const medCatYes = document.getElementById("medCatYes");
+    const medCatNo = document.getElementById("medCatNo");
+    const medCatDetails = document.getElementById("medCatDetails");
+
+    function toggleMedCatDetails() {
+      if (medCatYes.checked) {
+        medCatDetails.style.display = "block";
+      } else {
+        medCatDetails.style.display = "none";
+      }
+    }
+
+    medCatYes.addEventListener("change", toggleMedCatDetails);
+    medCatNo.addEventListener("change", toggleMedCatDetails);
+
+    const borderYes = document.getElementById("borderYes");
+    const borderNo = document.getElementById("borderNo");
+    const borderDistance = document.getElementById("borderDistance");
+
+    function toggleBorderDistance() {
+      if (borderYes.checked) {
+        borderDistance.style.display = "block";
+      } else {
+        borderDistance.style.display = "none";
+      }
+    }
+
+    borderYes.addEventListener("change", toggleBorderDistance);
+    borderNo.addEventListener("change", toggleBorderDistance);
+
+    const loanYes = document.getElementById("loanYes");
+    const loanNo = document.getElementById("loanNo");
+    const loanDetails = document.getElementById("loanDetails");
+
+    function toggleLoanDetails() {
+      if (loanYes.checked) {
+        loanDetails.style.display = "block";
+      } else {
+        loanDetails.style.display = "none";
+      }
+    }
+
+    loanYes.addEventListener("change", toggleLoanDetails);
+    loanNo.addEventListener("change", toggleLoanDetails);
+
+    const detailedYes = document.getElementById("detailedYes");
+    const detailedNo = document.getElementById("detailedNo");
+    const detailedCourseDetails = document.getElementById("detailedCourseDetails");
+
+    function toggleDetailedCourseDetails() {
+      if (detailedYes.checked) {
+        detailedCourseDetails.style.display = "block";
+      } else {
+        detailedCourseDetails.style.display = "none";
+      }
+    }
+
+    detailedYes.addEventListener("change", toggleDetailedCourseDetails);
+    detailedNo.addEventListener("change", toggleDetailedCourseDetails);
+
+    const discordYes = document.getElementById("discordYes");
+    const discordNo = document.getElementById("discordNo");
+    const maritalDiscordDetails = document.getElementById("maritalDiscordDetails");
+
+    function toggleDiscordDetails() {
+      if (discordYes.checked) {
+        maritalDiscordDetails.style.display = "block";
+      } else {
+        maritalDiscordDetails.style.display = "none";
+      }
+    }
+
+    discordYes.addEventListener("change", toggleDiscordDetails);
+    discordNo.addEventListener("change", toggleDiscordDetails);
+
+    // Dynamic table functionality
+    function addTableRow(tableId, buttonId, inputClass = "") {
+      const table = document.getElementById(tableId);
+      const tbody = table.querySelector("tbody");
+      const rows = tbody.querySelectorAll("tr");
+      const newRow = rows[0].cloneNode(true);
+
+      // Clear input values
+      newRow.querySelectorAll("input").forEach((input, index) => {
+        input.value = "";
+        input.className = input.className.replace(/is-invalid|is-valid/g, "");
+        const fieldName = input.name.replace("[]", "");
+        input.id = `${fieldName}-${rows.length + 1}-${index}`;
+      });
+
+      // Update serial number
+      const newSerial = rows.length + 1;
+      newRow.cells[0].textContent = newSerial;
+
+      // Add error message elements
+      newRow.querySelectorAll("td").forEach((td, index) => {
+        if (index > 0) {
+          const input = td.querySelector("input");
+          if (input) {
+            const existingError = td.querySelector(".error-message");
+            if (existingError) existingError.remove();
+            const errorDiv = document.createElement("div");
+            errorDiv.className = "error-message";
+            errorDiv.id = `${input.id}-error`;
+            errorDiv.style.display = "none";
+            errorDiv.textContent = `Invalid ${input.name.replace("[]", "")}`;
+            td.appendChild(errorDiv);
+          }
+        }
+      });
+
+      // Add delete button
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "btn btn-sm btn-danger btn-delete-row";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.addEventListener("click", function () {
+        if (tbody.querySelectorAll("tr").length > 1) {
+          newRow.remove();
+          updateSerialNumbers(tbody);
+        }
+      });
+      newRow.cells[newRow.cells.length - 1].innerHTML = "";
+      newRow.cells[newRow.cells.length - 1].appendChild(deleteBtn);
+
+      if (inputClass) {
+        newRow.querySelectorAll("input").forEach((input) => {
+          if (input.type !== "date" && input.type !== "number") {
+            input.classList.add(inputClass);
+          }
+        });
+      }
+      tbody.appendChild(newRow);
+    }
+
+    function updateSerialNumbers(tbody) {
+      const rows = tbody.querySelectorAll("tr");
+      rows.forEach((row, index) => {
+        row.cells[0].textContent = index + 1;
+      });
+    }
+
+    // Add event listeners for dynamic tables
+    document.getElementById("addCourseRow").addEventListener("click", function () {
+      addTableRow("coursesTable", "addCourseRow", "course-input");
+    });
+    document.getElementById("addUnitRow").addEventListener("click", function () {
+      addTableRow("unitsTable", "addUnitRow", "unit-input");
+    });
+    document.getElementById("addFamilyRow").addEventListener("click", function () {
+      addTableRow("familyTable", "addFamilyRow", "family-input");
+    });
+    document.getElementById("addChildRow").addEventListener("click", function () {
+      addTableRow("childrenTable", "addChildRow", "children-input");
+    });
+    document.getElementById("addLoanRow").addEventListener("click", function () {
+      addTableRow("loansTable", "addLoanRow", "loan-input");
+    });
+    document.getElementById("addPunishmentRow").addEventListener("click", function () {
+      addTableRow("punishmentTable", "addPunishmentRow", "punishment-input");
+    });
+    document.getElementById("addDetailedCourseRow").addEventListener("click", function () {
+      addTableRow("detailedCoursesTable", "addDetailedCourseRow", "detailed-course-input");
+    });
+    document.getElementById("addLeaveRow").addEventListener("click", function () {
+      addTableRow("leaveTable", "addLeaveRow");
+    });
+    document.getElementById("addMobileRow").addEventListener("click", function () {
+      addTableRow("mobileTable", "addMobileRow", "mobile-input");
+    });
+    document.getElementById("addDiscordRow").addEventListener("click", function () {
+      addTableRow("discordTable", "addDiscordRow", "discord-input");
+    });
+
+    // Form data collection and submission
+    function collectFormData() {
+      const data = {
+        name: document.getElementById("name").value,
+        armyNumber: document.getElementById("armyNumber").value,
+        rank: document.getElementById("rank").value,
+        trade: document.getElementById("trade").value,
+        dateOfEnrollment: document.getElementById("dateOfEnrollment").value,
+        dateOfBirth: document.getElementById("dateOfBirth").value,
+        dateOfTOS: document.getElementById("dateOfTOS").value,
+        dateOfTORS: document.getElementById("dateOfTORS").value,
+        bloodGroup: document.getElementById("bloodGroup").value,
+        religion: document.getElementById("religion").value,
+        foodPreference: document.querySelector('input[name="foodPreference"]:checked')?.value || "",
+        drinker: document.querySelector('input[name="drinker"]:checked')?.value || "",
+        company: document.getElementById("company").value,
+        civQualifications: document.getElementById("civQualifications").value,
+        decorationAwards: document.getElementById("decorationAwards").value,
+        lackingQualifications: document.getElementById("lackingQualifications").value,
+        willingPromotions: document.querySelector('input[name="willingPromotions"]:checked')?.value || "",
+        iCardNo: document.getElementById("iCardNo").value,
+        iCardDate: document.getElementById("iCardDate").value,
+        iCardIssuedBy: document.getElementById("iCardIssuedBy").value,
+        bpetGrading: document.getElementById("bpetGrading").value,
+        pptGrading: document.getElementById("pptGrading").value,
+        bpetDate: document.getElementById("bpetDate").value,
+        clothingCard: document.querySelector('input[name="clothingCard"]:checked')?.value || "",
+        panCardNo: document.getElementById("panCardNo").value,
+        panPartII: document.getElementById("panPartII").value,
+        aadharCardNo: document.getElementById("aadharCardNo").value,
+        aadharPartII: document.getElementById("aadharPartII").value,
+        jointAccountNo: document.getElementById("jointAccountNo").value,
+        jointAccountBank: document.getElementById("jointAccountBank").value,
+        jointAccountIFSC: document.getElementById("jointAccountIFSC").value,
+        homeHouseNo: document.getElementById("homeHouseNo").value,
+        homeVillage: document.getElementById("homeVillage").value,
+        homePhone: document.getElementById("homePhone").value,
+        homeTO: document.getElementById("homeTO").value,
+        homePO: document.getElementById("homePO").value,
+        homePS: document.getElementById("homePS").value,
+        homeTeh: document.getElementById("homeTeh").value,
+        homeNRS: document.getElementById("homeNRS").value,
+        homeNMH: document.getElementById("homeNMH").value,
+        homeDistrict: document.getElementById("homeDistrict").value,
+        homeState: document.getElementById("homeState").value,
+        borderArea: document.querySelector('input[name="borderArea"]:checked')?.value || "",
+        distanceFromIB: document.getElementById("distanceFromIB").value,
+        height: document.getElementById("height").value,
+        weight: document.getElementById("weight").value,
+        chest: document.getElementById("chest").value,
+        identificationMarks: document.getElementById("identificationMarks").value,
+        courtCases: document.getElementById("courtCases").value,
+        loan: document.querySelector('input[name="loan"]:checked')?.value || "",
+        totalLeavesEncashed: document.getElementById("totalLeavesEncashed").value,
+        participationActivities: document.getElementById("participationActivities").value,
+        presentFamilyLocation: document.getElementById("presentFamilyLocation").value,
+        priorStation: document.querySelector('input[name="priorStation"]:checked')?.value || "",
+        priorStationDate: document.getElementById("priorStationDate").value,
+        workedIT: document.querySelector('input[name="workedIT"]:checked')?.value || "",
+        workedUnitTenure: document.getElementById("workedUnitTenure").value,
+        detailedCourse: document.querySelector('input[name="detailedCourse"]:checked')?.value || "",
+        medCat: document.querySelector('input[name="medCat"]:checked')?.value || "",
+        lastRecatBDDate: document.getElementById("lastRecatBDDate").value,
+        lastRecatBDAt: document.getElementById("lastRecatBDAt").value,
+        nextRecatDue: document.getElementById("nextRecatDue").value,
+        medicalProblem: document.getElementById("medicalProblem").value,
+        restrictions: document.getElementById("restrictions").value,
+        computerKnowledge: document.getElementById("computerKnowledge").value,
+        itLiterature: document.getElementById("itLiterature").value,
+        kinName: document.getElementById("kinName").value,
+        kinRelation: document.getElementById("kinRelation").value,
+        kinMarriageDate: document.getElementById("kinMarriageDate").value,
+        kinAccountNo: document.getElementById("kinAccountNo").value,
+        kinBank: document.getElementById("kinBank").value,
+        kinIFSC: document.getElementById("kinIFSC").value,
+        kinPartII: document.getElementById("kinPartII").value,
+        vehicleRegNo: document.getElementById("vehicleRegNo").value,
+        vehicleModel: document.getElementById("vehicleModel").value,
+        vehiclePurchaseDate: document.getElementById("vehiclePurchaseDate").value,
+        vehicleAGIF: document.querySelector('input[name="vehicleAGIF"]:checked')?.value || "",
+        drivingLicenseNo: document.getElementById("drivingLicenseNo").value,
+        licenseIssueDate: document.getElementById("licenseIssueDate").value,
+        licenseExpiryDate: document.getElementById("licenseExpiryDate").value,
+        disabilityChild: document.querySelector('input[name="disabilityChild"]:checked')?.value || "",
+        maritalDiscord: document.querySelector('input[name="maritalDiscord"]:checked')?.value || "",
+        counselling: document.getElementById("counselling").value,
+        folderPreparedOn: document.getElementById("folderPreparedOn").value,
+        folderCheckedBy: document.getElementById("folderCheckedBy").value,
+        bringFamily: document.querySelector('input[name="bringFamily"]:checked')?.value || "",
+        domesticIssues: document.getElementById("domesticIssues").value,
+        otherRequests: document.getElementById("otherRequests").value,
+        familyMedicalIssues: document.getElementById("familyMedicalIssues").value,
+        qualityPoints: document.getElementById("qualityPoints").value,
+        strengths: document.getElementById("strengths").value,
+        weaknesses: document.getElementById("weaknesses").value,
+
+        courses: collectTableData("coursesTable", [
+          "course", "courseFrom", "courseTo", "courseInstitute", "courseGrading", "courseRemarks"
+        ]),
+        units: collectTableData("unitsTable", [
+          "unit", "unitFrom", "unitTo", "unitDuty"
+        ]),
+        loans: collectTableData("loansTable", [
+          "loanType", "loanAmount", "loanBank", "loanEMI", "loanPending", "loanRemarks"
+        ]),
+        punishments: collectTableData("punishmentTable", [
+          "punishmentDate", "punishment", "punishmentAASec", "punishmentRemarks"
+        ]),
+        detailedCourses: collectTableData("detailedCoursesTable", [
+          "detailedCourseName", "detailedCourseFrom", "detailedCourseTo", "detailedCourseRemarks"
+        ]),
+        leaves: collectTableData("leaveTable", [
+          "leaveYear", "leaveAL", "leaveCL", "leaveAAL", "leaveTotal", "leaveRemarks"
+        ]),
+        family: collectTableData("familyTable", [
+          "familyRelation", "familyName", "familyDOB", "familyUID", "familyPartII"
+        ]),
+        children: collectTableData("childrenTable", [
+          "childName", "childDOB", "childClass", "childPartII", "childUID"
+        ]),
+        mobiles: collectTableData("mobileTable", [
+          "mobileType", "mobileNumber", "mobileProvider", "mobileRemarks"
+        ]),
+        discordCases: collectTableData("discordTable", [
+          "discordCaseNo", "discordAmount", "discordSanction"
+        ]),
+      };
+
+      return data;
+    }
+
+    function collectTableData(tableId, fieldNames) {
+      const table = document.getElementById(tableId);
+      const rows = table.querySelectorAll("tbody tr");
+      const data = [];
+
+      rows.forEach((row) => {
+        const rowData = {};
+        const inputs = row.querySelectorAll("input, select, textarea");
+
+        inputs.forEach((input, index) => {
+          if (fieldNames[index]) {
+            rowData[fieldNames[index]] = input.value;
+          }
+        });
+        if (Object.values(rowData).some((val) => val !== "")) {
+          data.push(rowData);
+        }
+      });
+
+      return data;
+    }
+
+    async function submitFormData(formData) {
+      console.log("Form data to be sent:", JSON.stringify(formData, null, 2));
+      const submitBtn = document.querySelector(".btn-submit");
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch("http://localhost:5000/api/personnel", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+        
+        const result = await response.json();
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+
+        if (response.ok && result.success) {
+          alert(`Form submitted successfully! Personnel ID: ${result.personnel_id}`);
+          document.querySelector("form").reset();
+          showTab(0); // Return to first tab
+        } else {
+          alert(result.message || "Failed to submit form");
+        }
+      } catch (error) {
+        console.error("Submission error:", error);
+        alert("An unexpected error occurred");
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Initialize validation system
+    setupRealTimeValidation();
+    setupDynamicTableValidation();
+    setupFormSubmission();
+  });
+</script>
+{% endblock %}
   </body>
 </html>
