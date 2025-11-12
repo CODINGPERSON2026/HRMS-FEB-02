@@ -10,8 +10,8 @@ personnel_info = Blueprint('personal', __name__, url_prefix='/personnel_informat
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'qaz123QAZ!@#',
-    'database': 'army_personnel_db',
+    'password': '1234',
+    'database': 'unit15',
     'autocommit': True
 }
 
