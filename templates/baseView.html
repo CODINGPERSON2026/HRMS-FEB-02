@@ -26,6 +26,34 @@
     .bar-testing { background: #ffa336; }
     .bar-mkt { background: #f47920; }
     .top-bar-buttons .btn { margin-right: 1rem; }
+    .nav-link {
+      position: relative;
+      color: #333;
+      text-decoration: none;
+      padding: 8px 0;
+      transition: color 0.3s ease;
+    }
+    
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      height: 2px;
+      width: 0;
+      background-color: #007bff; /* underline color */
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+    
+    .nav-link:hover {
+      color: #007bff;
+    }
+    
+    .nav-link:hover::after {
+      width: 70%;
+    }
+    
   </style>
 </head>
 <body>

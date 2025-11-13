@@ -5,13 +5,13 @@ import mysql
 from blueprints.personal_information import personnel_info
 from blueprints.weight_ms import weight_ms
 app = Flask(__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # Cache static files for 1 year (in seconds)
+
 
 app.register_blueprint(personnel_info)
 app.register_blueprint(weight_ms)
 
-# @app.route('/')
-# def baseView():
-#     return render_template('baseView.html')
+
 
 
 def get_db_connection():
