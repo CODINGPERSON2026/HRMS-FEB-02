@@ -3,9 +3,11 @@ import sqlite3
 
 import mysql
 from blueprints.personal_information import personnel_info
+from blueprints.weight_ms import weight_ms
 app = Flask(__name__)
 
 app.register_blueprint(personnel_info)
+app.register_blueprint(weight_ms)
 
 # @app.route('/')
 # def baseView():
@@ -15,9 +17,9 @@ app.register_blueprint(personnel_info)
 def get_db_connection():
     return mysql.connector.connect(
         host="localhost",
-        user="root",                # 🔹 your MySQL username
-        password="1234",   # 🔹 your MySQL password
-        database="unit15"       # 🔹 the database you created
+        user="root",                # 
+        password="qaz123QAZ!@#",   # 🔹 your MySQL password
+        database="army_personnel_db"       # 🔹 the database you created
     )
 
 @app.route('/')
@@ -153,6 +155,6 @@ def assign_personnel():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=1000)
 
 
