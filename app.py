@@ -7,7 +7,7 @@ import os
 
 
 app = Flask(__name__)
-# app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # Cache static files for 1 year (in seconds)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # Cache static files for 1 year (in seconds)
 app.secret_key = os.urandom(24)
 
 app.register_blueprint(personnel_info)
