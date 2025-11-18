@@ -83,7 +83,7 @@
       </div>
       <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="card p-3 text-center">
-          <small class="text-muted">CSD Earnings</small>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#salesModal">CSD Earnings</button>
           <h3>$21445</h3>
           <span class="text-success">+2.1%</span>
         </div>
@@ -188,6 +188,7 @@
 
 
 {% include 'personal_modal.html' %}
+{% include 'salesModal.html' %}
  
   <script>
     async function get_dets() {
