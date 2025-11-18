@@ -335,6 +335,7 @@ def personnel_details(personnel_id):
 # Add personnel page route
 @personnel_info.route('/add-personnel')
 def add_personnel_page():
+    
     return render_template('/personnel_info/index.html', active_tab='add-personnel')
 
 # API endpoint for creating personnel
