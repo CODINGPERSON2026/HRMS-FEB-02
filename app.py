@@ -1,10 +1,13 @@
-from flask import Flask, jsonify, redirect,flash, render_template, request, url_for
+from flask import Flask, jsonify, redirect,flash, render_template, request, url_for,make_response
 import mysql
 from blueprints.personal_information import personnel_info
 from blueprints.weight_ms import weight_ms
 import pandas as pd
 import os
-
+import jwt
+from datetime import datetime
+from middleware import require_login
+from middleware import jwt,JWT_ALGO,JWT_SECRET
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # Cache static files for 1 year (in seconds)
@@ -23,9 +26,53 @@ def get_db_connection():
         password="qaz123QAZ!@#",   # 🔹 your MySQL password
         database="army_personnel_db"       # 🔹 the database you created
     )
+@app.route("/admin_login", methods=["POST",'GET'])
+def admin_login():
+    if request.method == 'GET':
+        return render_template('/loginpage/loginpage.html')
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (email, password))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not user:
+        return jsonify({"success": False, "error": "Invalid email or password"}), 401
+
+    # create JWT
+    payload = {
+        "user_id": user["id"],
+        "email": user["email"],
+        "role": user["role"]
+    }
+
+    token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
+
+    # set JWT in cookie
+    resp = jsonify({"success": True})
+    resp.set_cookie("token", token, httponly=True, samesite="Lax")
+
+    return resp
+
+@app.route("/logout")
+def logout():
+    resp = redirect(url_for("admin_login"))  # change to your login route name
+    resp.set_cookie("token", "", expires=0)  # delete cookie
+    return resp
+
+
 
 @app.route('/')
 def dashboard():
+    user = require_login()
+    if not user:
+        return redirect(url_for('admin_login'))
     return render_template('dashboard.html')
 
 

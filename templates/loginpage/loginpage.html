@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>15 CORPS LOGIN</title>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -30,15 +30,11 @@
             box-shadow: 0 0 30px rgba(0,0,0,0.25);
         }
 
-        /* LEFT SIDE WITH IMAGE — KEEPING THIS */
         .flag-section {
             width: 55%;
-            background: url('/chinar.jpg') no-repeat center center;
+            background: url('/static/image_for_login_page/chinar.jpg') no-repeat center center;
             background-size: cover;
-            position: relative;
         }
-
-        /* REMOVED .flag-text and animation */
 
         .login-section {
             width: 45%;
@@ -70,19 +66,11 @@
             margin: 0 auto 25px auto;
             overflow: hidden;
             background: #eee;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        .logo-holder img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .logo-holder img { width: 100%; height: 100%; object-fit: cover; }
 
-        .input-group {
-            position: relative;
-            margin-bottom: 22px;
-        }
+        .input-group { position: relative; margin-bottom: 22px; }
 
         .input-group input {
             width: 100%;
@@ -90,13 +78,6 @@
             border-radius: 12px;
             border: 1.5px solid #ccc;
             font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        .input-group input:focus {
-            border-color: #1a73e8;
-            box-shadow: 0 0 0 4px rgba(26,115,232,0.2);
-            outline: none;
         }
 
         .input-icon {
@@ -115,12 +96,6 @@
             transform: translateY(-50%);
             cursor: pointer;
             font-size: 19px;
-            color: #666;
-            transition: color 0.3s;
-        }
-
-        .password-eye:hover {
-            color: #1a73e8;
         }
 
         button {
@@ -130,21 +105,16 @@
             background: #1a73e8;
             color: white;
             font-size: 18px;
-            font-weight: bold;
             border-radius: 12px;
             cursor: pointer;
-            transition: background 0.3s;
             margin-top: 10px;
         }
 
-        button:hover {
-            background: #0d47a1;
-        }
-
-        @media (max-width: 992px) {
-            .container { flex-direction: column; height: auto; }
-            .flag-section, .login-section { width: 100%; height: 300px; }
-            .login-section { padding: 40px 30px; }
+        #error-msg {
+            color: red;
+            text-align: center;
+            margin-bottom: 12px;
+            display: none;
         }
     </style>
 </head>
@@ -152,49 +122,71 @@
 
     <div class="container">
 
-        <!-- Left Side - Image (flag-section stays) -->
         <div class="flag-section"></div>
 
-        <!-- Login Section -->
         <div class="login-section">
 
             <div class="logo-holder">
-                <img src="/download.jfif" alt="15 Corps Logo">
+                <img src="/static/image_for_login_page/download.jfif" alt="15 Corps Logo">
             </div>
 
             <h2>WELCOME TO HRMS</h2>
             <div class="sub-text">Please enter your credentials</div>
 
-            <form action="/admin_login" method="POST">
+            <div id="error-msg"></div>
 
-                <div class="input-group">
-                    <i class="fa fa-envelope input-icon"></i>
-                    <input type="email" name="email" placeholder="Enter Email" required autocomplete="off">
-                </div>
+            <div class="input-group">
+                <i class="fa fa-envelope input-icon"></i>
+                <input type="email" id="email" placeholder="Enter Email" required>
+            </div>
 
-                <div class="input-group">
-                    <i class="fa fa-lock input-icon"></i>
-                    <input type="password" name="password" id="passwordField" placeholder="Enter Password" required>
-                    <i class="fa fa-eye-slash password-eye" id="togglePassword"></i>
-                </div>
+            <div class="input-group">
+                <i class="fa fa-lock input-icon"></i>
+                <input type="password" id="password" placeholder="Enter Password" required>
+                <i class="fa fa-eye-slash password-eye" id="togglePassword"></i>
+            </div>
 
-                <button type="submit">LOGIN</button>
-            </form>
+            <button id="loginBtn">LOGIN</button>
 
         </div>
     </div>
 
     <script>
+        // Password toggle
         const togglePassword = document.getElementById("togglePassword");
-        const passwordField = document.getElementById("passwordField");
+        const passwordField = document.getElementById("password");
 
-        togglePassword.addEventListener("click", function () {
-            if (passwordField.type === "password") {
-                passwordField.type = "text";
-                togglePassword.classList.replace("fa-eye-slash", "fa-eye");
+        togglePassword.addEventListener("click", () => {
+            passwordField.type = (passwordField.type === "password") ? "text" : "password";
+            togglePassword.classList.toggle("fa-eye");
+            togglePassword.classList.toggle("fa-eye-slash");
+        });
+
+        // Login using fetch()
+        document.getElementById("loginBtn").addEventListener("click", async () => {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const errorMsg = document.getElementById("error-msg");
+
+            if (!email || !password) {
+                errorMsg.textContent = "Please fill all fields.";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            const response = await fetch("/admin_login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = "/";
             } else {
-                passwordField.type = "password";
-                togglePassword.classList.replace("fa-eye", "fa-eye-slash");
+                errorMsg.textContent = data.error;
+                errorMsg.style.display = "block";
             }
         });
     </script>
