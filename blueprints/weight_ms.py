@@ -508,86 +508,116 @@ def api_status_data():
     finally:
         cursor.close()
         connection.close()
-
 @weight_ms.route('/api/bar-graph-data')
 def api_bar_graph_data():
     company = request.args.get('company', 'All')
-    fit_unfit_filter = request.args.get('fitUnfitFilter', 'Fit')  # Default to 'fit'
-    safe_category_filter = request.args.get('safeCategoryFilter', 'safe')  # Default to 'safe'
+    fit_unfit_filter = request.args.get('fitUnfitFilter', 'Fit')
+    safe_category_filter = request.args.get('safeCategoryFilter', 'safe')  # 'safe' or 'category'
     
     connection = mysql.connector.connect(**db_config)
     cursor = connection.cursor(dictionary=True)
     
     try:
-        # Get fit and unfit counts from compute_authorization
+        # === 1. Fit / Unfit counts (unchanged) ===
         data = compute_authorization(company)
         fit_count = sum(1 for d in data if d['status'] == "Fit")
         unfit_count = sum(1 for d in data if d['status'] == "UnFit")
         
-        # Get JCO and OR counts for the selected fit/unfit filter
+        # === 2. JCO / OR counts for selected Fit/Unfit (unchanged) ===
         jco_status_count = sum(1 for d in data if d['status'] == fit_unfit_filter and d['rank'] == "JCO")
         or_status_count = sum(1 for d in data if d['status'] == fit_unfit_filter and d['rank'] != "JCO")
         
-        # Get JCO and OR counts for the selected safe/category filter
-        if company and company != "All":
-            cursor.execute("""
-                SELECT COUNT(*) as count 
-                FROM weight_info 
-                WHERE company = %s AND status_type = %s AND `rank` = 'JCO'
-            """, (company, safe_category_filter))
+        # === 3. Total Safe & Category counts (unchanged) ===
+        if company != "All":
+            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE company = %s AND status_type = 'safe'", (company,))
         else:
-            cursor.execute("""
-                SELECT COUNT(*) as count 
-                FROM weight_info 
-                WHERE status_type = %s AND `rank` = 'JCO'
-            """, (safe_category_filter,))
-        jco_status_type_count = cursor.fetchone()['count'] or 0
+            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'safe'")
+        total_safe_count = cursor.fetchone()['count'] or 0
         
-        if company and company != "All":
-            cursor.execute("""
-                SELECT COUNT(*) as count 
-                FROM weight_info 
-                WHERE company = %s AND status_type = %s AND `rank` != 'JCO'
-            """, (company, safe_category_filter))
+        if company != "All":
+            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE company = %s AND status_type = 'category'", (company,))
         else:
-            cursor.execute("""
-                SELECT COUNT(*) as count 
-                FROM weight_info 
-                WHERE status_type = %s AND `rank` != 'JCO'
-            """, (safe_category_filter,))
-        or_status_type_count = cursor.fetchone()['count'] or 0
-        
-        # Get total Safe and Category counts for the bar chart
-        if company and company != "All":
-            cursor.execute("""
-                SELECT COUNT(*) as count 
-                FROM weight_info 
-                WHERE company = %s AND status_type = 'safe'
-            """, (company,))
-        else:
-            cursor.execute("""
-                SELECT COUNT(*) as count 
-                FROM weight_info 
-                WHERE status_type = 'safe'
-            """)
-        total_safe_result = cursor.fetchone()
-        total_safe_count = total_safe_result['count'] if total_safe_result else 0
-        
-        if company and company != "All":
-            cursor.execute("""
-                SELECT COUNT(*) as count 
-                FROM weight_info 
-                WHERE company = %s AND status_type = 'category'
-            """, (company,))
-        else:
-            cursor.execute("""
-                SELECT COUNT(*) as count 
+            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'category'")
+        total_category_count = cursor.fetchone()['count'] or 0
+
+
+        # === 4. jcoSafeOrCategory – SMART LOGIC BASED ON FILTER ===
+        if safe_category_filter == 'safe':
+            # For "safe" → no temporary/permanent → just show total JCO vs OR
+            if company != "All":
+                cursor.execute("""
+                    SELECT COUNT(*) as count FROM weight_info 
+                    WHERE company = %s AND status_type = 'safe' AND `rank` = 'JCO'
+                """, (company,))
+            else:
+                cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'safe' AND `rank` = 'JCO'")
+            jco_val = cursor.fetchone()['count'] or 0
+
+            if company != "All":
+                cursor.execute("""
+                    SELECT COUNT(*) as count FROM weight_info 
+                    WHERE company = %s AND status_type = 'safe' AND `rank` != 'JCO'
+                """, (company,))
+            else:
+                cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'safe' AND `rank` != 'JCO'")
+            or_val = cursor.fetchone()['count'] or 0
+
+            jcoSafeOrCategory = {
+                "labels": ["JCO Safe", "OR Safe"],
+                "data": [jco_val, or_val],
+                
+            }
+
+        else:  # safe_category_filter == 'category'
+            # For "category" → split into Temporary & Permanent
+            query = """
+                SELECT `rank`,
+                       COALESCE(LOWER(TRIM(category_type)), 'unknown') AS cat_type,
+                       COUNT(*) AS cnt
                 FROM weight_info 
                 WHERE status_type = 'category'
-            """)
-        total_category_result = cursor.fetchone()
-        total_category_count = total_category_result['count'] if total_category_result else 0
-        
+            """
+            params = []
+            if company != "All":
+                query += " AND company = %s"
+                params.append(company)
+            query += " GROUP BY `rank`, category_type"
+
+            cursor.execute(query, params)
+            results = cursor.fetchall()
+            print(results,"these are results")
+
+            jco_temp = jco_perm = or_temp = or_perm = 0
+
+            for row in results:
+                rank = row['rank']
+                cat_type = row['cat_type']
+                cnt = row['cnt']
+
+                if rank == 'JCO':
+                    if cat_type in ('temporary', 'temp'):
+                        jco_temp += cnt
+                    elif cat_type in ('permanent', 'perm'):
+                        jco_perm += cnt
+                else:
+                    # All other ranks = OR (including AGNIVEER, Havaldar, MAJOR, etc.)
+                    if cat_type in ('temporary', 'temp'):
+                        or_temp += cnt
+                    elif cat_type in ('permanent', 'perm'):
+                        or_perm += cnt
+
+            print(jco_temp, jco_perm, or_temp, or_perm)
+
+            jcoSafeOrCategory = {
+                "labels": ["JCO Temporary", "JCO Permanent", "OR Temporary", "OR Permanent"],
+                "data": [jco_temp, jco_perm, or_temp, or_perm],
+                
+            }
+
+
+        print(total_safe_count, total_category_count, "→ bar graph")
+        print(jco_status_count, or_status_count, "→ donut graph (fit)")
+
         return jsonify({
             "fitUnfit": {
                 "labels": ["Fit", "Unfit"],
@@ -601,13 +631,11 @@ def api_bar_graph_data():
                 "labels": [f"JCO {fit_unfit_filter}", f"OR {fit_unfit_filter}"],
                 "data": [jco_status_count, or_status_count]
             },
-            "jcoSafeOrCategory": {
-                "labels": [f"JCO {safe_category_filter}", f"OR {safe_category_filter}"],
-                "data": [jco_status_type_count, or_status_type_count]
-            }
+            "jcoSafeOrCategory": jcoSafeOrCategory   # ← Smart response
         })
         
     except mysql.connector.Error as err:
+        print(f"DB Error: {err}")
         return jsonify({'error': 'Database error occurred'}), 500
     finally:
         cursor.close()

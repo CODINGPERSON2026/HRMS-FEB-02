@@ -294,16 +294,39 @@ function updateDoughnutCharts() {
           window.jcoSafeOrCategoryChartInstance = new Chart(jcoSafeOrCategoryCtx, {
               type: 'doughnut',
               data: {
-                  labels: data.jcoSafeOrCategory?.labels || [`JCO ${jcoSafeOrFilter.charAt(0).toUpperCase() + jcoSafeOrFilter.slice(1)}`, `OR ${jcoSafeOrFilter.charAt(0).toUpperCase() + jcoSafeOrFilter.slice(1)}`],
+                labels: data.jcoSafeOrCategory?.labels || [
+                    `JCO ${jcoSafeOrFilter.charAt(0).toUpperCase()}`, 
+                    `OR ${jcoSafeOrFilter.charAt(0).toUpperCase()}`
+                ],
+                
                   datasets: [{
                       label: `JCO vs OR ${jcoSafeOrFilter.charAt(0).toUpperCase() + jcoSafeOrFilter.slice(1)}`,
                       data: data.jcoSafeOrCategory?.data || [34, 118],
-                      backgroundColor: ['#3182ce', '#d69e2e'],
+                      "backgroundColor": [
+                        "#3182ce",  
+                        "#2c5282",   
+                        "#d69e2e",   
+                        "#b7791f"    
+                    ],
                       borderColor: ['#2c5282', '#b7791f'],
                       borderWidth: 1
                   }]
               },
-              options: commonDonutOptions
+              options: {
+                ...commonDonutOptions,  // keep your shared options
+                plugins: {
+                    legend: {
+                        position: 'top',   // move legend to the right to prevent stacking
+                        labels: {
+                            boxWidth: 15,
+                            font: {
+                                size: 12      // reduce font size if needed
+                            }
+                        }
+                    }
+                }
+            }
+            
           });
       })
       .catch(err => {
