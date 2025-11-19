@@ -39,6 +39,8 @@ def admin_login():
 
     cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (email, password))
     user = cursor.fetchone()
+    username  =  user['username']
+    
     cursor.close()
     conn.close()
 
@@ -49,13 +51,14 @@ def admin_login():
     payload = {
         "user_id": user["id"],
         "email": user["email"],
+        'username':user['username'],
         "role": user["role"]
     }
 
     token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
     # set JWT in cookie
-    resp = jsonify({"success": True})
+    resp = jsonify({"success": True,"username":username})
     resp.set_cookie("token", token, httponly=True, samesite="Lax")
 
     return resp
@@ -71,9 +74,10 @@ def logout():
 @app.route('/')
 def dashboard():
     user = require_login()
+    print(user)
     if not user:
         return redirect(url_for('admin_login'))
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', username = user['username'],role = user['role'])
 
 
 @app.route('/mt', methods=['GET', 'POST'])
