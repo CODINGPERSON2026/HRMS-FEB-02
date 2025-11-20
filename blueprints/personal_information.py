@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify, render_template,Blueprint
+from flask import Flask, request, jsonify, render_template,Blueprint,redirect,url_for
 
 import mysql.connector
 from mysql.connector import Error
 import json
+from middleware import require_login
 
 personnel_info = Blueprint('personal', __name__, url_prefix='/personnel_information')
 
@@ -32,7 +33,10 @@ def get_db_connection():
 # Dashboard route
 @personnel_info.route('/')
 def dashboard():
-    print("in blueprint route")
+    user = require_login()
+    print(user)
+    if not user:
+        return redirect(url_for('admin_login'))
     connection = get_db_connection()
     if not connection:
         return "Database connection failed", 500

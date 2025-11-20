@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, render_template, request,Blueprint
+from flask import Flask, jsonify, render_template, request,Blueprint,redirect,url_for
 import mysql.connector
 import re
+from middleware import require_login
 
 weight_ms = Blueprint('weight', __name__, url_prefix='/weight_system')
 db_config = {
@@ -356,6 +357,10 @@ def api_companies():
 
 @weight_ms.route('/')
 def dashboard():
+    user = require_login()
+    print(user)
+    if not user:
+        return redirect(url_for('admin_login'))
     return render_template('weight_system/home.html')
 
 @weight_ms.route('/api/status-summary')

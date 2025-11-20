@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Bootstrap 5 CSS CDN -->
   <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+  <!-- Make sure this comes BEFORE your apply_leave page script -->
+<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
   <style>
     body { background: #f5f7fa; }
@@ -65,7 +67,7 @@
       <a class="nav-link active" href="{{ url_for('dashboard') }}">Dashboard</a>
       <a class="nav-link" href="{{ url_for('mt') }}">MT</a>
       <a class="nav-link" href="#">Accounts</a>
-      <a class="nav-link" href="{{ url_for('apply_leave') }}">Apply Leave</a>
+      <a class="nav-link" href="/apply_leave/">Apply Leave</a>
       <a class="nav-link" href="{{ url_for('stores_dashboard') }}">Stores</a>
       <a class="nav-link" href="/personnel_information">Personal Information</a>
       <a class="nav-link" href="/weight_system">Weight Management</a>

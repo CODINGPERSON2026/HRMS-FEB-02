@@ -2,6 +2,7 @@ from flask import Flask, jsonify, redirect,flash, render_template, request, url_
 import mysql
 from blueprints.personal_information import personnel_info
 from blueprints.weight_ms import weight_ms
+from blueprints.apply_leave import leave_bp
 import pandas as pd
 import os
 import jwt
@@ -15,6 +16,7 @@ app.secret_key = os.urandom(24)
 
 app.register_blueprint(personnel_info)
 app.register_blueprint(weight_ms)
+app.register_blueprint(leave_bp)
 
 
 
@@ -148,19 +150,19 @@ def update_personal():
 def view_personal():
     return render_template('personalInfoView.html', form_view='view')
 
-@app.route('/search_personnel')
-def search_personnel():
-    query = request.args.get('query', '')
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT name, army_number, `rank`, trade, company
-        FROM personnel
-        WHERE name LIKE %s OR trade LIKE %s
-    """, (f"%{query}%", f"%{query}%"))
-    results = cursor.fetchall()
-    conn.close()
-    return jsonify(results)
+# @app.route('/search_personnel')
+# def search_personnel():
+#     query = request.args.get('query', '')
+#     conn = get_db_connection()
+#     cursor = conn.cursor(dictionary=True)
+#     cursor.execute("""
+#         SELECT name, army_number, `rank`, trade, company
+#         FROM personnel
+#         WHERE name LIKE %s OR trade LIKE %s
+#     """, (f"%{query}%", f"%{query}%"))
+#     results = cursor.fetchall()
+#     conn.close()
+#     return jsonify(results)
 
 # Fetch dropdown locations
 @app.route('/get_locations')
