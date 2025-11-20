@@ -11,7 +11,7 @@
 
   <style>
     body { background: #f5f7fa; }
-    .sidebar { width: 230px; min-height: 100vh; background: #fff; border-right: 1px solid #eee; position: fixed; }
+    .sidebar { width: 230px; min-height: 100vh; background: #fff; border-right: 1px solid #d6caca; position: fixed; }
     .sidebar .nav-link { color: #333; }
     .dashboard-content { margin-left: 250px; padding: 32px 24px; }
     .card { border-radius: 18px; border: none; }
@@ -33,7 +33,7 @@
       position: relative;
       color: #333;
       text-decoration: none;
-      padding: 8px 0;
+      padding: 8px 16px;
       transition: color 0.3s ease;
     }
     
@@ -61,7 +61,7 @@
 </head>
 <body>
   <!-- Sidebar -->
-  <div class="sidebar p-3">
+  <div class="sidebar p-2">
     <h4 class="mb-4">Unit Management</h4>
     <nav class="nav flex-column">
       <a class="nav-link active" href="{{ url_for('dashboard') }}">Dashboard</a>
