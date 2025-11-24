@@ -8,30 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Bootstrap 5 CSS CDN -->
   <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
-
-  <style>
-    body { background: #f5f7fa; }
-    .sidebar { width: 230px; min-height: 100vh; background: #fff; border-right: 1px solid #eee; position: fixed; }
-    .sidebar .nav-link { color: #333; }
-    .dashboard-content { margin-left: 250px; padding: 32px 24px; }
-    .card { border-radius: 18px; border: none; }
-    .status-dot { height: 10px; width: 10px; display: inline-block; border-radius: 50%; }
-    .dot-green { background: #23c552; }
-    .dot-red { background: #f44336; }
-    .dot-orange { background: #ff9800; }
-    .dot-blue { background: #3399ff; }
-    .avatar { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; }
-    .department-bar { height: 8px; border-radius: 4px; }
-    .bar-uiux { background: #ff6f00; }
-    .bar-dev { background: #267af6; }
-    .bar-mgmt { background: #ff4b68; }
-    .bar-hr { background: #34bfa3; }
-    .bar-testing { background: #ffa336; }
-    .bar-mkt { background: #f47920; }
-    .top-bar-buttons .btn { margin-right: 1rem; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
+  <div id="fullscreenLoader">
+    <div class="loader"></div>
+  </div>
+
+  
   <!-- Sidebar -->
   <div class="dashboard-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -73,6 +57,9 @@
         <div class="card p-3 text-center">
           <small class="text-muted">Dets</small>
           <h3 id="locationCount"></h3>
+          <button id="viewDetailsBtn" class="view-details">View Details</button>
+
+
         </div>
       </div>
       <div class="col-lg-2 col-md-4 col-sm-6">
@@ -108,7 +95,7 @@
         </div>
       </div>
       <div class="col-lg-2 col-md-4 col-sm-6">
-        <div class="card p-3 text-center">
+ ;       <div class="card p-3 text-center">
           <small class="text-muted">New Arrival</small>
           <h3>45/48</h3>
           <span class="text-danger">-11.2%</span>
@@ -187,26 +174,113 @@
     </div>
   </div>
 
+  <!-- DET PERSONNEL MODAL -->
+<!-- DET PERSONNEL MODAL -->
+<div class="modal fade" id="detModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Personnel in DET</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Spinner (visible while fetching) -->
+        <div id="detSpinner" class="text-center my-4">
+          <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+          <p class="mt-2">Fetching data...</p>
+        </div>
+
+        <!-- Table (hidden until fetch is complete) -->
+        <table class="table table-striped d-none" id="detTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Army Number</th>
+              <th>Rank</th>
+            </tr>
+          </thead>
+          <tbody id="detTableBody"></tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 {% include 'personal_modal.html' %}
 {% include 'salesModal.html' %}
  
   <script>
-    async function get_dets() {
-        try {
-          const res = await fetch('/get_dets');
-          console.log("response", res);
-          if (!res.ok) throw new Error("Network error");
-          const data = await res.json();
-          document.getElementById('locationCount').innerText = data.count;
-        } catch (err) {
-          console.error("Error fetching location count:", err);
-          document.getElementById('locationCount').innerText = 'Waiting...';
-        }
-      }
+  
+    // 🔥 Fullscreen loader hide after API fetch completes
+function hideFullLoader() {
+  const fullLoader = document.getElementById("fullscreenLoader");
+  if (fullLoader) fullLoader.style.display = "none";
+}
 
-      document.addEventListener('DOMContentLoaded', get_dets);
-      
+document.getElementById("viewDetailsBtn").addEventListener("click", function () {
+  const detModal = new bootstrap.Modal(document.getElementById('detModal'));
+  detModal.show();
+  load_det_personnel();
+});
+
+async function load_det_personnel() {
+  let spinner = document.getElementById("detSpinner");
+  let table = document.getElementById("detTable");
+  let tbody = document.getElementById("detTableBody");
+
+  spinner.classList.remove("d-none");
+  table.classList.add("d-none");
+  tbody.innerHTML = "";
+
+  try {
+    const response = await fetch("/stats/get_detachment_details");
+    const result = await response.json();
+
+    if (result.status !== "success") throw new Error("Fetch failed");
+
+    result.data.forEach(row => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${row.name}</td>
+          <td>${row.army_number}</td>
+          <td>${row.rank}</td>
+        </tr>
+      `;
+    });
+
+    spinner.classList.add("d-none");
+    table.classList.remove("d-none");
+
+  } catch (err) {
+    console.error(err);
+    spinner.innerHTML = `<p class="text-danger fw-bold mt-3">❌ Failed to load data</p>`;
+  }
+}
+
+async function get_dets() {
+  try {
+    const res = await fetch('/get_dets');
+    if (!res.ok) throw new Error("Network error");
+    const data = await res.json();
+    document.getElementById('locationCount').innerText = data.count;
+
+  } catch (err) {
+    console.error("Error fetching location count:", err);
+    document.getElementById('locationCount').innerText = 'Waiting...';
+  }
+
+  // 👇 Hide fullscreen loader only after dashboard data loaded
+  hideFullLoader();
+}
+
+// Load dashboard API on page ready
+document.addEventListener('DOMContentLoaded', get_dets);
+
       
 
   </script>

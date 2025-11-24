@@ -7,6 +7,7 @@ app.secret_key = os.urandom(24)
 app.register_blueprint(personnel_info)
 app.register_blueprint(weight_ms)
 app.register_blueprint(leave_bp)
+app.register_blueprint(dashboard_bp)
 
 
 
@@ -168,8 +169,9 @@ def get_locations():
 def get_dets():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT COUNT(*) AS count FROM dets")
+    cursor.execute("SELECT COUNT(*) AS count from personnel where detachment_status = 1")
     result = cursor.fetchone()
+    print(result['count'])
     cursor.close()
     conn.close()
     return jsonify({'count': result['count']})
