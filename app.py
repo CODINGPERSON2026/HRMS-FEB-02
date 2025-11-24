@@ -9,16 +9,6 @@ app.register_blueprint(weight_ms)
 app.register_blueprint(leave_bp)
 app.register_blueprint(dashboard_bp)
 
-
-
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",                # 
-        password="qaz123QAZ!@#",   # 🔹 your MySQL password
-        database="army_personnel_db"       # 🔹 the database you created
-    )
 @app.route("/admin_login", methods=["POST",'GET'])
 def admin_login():
     if request.method == 'GET':

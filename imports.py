@@ -9,6 +9,7 @@ from flask import (
     flash,
     make_response
 )
+from middleware import require_login
 
 import mysql.connector
 from mysql.connector import Error

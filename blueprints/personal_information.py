@@ -1,4 +1,5 @@
 from imports import *
+from middleware import require_login
 
 personnel_info = Blueprint('personal', __name__, url_prefix='/personnel_information')
 
