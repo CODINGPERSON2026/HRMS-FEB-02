@@ -1,0 +1,32 @@
+<div class="modal fade" id="detModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Personnel in DET</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+  
+        <div class="modal-body">
+  
+          <!-- Spinner (visible while fetching) -->
+          <div id="detSpinner" class="text-center my-4">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+            <p class="mt-2">Fetching data...</p>
+          </div>
+  
+          <!-- Table (hidden until fetch is complete) -->
+          <table class="table table-striped d-none" id="detTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Army Number</th>
+                <th>Rank</th>
+              </tr>
+            </thead>
+            <tbody id="detTableBody"></tbody>
+          </table>
+  
+        </div>
+      </div>
+    </div>
+  </div>
