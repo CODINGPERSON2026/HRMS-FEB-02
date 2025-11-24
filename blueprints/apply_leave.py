@@ -1,7 +1,4 @@
-from flask import Flask, jsonify, render_template, request,Blueprint,redirect,url_for
-import mysql.connector
-import re
-from middleware import require_login
+from imports import *
 from blueprints.personal_information import DB_CONFIG
 
 

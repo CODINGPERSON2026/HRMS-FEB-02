@@ -1,9 +1,4 @@
-from flask import Flask, request, jsonify, render_template,Blueprint,redirect,url_for
-
-import mysql.connector
-from mysql.connector import Error
-import json
-from middleware import require_login
+from imports import *
 
 personnel_info = Blueprint('personal', __name__, url_prefix='/personnel_information')
 

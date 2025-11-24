@@ -1,14 +1,4 @@
-from flask import Flask, jsonify, redirect,flash, render_template, request, url_for,make_response
-import mysql
-from blueprints.personal_information import personnel_info
-from blueprints.weight_ms import weight_ms
-from blueprints.apply_leave import leave_bp
-import pandas as pd
-import os
-import jwt
-from datetime import datetime
-from middleware import require_login
-from middleware import jwt,JWT_ALGO,JWT_SECRET
+from imports import *
 
 app = Flask(__name__)
 # app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # Cache static files for 1 year (in seconds)

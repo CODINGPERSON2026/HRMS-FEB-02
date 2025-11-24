@@ -1,7 +1,4 @@
-from flask import Flask, jsonify, render_template, request,Blueprint,redirect,url_for
-import mysql.connector
-import re
-from middleware import require_login
+from imports import *
 
 weight_ms = Blueprint('weight', __name__, url_prefix='/weight_system')
 db_config = {
