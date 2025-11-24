@@ -1,0 +1,32 @@
+<!-- Leave Requests Modal -->
+<div class="modal fade" id="leaveRequestsModal" tabindex="-1" aria-labelledby="leaveRequestsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="leaveRequestsModalLabel">Leave Requests</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="leaveRequestsSpinner" class="text-center my-3">
+            <div class="spinner-border text-primary" role="status"></div>
+          </div>
+          <table class="table table-striped d-none" id="leaveRequestsTable">
+            <thead>
+              <tr>
+                <th>Army Number</th>
+                <th>Leave Type</th>
+                <th>Days</th>
+                <th>Status</th>
+                <th>Remarks</th>
+                <th>Applied At</th>
+                <th>Actions</th> <!-- NEW COLUMN -->
+              </tr>
+            </thead>
+            <tbody id="leaveRequestsTableBody"></tbody>
+          </table>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  

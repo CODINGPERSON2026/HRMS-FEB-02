@@ -33,8 +33,10 @@
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">Assign personal</button>
         <button class="btn btn-primary">Add Requests</button>
         <button class="btn btn-light ms-2">Export</button>
+        <button id="leaveRequestsBtn" class="btn btn-warning ms-2">Leave Requests</button>
         <span class="ms-3 text-muted">2024 - 2025</span>
-      </div>
+    </div>
+    
     </div>
 
     <!-- Stats Row 1 -->
@@ -178,6 +180,7 @@
 {% include 'modals/detachmentModal/detachment.html'%}
 {% include 'modals/personnelModal/personal_modal.html' %}
 {% include 'modals/salesmodal/salesModal.html' %}
+{% include 'modals/leaverequest/leave_request.html' %}
 
 
 
@@ -185,77 +188,136 @@
 
 
 <script>
-  
-    // 🔥 Fullscreen loader hide after API fetch completes
-function hideFullLoader() {
-  const fullLoader = document.getElementById("fullscreenLoader");
-  if (fullLoader) fullLoader.style.display = "none";
-}
-
-document.getElementById("viewDetailsBtn").addEventListener("click", function () {
-  const detModal = new bootstrap.Modal(document.getElementById('detModal'));
-  detModal.show();
-  load_det_personnel();
-});
-
-async function load_det_personnel() {
-  let spinner = document.getElementById("detSpinner");
-  let table = document.getElementById("detTable");
-  let tbody = document.getElementById("detTableBody");
-
-  spinner.classList.remove("d-none");
-  table.classList.add("d-none");
-  tbody.innerHTML = "";
-
-  try {
-    const response = await fetch("/stats/get_detachment_details");
-    const result = await response.json();
-
-    if (result.status !== "success") throw new Error("Fetch failed");
-
-    result.data.forEach(row => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${row.name}</td>
-          <td>${row.army_number}</td>
-          <td>${row.rank}</td>
-        </tr>
-      `;
-    });
-
-    spinner.classList.add("d-none");
-    table.classList.remove("d-none");
-
-  } catch (err) {
-    console.error(err);
-    spinner.innerHTML = `<p class="text-danger fw-bold mt-3">❌ Failed to load data</p>`;
-  }
-}
-
-async function get_dets() {
-  try {
-    const res = await fetch('/get_dets');
-    if (!res.ok) throw new Error("Network error");
-    const data = await res.json();
-    document.getElementById('locationCount').innerText = data.count;
-
-  } catch (err) {
-    console.error("Error fetching location count:", err);
-    document.getElementById('locationCount').innerText = 'Waiting...';
+  // 🔥 Fullscreen loader hide after API fetch completes
+  function hideFullLoader() {
+    const fullLoader = document.getElementById("fullscreenLoader");
+    if (fullLoader) fullLoader.style.display = "none";
   }
 
-  // 👇 Hide fullscreen loader only after dashboard data loaded
-setTimeout(function(){
-  hideFullLoader();
+  // ------------------ Detachment Modal ------------------
+  document.getElementById("viewDetailsBtn").addEventListener("click", function () {
+    const detModal = new bootstrap.Modal(document.getElementById('detModal'));
+    detModal.show();
+    load_det_personnel();
+  });
 
-},500)}
+  async function load_det_personnel() {
+    const spinner = document.getElementById("detSpinner");
+    const table = document.getElementById("detTable");
+    const tbody = document.getElementById("detTableBody");
 
-// Load dashboard API on page ready
-document.addEventListener('DOMContentLoaded', get_dets);
+    spinner.classList.remove("d-none");
+    table.classList.add("d-none");
+    tbody.innerHTML = "";
 
-      
+    try {
+      const response = await fetch("/stats/get_detachment_details");
+      const result = await response.json();
 
-  </script>
+      if (result.status !== "success") throw new Error("Fetch failed");
+
+      result.data.forEach(row => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${row.name}</td>
+            <td>${row.army_number}</td>
+            <td>${row.rank}</td>
+          </tr>
+        `;
+      });
+
+      spinner.classList.add("d-none");
+      table.classList.remove("d-none");
+
+    } catch (err) {
+      console.error(err);
+      spinner.innerHTML = `<p class="text-danger fw-bold mt-3">❌ Failed to load data</p>`;
+    }
+  }
+
+  // ------------------ Dashboard Counts ------------------
+  async function get_dets() {
+    try {
+      const res = await fetch('/get_dets');
+      if (!res.ok) throw new Error("Network error");
+      const data = await res.json();
+      document.getElementById('locationCount').innerText = data.count;
+
+    } catch (err) {
+      console.error("Error fetching location count:", err);
+      document.getElementById('locationCount').innerText = 'Waiting...';
+    }
+
+    setTimeout(hideFullLoader, 500); // Hide loader after 0.5s
+  }
+
+  document.addEventListener('DOMContentLoaded', get_dets);
+
+  // ------------------ Leave Requests Modal ------------------
+  document.getElementById("leaveRequestsBtn").addEventListener("click", async function() {
+    const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
+    modal.show();
+    await loadLeaveRequests();
+  });
+
+  async function loadLeaveRequests() {
+    const spinner = document.getElementById("leaveRequestsSpinner");
+    const table = document.getElementById("leaveRequestsTable");
+    const tbody = document.getElementById("leaveRequestsTableBody");
+
+    spinner.classList.remove("d-none");
+    table.classList.add("d-none");
+    tbody.innerHTML = "";
+
+    try {
+      const res = await fetch("/apply_leave/get_leave_requests");
+      if (!res.ok) throw new Error("Network error");
+      const result = await res.json();
+
+      result.data.forEach(row => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${row.army_number}</td>
+            <td>${row.leave_type}</td>
+            <td>${row.leave_days}</td>
+            <td>${row.request_status}</td>
+            <td>${row.remarks}</td>
+            <td>${row.created_at}</td>
+            <td>${row.actions || row.request_status}</td>
+          </tr>
+        `;
+      });
+
+      spinner.classList.add("d-none");
+      table.classList.remove("d-none");
+
+    } catch (err) {
+      console.error(err);
+      spinner.innerHTML = `<p class="text-danger fw-bold mt-3">❌ Failed to load leave requests</p>`;
+    }
+  }
+
+  // ------------------ Update Leave Status ------------------
+  async function updateLeaveStatus(leaveId, status) {
+    try {
+      const res = await fetch('/apply_leave/update_leave_status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: leaveId, status: status })
+      });
+      const result = await res.json();
+      if (result.status === 'success') {
+        await loadLeaveRequests(); // Refresh table after update
+      } else {
+        alert("Failed to update leave status: " + result.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error updating leave status.");
+    }
+  }
+</script>
+
   <!-- Main Dashboard Content -->
 
   <!-- Bootstrap 5 JS Bundle CDN -->

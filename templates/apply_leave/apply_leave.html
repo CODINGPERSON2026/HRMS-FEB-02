@@ -482,7 +482,7 @@
     document.getElementById("applyLeaveBtn").addEventListener("click", async function() {
         const leave_type = document.getElementById("leaveType").value;
         const days = document.getElementById("days").value;
-    alert("work to be done on the functionality")
+    
         if (!selectedPersonArmyNumber) {
             alert("Please select an employee first.");
             return;
@@ -499,7 +499,7 @@
         showLoading();
     
         try {
-            const res = await fetch("/apply_leave_submit", {
+            const res = await fetch("/apply_leave/submit_leave", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
