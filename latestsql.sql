@@ -285,6 +285,39 @@ INSERT INTO `leave_details` VALUES (1,1,'778G',1,'2024',20,10,5,35,'Utilized for
 UNLOCK TABLES;
 
 --
+-- Table structure for table `leave_status_info`
+--
+
+DROP TABLE IF EXISTS `leave_status_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `leave_status_info` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `army_number` varchar(20) NOT NULL,
+  `leave_type` varchar(50) NOT NULL,
+  `leave_days` int NOT NULL,
+  `request_sent_to` varchar(100) NOT NULL,
+  `request_status` enum('Pending','Approved','Rejected') DEFAULT 'Pending',
+  `approval_date` datetime DEFAULT NULL,
+  `rejected_date` datetime DEFAULT NULL,
+  `remarks` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `leave_status_info`
+--
+
+LOCK TABLES `leave_status_info` WRITE;
+/*!40000 ALTER TABLE `leave_status_info` DISABLE KEYS */;
+INSERT INTO `leave_status_info` VALUES (1,'778G','AL',10,'OC','Approved','2025-11-25 02:59:52',NULL,'AL for 10 day(s)','2025-11-24 21:18:25','2025-11-24 21:29:52'),(2,'778G','AL',10,'OC','Pending',NULL,NULL,'AL for 10 day(s)','2025-11-24 21:42:38','2025-11-24 21:42:38');
+/*!40000 ALTER TABLE `leave_status_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `loans`
 --
 
@@ -758,4 +791,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-24 14:15:49
+-- Dump completed on 2025-11-25  3:15:15

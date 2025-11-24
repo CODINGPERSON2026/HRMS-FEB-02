@@ -155,12 +155,17 @@ def submit_leave_request():
 def get_leave_requests():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)  # Use dictionary cursor for JSON
+    user = require_login()
+    role = user['role']
+    print(user)
     try:
         cursor.execute("""
-            SELECT id, army_number, leave_type, leave_days, request_status, remarks, created_at
-            FROM leave_status_info
-            ORDER BY created_at DESC
-        """)
+    SELECT id, army_number, leave_type, leave_days, request_status, remarks, created_at
+    FROM leave_status_info
+    WHERE request_sent_to = %s
+    ORDER BY created_at DESC
+""", (role,))
+
         rows = cursor.fetchall()
 
         # Add approve/reject buttons HTML
