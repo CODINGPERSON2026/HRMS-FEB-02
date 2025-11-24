@@ -857,3 +857,362 @@ def loan_amounts_chart():
         cursor.close()
         connection.close()
         
+# Add these routes to your personnel_info.py file
+
+@personnel_info.route('/update-personnel')
+def update_personnel_page():
+    """Render the update personnel page"""
+    return render_template('/personnel_info/update.html', active_tab='update-personnel')
+
+@personnel_info.route('/api/personnel/search/<army_number>', methods=['GET'])
+def search_personnel(army_number):
+    """Search for personnel by army number and return all details"""
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({'success': False, 'message': 'Database connection failed'}), 500
+    
+    cursor = connection.cursor(dictionary=True)
+    
+    try:
+        # Get personnel basic information
+        cursor.execute("""
+            SELECT * FROM personnel WHERE army_number = %s
+        """, (army_number,))
+        personnel = cursor.fetchone()
+        
+        if not personnel:
+            return jsonify({'success': False, 'message': 'Personnel not found'}), 404
+        
+        personnel_id = personnel['id']
+        
+        # Convert dates to string format for JSON
+        date_fields = ['date_of_birth', 'date_of_enrollment', 'date_of_tos', 'date_of_tors',
+                      'i_card_date', 'bpet_date', 'kin_marriage_date', 'vehicle_purchase_date',
+                      'license_issue_date', 'license_expiry_date', 'folder_prepared_on',
+                      'prior_station_date', 'last_recat_bd_date', 'next_recat_due']
+        
+        for field in date_fields:
+            if field in personnel and personnel[field]:
+                personnel[field] = personnel[field].strftime('%Y-%m-%d')
+        
+        # Get courses
+        cursor.execute("""
+            SELECT * FROM courses WHERE personnel_id = %s ORDER BY sr_no
+        """, (personnel_id,))
+        courses = cursor.fetchall()
+        
+        for course in courses:
+            if course.get('from_date'):
+                course['from_date'] = course['from_date'].strftime('%Y-%m-%d')
+            if course.get('to_date'):
+                course['to_date'] = course['to_date'].strftime('%Y-%m-%d')
+        
+        # Get units served
+        cursor.execute("""
+            SELECT * FROM units_served WHERE personnel_id = %s ORDER BY sr_no
+        """, (personnel_id,))
+        units = cursor.fetchall()
+        
+        for unit in units:
+            if unit.get('from_date'):
+                unit['from_date'] = unit['from_date'].strftime('%Y-%m-%d')
+            if unit.get('to_date'):
+                unit['to_date'] = unit['to_date'].strftime('%Y-%m-%d')
+        
+        # Get loans
+        cursor.execute("""
+            SELECT * FROM loans WHERE personnel_id = %s ORDER BY sr_no
+        """, (personnel_id,))
+        loans = cursor.fetchall()
+        
+        # Get punishments
+        cursor.execute("""
+            SELECT * FROM punishments WHERE personnel_id = %s ORDER BY sr_no
+        """, (personnel_id,))
+        punishments = cursor.fetchall()
+        
+        for punishment in punishments:
+            if punishment.get('punishment_date'):
+                punishment['punishment_date'] = punishment['punishment_date'].strftime('%Y-%m-%d')
+        
+        # Get detailed courses
+        cursor.execute("""
+            SELECT * FROM detailed_courses WHERE personnel_id = %s ORDER BY sr_no
+        """, (personnel_id,))
+        detailed_courses = cursor.fetchall()
+        
+        for course in detailed_courses:
+            if course.get('from_date'):
+                course['from_date'] = course['from_date'].strftime('%Y-%m-%d')
+            if course.get('to_date'):
+                course['to_date'] = course['to_date'].strftime('%Y-%m-%d')
+        
+        # Get leave details
+        cursor.execute("""
+            SELECT * FROM leave_details WHERE personnel_id = %s ORDER BY sr_no
+        """, (personnel_id,))
+        leaves = cursor.fetchall()
+        
+        # Get family members
+        cursor.execute("""
+            SELECT * FROM family_members WHERE personnel_id = %s
+        """, (personnel_id,))
+        family = cursor.fetchall()
+        
+        for member in family:
+            if member.get('date_of_birth'):
+                member['date_of_birth'] = member['date_of_birth'].strftime('%Y-%m-%d')
+        
+        # Get children
+        cursor.execute("""
+            SELECT * FROM children WHERE personnel_id = %s ORDER BY sr_no
+        """, (personnel_id,))
+        children = cursor.fetchall()
+        
+        for child in children:
+            if child.get('date_of_birth'):
+                child['date_of_birth'] = child['date_of_birth'].strftime('%Y-%m-%d')
+        
+        # Get mobile phones
+        cursor.execute("""
+            SELECT * FROM mobile_phones WHERE personnel_id = %s ORDER BY sr_no
+        """, (personnel_id,))
+        mobiles = cursor.fetchall()
+        
+        # Get marital discord cases
+        cursor.execute("""
+            SELECT * FROM marital_discord_cases WHERE personnel_id = %s ORDER BY sr_no
+        """, (personnel_id,))
+        discord_cases = cursor.fetchall()
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'personnel': personnel,
+                'courses': courses,
+                'units': units,
+                'loans': loans,
+                'punishments': punishments,
+                'detailed_courses': detailed_courses,
+                'leaves': leaves,
+                'family': family,
+                'children': children,
+                'mobiles': mobiles,
+                'discord_cases': discord_cases
+            }
+        }), 200
+    
+    except Error as e:
+        print(f"Database error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+
+@personnel_info.route('/api/personnel/update/<army_number>', methods=['PUT'])
+def update_personnel(army_number):
+    """Update personnel information"""
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({'success': False, 'message': 'Database connection failed'}), 500
+
+    cursor = connection.cursor()
+
+    try:
+        data = request.get_json()
+        print("Received update data:", json.dumps(data, indent=2))
+        
+        # First, get the personnel ID
+        cursor.execute("SELECT id FROM personnel WHERE army_number = %s", (army_number,))
+        result = cursor.fetchone()
+        
+        if not result:
+            return jsonify({'success': False, 'message': 'Personnel not found'}), 404
+        
+        personnel_id = result[0]
+        
+        # Helper functions (same as create)
+        def get_value(key, default=None):
+            value = data.get(key, default)
+            return None if value == '' else value
+        
+        def get_date(key):
+            value = data.get(key)
+            return value if value and value != '' else None
+        
+        def get_float(key):
+            value = data.get(key)
+            try:
+                return float(value) if value and value != '' else None
+            except (ValueError, TypeError):
+                return None
+        
+        def get_int(key):
+            value = data.get(key)
+            try:
+                return int(value) if value and value != '' else None
+            except (ValueError, TypeError):
+                return None
+
+        # Update personnel main table
+        personnel_query = """
+        UPDATE personnel SET
+            name = %s, `rank` = %s, trade = %s, date_of_enrollment = %s, date_of_birth = %s, 
+            date_of_tos = %s, date_of_tors = %s, blood_group = %s, religion = %s, 
+            food_preference = %s, drinker = %s, company = %s, civ_qualifications = %s, 
+            decoration_awards = %s, lacking_qualifications = %s, willing_promotions = %s, 
+            i_card_no = %s, i_card_date = %s, i_card_issued_by = %s, bpet_grading = %s, 
+            ppt_grading = %s, bpet_date = %s, clothing_card = %s, pan_card_no = %s, 
+            pan_part_ii = %s, aadhar_card_no = %s, aadhar_part_ii = %s, joint_account_no = %s, 
+            joint_account_bank = %s, joint_account_ifsc = %s, home_house_no = %s, 
+            home_village = %s, home_phone = %s, home_to = %s, home_po = %s, home_ps = %s, 
+            home_teh = %s, home_nrs = %s, home_nmh = %s, home_district = %s, home_state = %s, 
+            border_area = %s, distance_from_ib = %s, height = %s, weight = %s, chest = %s, 
+            identification_marks = %s, court_cases = %s, loan = %s, total_leaves_encashed = %s, 
+            participation_activities = %s, present_family_location = %s, prior_station = %s, 
+            prior_station_date = %s, worked_it = %s, worked_unit_tenure = %s, med_cat = %s, 
+            last_recat_bd_date = %s, last_recat_bd_at = %s, next_recat_due = %s, 
+            medical_problem = %s, restrictions = %s, computer_knowledge = %s, it_literature = %s, 
+            kin_name = %s, kin_relation = %s, kin_marriage_date = %s, kin_account_no = %s, 
+            kin_bank = %s, kin_ifsc = %s, kin_part_ii = %s, vehicle_reg_no = %s, 
+            vehicle_model = %s, vehicle_purchase_date = %s, vehicle_agif = %s, 
+            driving_license_no = %s, license_issue_date = %s, license_expiry_date = %s, 
+            disability_child = %s, marital_discord = %s, counselling = %s, 
+            folder_prepared_on = %s, folder_checked_by = %s, bring_family = %s, 
+            domestic_issues = %s, other_requests = %s, family_medical_issues = %s, 
+            quality_points = %s, strengths = %s, weaknesses = %s, detailed_course = %s
+        WHERE army_number = %s
+        """
+        
+        personnel_values = (
+            get_value('name'),
+            get_value('rank'),
+            get_value('trade'),
+            get_date('dateOfEnrollment'),
+            get_date('dateOfBirth'),
+            get_date('dateOfTOS'),
+            get_date('dateOfTORS'),
+            get_value('bloodGroup'),
+            get_value('religion'),
+            get_value('foodPreference'),
+            get_value('drinker'),
+            get_value('company'),
+            get_value('civQualifications'),
+            get_value('decorationAwards'),
+            get_value('lackingQualifications'),
+            get_value('willingPromotions'),
+            get_value('iCardNo'),
+            get_date('iCardDate'),
+            get_value('iCardIssuedBy'),
+            get_value('bpetGrading'),
+            get_value('pptGrading'),
+            get_date('bpetDate'),
+            get_value('clothingCard'),
+            get_value('panCardNo'),
+            get_value('panPartII'),
+            get_value('aadharCardNo'),
+            get_value('aadharPartII'),
+            get_value('jointAccountNo'),
+            get_value('jointAccountBank'),
+            get_value('jointAccountIFSC'),
+            get_value('homeHouseNo'),
+            get_value('homeVillage'),
+            get_value('homePhone'),
+            get_value('homeTO'),
+            get_value('homePO'),
+            get_value('homePS'),
+            get_value('homeTeh'),
+            get_value('homeNRS'),
+            get_value('homeNMH'),
+            get_value('homeDistrict'),
+            get_value('homeState'),
+            get_value('borderArea'),
+            get_float('distanceFromIB'),
+            get_float('height'),
+            get_float('weight'),
+            get_float('chest'),
+            get_value('identificationMarks'),
+            get_value('courtCases'),
+            get_value('loan'),
+            get_int('totalLeavesEncashed'),
+            get_value('participationActivities'),
+            get_value('presentFamilyLocation'),
+            get_value('priorStation'),
+            get_date('priorStationDate'),
+            get_value('workedIT'),
+            get_value('workedUnitTenure'),
+            get_value('medCat'),
+            get_date('lastRecatBDDate'),
+            get_value('lastRecatBDAt'),
+            get_date('nextRecatDue'),
+            get_value('medicalProblem'),
+            get_value('restrictions'),
+            get_value('computerKnowledge'),
+            get_value('itLiterature'),
+            get_value('kinName'),
+            get_value('kinRelation'),
+            get_date('kinMarriageDate'),
+            get_value('kinAccountNo'),
+            get_value('kinBank'),
+            get_value('kinIFSC'),
+            get_value('kinPartII'),
+            get_value('vehicleRegNo'),
+            get_value('vehicleModel'),
+            get_date('vehiclePurchaseDate'),
+            get_value('vehicleAGIF'),
+            get_value('drivingLicenseNo'),
+            get_date('licenseIssueDate'),
+            get_date('licenseExpiryDate'),
+            get_value('disabilityChild'),
+            get_value('maritalDiscord'),
+            get_value('counselling'),
+            get_date('folderPreparedOn'),
+            get_value('folderCheckedBy'),
+            get_value('bringFamily'),
+            get_value('domesticIssues'),
+            get_value('otherRequests'),
+            get_value('familyMedicalIssues'),
+            get_value('qualityPoints'),
+            get_value('strengths'),
+            get_value('weaknesses'),
+            get_value('detailedCourse'),
+            army_number
+        )
+
+        cursor.execute(personnel_query, personnel_values)
+
+        # Delete existing related records and insert new ones
+        delete_related_records(cursor, personnel_id)
+        insert_dynamic_data(cursor, personnel_id, army_number, data)
+
+        connection.commit()
+        return jsonify({'success': True, 'personnel_id': personnel_id, 'message': 'Personnel updated successfully'}), 200
+
+    except Error as e:
+        connection.rollback()
+        print(f"Database error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    except Exception as e:
+        connection.rollback()
+        print(f"General error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def delete_related_records(cursor, personnel_id):
+    """Delete all related records for a personnel before updating"""
+    tables = [
+        'courses', 'units_served', 'loans', 'punishments', 
+        'detailed_courses', 'leave_details', 'family_members', 
+        'children', 'mobile_phones', 'marital_discord_cases'
+    ]
+    
+    for table in tables:
+        cursor.execute(f"DELETE FROM {table} WHERE personnel_id = %s", (personnel_id,))
