@@ -1,12 +1,6 @@
 from imports import *
 
 weight_ms = Blueprint('weight', __name__, url_prefix='/weight_system')
-db_config = {
-    "host": "localhost",
-    "user": "root",
-    "password": "qaz123QAZ!@#",
-    "database": "weight_system"
-}
 
 # --- Helper functions ---
 def round_to_nearest_even(n):
@@ -36,7 +30,7 @@ def get_ideal_weight(age, height_cm, cursor):
     return None
 
 def compute_authorization(company=None):
-    connection = mysql.connector.connect(**db_config)
+    connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
 
     if company and company != "All":
@@ -228,7 +222,7 @@ def add_user():
         actual_weight = float(actual_weight)
 
         # Check if army_number already exists
-        connection = mysql.connector.connect(**db_config)
+        connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
         
         cursor.execute("SELECT army_number FROM weight_info WHERE army_number = %s", (army_number,))
@@ -343,7 +337,7 @@ def api_Fit():
 
 @weight_ms.route('/api/companies')
 def api_companies():
-    connection = mysql.connector.connect(**db_config)
+    connection = get_db_connection()
     cursor = connection.cursor()
     cursor.execute("SELECT DISTINCT company FROM weight_info ORDER BY company")
     companies = [row[0] for row in cursor.fetchall()]
@@ -364,7 +358,7 @@ def dashboard():
 def api_status_summary():
     company = request.args.get('company', 'All')
     
-    connection = mysql.connector.connect(**db_config)
+    connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
     
     try:
@@ -420,7 +414,7 @@ def api_status_data():
     if not status_type:
         return jsonify({'error': 'status_type parameter is required'}), 400
     
-    connection = mysql.connector.connect(**db_config)
+    connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
     
     try:
@@ -516,7 +510,7 @@ def api_bar_graph_data():
     fit_unfit_filter = request.args.get('fitUnfitFilter', 'Fit')
     safe_category_filter = request.args.get('safeCategoryFilter', 'safe')  # 'safe' or 'category'
     
-    connection = mysql.connector.connect(**db_config)
+    connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
     
     try:
@@ -646,7 +640,7 @@ def api_bar_graph_data():
 # API Route to Get User by Army Number
 @weight_ms.route('/api/user/<army_number>', methods=['GET'])
 def get_user(army_number):
-    connection = mysql.connector.connect(**db_config)
+    connection = get_db_connection()
     if not connection:
         return jsonify({'error': 'Database connection failed'}), 500
 
@@ -682,7 +676,7 @@ def get_user(army_number):
 # API Route to Update User
 @weight_ms.route('/api/update-user', methods=['PUT'])
 def update_user():
-    connection = mysql.connector.connect(**db_config)
+    connection = get_db_connection()
     if not connection:
         return jsonify({'error': 'Da;tabase connection failed'}), 500
 

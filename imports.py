@@ -14,6 +14,7 @@ import mysql.connector
 from mysql.connector import Error
 import mysql
 
+from blueprints.personal_information import get_db_connection
 import re
 import json
 import os
