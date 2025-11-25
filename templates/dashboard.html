@@ -25,17 +25,13 @@
           <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="User" class="avatar me-2">
           <div>
             <span id="welcometext" class="fw-bold" >Welcome Back,{{role}} {{username}}</span><br>
-            <small>You have <span class="text-primary">21</span> Pending Approvals &amp; <span class="text-danger">14</span> Leave Requests</small>
           </div>
         </div>
       </div>
       <div class="top-bar-buttons d-flex align-items-center">
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">Assign personal</button>
-        <button class="btn btn-primary">Add Requests</button>
-        <button class="btn btn-light ms-2">Export</button>
         <button id="leaveRequestsBtn" class="btn btn-warning ms-2">Leave Requests</button>
-        <span class="ms-3 text-muted">2024 - 2025</span>
-    </div>
+      </div>
     
     </div>
 
@@ -82,7 +78,7 @@
           <small class="text-muted">Profit This Week</small>
           <h3>$5,544</h3>
           <span class="text-success">+2.2%</span>
-        </div>
+      </div>
       </div> -->
     </div>
 
@@ -140,70 +136,70 @@
 
 
 <script>
-  // 🔥 Fullscreen loader hide after API fetch completes
-  function hideFullLoader() {
-    const fullLoader = document.getElementById("fullscreenLoader");
-    if (fullLoader) fullLoader.style.display = "none";
-  }
+    // 🔥 Fullscreen loader hide after API fetch completes
+function hideFullLoader() {
+  const fullLoader = document.getElementById("fullscreenLoader");
+  if (fullLoader) fullLoader.style.display = "none";
+}
 
   // ------------------ Detachment Modal ------------------
-  document.getElementById("viewDetailsBtn").addEventListener("click", function () {
-    const detModal = new bootstrap.Modal(document.getElementById('detModal'));
-    detModal.show();
-    load_det_personnel();
-  });
+document.getElementById("viewDetailsBtn").addEventListener("click", function () {
+  const detModal = new bootstrap.Modal(document.getElementById('detModal'));
+  detModal.show();
+  load_det_personnel();
+});
 
-  async function load_det_personnel() {
+async function load_det_personnel() {
     const spinner = document.getElementById("detSpinner");
     const table = document.getElementById("detTable");
     const tbody = document.getElementById("detTableBody");
 
-    spinner.classList.remove("d-none");
-    table.classList.add("d-none");
-    tbody.innerHTML = "";
+  spinner.classList.remove("d-none");
+  table.classList.add("d-none");
+  tbody.innerHTML = "";
 
-    try {
-      const response = await fetch("/stats/get_detachment_details");
-      const result = await response.json();
+  try {
+    const response = await fetch("/stats/get_detachment_details");
+    const result = await response.json();
 
-      if (result.status !== "success") throw new Error("Fetch failed");
+    if (result.status !== "success") throw new Error("Fetch failed");
 
-      result.data.forEach(row => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${row.name}</td>
-            <td>${row.army_number}</td>
-            <td>${row.rank}</td>
-          </tr>
-        `;
-      });
+    result.data.forEach(row => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${row.name}</td>
+          <td>${row.army_number}</td>
+          <td>${row.rank}</td>
+        </tr>
+      `;
+    });
 
-      spinner.classList.add("d-none");
-      table.classList.remove("d-none");
+    spinner.classList.add("d-none");
+    table.classList.remove("d-none");
 
-    } catch (err) {
-      console.error(err);
-      spinner.innerHTML = `<p class="text-danger fw-bold mt-3">❌ Failed to load data</p>`;
-    }
+  } catch (err) {
+    console.error(err);
+    spinner.innerHTML = `<p class="text-danger fw-bold mt-3">❌ Failed to load data</p>`;
   }
+}
 
   // ------------------ Dashboard Counts ------------------
-  async function get_dets() {
-    try {
-      const res = await fetch('/get_dets');
-      if (!res.ok) throw new Error("Network error");
-      const data = await res.json();
-      document.getElementById('locationCount').innerText = data.count;
+async function get_dets() {
+  try {
+    const res = await fetch('/get_dets');
+    if (!res.ok) throw new Error("Network error");
+    const data = await res.json();
+    document.getElementById('locationCount').innerText = data.count;
 
-    } catch (err) {
-      console.error("Error fetching location count:", err);
-      document.getElementById('locationCount').innerText = 'Waiting...';
-    }
+  } catch (err) {
+    console.error("Error fetching location count:", err);
+    document.getElementById('locationCount').innerText = 'Waiting...';
+  }
 
     setTimeout(hideFullLoader, 500); // Hide loader after 0.5s
   }
 
-  document.addEventListener('DOMContentLoaded', get_dets);
+document.addEventListener('DOMContentLoaded', get_dets);
 
   // ------------------ Leave Requests Modal ------------------
   document.getElementById("leaveRequestsBtn").addEventListener("click", async function() {
@@ -268,7 +264,7 @@
       alert("Error updating leave status.");
     }
   }
-</script>
+  </script>
 
   <!-- Main Dashboard Content -->
 

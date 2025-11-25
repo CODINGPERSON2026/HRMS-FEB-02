@@ -108,7 +108,7 @@ def mt():
         {"vehicle": "Motorcycle MH13GH2345", "issue": "Engine oil change", "date_reported": "2025-10-27", "status": "Pending"},
     ]
 
-    return render_template('mtView.html', vehicles=vehicles, drivers=drivers, maintenance=maintenance)
+    return render_template('mt/mtView.html', vehicles=vehicles, drivers=drivers, maintenance=maintenance)
     
 @app.route('/personal_info')
 def personal_info():
@@ -229,149 +229,57 @@ def get_sales_data():
         return jsonify({"error": str(e)}), 500
     
 
-    # Stores code
-
-@app.route('/stores')
-def stores_dashboard():
-    """Show overview of stores, and options to add store or view store details."""
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT s.store_id,
-            s.store_name,
-            s.place,
-            s.incharge_name,
-            IFNULL(si.count_items, 0) AS total_items
-        FROM stores s
-        LEFT JOIN (
-            SELECT store_id, COUNT(*) AS count_items
-            FROM store_items
-            GROUP BY store_id
-        ) si ON s.store_id = si.store_id
-        ORDER BY s.store_name
-    """)
-    stores = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return render_template('stores.html', stores=stores)
-
-@app.route('/stores/add', methods=['POST'])
-def add_store():
-    store_name = request.form.get('store_name')
-    place = request.form.get('place')
-    incharge_name = request.form.get('incharge_name')
-
-    if not store_name:
-        flash("Store name is required", "danger")
-        return redirect(url_for('stores_dashboard'))
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO stores (store_name, place, incharge_name) VALUES (%s, %s, %s)",
-        (store_name, place, incharge_name)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    flash("Store added successfully", "success")
-    return redirect(url_for('stores_dashboard'))
-
-@app.route('/stores/<int:store_id>')
-def view_store(store_id):
-    """View individual store items and add new item form."""
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    # fetch store info
-    cursor.execute("SELECT * FROM stores WHERE store_id = %s", (store_id,))
-    store = cursor.fetchone()
-    if not store:
-        cursor.close()
-        conn.close()
-        flash("Store not found", "danger")
-        return redirect(url_for('stores_dashboard'))
-
-    # fetch items for this store
-# fetch items for this store
-    cursor.execute("""
-        SELECT item_id, qlp_no, slp_no, NOMENCLATURE, AU, Quantity
-        FROM store_items
-        WHERE store_id = %s
-    """, (store_id,))
-    items = cursor.fetchall()
-
-
-    cursor.close()
-    conn.close()
-    return render_template('store_view.html', store=store, items=items)
-
-@app.route('/stores/<int:store_id>/add_item', methods=['POST'])
-def add_item(store_id):
-    qlp_no = request.form.get('qlp_no')
-    slp_no = request.form.get('slp_no')
-    NOMENCLATURE = request.form.get('NOMENCLATURE')
-    AU = request.form.get('AU')
-    Quantity = request.form.get('Quantity', '0')
-
-    # basic validation
-    if not NOMENCLATURE:
-        flash("Nomenclature is required", "danger")
-        return redirect(url_for('view_store', store_id=store_id))
-
-    # normalize numeric quantity
-    try:
-        qty = float(Quantity)
-    except ValueError:
-        qty = 0.0
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO store_items (store_id, qlp_no, slp_no, NOMENCLATURE, AU, Quantity)
-        VALUES (%s, %s, %s, %s, %s, %s)
-    """, (store_id, qlp_no, slp_no, NOMENCLATURE, AU, qty))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    flash("Item added to store", "success")
-    return redirect(url_for('view_store', store_id=store_id))
-
-# optional: delete item
-@app.route('/stores/<int:store_id>/delete_item/<int:item_id>', methods=['POST'])
-def delete_item(store_id, item_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM store_items WHERE item_id = %s AND store_id = %s", (item_id, store_id))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    flash("Item deleted", "info")
-    return redirect(url_for('view_store', store_id=store_id))
-
-@app.route('/stores/delete/<int:store_id>', methods=['POST'])
-def delete_store(store_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    # First delete all items inside the store (to avoid foreign key errors)
-    cursor.execute("DELETE FROM store_items WHERE store_id = %s", (store_id,))
-
-    # Now delete the store itself
-    cursor.execute("DELETE FROM stores WHERE store_id = %s", (store_id,))
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-
-    flash("Store deleted successfully", "info")
-    return redirect(url_for('stores_dashboard'))
-
 # Leave Application
 
 @app.route('/apply_leave')
 def apply_leave():
     return render_template('apply_leave.html')
+
+@app.route('/daily_running')
+def daily_running():
+    return render_template('mt/daily_running.html')
+
+
+@app.route('/get_vehicle_details', methods=['POST'])
+def get_vehicle_details():
+    vehicle_no = request.form.get('vehicle_no')
+    print(vehicle_no)
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT type, class FROM vehicle_detail WHERE vehicle_no=%s", (vehicle_no,))
+    result = cursor.fetchone()
+    print(result)
+    cursor.close()
+    conn.close()
+
+    if result:
+        return jsonify(result)
+    else:
+        return jsonify({"error": "Vehicle not found"}), 500
+
+
+@app.route('/submit_running', methods=['POST'])
+def submit_running():
+    vehicle_no = request.form['vehicle_no']
+    v_type = request.form['type']
+    v_class = request.form['class']
+    from_place = request.form['from_place']
+    to_place = request.form['to_place']
+    remarks = request.form['remarks']
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = """
+        INSERT INTO daily_running (vehicle_no, type, class, from_place, to_place, remarks, date)
+        VALUES (%s, %s, %s, %s, %s, %s, NOW())
+    """
+    cursor.execute(query, (vehicle_no, v_type, v_class, from_place, to_place, remarks))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({"message": "Saved successfully"})
 
 
 
