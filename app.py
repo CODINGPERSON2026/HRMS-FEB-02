@@ -131,19 +131,31 @@ def update_personal():
 def view_personal():
     return render_template('personalInfoView.html', form_view='view')
 
-# @app.route('/search_personnel')
-# def search_personnel():
-#     query = request.args.get('query', '')
-#     conn = get_db_connection()
-#     cursor = conn.cursor(dictionary=True)
-#     cursor.execute("""
-#         SELECT name, army_number, `rank`, trade, company
-#         FROM personnel
-#         WHERE name LIKE %s OR trade LIKE %s
-#     """, (f"%{query}%", f"%{query}%"))
-#     results = cursor.fetchall()
-#     conn.close()
-#     return jsonify(results)
+@app.route('/search_personnel')
+def search_personnel():
+    query = request.args.get('query', '')
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    print(query)
+
+    cursor.execute("""
+        SELECT 
+            name, 
+            army_number, 
+            `rank`, 
+            trade, 
+            company,
+            detachment_status AS det_status,
+            posting_status
+        FROM personnel
+        WHERE army_number = %s
+    """, (query,))
+
+    results = cursor.fetchall()
+    print(results)
+    conn.close()
+    return jsonify(results)
+
 
 # Fetch dropdown locations
 @app.route('/get_locations')
@@ -173,6 +185,7 @@ def get_dets():
 def assign_personnel():
     data = request.get_json()
     print("data", data)
+
     personnel_ids = data.get('army_number', [])
     location_id = data.get('det_id')
 
@@ -181,14 +194,36 @@ def assign_personnel():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    for pid in personnel_ids:
-        cursor.execute("""
-            INSERT INTO assigned_det (army_number, det_id)
-            VALUES (%s, %s)
-        """, (pid, location_id))
-    conn.commit()
-    conn.close()
-    return jsonify({"message": "Personnel assigned successfully"})
+
+    try:
+        # 1️⃣ INSERT INTO assigned_det
+        for pid in personnel_ids:
+            cursor.execute("""
+                INSERT INTO assigned_det (army_number, det_id)
+                VALUES (%s, %s)
+            """, (pid, location_id))
+
+        # 2️⃣ UPDATE personnel status
+        cursor.executemany("""
+            UPDATE personnel
+            SET detachment_status = 1
+            WHERE army_number = %s
+        """, [(pid,) for pid in personnel_ids])
+
+        # If everything OK → commit
+        conn.commit()
+        return jsonify({"message": "Personnel assigned successfully"})
+
+    except Exception as e:
+        # If any error → rollback all changes
+        conn.rollback()
+        print("❌ Error:", e)
+        return jsonify({"error": "Assignment failed"}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
 
 @app.route("/get_sales_data")
 def get_sales_data():

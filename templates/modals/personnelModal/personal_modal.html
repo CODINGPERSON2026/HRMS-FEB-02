@@ -33,6 +33,8 @@
           </table>
         </div>
       </div>
+      <p id="warningMessage" style="color: red; font-weight: bold;"></p>
+
       <div class="modal-footer">
         <button class="btn btn-primary" id="assignBtn">Assign Selected</button>
       </div>
@@ -56,22 +58,53 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
   const query = document.getElementById('searchInput').value;
   const res = await fetch(`/search_personnel?query=${encodeURIComponent(query)}`);
   const personnel = await res.json();
+  console.log(personnel)
   
   // Keep checked people on top
   personnel.sort((a, b) => (selectedPersonnel.has(a.id) ? -1 : 1));
   
   const tbody = document.getElementById('personnelTableBody');
   console.log('Personal data', personnel);
-  tbody.innerHTML = personnel.map(person => `
-    <tr>
-      <td><input type="checkbox" class="personnel-checkbox" data-id="${person.army_number}" ${selectedPersonnel.has(person.army_number) ? 'checked' : ''}></td>
-      <td>${person.name}</td>
-      <td>${person.army_number}</td>
-      <td>${person.rank}</td>
-      <td>${person.trade}</td>
-      <td>${person.company}</td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = ""; // clear existing rows
+
+personnel.forEach(person => {
+  const row = tbody.insertRow();
+
+  // Checkbox column
+  const cell0 = row.insertCell();
+  cell0.innerHTML = `<input type="checkbox" class="personnel-checkbox"
+                     data-id="${person.army_number}"
+                     ${selectedPersonnel.has(person.army_number) ? "checked" : ""}>`;
+
+  row.insertCell().textContent = person.name;
+  row.insertCell().textContent = person.army_number;
+  row.insertCell().textContent = person.rank;
+  row.insertCell().textContent = person.trade;
+  row.insertCell().textContent = person.company;
+});
+
+  
+  const warning = document.getElementById('warningMessage'); 
+  const assignBtn = document.getElementById('assignBtn'); 
+  const alreadyInDet = personnel.some(p => p.det_status == 1);
+  const alreadyPosted = personnel.some(p => p.posting_status == 1);
+  console.log(alreadyInDet,"ths is already in det")
+  console.log(alreadyPosted,"ths is already in det")
+  
+  if (alreadyInDet) {
+    console.log("inside this");
+    warning.textContent = "⚠️ This personnel is already in DET.";
+    assignBtn.disabled = true;
+  } 
+  else if (alreadyPosted) {
+    warning.textContent = "⚠️ This personnel is already Posted.";
+    assignBtn.disabled = true;
+  } 
+  else {
+    warning.textContent = "";
+    assignBtn.disabled = false;
+  }
+  
 });
 
 // Track checkbox selections
@@ -100,5 +133,7 @@ document.getElementById('assignBtn').addEventListener('click', async () => {
   
   const data = await res.json();
   alert(data.message || data.error);
+  location.reload();
+
 });
 </script>
