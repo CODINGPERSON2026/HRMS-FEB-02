@@ -1,0 +1,71 @@
+<!-- Apply Leave Header Component -->
+<style>
+    .page-title {
+        height: 130px;
+        background: linear-gradient(135deg, #3c425c 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title h3 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .page-title p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.95;
+        font-size: 1rem;
+    }
+
+    .org-logo {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        border-radius: 20%;
+        padding: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .org-logo:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            flex-direction: column;
+            text-align: center;
+            height: auto;
+        }
+
+        .org-logo {
+            width: 90px;
+            height: 90px;
+            margin-top: 10px;
+        }
+
+        .page-title h3 {
+            font-size: 1.5rem;
+        }
+
+        .page-title p {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<div class="page-title">
+    <div>
+        <h3 class="fw-bold">{{header}}</h3>
+        <p>{{subscript}}</p>
+    </div>
+    <img src="/static/image_for_login_page/download.jfif" class="org-logo" alt="Organization Logo">
+</div>

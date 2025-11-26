@@ -8,6 +8,7 @@ app.register_blueprint(personnel_info)
 app.register_blueprint(weight_ms)
 app.register_blueprint(leave_bp)
 app.register_blueprint(dashboard_bp)
+app.register_blueprint(task_bp)
 
 @app.route("/admin_login", methods=["POST",'GET'])
 def admin_login():

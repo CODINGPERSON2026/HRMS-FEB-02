@@ -28,3 +28,4 @@ from blueprints.personal_information import personnel_info
 from blueprints.weight_ms import weight_ms
 from blueprints.apply_leave import leave_bp
 from blueprints.dashboard import dashboard_bp
+from blueprints.task_manager import task_bp
