@@ -155,11 +155,12 @@ async function get_dets() {
     const res = await fetch('/get_dets');
     if (!res.ok) throw new Error("Network error");
     const data = await res.json();
+    console.log(data,"thisis count")
     document.getElementById('locationCount').innerText = data.count;
 
   } catch (err) {
     console.error("Error fetching location count:", err);
-    document.getElementById('locationCount').innerText = 'Waiting...';
+    document.getElementById('locationCount').innerText = 'fetching...';
   }
 
     setTimeout(hideFullLoader, 500); // Hide loader after 0.5s
