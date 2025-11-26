@@ -11,7 +11,15 @@
           <input type="text" id="searchInput" class="form-control me-2" placeholder="Search by name or trade">
           <button class="btn btn-success" id="searchBtn">Search</button>
         </div>
-
+        <div class="mb-3">
+          <label class="form-label">Select Action</label>
+          <select id="actionType" class="form-select">
+            <option value="">-- Select Action --</option>
+            <option value="det">Detachment</option>
+            <option value="posting">Posting</option>
+          </select>
+        </div>
+        
         <div class="mb-3">
           <label for="locationDropdown" class="form-label">Select Location:</label>
           <select id="locationDropdown" class="form-select"></select>
@@ -42,98 +50,110 @@
   </div>
 </div>
 <script>
-let selectedPersonnel = new Set();
-
-// Load dropdown on modal open
-document.getElementById('personnelModal').addEventListener('shown.bs.modal', async () => {
-  const res = await fetch('/get_locations');
-  const locations = await res.json();
-  console.log("Locations", locations);
+  let selectedPersonnel = new Set();
   const dropdown = document.getElementById('locationDropdown');
-  dropdown.innerHTML = locations.map(l => `<option value="${l.det_id}">${l.det_name}</option>`).join('');
-});
-
-// Search button click
-document.getElementById('searchBtn').addEventListener('click', async () => {
-  const query = document.getElementById('searchInput').value;
-  const res = await fetch(`/search_personnel?query=${encodeURIComponent(query)}`);
-  const personnel = await res.json();
-  console.log(personnel)
+  const actionSelect = document.getElementById('actionType');
   
-  // Keep checked people on top
-  personnel.sort((a, b) => (selectedPersonnel.has(a.id) ? -1 : 1));
+  // -----------------------------------------------
+  // 🆕 Change dropdown options based on Action Type
+  // -----------------------------------------------
+  actionSelect.addEventListener("change", async function () {
+    const selectedAction = this.value;
   
-  const tbody = document.getElementById('personnelTableBody');
-  console.log('Personal data', personnel);
-  tbody.innerHTML = ""; // clear existing rows
-
-personnel.forEach(person => {
-  const row = tbody.insertRow();
-
-  // Checkbox column
-  const cell0 = row.insertCell();
-  cell0.innerHTML = `<input type="checkbox" class="personnel-checkbox"
-                     data-id="${person.army_number}"
-                     ${selectedPersonnel.has(person.army_number) ? "checked" : ""}>`;
-
-  row.insertCell().textContent = person.name;
-  row.insertCell().textContent = person.army_number;
-  row.insertCell().textContent = person.rank;
-  row.insertCell().textContent = person.trade;
-  row.insertCell().textContent = person.company;
-});
-
+    dropdown.innerHTML = ""; // reset dropdown
   
-  const warning = document.getElementById('warningMessage'); 
-  const assignBtn = document.getElementById('assignBtn'); 
-  const alreadyInDet = personnel.some(p => p.det_status == 1);
-  const alreadyPosted = personnel.some(p => p.posting_status == 1);
-  console.log(alreadyInDet,"ths is already in det")
-  console.log(alreadyPosted,"ths is already in det")
-  
-  if (alreadyInDet) {
-    console.log("inside this");
-    warning.textContent = "⚠️ This personnel is already in DET.";
-    assignBtn.disabled = true;
-  } 
-  else if (alreadyPosted) {
-    warning.textContent = "⚠️ This personnel is already Posted.";
-    assignBtn.disabled = true;
-  } 
-  else {
-    warning.textContent = "";
-    assignBtn.disabled = false;
-  }
-  
-});
-
-// Track checkbox selections
-document.addEventListener('change', e => {
-  if (e.target.classList.contains('personnel-checkbox')) {
-    const id = e.target.getAttribute('data-id');
-    if (e.target.checked) selectedPersonnel.add(id);
-    else selectedPersonnel.delete(id);
-  }
-});
-
-// Assign button
-document.getElementById('assignBtn').addEventListener('click', async () => {
-  const locationId = document.getElementById('locationDropdown').value;
-  if (selectedPersonnel.size === 0) return alert("Select at least one person.");
-  if (!locationId) return alert("Select a location.");
-
-  const res = await fetch('/assign_personnel', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      army_number: Array.from(selectedPersonnel),
-      det_id: locationId
-    })
+    if (selectedAction === "posting") {
+        // 🆕 Show ONLY P1, P2, P3, P4
+        const postingOptions = ["P1", "P2", "P3", "P4"];
+        dropdown.innerHTML = postingOptions.map(p => `<option value="${p}">${p}</option>`).join('');
+    
+    } else if (selectedAction === "det") {
+        // Load Locations from Database
+        const res = await fetch('/get_locations');
+        const locations = await res.json();
+        dropdown.innerHTML = locations.map(l => `<option value="${l.det_id}">${l.det_name}</option>`).join('');
+    }
   });
   
-  const data = await res.json();
-  alert(data.message || data.error);
-  location.reload();
-
-});
-</script>
+  // Load dropdown on modal open (det default)
+  document.getElementById('personnelModal').addEventListener('shown.bs.modal', async () => {
+    const res = await fetch('/get_locations');
+    const locations = await res.json();
+    dropdown.innerHTML = locations.map(l => `<option value="${l.det_id}">${l.det_name}</option>`).join('');
+  });
+  
+  // Search button click
+  document.getElementById('searchBtn').addEventListener('click', async () => {
+    const query = document.getElementById('searchInput').value;
+    const res = await fetch(`/search_personnel?query=${encodeURIComponent(query)}`);
+    const personnel = await res.json();
+    
+    personnel.sort((a, b) => (selectedPersonnel.has(a.id) ? -1 : 1));
+    
+    const tbody = document.getElementById('personnelTableBody');
+    tbody.innerHTML = "";
+  
+    personnel.forEach(person => {
+      const row = tbody.insertRow();
+      row.insertCell().innerHTML = `<input type="checkbox" class="personnel-checkbox" data-id="${person.army_number}" ${selectedPersonnel.has(person.army_number) ? "checked" : ""}>`;
+      row.insertCell().textContent = person.name;
+      row.insertCell().textContent = person.army_number;
+      row.insertCell().textContent = person.rank;
+      row.insertCell().textContent = person.trade;
+      row.insertCell().textContent = person.company;
+    });
+  
+    const warning = document.getElementById('warningMessage');
+    const assignBtn = document.getElementById('assignBtn');
+  
+    const alreadyInDet = personnel.some(p => p.det_status == 1);
+    const alreadyPosted = personnel.some(p => p.posting_status == 1);
+    
+    if (alreadyInDet) {
+      warning.textContent = "⚠️ This personnel is already in DET.";
+      assignBtn.disabled = true;
+    } 
+    else if (alreadyPosted) {
+      warning.textContent = "⚠️ This personnel is already Posted.";
+      assignBtn.disabled = true;
+    } 
+    else {
+      warning.textContent = "";
+      assignBtn.disabled = false;
+    }
+  });
+  
+  // Track checkbox selections
+  document.addEventListener('change', e => {
+    if (e.target.classList.contains('personnel-checkbox')) {
+      const id = e.target.getAttribute('data-id');
+      if (e.target.checked) selectedPersonnel.add(id);
+      else selectedPersonnel.delete(id);
+    }
+  });
+  
+  // Assign button
+  document.getElementById('assignBtn').addEventListener('click', async () => {
+    const locationId = dropdown.value;
+    const actionType = actionSelect.value;
+  
+    if (selectedPersonnel.size === 0) return alert("Select at least one person.");
+    if (!actionType) return alert("Select an Action.");
+    if (!locationId) return alert("Select a location.");
+  
+    const res = await fetch('/assign_personnel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        army_number: Array.from(selectedPersonnel),
+        det_id: locationId,
+        action: actionType   // 🆕 Send whether it's det or posting
+      })
+    });
+    
+    const data = await res.json();
+    alert(data.message || data.error);
+    location.reload();
+  });
+  </script>
+  

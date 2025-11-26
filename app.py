@@ -187,35 +187,61 @@ def assign_personnel():
     print("data", data)
 
     personnel_ids = data.get('army_number', [])
-    location_id = data.get('det_id')
+    location_id = data.get('det_id')  # Can be det_id or posting branch
+    action_type = data.get('action')  # 🔥 New field (det or posting)
 
-    if not personnel_ids or not location_id:
+    if not personnel_ids or not location_id or not action_type:
         return jsonify({"error": "Missing data"}), 400
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        # 1️⃣ INSERT INTO assigned_det
-        for pid in personnel_ids:
-            cursor.execute("""
-                INSERT INTO assigned_det (army_number, det_id)
-                VALUES (%s, %s)
-            """, (pid, location_id))
+        # ============================
+        #  CASE 1: DETACHMENT
+        # ============================
+        if action_type == "det":
 
-        # 2️⃣ UPDATE personnel status
-        cursor.executemany("""
-            UPDATE personnel
-            SET detachment_status = 1
-            WHERE army_number = %s
-        """, [(pid,) for pid in personnel_ids])
+            for pid in personnel_ids:
+                cursor.execute("""
+                    INSERT INTO assigned_det (army_number, det_id)
+                    VALUES (%s, %s)
+                """, (pid, location_id))
 
-        # If everything OK → commit
+            cursor.executemany("""
+                UPDATE personnel
+                SET detachment_status = 1
+                WHERE army_number = %s
+            """, [(pid,) for pid in personnel_ids])
+
+
+        # ============================
+        #  CASE 2: POSTING
+        # ============================
+        elif action_type == "posting":
+
+            for pid in personnel_ids:
+                cursor.execute("""
+                    INSERT INTO posting_details_table (army_number, action_type, posting_date)
+                    VALUES (%s, %s, NOW())
+                """, (pid, location_id))  # you can change action_type to location_id label if needed
+
+            cursor.executemany("""
+                UPDATE personnel
+                SET posting_status = 1
+                WHERE army_number = %s
+            """, [(pid,) for pid in personnel_ids])
+
+
+        else:
+            return jsonify({"error": "Invalid action type"}), 400
+
+
+        # Commit if no issues
         conn.commit()
-        return jsonify({"message": "Personnel assigned successfully"})
+        return jsonify({"message": "Personnel assigned successfully!"})
 
     except Exception as e:
-        # If any error → rollback all changes
         conn.rollback()
         print("❌ Error:", e)
         return jsonify({"error": "Assignment failed"}), 500
@@ -315,6 +341,57 @@ def submit_running():
     conn.close()
 
     return jsonify({"message": "Saved successfully"})
+
+
+
+
+
+
+
+# // ************************ ALARM FUNCTIONALITY//**************************
+
+@app.route('/api/assigned_alarm')
+def assigned_alarm():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Fetch all rows where assigned_on > 10 seconds and get det_name
+        query = '''SELECT 
+    ad.army_number, 
+    p.name,
+    ad.det_id, 
+    d.det_name, 
+    ad.assigned_on,
+    ad.det_status
+FROM assigned_det ad
+LEFT JOIN dets d ON ad.det_id = d.det_id
+LEFT JOIN personnel p ON ad.army_number = p.army_number
+WHERE TIMESTAMPDIFF(SECOND, ad.assigned_on, NOW()) > 10
+  AND ad.det_status = 1
+ORDER BY ad.assigned_on ASC '''
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        print(rows,"this is rows")
+
+        return jsonify({"status": "success", "rows": rows})
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+
+
+
+
+
+
+
 
 
 

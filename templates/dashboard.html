@@ -2,7 +2,7 @@
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
   <meta charset="UTF-8">
   <title>SmartHR Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,10 +11,12 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
+  
+  {% include 'modals/alarm/alarm.html'%}
   <div id="fullscreenLoader">
     <div class="loader"></div>
   </div>
-
+  
   
   <!-- Sidebar -->
   <div class="dashboard-content">
@@ -56,7 +58,8 @@
           <small class="text-muted">Dets</small>
           <h3 id="locationCount"></h3>
           <button id="viewDetailsBtn" class="view-details">View Details</button>
-
+          
+          {% include 'modals/detachmentModal/detachment.html'%}
 
         </div>
       </div>
@@ -123,14 +126,16 @@
     </div>
   </div>
 
+  
 
 
-{% include 'modals/detachmentModal/detachment.html'%}
 {% include 'modals/personnelModal/personal_modal.html' %}
 {% include 'modals/salesmodal/salesModal.html' %}
 {% include 'modals/leaverequest/leave_request.html' %}
 
-
+<!-- Place this somewhere inside <body> -->
+ 
+  
 
 
 
@@ -143,46 +148,6 @@ function hideFullLoader() {
 }
 
   // ------------------ Detachment Modal ------------------
-document.getElementById("viewDetailsBtn").addEventListener("click", function () {
-  const detModal = new bootstrap.Modal(document.getElementById('detModal'));
-  detModal.show();
-  load_det_personnel();
-});
-
-async function load_det_personnel() {
-    const spinner = document.getElementById("detSpinner");
-    const table = document.getElementById("detTable");
-    const tbody = document.getElementById("detTableBody");
-
-  spinner.classList.remove("d-none");
-  table.classList.add("d-none");
-  tbody.innerHTML = "";
-
-  try {
-    const response = await fetch("/stats/get_detachment_details");
-    const result = await response.json();
-
-    if (result.status !== "success") throw new Error("Fetch failed");
-
-    result.data.forEach(row => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${row.det_name}</td>
-          <td>${row.name}</td>
-          <td>${row.army_number}</td>
-          <td>${row.rank}</td>
-        </tr>
-      `;
-    });
-
-    spinner.classList.add("d-none");
-    table.classList.remove("d-none");
-
-  } catch (err) {
-    console.error(err);
-    spinner.innerHTML = `<p class="text-danger fw-bold mt-3">❌ Failed to load data</p>`;
-  }
-}
 
   // ------------------ Dashboard Counts ------------------
 async function get_dets() {
@@ -267,9 +232,13 @@ document.addEventListener('DOMContentLoaded', get_dets);
   }
   </script>
 
-  <!-- Main Dashboard Content -->
 
-  <!-- Bootstrap 5 JS Bundle CDN -->
+
+
+  <!-- Add this inside your <script> tag -->
+
+
+
 </body>
 </html>
 {% endblock %}
