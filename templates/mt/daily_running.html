@@ -26,17 +26,28 @@
             font-weight: 600;
             letter-spacing: 0.5px;
         }
+        .content-wrapper {
+        padding-left: 16rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding-top: 16px;
+        
+    }
     </style>
 </head>
 
 <body>
-
+  <div class="content-wrapper">
+   {% set header = "Daily Vehicle Running Status" %}
+    {% set subscript = "Search vehicle → auto-fill type & class → enter trip details" %}
+{% include 'navbar/navbar.html' %}
+  </div>
 <div class="container py-4">
 
-    <div class="text-center mb-4">
+    <!-- <div class="text-center mb-4">
         <h2 class="page-title">Daily Vehicle Running Status</h2>
         <p class="text-muted">Search vehicle → auto-fill type & class → enter trip details</p>
-    </div>
+    </div> -->
+   
 
     <div class="row justify-content-center">
         <div class="col-md-8">
