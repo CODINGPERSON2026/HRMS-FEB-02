@@ -166,7 +166,14 @@
     border-left: 4px solid var(--secondary-color);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   }
-  
+.sports-checkbox {
+  margin-right: 8px;
+}
+
+.form-check-label {
+  font-weight: 500;
+  color: #444;
+}
   .btn-submit {
     background: linear-gradient(135deg, var(--secondary-color), #6a0505);
     color: white;
@@ -2247,6 +2254,69 @@
                     </div>
                   </div>
 
+                  <!-- Add this after the Vehicle Details section in the Additional Information tab -->
+<div class="form-section">
+  <h3 class="section-header">
+    <i class="fas fa-running"></i> Sports & Games
+  </h3>
+
+  <div class="row">
+    <div class="col-md-12 mb-3">
+      <label class="form-label">Sports Played</label>
+      <div class="row">
+        <div class="col-md-4 mb-2">
+          <div class="form-check">
+            <input class="form-check-input sports-checkbox" type="checkbox" id="football" name="sports" value="Football">
+            <label class="form-check-label" for="football">Football</label>
+          </div>
+        </div>
+        <div class="col-md-4 mb-2">
+          <div class="form-check">
+            <input class="form-check-input sports-checkbox" type="checkbox" id="basketball" name="sports" value="Basketball">
+            <label class="form-check-label" for="basketball">Basketball</label>
+          </div>
+        </div>
+        <div class="col-md-4 mb-2">
+          <div class="form-check">
+            <input class="form-check-input sports-checkbox" type="checkbox" id="volleyball" name="sports" value="Volleyball">
+            <label class="form-check-label" for="volleyball">Volleyball</label>
+          </div>
+        </div>
+        <div class="col-md-4 mb-2">
+          <div class="form-check">
+            <input class="form-check-input sports-checkbox" type="checkbox" id="handball" name="sports" value="Handball">
+            <label class="form-check-label" for="handball">Handball</label>
+          </div>
+        </div>
+        <div class="col-md-4 mb-2">
+          <div class="form-check">
+            <input class="form-check-input sports-checkbox" type="checkbox" id="hockey" name="sports" value="Hockey">
+            <label class="form-check-label" for="hockey">Hockey</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12 mb-3">
+      <label for="otherSports" class="form-label">Add Other Games</label>
+      <input
+        type="text"
+        class="form-control"
+        id="otherSports"
+        placeholder="Enter other sports separated by commas (e.g., Cricket,Tennis,Swimming)"
+      />
+      <div class="error-message" id="otherSports-error">
+        Please separate sports with commas only. No spaces allowed between sports without commas.
+      </div>
+      <small class="form-text text-muted">
+        Enter additional sports separated by commas (e.g., Cricket,Tennis,Swimming)
+      </small>
+    </div>
+  </div>
+</div>
+
                   <div class="form-section">
                     <h3 class="section-header">
                       <i class="fas fa-user-plus"></i> Additional Personal
@@ -2897,7 +2967,12 @@
         pattern: /^[a-zA-Z0-9\s\-_.,()\/\n]*$/,
         message: "Only letters, numbers, spaces, and common punctuation are allowed",
         required: false
-      }
+      },
+      otherSports: {
+  pattern: /^[a-zA-Z]+(,[a-zA-Z]+)*$|^$/,
+  message: "Sports must be separated by commas only (no spaces). Example: Cricket,Tennis,Swimming",
+  required: false
+},
     };
 
     // Real-time validation function
@@ -3585,6 +3660,8 @@
         strengths: document.getElementById("strengths").value,
         weaknesses: document.getElementById("weaknesses").value,
 
+        sports: collectSportsData(),
+    otherSports: document.getElementById("otherSports").value,
         courses: collectTableData("coursesTable", [
           "course", "courseFrom", "courseTo", "courseInstitute", "courseGrading", "courseRemarks"
         ]),
@@ -3620,6 +3697,17 @@
       return data;
     }
 
+    function collectSportsData() {
+      const sports = [];
+      const checkboxes = document.querySelectorAll('.sports-checkbox:checked');
+      
+      checkboxes.forEach(checkbox => {
+        sports.push(checkbox.value);
+      });
+      
+      return sports;
+    }
+    
     function collectTableData(tableId, fieldNames) {
       const table = document.getElementById(tableId);
       const rows = table.querySelectorAll("tbody tr");
