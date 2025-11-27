@@ -70,20 +70,7 @@
           <span class="text-success">+11.2%</span>
         </div>
       </div>
-      <!-- <div class="col-lg-2 col-md-4 col-sm-6">
-        <div class="card p-3 text-center">
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#salesModal">CSD Earnings</button>
-;          <h3>$21445</h3>
         </div>
-      </div> -->
-      <!-- <div class="col-lg-2 col-md-4 col-sm-6">
-        <div class="card p-3 text-center">
-          <small class="text-muted">Profit This Week</small>
-          <h3>$5,544</h3>
-          <span class="text-success">+2.2%</span>
-      </div>
-      </div> -->
-    </div>
 
     <!-- Stats Row 2 -->
     <div class="row g-3 mb-4">
@@ -133,7 +120,7 @@
 {% include 'modals/salesmodal/salesModal.html' %}
 {% include 'modals/leaverequest/leave_request.html' %}
 
-<!-- Place this somewhere inside <body> -->
+
  
   
 
@@ -163,7 +150,7 @@ async function get_dets() {
     document.getElementById('locationCount').innerText = 'fetching...';
   }
 
-    setTimeout(hideFullLoader, 500); // Hide loader after 0.5s
+    hideFullLoader() // Hide loader after 0.5s
   }
 
 document.addEventListener('DOMContentLoaded', get_dets);

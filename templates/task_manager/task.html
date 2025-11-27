@@ -1,14 +1,192 @@
-{% extends "baseView.html" %} {% block content %}
+{% extends "baseView.html" %}
+{% block content %}
 <style>
   .wrapper {
     padding-left: 16rem;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     padding-top: 16px;
   }
+
+  /* Active button styling */
+  .active-btn {
+    background-color: #5889d2 !important;
+    color: #fff !important;
+  }
+  /* Smooth transition for form show/hide */
+#createTaskForm {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.35s ease;
+}
+
+/* Visible State */
+#createTaskForm.show {
+  opacity: 1;
+  max-height: 1000px; /* enough height to expand */
+}
+
+  
 </style>
+
 <div class="wrapper">
-  {% set header = "Task Management" %} {% set subscript = "Create tasks → View
-  tasks → Update tasks → Assign tasks" %} {% include 'navbar/navbar.html' %}
-</div>
+  {% set header = "Task Management" %}
+  {% set subscript = "Create tasks → View tasks → Update tasks → Assign tasks" %}
+  {% include 'navbar/navbar.html' %}
+
+  <!-- ================= Buttons Row ================= -->
+  <div class="container mt-4">
+    <div class="card shadow-sm p-3">
+      <div class="row g-2 align-items-center">
+
+        <!-- Create Task Button -->
+        <div class="col-auto">
+          <button id="btnCreateTask" class="btn btn-primary btn-md">
+            Create Task
+          </button>
+        </div>
+
+        <!-- View Tasks Button -->
+        <div class="col-auto">
+          <button id="btnViewTask" class="btn btn-primary btn-md">
+            View Tasks
+          </button>
+        </div>
+
+        <!-- Search Field -->
+        <div class="col-md-4 ms-auto">
+          <form method="GET">
+            <input type="text" name="query" class="form-control" placeholder="Search for a task...">
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Create Task Form (Initially Hidden) ================= -->
+  <div class="container mt-4" id="createTaskForm" style="display: none;">
+    <div class="card shadow-sm p-4">
+      <h4>Create New Task</h4>
+      <hr>
+
+      <form id="taskForm">
+
+        <div class="mb-3">
+          <label class="form-label">Task Name</label>
+          <input type="text" class="form-control" name="task_name">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" name="description"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Priority</label>
+          <select class="form-control" name="priority">
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Assigned To</label>
+          <input type="text" class="form-control" name="assigned_to">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Due Date</label>
+          <input type="date" class="form-control" name="due_date">
+        </div>
+
+        <button type="submit" class="btn btn-success">Save Task</button>
+
+      </form>
+    </div>
+  </div>
+
+</div> 
+
+
+<!-- ================= JavaScript to toggle form & highlight button ================= -->
+<script>
+
+  const btnCreate = document.getElementById("btnCreateTask");
+  const btnView = document.getElementById("btnViewTask");
+  const formDiv = document.getElementById("createTaskForm");
+ btnCreate.addEventListener("click", () => {
+  
+  // If visible -> hide it
+  if (formDiv.classList.contains("show")) {
+    formDiv.classList.remove("show");
+    btnCreate.classList.remove("active-btn");
+    return;
+  }
+
+  // else, show it
+  formDiv.classList.add("show");
+  btnCreate.classList.add("active-btn");
+  btnView.classList.remove("active-btn");
+});
+
+btnView.addEventListener("click", () => {
+  formDiv.classList.remove("show");
+  btnView.classList.add("active-btn");
+  btnCreate.classList.remove("active-btn");
+});
+  
+
+
+
+  btnCreate.addEventListener("click", () => {
+    formDiv.style.display = "block";
+    btnCreate.classList.add("active-btn");
+    btnView.classList.remove("active-btn");
+  });
+
+  btnView.addEventListener("click", () => {
+    formDiv.style.display = "none";
+    btnView.classList.add("active-btn");
+    btnCreate.classList.remove("active-btn");
+  });
+
+
+  // ===========================
+  //  SAVE TASK USING FETCH()
+  // ===========================
+  const taskForm = document.getElementById("taskForm");
+
+  taskForm.addEventListener("submit", async (e) => {
+    e.preventDefault();  // stop page reload
+
+    const data = {
+      task_name: taskForm.task_name.value,
+      description: taskForm.description.value,
+      priority: taskForm.priority.value,
+      assigned_to: taskForm.assigned_to.value,
+      due_date: taskForm.due_date.value,
+
+      // Extract from session:  
+      assigned_by: "{{ session['user_id'] }}"   // backend fills this
+    };
+
+    const response = await fetch("/task_manager/create-task", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (result.status === "success") {
+      alert("Task created successfully!");
+      taskForm.reset();
+      formDiv.style.display = "none";
+    } else {
+      alert("Error: " + result.message);
+    }
+  });
+</script>
 
 {% endblock %}
