@@ -688,6 +688,37 @@ def insert_dynamic_data(cursor, personnel_id, army_number, data):
 
     insert_sports_data(cursor, personnel_id, army_number, data)
 
+    
+@personnel_info.route('/sports_distribution_chart')
+def sports_distribution_chart():
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT 
+                sport_name,
+                COUNT(*) as count
+            FROM personnel_sports
+            GROUP BY sport_name
+            ORDER BY count DESC
+        """)
+        result = cursor.fetchall()
+        
+        sports_distribution = []
+        for row in result:
+            sports_distribution.append({
+                'sport': row['sport_name'],
+                'count': row['count']
+            })
+        
+        return jsonify({'sports_distribution': sports_distribution}), 200
+        
+    except Exception as e:
+        print(f"Error in sports distribution chart: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
 @personnel_info.route('/api/test', methods=['GET'])
 def test_connection():
     connection = get_db_connection()

@@ -6,9 +6,567 @@
   <meta charset="UTF-8">
   <title>SmartHR Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap 5 CSS CDN -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <style>
+    :root {
+      --sidebar-width: 280px;
+      --sidebar-collapsed-width: 70px;
+      --header-height: 100px;
+      --saffron: #FF9933;
+      --white: #FFFFFF;
+      --green: #138808;
+      --navy-blue: #1e3a8a;
+      --dark-blue: #2563eb;
+      --light-blue: #3b82f6;
+      --light-bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-dark: #1f2937;
+      --text-light: #6b7280;
+    }
+    
+    /* Hide the original sidebar from baseView.html */
+    .sidebar {
+      display: none;
+    }
+    
+    .dashboard-content {
+      margin-left: 0 !important;
+      padding: 0 !important;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    
+    /* New Layout */
+    .new-dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* New Sidebar Styles */
+    .new-sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .new-sidebar.collapsed {
+      width: var(--sidebar-collapsed-width);
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+      height: 70px;
+    }
+    
+    .sidebar-header h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      color: white;
+    }
+    
+    .new-sidebar.collapsed .sidebar-header h3 {
+      display: none;
+    }
+    
+    .toggle-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+    
+    .new-sidebar.collapsed .toggle-btn {
+      transform: rotate(180deg);
+    }
+    
+    .sidebar-menu {
+      padding: 20px 0;
+      flex: 1;
+    }
+    
+    .menu-item {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      margin: 4px 12px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    
+    .menu-item:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.3) 100%);
+      color: white;
+      transform: translateX(5px);
+    }
+    
+    .menu-item.active {
+      background: linear-gradient(135deg, var(--light-blue) 0%, var(--dark-blue) 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .menu-item i {
+      margin-right: 15px;
+      font-size: 1.3rem;
+      min-width: 24px;
+      text-align: center;
+    }
+    
+    .new-sidebar.collapsed .menu-item span {
+      display: none;
+    }
+    
+    .logout-menu-item {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      margin: 4px 12px;
+      border-radius: 10px;
+      font-weight: 500;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      cursor: pointer;
+    }
+    
+    .logout-menu-item:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: translateX(5px);
+    }
+    
+    /* Header Styles - Like your navbar */
+    .new-header {
+      height: var(--header-height);
+      background: linear-gradient(
+        180deg,
+        var(--saffron),
+        var(--white) 50%,
+        var(--green)
+      );
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      z-index: 900;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+    }
+    
+    .new-header.expanded {
+      left: var(--sidebar-collapsed-width);
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+    
+    .header-info {
+      display: flex;
+      flex-direction: column;
+      margin-left: 0;
+    }
+    
+    .welcome-text {
+      color: #000;
+      font-weight: 700;
+      font-size: 1.2rem;
+      line-height: 1.4;
+    }
+    
+    .unit-name {
+      color: #000;
+      font-weight: 600;
+      font-size: 0.95rem;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-top: var(--header-height);
+      margin-left: var(--sidebar-width);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 30px;
+      background: transparent;
+      min-height: calc(100vh - var(--header-height));
+      overflow-y: auto;
+    }
+    
+    .main-content.expanded {
+      margin-left: var(--sidebar-collapsed-width);
+    }
+    
+    /* Action Buttons Section - Professional Design */
+    .action-section {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      margin-bottom: 35px;
+      border: 1px solid #e2e8f0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .action-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--saffron) 33%, var(--white) 33%, var(--white) 66%, var(--green) 66%, var(--green) 100%);
+    }
+    
+    .action-section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+    
+    /* Buttons - Professional Style */
+    .btn {
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 14px 32px;
+      transition: all 0.3s ease;
+      border: none;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    
+    .btn-outline-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      border: none;
+    }
+    
+    .btn-outline-primary:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+    }
+    
+    .btn-warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      border: none;
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      margin-bottom: 35px;
+    }
+    
+    /* Card Styles - Enhanced Professional */
+    .card {
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #e2e8f0;
+      height: 100%;
+      position: relative;
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--light-blue) 0%, var(--dark-blue) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card:hover::before {
+      opacity: 1;
+    }
+    
+    .card h3 {
+      font-size: 2.2rem;
+      margin: 15px 0;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+    
+    .card .text-muted {
+      color: var(--text-light) !important;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .card .text-success {
+      color: #10b981 !important;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    
+    .card .text-danger {
+      color: #ef4444 !important;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    
+    .view-details {
+      background: linear-gradient(135deg, var(--light-blue) 0%, var(--dark-blue) 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+    
+    .view-details:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+    }
+    
+    /* Status Card */
+    .status-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .status-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--green) 100%);
+    }
+    
+    /* Status Dots */
+    .status-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .dot-orange {
+      background: #f59e0b;
+    }
+    
+    .dot-blue {
+      background: #3b82f6;
+    }
+    
+    .dot-green {
+      background: #10b981;
+    }
+    
+    .dot-red {
+      background: #ef4444;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .new-sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .new-sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      
+      .new-header {
+        left: 0 !important;
+        padding: 0 15px;
+      }
+      
+      .main-content {
+        margin-left: 0 !important;
+        padding: 20px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .header-info {
+        margin-left: 10px;
+      }
+      
+      .welcome-text {
+        font-size: 0.9rem;
+      }
+      
+      .unit-name {
+        font-size: 0.8rem;
+      }
+      
+      .mobile-menu-btn {
+        display: block;
+      }
+      
+      .action-section {
+        padding: 20px;
+      }
+    }
+    
+    .mobile-menu-btn {
+      display: none;
+      background: var(--light-blue);
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-right: 10px;
+    }
+    
+    /* Fullscreen Loader */
+    #fullscreenLoader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    
+    .loader {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f4f6;
+      border-top: 5px solid var(--light-blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Ensure all content is visible */
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+    
+    .main-content {
+      overflow-y: auto;
+      max-height: calc(100vh - var(--header-height));
+    }
+  </style>
 </head>
 <body>
   
@@ -17,228 +575,224 @@
     <div class="loader"></div>
   </div>
   
-  
-  <!-- Sidebar -->
-  <div class="dashboard-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1>UNIT NAME</h1>
-        <div class="d-flex align-items-center">
-          <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="User" class="avatar me-2">
-          <div>
-            <span id="welcometext" class="fw-bold" >Welcome Back,{{role}} {{username}}</span><br>
-          </div>
+  <!-- New Dashboard Layout -->
+  <div class="new-dashboard-container">
+    <!-- New Sidebar -->
+    <div class="new-sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h3>SmartHR</h3>
+        <button class="toggle-btn" id="sidebarToggle">
+          ←
+        </button>
+      </div>
+      
+      <div class="sidebar-menu">
+        <a href="{{ url_for('dashboard') }}" class="menu-item active">
+          <i>📊</i>
+          <span>Dashboard</span>
+        </a>
+        <a href="/weight_system" class="menu-item">
+          <i>⚖️</i>
+          <span>Weight Management</span>
+        </a>
+        <a href="/personnel_information" class="menu-item">
+          <i>👥</i>
+          <span>Personal Information</span>
+        </a>
+        <a href="{{ url_for('mt') }}" class="menu-item">
+          <i>🚛</i>
+          <span>MT</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i>💰</i>
+          <span>Accounts</span>
+        </a>
+        <a href="/apply_leave/" class="menu-item">
+          <i>🏖️</i>
+          <span>Apply Leave</span>
+        </a>
+        <a href="/task_manager/" class="menu-item">
+          <i>✅</i>
+          <span>Task Management</span>
+        </a>
+        <!-- Logout button directly in sidebar menu -->
+        <div class="logout-menu-item" id="logoutBtnSidebar">
+          <i>🚪</i>
+          <span>Logout</span>
         </div>
       </div>
-      <div class="top-bar-buttons d-flex align-items-center">
-        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">Assign personal</button>
-        <button id="leaveRequestsBtn" class="btn btn-warning ms-2">Leave Requests</button>
-      </div>
-    
     </div>
+    
+    <!-- New Header with Indian Flag Colors like your navbar -->
+    <div class="new-header" id="header">
+      <div class="header-content">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobileMenuToggle">
+            ☰
+          </button>
+          
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+      
+      <!-- Action Buttons Section -->
+      <div class="action-section">
+        <div class="header-info">
+          <div class="welcome-text">Welcome Back, {{role}} {{username}}</div>
+        </div>
+        <div class="action-section-title">
+          <span>⚡</span> Quick Actions
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
+            <span>👥</span> Assign Personnel
+          </button>
+          <button id="leaveRequestsBtn" class="btn btn-warning">
+            <span>📋</span> Leave Requests
+          </button>
+        </div>
+      </div>
 
-    <!-- Stats Row 1 -->
-    <div class="row g-3 mb-4">
-      <div class="col-lg-2 col-md-4 col-sm-6">
+      <!-- Stats Grid -->
+      <div class="stats-grid">
         <div class="card p-3 text-center">
           <small class="text-muted">Parade State</small>
           <h3>120/154</h3>
           <span class="text-success">+2.1%</span>
         </div>
-      </div>
-      <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="card p-3 text-center">
-          <small class="text-muted">Total No of Project's</small>
+          <small class="text-muted">Total Projects</small>
           <h3>90/125</h3>
           <span class="text-danger">-2.1%</span>
         </div>
-      </div>
-      <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="card p-3 text-center">
-          <small class="text-muted">Dets</small>
+          <small class="text-muted">Detachments</small>
           <h3 id="locationCount"></h3>
           <button id="viewDetailsBtn" class="view-details">View Details</button>
-          
-          {% include 'modals/detachmentModal/detachment.html'%}
-
         </div>
-      </div>
-      <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="card p-3 text-center">
           <small class="text-muted">BOO's</small>
           <h3>25/28</h3>
           <span class="text-success">+11.2%</span>
         </div>
-      </div>
-      <!-- <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="card p-3 text-center">
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#salesModal">CSD Earnings</button>
-;          <h3>$21445</h3>
-        </div>
-      </div> -->
-      <!-- <div class="col-lg-2 col-md-4 col-sm-6">
-        <div class="card p-3 text-center">
-          <small class="text-muted">Profit This Week</small>
-          <h3>$5,544</h3>
-          <span class="text-success">+2.2%</span>
-      </div>
-      </div> -->
-    </div>
-
-    <!-- Stats Row 2 -->
-    <div class="row g-3 mb-4">
-      <div class="col-lg-2 col-md-4 col-sm-6">
-        <div class="card p-3 text-center">
-          <small class="text-muted">Lve Application</small>
+          <small class="text-muted">Leave Applications</small>
           <h3>98</h3>
           <span class="text-success">+2.1%</span>
         </div>
-      </div>
-      <div class="col-lg-2 col-md-4 col-sm-6">
- ;       <div class="card p-3 text-center">
-          <small class="text-muted">New Arrival</small>
+        <div class="card p-3 text-center">
+          <small class="text-muted">New Arrivals</small>
           <h3>45/48</h3>
           <span class="text-danger">-11.2%</span>
         </div>
       </div>
-      
-    </div>
 
-    <!-- Status and Attendance -->
-    <div class="row g-3 mb-4">
-      <div class="col-lg-4">
-        <div class="card p-3">
-          <small class="text-muted">Man Power Status</small>
-          <div>Total Employee: <b>154</b></div>
-          <ul class="list-unstyled mt-3">
-            <li><span class="status-dot dot-orange"></span> Auth (48%) - 112</li>
-            <li><span class="status-dot dot-blue"></span> Hard Scale (20%) - 21</li>
-            <li><span class="status-dot dot-green"></span> Present State (22%) - 12</li>
-            <li><span class="status-dot dot-red"></span> On Lve (10%) - 4</li>
-            <li><span class="status-dot dot-red"></span> In DET (10%) - 4</li>
-            <li><span class="status-dot dot-red"></span> On TD (10%) - 4</li>
-          </ul>
-          <div class="mt-3"><b>Top Performer:</b> Daniel Esbella, IOS Developer (Performance 99%)</div>
-        </div>
-      </div>
-      <!--  -->
       
     </div>
   </div>
 
-  
+  {% include 'modals/detachmentModal/detachment.html' %}
+  {% include 'modals/personnelModal/personal_modal.html' %}
+  {% include 'modals/salesmodal/salesModal.html' %}
+  {% include 'modals/leaverequest/leave_request.html' %}
 
-
-{% include 'modals/personnelModal/personal_modal.html' %}
-{% include 'modals/salesmodal/salesModal.html' %}
-{% include 'modals/leaverequest/leave_request.html' %}
-
-<!-- Place this somewhere inside <body> -->
- 
-  
-
-
-
-
-<script>
-    // 🔥 Fullscreen loader hide after API fetch completes
-function hideFullLoader() {
-  const fullLoader = document.getElementById("fullscreenLoader");
-  if (fullLoader) fullLoader.style.display = "none";
-}
-
-  // ------------------ Detachment Modal ------------------
-
-  // ------------------ Dashboard Counts ------------------
-async function get_dets() {
-  try {
-    const res = await fetch('/get_dets');
-    if (!res.ok) throw new Error("Network error");
-    const data = await res.json();
-    document.getElementById('locationCount').innerText = data.count;
-
-  } catch (err) {
-    console.error("Error fetching location count:", err);
-    document.getElementById('locationCount').innerText = 'Waiting...';
-  }
-
-    setTimeout(hideFullLoader, 500); // Hide loader after 0.5s
-  }
-
-document.addEventListener('DOMContentLoaded', get_dets);
-
-  // ------------------ Leave Requests Modal ------------------
-  document.getElementById("leaveRequestsBtn").addEventListener("click", async function() {
-    const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
-    modal.show();
-    await loadLeaveRequests();
-  });
-
-  async function loadLeaveRequests() {
-    const spinner = document.getElementById("leaveRequestsSpinner");
-    const table = document.getElementById("leaveRequestsTable");
-    const tbody = document.getElementById("leaveRequestsTableBody");
-
-    spinner.classList.remove("d-none");
-    table.classList.add("d-none");
-    tbody.innerHTML = "";
-
-    try {
-      const res = await fetch("/apply_leave/get_leave_requests");
-      if (!res.ok) throw new Error("Network error");
-      const result = await res.json();
-
-      result.data.forEach(row => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${row.army_number}</td>
-            <td>${row.leave_type}</td>
-            <td>${row.leave_days}</td>
-            <td>${row.request_status}</td>
-            <td>${row.remarks}</td>
-            <td>${row.created_at}</td>
-            <td>${row.actions || row.request_status}</td>
-          </tr>
-        `;
-      });
-
-      spinner.classList.add("d-none");
-      table.classList.remove("d-none");
-
-    } catch (err) {
-      console.error(err);
-      spinner.innerHTML = `<p class="text-danger fw-bold mt-3">❌ Failed to load leave requests</p>`;
-    }
-  }
-
-  // ------------------ Update Leave Status ------------------
-  async function updateLeaveStatus(leaveId, status) {
-    try {
-      const res = await fetch('/apply_leave/update_leave_status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: leaveId, status: status })
-      });
-      const result = await res.json();
-      if (result.status === 'success') {
-        await loadLeaveRequests(); // Refresh table after update
-      } else {
-        alert("Failed to update leave status: " + result.message);
+  <script>
+    // Sidebar toggle functionality
+    const sidebar = document.getElementById('sidebar');
+    const header = document.getElementById('header');
+    const mainContent = document.getElementById('mainContent');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const logoutBtnSidebar = document.getElementById('logoutBtnSidebar');
+    
+    sidebarToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('collapsed');
+      header.classList.toggle('expanded');
+      mainContent.classList.toggle('expanded');
+    });
+    
+    mobileMenuToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('mobile-open');
+    });
+    
+    // Logout functionality
+    function handleLogout() {
+      if(confirm('Are you sure you want to logout?')) {
+        window.location.href = '/logout';
       }
-    } catch (err) {
-      console.error(err);
-      alert("Error updating leave status.");
     }
-  }
+    
+    logoutBtnSidebar.addEventListener('click', handleLogout);
+    
+    // 🔥 Fullscreen loader hide after API fetch completes
+    function hideFullLoader() {
+      const fullLoader = document.getElementById("fullscreenLoader");
+      if (fullLoader) fullLoader.style.display = "none";
+    }
+
+    // ------------------ Dashboard Counts ------------------
+    async function get_dets() {
+      try {
+        const res = await fetch('/get_dets');
+        if (!res.ok) throw new Error("Network error");
+        const data = await res.json();
+        document.getElementById('locationCount').innerText = data.count;
+      } catch (err) {
+        console.error("Error fetching location count:", err);
+        document.getElementById('locationCount').innerText = 'Waiting...';
+      }
+      setTimeout(hideFullLoader, 500);
+    }
+
+    document.addEventListener('DOMContentLoaded', get_dets);
+
+    // ------------------ Leave Requests Modal ------------------
+    document.getElementById("leaveRequestsBtn").addEventListener("click", async function() {
+      const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
+      modal.show();
+      await loadLeaveRequests();
+    });
+
+    async function loadLeaveRequests() {
+      const spinner = document.getElementById("leaveRequestsSpinner");
+      const table = document.getElementById("leaveRequestsTable");
+      const tbody = document.getElementById("leaveRequestsTableBody");
+
+      spinner.classList.remove("d-none");
+      table.classList.add("d-none");
+      tbody.innerHTML = "";
+
+      try {
+        const res = await fetch("/apply_leave/get_leave_requests");
+        if (!res.ok) throw new Error("Network error");
+        const result = await res.json();
+
+        result.data.forEach(row => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${row.army_number}</td>
+              <td>${row.leave_type}</td>
+              <td>${row.leave_days}</td>
+              <td>${row.request_status}</td>
+              <td>${row.remarks}</td>
+              <td>${row.created_at}</td>
+              <td>${row.actions || row.request_status}</td>
+            </tr>
+          `;
+        });
+
+        spinner.classList.add("d-none");
+        table.classList.remove("d-none");
+
+      } catch (err) {
+        console.error(err);
+        spinner.innerHTML = `<p class="text-danger fw-bold mt-3">❌ Failed to load leave requests</p>`;
+      }
+    }
   </script>
-
-
-
-
-  <!-- Add this inside your <script> tag -->
-
-
-
 </body>
 </html>
 {% endblock %}
