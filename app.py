@@ -354,6 +354,8 @@ def submit_running():
 
 @app.route('/api/assigned_alarm')
 def assigned_alarm():
+    conn = None
+    cursor = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -381,8 +383,10 @@ ORDER BY ad.assigned_on ASC '''
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 
