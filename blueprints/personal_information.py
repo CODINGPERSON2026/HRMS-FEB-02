@@ -61,7 +61,34 @@ def dashboard():
         cursor.close()
         connection.close()
 
-
+def insert_sports_data(cursor, personnel_id, army_number, data):
+    """Insert sports data into personnel_sports table"""
+    
+    sports_list = data.get('sports', [])
+    for sport in sports_list:
+        cursor.execute("""
+            INSERT INTO personnel_sports (personnel_id, army_number, sport_type, sport_name)
+            VALUES (%s, %s, %s, %s)
+        """, (
+            personnel_id, 
+            army_number, 
+            sport,
+            sport
+        ))
+    
+    other_sports = data.get('otherSports', '')
+    if other_sports:
+        additional_sports = [sport.strip() for sport in other_sports.split(',') if sport.strip()]
+        for sport in additional_sports:
+            cursor.execute("""
+                INSERT INTO personnel_sports (personnel_id, army_number, sport_type, sport_name)
+                VALUES (%s, %s, %s, %s)
+            """, (
+                personnel_id, 
+                army_number, 
+                'Other',
+                sport
+            ))
 
 @personnel_info.route('/get_total_personnel_count_and_courses')
 def total_army_personnel__and_courses():
@@ -349,7 +376,7 @@ def create_personnel():
 
     try:
         data = request.get_json()
-        print("Received data:", json.dumps(data, indent=2))
+        print("Received data:", data)
         
         def get_value(key, default=None):
             value = data.get(key, default)
@@ -659,6 +686,39 @@ def insert_dynamic_data(cursor, personnel_id, army_number, data):
                 discord.get('discordSanction', '')
             ))
 
+    insert_sports_data(cursor, personnel_id, army_number, data)
+
+    
+@personnel_info.route('/sports_distribution_chart')
+def sports_distribution_chart():
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT 
+                sport_name,
+                COUNT(*) as count
+            FROM personnel_sports
+            GROUP BY sport_name
+            ORDER BY count DESC
+        """)
+        result = cursor.fetchall()
+        
+        sports_distribution = []
+        for row in result:
+            sports_distribution.append({
+                'sport': row['sport_name'],
+                'count': row['count']
+            })
+        
+        return jsonify({'sports_distribution': sports_distribution}), 200
+        
+    except Exception as e:
+        print(f"Error in sports distribution chart: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
 @personnel_info.route('/api/test', methods=['GET'])
 def test_connection():
     connection = get_db_connection()
@@ -985,6 +1045,11 @@ def search_personnel(army_number):
             SELECT * FROM marital_discord_cases WHERE personnel_id = %s ORDER BY sr_no
         """, (personnel_id,))
         discord_cases = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT * FROM personnel_sports WHERE personnel_id = %s ORDER BY sport_type, sport_name
+                """, (personnel_id,))
+        sports_data = cursor.fetchall()
         
         return jsonify({
             'success': True,
@@ -999,7 +1064,8 @@ def search_personnel(army_number):
                 'family': family,
                 'children': children,
                 'mobiles': mobiles,
-                'discord_cases': discord_cases
+                'discord_cases': discord_cases,
+                'sports': sports_data
             }
         }), 200
     
@@ -1212,7 +1278,8 @@ def delete_related_records(cursor, personnel_id):
     tables = [
         'courses', 'units_served', 'loans', 'punishments', 
         'detailed_courses', 'leave_details', 'family_members', 
-        'children', 'mobile_phones', 'marital_discord_cases'
+        'children', 'mobile_phones', 'marital_discord_cases',
+        'personnel_sports'
     ]
     
     for table in tables:
