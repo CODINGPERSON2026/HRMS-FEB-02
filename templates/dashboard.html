@@ -1,226 +1,254 @@
 {% extends "baseView.html" %}
 {% block content %}
 
-  <style>
-    :root {
-      --light-blue: #3b82f6;
-      --dark-blue: #2563eb;
-      --text-dark: #1f2937;
-      --text-light: #6b7280;
-    }
+<style>
+  :root {
+    --light-blue: #3b82f6;
+    --dark-blue: #2563eb;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+  }
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f0f4f8;
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
 
-    /* Hide original sidebar from baseView.html */
-    
+  /* Hide original sidebar if present */
+  .sidebar, .dashboard-content > .container { margin-left: 0 !important; }
 
-    /* Main Content - Full width, no offset */
-    .main-content {
-      min-height: 100vh;
-      background: transparent;
-      overflow-y: auto;
-    }
+  /* Dashboard Wrapper */
+  .dashboard-content {
+    position: relative;
+    min-height: 100vh;
+  }
 
-    /* Action Buttons Section */
-    .action-section {
-      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-      margin-bottom: 35px;
-      border: 1px solid #e2e8f0;
-      position: relative;
-      overflow: hidden;
-    }
+  /* Local Content Loader (only covers dashboard area) */
+  .content-loader {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(248, 250, 252, 0.97);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    border-radius: 20px;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
 
-    .action-section::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 5px;
-      background: linear-gradient(90deg, #FF9933 0%, #FF9933 33%, #FFFFFF 33%, #FFFFFF 66%, #138808 66%);
-    }
+  .content-loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 
-    .action-section-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #1e293b;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #e2e8f0;
+    border-top: 6px solid var(--light-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
 
-    .action-buttons {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
+  .loader-text {
+    font-size: 1.2rem;
+    color: #475569;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
 
-    .btn {
-      border-radius: 12px;
-      font-weight: 600;
-      padding: 14px 32px;
-      border: none;
-      font-size: 1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 
-    .btn-outline-primary {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      color: white;
-    }
+  /* Main Content */
+  .main-content {
+    padding: 30px;
+    min-height: 100vh;
+    opacity: 0; /* Hidden until loader is removed */
+    transition: opacity 0.6s ease;
+  }
 
-    .btn-outline-primary:hover {
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
-    }
+  .main-content.loaded {
+    opacity: 1;
+  }
 
-    .btn-warning {
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      color: white;
-    }
+  /* Action Section */
+  .action-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    margin-bottom: 35px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+  }
 
-    .btn-warning:hover {
-      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
-    }
+  .action-section::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #ff9933 0%, #ff9933 33%, #ffffff 33%, #ffffff 66%, #138808 66%);
+  }
 
-    /* Stats Grid & Cards */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 25px;
-      margin-bottom: 35px;
-    }
+  .action-section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-    .card {
-      border: none;
-      border-radius: 20px;
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
-      overflow: hidden;
-      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-      border: 1px solid #e2e8f0;
-      height: 100%;
-      position: relative;
-      text-align: center;
-      padding: 20px;
-    }
+  .action-buttons {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--light-blue) 0%, var(--dark-blue) 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
+  .btn {
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 14px 32px;
+    border: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
 
-    .card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-    }
+  .btn-outline-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+  }
 
-    .card:hover::before { opacity: 1; }
+  .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+  }
 
-    .card h3 {
-      font-size: 2.2rem;
-      margin: 15px 0;
-      font-weight: 800;
-      color: var(--text-dark);
-    }
+  .btn-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+  }
 
-    .card .text-muted {
-      color: var(--text-light) !important;
-      font-weight: 600;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+  .btn-warning:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+  }
 
-    .card .text-success { color: #10b981 !important; font-weight: 700; font-size: 0.9rem; }
-    .card .text-danger { color: #ef4444 !important; font-weight: 700; font-size: 0.9rem; }
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    margin-bottom: 35px;
+  }
 
-    .view-details {
-      background: linear-gradient(135deg, var(--light-blue) 0%, var(--dark-blue) 100%);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      margin-top: 8px;
-      transition: all 0.3s ease;
-    }
+  .card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    padding: 20px;
+    position: relative;
+  }
 
-    .view-details:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
-    }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--light-blue) 0%, var(--dark-blue) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
 
-    /* Fullscreen Loader */
-    #fullscreenLoader {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.95);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
+  .card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  }
 
-    .loader {
-      width: 50px;
-      height: 50px;
-      border: 5px solid #f3f4f6;
-      border-top: 5px solid var(--light-blue);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+  .card:hover::before { opacity: 1; }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+  .card h3 {
+    font-size: 2.2rem;
+    margin: 15px 0;
+    font-weight: 800;
+    color: var(--text-dark);
+  }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .main-content { padding: 20px; }
-      .action-buttons { flex-direction: column; }
-      .action-section-title { font-size: 1.2rem; }
-    }
-  </style>
-  <div class="dashboard-content">
+  .card .text-muted {
+    color: var(--text-light) !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 
-    
+  .card .text-success { color: #10b981 !important; font-weight: 700; font-size: 0.9rem; }
+  .card .text-danger { color: #ef4444 !important; font-weight: 700; font-size: 0.9rem; }
 
-  <!-- Main Content Area -->
-  <div class="main-content">
-    
-    <!-- Welcome + Quick Actions -->
+  .view-details {
+    background: linear-gradient(135deg, var(--light-blue) 0%, var(--dark-blue) 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-top: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .view-details:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .main-content { padding: 20px; }
+    .action-buttons { flex-direction: column; }
+    .action-section-title { font-size: 1.2rem; }
+  }
+</style>
+
+<!-- Dashboard with Local Loader -->
+<div class="dashboard-content">
+
+  <!-- Local Loader (only inside dashboard-content) -->
+  <div class="content-loader" id="contentLoader">
+    <div class="spinner"></div>
+    <div class="loader-text">Loading your dashboard...</div>
+  </div>
+
+  <!-- Main Content (initially hidden) -->
+  <div class="main-content" id="mainContent">
     <div class="action-section">
       <h2 style="margin: 0 0 10px 0; color: #1e293b; font-weight: 700;">
         Welcome Back, {{ role }} {{ username }}
       </h2>
-      <div class="action-section-title">
-        Quick Actions
-      </div>
+      <div class="action-section-title">Quick Actions</div>
       <div class="action-buttons">
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
           Assign Personnel
@@ -230,8 +258,7 @@
         </button>
       </div>
     </div>
-    
-    <!-- Stats Grid -->
+
     <div class="stats-grid">
       <div class="card">
         <small class="text-muted">Parade State</small>
@@ -264,91 +291,92 @@
         <span class="text-danger">-11.2%</span>
       </div>
     </div>
-
   </div>
-
 </div>
-  <!-- Modals -->
-  {% include 'modals/alarm/alarm.html'%}
-  {% include 'modals/detachmentModal/detachment.html' %}
-  {% include 'modals/personnelModal/personal_modal.html' %}
-  {% include 'modals/salesmodal/salesModal.html' %}
-  {% include 'modals/leaverequest/leave_request.html' %}
-  
-  <script>
-    // Hide loader
-    function hideFullLoader() {
-      const loader = document.getElementById("fullscreenLoader");
-      if (loader) loader.style.display = "none";
-    }
-    
-    // Fetch detachment count
-    async function get_dets() {
-      try {
-        const res = await fetch('/get_dets');
-        if (!res.ok) throw new Error("Network error");
-        const data = await res.json();
-        document.getElementById('locationCount').innerText = data.count;
-      } catch (err) {
-        console.error("Error fetching detachments:", err);
-        document.getElementById('locationCount').innerText = '—';
-      }
-      //  finally {
-      //   setTimeout(hideFullLoader, 500);
-      // }
-    }
 
-    document.addEventListener('DOMContentLoaded', get_dets);
+<!-- Modals -->
+{% include 'modals/alarm/alarm.html' %}
+{% include 'modals/detachmentModal/detachment.html' %}
+{% include 'modals/personnelModal/personal_modal.html' %}
+{% include 'modals/salesmodal/salesModal.html' %}
+{% include 'modals/leaverequest/leave_request.html' %}
 
-    // Leave Requests Modal
-    document.getElementById("leaveRequestsBtn")?.addEventListener("click", async () => {
-      const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
-      modal.show();
-      await loadLeaveRequests();
-    });
+<script>
+  // References
+  const contentLoader = document.getElementById("contentLoader");
+  const mainContent = document.getElementById("mainContent");
 
-    async function loadLeaveRequests() {
-      const spinner = document.getElementById("leaveRequestsSpinner");
-      const table = document.getElementById("leaveRequestsTable");
-      const tbody = document.getElementById("leaveRequestsTableBody");
+  // This function will be called when ALL async operations are done
+  function hideLoaderAndShowContent() {
+    contentLoader.classList.add("hidden");
+    mainContent.classList.add("loaded");
+  }
 
-      if (!spinner || !table || !tbody) return;
-
-      spinner.classList.remove("d-none");
-      table.classList.add("d-none");
-      tbody.innerHTML = "";
-
-      try {
-        const res = await fetch("/apply_leave/get_leave_requests");
-        if (!res.ok) throw new Error("Network error");
-        const result = await res.json();
-
-        result.data.forEach(row => {
-          tbody.innerHTML += `
-            <tr>
-              <td>${row.army_number}</td>
-              <td>${row.leave_type}</td>
-              <td>${row.leave_days}</td>
-              <td>${row.request_status}</td>
-              <td>${row.remarks}</td>
-              <td>${row.created_at}</td>
-              <td>${row.actions || row.request_status}</td>
-            </tr>
-          `;
-        });
-
-        spinner.classList.add("d-none");
-        table.classList.remove("d-none");
-
-      } catch (err) {
-        console.error(err);
-        spinner.innerHTML = `<p class="text-danger fw-bold mt-3">Failed to load leave requests</p>`;
-      }
+  // Fetch detachment count
+  async function loadDashboardData() {
+    try {
+      const res = await fetch('/get_dets');
+      if (!res.ok) throw new Error("Failed to fetch detachments");
+      const data = await res.json();
+      document.getElementById('locationCount').innerText = data.count || '—';
     } catch (err) {
-      console.error(err);
-      alert("Error updating leave status.");
+      console.error("Error loading detachments:", err);
+      document.getElementById('locationCount').innerText = '—';
+    } finally {
+      // All promises are settled → now hide loader
+      hideLoaderAndShowContent();
     }
   }
-  </script>
+
+  // Start loading when page is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    loadDashboardData();
+  });
+
+  // Leave Requests Button
+  document.getElementById("leaveRequestsBtn")?.addEventListener("click", async () => {
+    const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
+    modal.show();
+    await loadLeaveRequests();
+  });
+
+  async function loadLeaveRequests() {
+    const spinner = document.getElementById("leaveRequestsSpinner");
+    const table = document.getElementById("leaveRequestsTable");
+    const tbody = document.getElementById("leaveRequestsTableBody");
+
+    if (!spinner || !table || !tbody) return;
+
+    spinner.classList.remove("d-none");
+    table.classList.add("d-none");
+    tbody.innerHTML = "";
+
+    try {
+      const res = await fetch("/apply_leave/get_leave_requests");
+      if (!res.ok) throw new Error("Network error");
+      const result = await res.json();
+
+      result.data.forEach(row => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${row.army_number}</td>
+            <td>${row.leave_type}</td>
+            <td>${row.leave_days}</td>
+            <td>${row.request_status}</td>
+            <td>${row.remarks}</td>
+            <td>${row.created_at}</td>
+            <td>${row.actions || row.request_status}</td>
+          </tr>
+        `;
+      });
+
+      spinner.classList.add("d-none");
+      table.classList.remove("d-none");
+    } catch (err) {
+      console.error(err);
+      spinner.innerHTML = `<p class="text-danger fw-bold mt-3">Failed to load leave requests</p>`;
+    }
+  }
+</script>
 
 {% endblock %}
