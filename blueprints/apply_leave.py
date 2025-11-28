@@ -1,5 +1,5 @@
 from imports import *
-from blueprints.personal_information import DB_CONFIG
+from db_config import get_db_connection
 
 
 leave_bp = Blueprint('apply_leave', __name__, url_prefix='/apply_leave')
@@ -15,7 +15,7 @@ def get_leave_details():
         return jsonify({"success": False, "message": "Army number missing"}), 400
 
     try:
-        conn = mysql.connector.connect(**DB_CONFIG)
+        conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
         cursor.execute("""
@@ -87,7 +87,7 @@ def search_personnel():
         return jsonify([])
 
     try:
-        conn = mysql.connector.connect(**DB_CONFIG)
+        conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
         # Search by army number (exact or partial)

@@ -1,5 +1,5 @@
 from imports import *
-from blueprints.personal_information import get_db_connection
+from db_config  import get_db_connection
 dashboard_bp =  Blueprint('dasboard',__name__,url_prefix='/stats')
 
 @dashboard_bp.route('/get_detachment_details')
