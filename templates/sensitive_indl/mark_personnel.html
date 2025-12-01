@@ -1,0 +1,257 @@
+{% extends "baseView.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mark Sensitive Personnel</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f6fa;
+            padding: 30px;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .search-card, .mark-card {
+            border-radius: 15px;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+
+        .selected-row {
+            background-color: #d0ebff !important;
+        }
+
+        .btn-primary {
+            border-radius: 30px;
+            padding: 8px 25px;
+        }
+
+        .btn-success {
+            border-radius: 30px;
+        }
+
+        textarea {
+            border-radius: 10px !important;
+        }
+
+        .container {
+            padding-left: 12rem;
+        }
+        .sensitive-card .card {
+            border-left: 6px solid #d9534f;
+            border-radius: 10px;
+            padding: 12px;
+            transition: 0.2s;
+        }
+
+        .sensitive-card .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+
+        .alert-badge {
+            background: #d9534f;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .card-img-top {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h2 class="text-center mb-4 fw-bold">🔐 Mark Personnel as Sensitive</h2>
+
+    <!-- Search Panel -->
+    <div class="card shadow search-card p-4">
+        <div class="row align-items-center">
+            <div class="col-md-9">
+                <label class="form-label fw-semibold">Search Personnel by Name</label>
+                <div class="input-group">
+                    <span class="input-group-text">🔍</span>
+                    <input type="text" id="search_name" class="form-control" placeholder="Enter name">
+                </div>
+            </div>
+
+            <div class="col-md-3 mt-3 mt-md-0 text-end">
+                <button id="searchBtn" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsSection" class="mt-4" style="display:none;">
+        <div class="card shadow p-3">
+            <h5 class="fw-bold mb-3">Search Results</h5>
+
+            <table class="table table-hover table-bordered" id="resultTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Select</th>
+                        <th>Name</th>
+                        <th>rank</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Mark Sensitive -->
+    <div class="card shadow mark-card p-4 mt-4">
+        <form id="markForm" action="/mark_sensitive" method="POST">
+            <input type="hidden" name="army_number" id="army_number">
+
+            <h5 class="fw-bold">Reason for Marking Sensitive</h5>
+            <textarea class="form-control mt-2" name="reason" rows="3" required placeholder="Enter reason..."></textarea>
+
+            <div class="text-end mt-3">
+                <button type="submit" class="btn btn-success">Mark Sensitive</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="mt-4">
+
+    <h3 class="fw-bold mb-3">Recently Marked Sensitive Personnel</h3>
+
+    <!-- Filter Dropdown -->
+    <div class="d-flex justify-content-end mb-3">
+        <select id="filterCount" class="form-select w-auto">
+            <option value="5">Show 5</option>
+            <option value="10">Show 10</option>
+            <option value="25">Show 25</option>
+            <option value="50">Show 50</option>
+        </select>
+    </div>
+
+    <!-- Container for cards -->
+     
+    <div id="sensitiveContainer" class="row gy-3">
+        {% for s in sensitive_list %}
+        <div class="col-md-3 mb-3 sensitive-card">
+        <div class="card shadow-sm">
+
+            <span class="alert-badge">SENSITIVE</span>
+
+            <img src="/static/photos/{{ s.army_number }}.jpeg"
+                class="card-img-top"
+                onerror="this.src='/static/photos/default.jpeg';">
+
+            <h6 class="fw-bold mt-2">{{ s.name }} ({{ s.rank }})</h6>
+
+            <p class="m-0"><small>Army No: <b>{{ s.army_number }}</b></small></p>
+            <p class="m-0"><small>Reason: <b>{{ s.reason }}</b></small></p>
+        </div>
+       </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+
+</div>
+
+<script>
+
+    // ----------------- Search Button -----------------
+    document.getElementById("searchBtn").addEventListener("click", function() {
+        let name = document.getElementById("search_name").value.trim();
+        console.log("search personnel");
+        if (!name) {
+            alert("Enter a name to search!");
+            return;
+        }
+
+        fetch("/search_personnel", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ name: name })
+        })
+        .then(response => response.json())
+        .then(data => {
+            let tbody = document.querySelector("#resultTable tbody");
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+                alert("No personnel found!");
+                document.getElementById("resultsSection").style.display = "none";
+                return;
+            }
+
+            data.forEach(person => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td><input type="radio" name="select_person" value="${person.army_number}"></td>
+                    <td>${person.name}</td>
+                    <td>${person.rank}</td>
+                `;
+
+                row.addEventListener("click", () => selectRow(person.army_number, row));
+                tbody.appendChild(row);
+            });
+
+            document.getElementById("resultsSection").style.display = "block";
+        });
+    });
+
+    // ----------------- Helper Functions -----------------
+
+    function selectRow(army_number, row) {
+        document.querySelectorAll("#resultTable tbody tr")
+            .forEach(tr => tr.classList.remove("selected-row"));
+
+        row.classList.add("selected-row");
+
+        document.querySelector(`input[name='select_person'][value='${army_number}']`).checked = true;
+
+        document.getElementById("army_number").value = army_number;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+    const filter = document.getElementById("filterCount");
+    const cards = [...document.querySelectorAll(".sensitive-card")];
+
+    function applyFilter() {
+        let value = filter.value;
+
+        cards.forEach((card, index) => {
+            if (value === "all" || index < value) {
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+
+    filter.addEventListener("change", applyFilter);
+   });
+
+
+
+</script>
+
+</body>
+</html>
+
+{% endblock %}
