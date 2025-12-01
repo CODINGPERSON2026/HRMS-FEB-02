@@ -243,71 +243,88 @@ def get_pending_interview_list():
 @app.route('/assign_personnel', methods=['POST'])
 def assign_personnel():
     data = request.get_json()
-    print("data", data)
 
     personnel_ids = data.get('army_number', [])
-    location_id = data.get('det_id')  # Can be det_id or posting branch
-    action_type = data.get('action')  # 🔥 New field (det or posting)
+    action_type = data.get('status', '').lower()
+    remarks = data.get('remarks', '')
 
-    if not personnel_ids or not location_id or not action_type:
+    if not personnel_ids or not action_type:
         return jsonify({"error": "Missing data"}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
     try:
-        # ============================
-        #  CASE 1: DETACHMENT
-        # ============================
-        if action_type == "det":
+        # -----------------------------
+        # STEP 1: VALIDATION FIRST
+        # -----------------------------
+        for pid in personnel_ids:
+            cursor.execute("""
+    SELECT detachment_status, posting_status, td_status
+    FROM personnel
+    WHERE army_number=%s
+""", (pid,))
+        status = cursor.fetchone()
+        if not status:
+            return jsonify({"error": f"{pid} not found"}), 404
 
-            for pid in personnel_ids:
+# Convert values safely
+        det_flag = int(status['detachment_status']) if status['detachment_status'] else 0
+        post_flag = int(status['posting_status']) if status['posting_status'] else 0
+        td_flag = int(status['td_status']) if status['td_status'] else 0
+
+# Prevent duplicate assignment
+        if action_type == "det" and det_flag == 1:
+            return jsonify({"error": f"{pid} is already in Detachment"}), 400
+
+        if action_type == "posting" and post_flag == 1:
+            return jsonify({"error": f"{pid} is already Posted"}), 400
+
+        if action_type == "td" and td_flag == 1:
+            return jsonify({"error": f"{pid} is already on TD"}), 400
+
+
+        # -----------------------------
+        # STEP 2: IF VALID → APPLY ACTION TO ALL
+        # -----------------------------
+        for pid in personnel_ids:
+
+            if action_type == "det":
                 cursor.execute("""
                     INSERT INTO assigned_det (army_number, det_id)
                     VALUES (%s, %s)
-                """, (pid, location_id))
+                """, (pid, remarks))
 
-            cursor.executemany("""
-                UPDATE personnel
-                SET detachment_status = 1
-                WHERE army_number = %s
-            """, [(pid,) for pid in personnel_ids])
+                cursor.execute("UPDATE personnel SET detachment_status=1 WHERE army_number=%s", (pid,))
 
-
-        # ============================
-        #  CASE 2: POSTING
-        # ============================
-        elif action_type == "posting":
-
-            for pid in personnel_ids:
+            elif action_type == "posting":
                 cursor.execute("""
                     INSERT INTO posting_details_table (army_number, action_type, posting_date)
                     VALUES (%s, %s, NOW())
-                """, (pid, location_id))  # you can change action_type to location_id label if needed
+                """, (pid, remarks))
 
-            cursor.executemany("""
-                UPDATE personnel
-                SET posting_status = 1
-                WHERE army_number = %s
-            """, [(pid,) for pid in personnel_ids])
+                cursor.execute("UPDATE personnel SET posting_status=1 WHERE army_number=%s", (pid,))
 
+            elif action_type == "td":
+                cursor.execute("""
+                    INSERT INTO td_table (army_number, remarks)
+                    VALUES (%s, %s)
+                """, (pid, remarks))
 
-        else:
-            return jsonify({"error": "Invalid action type"}), 400
+                cursor.execute("UPDATE personnel SET td_status=1 WHERE army_number=%s", (pid,))
 
-
-        # Commit if no issues
         conn.commit()
-        return jsonify({"message": "Personnel assigned successfully!"})
+        return jsonify({"message": f"{action_type.upper()} Assigned Successfully"}), 200
 
     except Exception as e:
         conn.rollback()
-        print("❌ Error:", e)
-        return jsonify({"error": "Assignment failed"}), 500
+        return jsonify({"error": str(e)}), 500
 
     finally:
         cursor.close()
         conn.close()
+
+
 
 
 @app.route("/get_sales_data")
