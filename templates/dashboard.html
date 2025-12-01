@@ -294,53 +294,45 @@
       </div>
     </div>
 
-    <div class="stats-grid">
+<div class="stats-grid">
 
-      <!-- First Row Cards -->
-      <div class="card" style="cursor:pointer" id="overAllParadeState">
-        <small class="text-muted">Parade State</small>
-        <h3>120/154</h3>
-      </div>
-    
-      <div class="card" style="cursor:pointer" id="interview-card">
-        <small class="text-muted">Interview Pending</small>
-        <h3>
-          <span id="interview-Count"></span><span>/</span><span id="total-count"></span>
-        </h3>
-        <span id="interview%" class="text-danger">-2.1%</span>
-      </div>
-    
-      <div class="card">
-        <small class="text-muted">Total Projects</small>
-        <h3>90/125</h3>
-      </div>
-    
-      <div class="card" id="viewDetailsBtn" style="cursor:pointer">
-        <small class="text-muted">Detachments</small>
-        <h3 id="locationCount">—</h3>
-      </div>
-    
-      <!-- Second Row Cards -->
-      <div class="card p-3 text-center" id="openBoardDetails">
-        <small class="text-muted">BOO's</small>
-        <h3>98</h3>
-      </div>
-    
-      <div class="card p-3 text-center">
-        <small class="text-muted">New Arrival</small>
-        <h3>45/48</h3>
-      </div>
-    
-      <div class="card p-3 text-center" style="cursor:pointer" id="openSensitive">
-        <small class="text-muted">Sensitive Indl</small>
-        <h3>4</h3>
-      </div>
-    
-    </div>
-    
-
-
+  <!-- First Row Cards -->
+  <div class="card p-3 text-center" style="cursor:pointer" id="overAllParadeState">
+    <small class="text-muted">Parade State</small>
+    <h3>120/154</h3>
   </div>
+
+  <div class="card p-3 text-center" style="cursor:pointer" id="interview-card">
+    <small class="text-muted">Interview Pending</small>
+    <h3>
+      <span id="interview-Count"></span>/<span id="total-count"></span>
+    </h3>
+    <span id="interview%" class="text-danger">-2.1%</span>
+  </div>
+
+  <div class="card p-3 text-center" style="cursor:pointer" id="openProjects">
+    <small class="text-muted">Total Projects</small>
+    <h3>90/125</h3>
+  </div>
+
+  <div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
+    <small class="text-muted">Detachments</small>
+    <h3 id="locationCount">—</h3>
+  </div>
+
+  <!-- Second Row Cards -->
+  <div class="card p-3 text-center" id="openBoardDetails">
+    <small class="text-muted">BOO's</small>
+    <h3>98</h3>
+  </div>
+
+  <div class="card p-3 text-center" style="cursor:pointer" id="openSensitive">
+    <small class="text-muted">Sensitive Indl</small>
+    <h3>4</h3>
+  </div>
+
+</div>
+
 
 
   <!-- Add Event Modal -->
@@ -513,6 +505,10 @@
     document.getElementById("overAllParadeState").addEventListener("click", function () {
       window.location.href = "/paradeState";
     });
+
+  document.getElementById("openProjects").addEventListener("click", function() {
+    window.location.href = "/projects";
+});
 
 
     

@@ -803,14 +803,80 @@ ORDER BY ad.assigned_on ASC '''
             conn.close()
 
 
+@app.route("/projects")
+def home():
+    conn = get_db_connection()
+    cur = conn.cursor(dictionary=True)
+
+    filter_stage = request.args.get("stage", "all")
+
+    if filter_stage == "aon":
+        cur.execute("SELECT * FROM projects WHERE LOWER(current_stage) LIKE '%aon%'")
+    elif filter_stage == "tob":
+        cur.execute("SELECT * FROM projects WHERE LOWER(current_stage) LIKE '%tob%' OR LOWER(current_stage) LIKE '%tec%'")
+    elif filter_stage == "atp":
+        cur.execute("SELECT * FROM projects WHERE LOWER(current_stage) LIKE '%atp%'")
+    elif filter_stage == "completed":
+        cur.execute("SELECT * FROM projects WHERE LOWER(current_stage) LIKE '%atp%'")
+    else:
+        cur.execute("SELECT * FROM projects")
+
+    projects = cur.fetchall()
+    print("projects", projects)
+    conn.close()
+
+    # Add calculated percentage
+    for p in projects:
+        p["percent"] = stage_to_percent(p["current_stage"])
+
+    return render_template("projects/projects.html", projects=projects, filter_stage=filter_stage)
+
+def stage_to_percent(stage):
+    s = stage.strip().lower()
+
+    if "aon" in s:
+        return 33
+    elif "tob" in s or "tec" in s:
+        return 66
+    elif "atp" in s:
+        return 100
+    return 0
 
 
+# ---------------- ADD PROJECT ----------------
+@app.route("/add_project", methods=["POST"])
+def add_project():
+    data = request.form
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO projects (project_name, current_stage, project_cost, project_items, quantity, project_description)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (
+        data["project_name"],
+        data["current_stage"],
+        data["project_cost"],
+        data["project_items"],
+        data["quantity"],
+        data["project_description"]
+    ))
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "success"})
 
+# ---------------- UPDATE STAGE ----------------
+@app.route("/update_stage", methods=["POST"])
+def update_stage():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+        UPDATE projects SET current_stage=%s WHERE project_id=%s
+    """, (request.form["new_stage"], request.form["project_id"]))
 
-
-
-
-
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "success"})
 
 
 

@@ -1,0 +1,224 @@
+{% extends "baseView.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project Dashboard</title>
+
+    <link rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        .card-header { font-size: 20px; font-weight: bold; }
+        .container {
+            padding-left: 10rem;
+        }
+        .project-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4" >
+    {% set header = "Project Management" %}
+    {% set subscript = "Click on Add project to add a new project" %}
+    {% include 'navbar/navbar.html' %}
+
+    <div class="d-flex justify-content-between mb-3">
+        <h2>Project Monitoring Dashboard</h2>
+        <div class="btn-group mb-3" role="group" id="stageFilters">
+        <button class="btn btn-dark" data-stage="all">All</button>
+        <button class="btn btn-secondary" data-stage="AON">AON Stage</button>
+        <button class="btn btn-secondary" data-stage="TOB">TOB & TEC Stage</button>
+        <button class="btn btn-secondary" data-stage="ATP">ATP Stage</button>
+        <button class="btn btn-success" data-stage="Completed">Completed</button>
+    </div>
+
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProjectModal">Add Project</button>
+    </div>
+
+{% for p in projects %}
+<div style="display: flex;">
+    <div class="col-md-4">
+      <div class="card project-card shadow-sm mb-4" data-stage="{{ p.current_stage }}" style="border-radius: 15px;">
+        <div class="card-body">
+          <h5 class="card-title fw-bold">{{ p.project_name }}</h5>
+  
+          <div class="mb-2">
+            <span class="text-muted small">Cost:</span>
+            <span class="fw-semibold">₹{{ p.project_cost }}</span>
+          </div>
+  
+          <div class="mb-3">
+            <span class="text-muted small">Stage:</span>
+            <span class="fw-semibold">{{ p.current_stage }}</span>
+          </div>
+  
+          <!-- safe id fallback: if project_id missing, use loop.index -->
+          {% set pid = p.project_id|default(loop.index) %}
+  
+          <!-- Progress Bar (data-percent ensures safe rendering) -->
+          <div class="progress mb-2" style="height:12px; border-radius:12px; overflow:hidden;">
+            <div class="progress-bar"
+                 role="progressbar"
+                 aria-valuemin="0" aria-valuemax="100"
+                 data-pid="{{ pid }}"
+                 data-percent="{{ p.percent|int }}"
+                 id="progress-{{ pid }}">
+              {{ p.percent|int }}%
+            </div>
+          </div>
+  
+          <button class="btn btn-warning btn-sm"
+                  onclick="openUpdateModal('{{ pid }}', '{{ p.current_stage }}')">
+            Update Stage
+          </button>
+        </div>
+      </div>
+    </div>
+
+</div>
+{% endfor %}
+    </div>
+
+</div>
+
+<!-- ---------------- ADD PROJECT MODAL ---------------- -->
+<div class="modal fade" id="addProjectModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header bg-primary text-white">
+        <h5>Add New Project</h5>
+      </div>
+
+      <div class="modal-body">
+
+        <form id="addProjectForm">
+            <input class="form-control mb-2" name="project_name" placeholder="Project Name" required>
+            <input class="form-control mb-2" name="current_stage" placeholder="Current Stage" required>
+            <input class="form-control mb-2" name="project_cost" placeholder="Project Cost" required>
+            <input class="form-control mb-2" name="project_items" placeholder="Items (Generators, Laptops etc.)">
+            <input class="form-control mb-2" name="quantity" placeholder="Quantity">
+            <textarea class="form-control mb-2" name="project_description" placeholder="Description"></textarea>
+        </form>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success" onclick="addProject()">Save</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ---------------- UPDATE STAGE MODAL ---------------- -->
+<div class="modal fade" id="updateStageModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header bg-warning text-dark">
+        <h5>Update Project Stage</h5>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="edit_project_id">
+        <input class="form-control" id="new_stage" placeholder="Enter New Stage">
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success" onclick="updateStage()">Update</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+
+console.log("Pro");
+document.addEventListener("DOMContentLoaded", function () {
+  // set widths and color-code by percent or stage if you like
+  document.querySelectorAll(".progress-bar[data-percent]").forEach(function(bar){
+    const pct = parseInt(bar.dataset.percent) || 0;
+    bar.style.width = pct + "%";
+    bar.textContent = pct + "%";
+
+    // optional: colour by pct or by stage:
+    if (pct >= 100) {
+      bar.classList.add("bg-success");
+    } else if (pct >= 66) {
+      bar.classList.add("bg-info");
+    } else if (pct >= 33) {
+      bar.classList.add("bg-warning");
+    } else {
+      bar.classList.add("bg-secondary");
+    }
+  });
+});
+
+// ---------- ADD PROJECT ----------
+function addProject() {
+    $.post("/add_project", $("#addProjectForm").serialize(), function (res) {
+        if (res.status === "success") location.reload();
+    });
+}
+
+// ---------- OPEN UPDATE MODAL ----------
+function openUpdateModal(id, stage) {
+    $("#edit_project_id").val(id);
+    $("#new_stage").val(stage);
+    new bootstrap.Modal(document.getElementById("updateStageModal")).show();
+}
+
+// ---------- UPDATE STAGE ----------
+function updateStage() {
+    $.post("/update_stage", {
+        project_id: $("#edit_project_id").val(),
+        new_stage: $("#new_stage").val()
+    }, function(res) {
+        if (res.status === "success") location.reload();
+    });
+}
+
+document.querySelectorAll("#stageFilters button").forEach(btn => {
+    btn.addEventListener("click", function () {
+        // Remove active state
+        document.querySelectorAll("#stageFilters button").forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+
+        const stage = this.dataset.stage;
+        const cards = document.querySelectorAll(".project-card");
+
+        cards.forEach(card => {
+            const cardStage = card.dataset.stage;
+
+            if (stage === "all" || stage === cardStage) {
+                card.style.display = "";
+            } else if (stage === "Completed" && cardStage === "Completed") {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    });
+});
+
+</script>
+
+</body>
+</html>
+{% endblock %}
