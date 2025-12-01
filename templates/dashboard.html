@@ -19,7 +19,10 @@
   }
 
   /* Hide original sidebar if present */
-  .sidebar, .dashboard-content > .container { margin-left: 0 !important; }
+  .sidebar,
+  .dashboard-content>.container {
+    margin-left: 0 !important;
+  }
 
   /* Dashboard Wrapper */
   .dashboard-content {
@@ -30,7 +33,10 @@
   /* Local Content Loader (only covers dashboard area) */
   .content-loader {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(248, 250, 252, 0.97);
     backdrop-filter: blur(10px);
     display: flex;
@@ -66,14 +72,17 @@
   }
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   /* Main Content */
   .main-content {
     padding: 1px;
     min-height: 100vh;
-    opacity: 0; /* Hidden until loader is removed */
+    opacity: 0;
+    /* Hidden until loader is removed */
     transition: opacity 0.6s ease;
   }
 
@@ -96,7 +105,9 @@
   .action-section::before {
     content: "";
     position: absolute;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 5px;
     background: linear-gradient(90deg, #ff9933 0%, #ff9933 33%, #ffffff 33%, #ffffff 66%, #138808 66%);
   }
@@ -177,7 +188,9 @@
   .card::before {
     content: "";
     position: absolute;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 4px;
     background: linear-gradient(90deg, var(--light-blue) 0%, var(--dark-blue) 100%);
     opacity: 0;
@@ -189,7 +202,9 @@
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
   }
 
-  .card:hover::before { opacity: 1; }
+  .card:hover::before {
+    opacity: 1;
+  }
 
   .card h3 {
     font-size: 2.2rem;
@@ -206,8 +221,17 @@
     letter-spacing: 0.5px;
   }
 
-  .card .text-success { color: #10b981 !important; font-weight: 700; font-size: 0.9rem; }
-  .card .text-danger { color: #ef4444 !important; font-weight: 700; font-size: 0.9rem; }
+  .card .text-success {
+    color: #10b981 !important;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .card .text-danger {
+    color: #ef4444 !important;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
 
   .view-details {
     background: linear-gradient(135deg, var(--light-blue) 0%, var(--dark-blue) 100%);
@@ -227,9 +251,17 @@
   }
 
   @media (max-width: 768px) {
-    .main-content { padding: 20px; }
-    .action-buttons { flex-direction: column; }
-    .action-section-title { font-size: 1.2rem; }
+    .main-content {
+      padding: 20px;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .action-section-title {
+      font-size: 1.2rem;
+    }
   }
 </style>
 
@@ -257,192 +289,199 @@
           Leave Requests
         </button>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">Add Event</button>
+        
+
       </div>
     </div>
 
     <div class="stats-grid">
+
+      <!-- First Row Cards -->
       <div class="card" style="cursor:pointer" id="overAllParadeState">
         <small class="text-muted">Parade State</small>
         <h3>120/154</h3>
-        <span class="text-success">+2.1%</span>
       </div>
+    
+      <div class="card" style="cursor:pointer" id="interview-card">
+        <small class="text-muted">Interview Pending</small>
+        <h3>
+          <span id="interview-Count"></span><span>/</span><span id="total-count"></span>
+        </h3>
+        <span id="interview%" class="text-danger">-2.1%</span>
+      </div>
+    
       <div class="card">
         <small class="text-muted">Total Projects</small>
         <h3>90/125</h3>
-        <span class="text-danger">-2.1%</span>
       </div>
-      <div class="card">
+    
+      <div class="card" id="viewDetailsBtn" style="cursor:pointer">
         <small class="text-muted">Detachments</small>
         <h3 id="locationCount">—</h3>
-        <button id="viewDetailsBtn" class="view-details">View Details</button>
       </div>
-      <div class="card" style="cursor:pointer" id="openBoardDetails">
-        <small class="text-muted">BOO's</small>
-        <h3>12</h3>
-      </div>
-      
-      <!-- <div class="col-lg-2 col-md-4 col-sm-6">
-        <div class="card p-3 text-center">
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#salesModal">CSD Earnings</button>
-;          <h3>$21445</h3>
-        </div>
-      </div> -->
-      <!-- <div class="col-lg-2 col-md-4 col-sm-6">
-        <div class="card p-3 text-center">
-          <small class="text-muted">Profit This Week</small>
-          <h3>$5,544</h3>
-          <span class="text-success">+2.2%</span>
-      </div>
-      </div> -->
-    </div>
-
-    <!-- Stats Row 2 -->
-    <div class="row g-3 mb-4">
-      <div class="col-lg-2 col-md-4 col-sm-6">
-        <div class="card p-3 text-center">
-          <small class="text-muted">Lve Application</small>
-          <h3>98</h3>
-          <span class="text-success">+2.1%</span>
-        </div>
-      </div>
-      <div class="col-lg-2 col-md-4 col-sm-6">
-        <div class="card p-3 text-center">
-          <small class="text-muted">New Arrival</small>
-          <h3>45/48</h3>
-          <span class="text-danger">-11.2%</span>
-        </div>
-      </div>
-
-      <div class="col-lg-2 col-md-4 col-sm-6" style="cursor:pointer">
-        <div class="card p-3 text-center" id="openSensitive">
-          <small class="text-muted">Sensitive Indl</small>
-          <h3>4</h3>
-        </div>
-      </div>
-      
-    </div>
-
     
+      <!-- Second Row Cards -->
+      <div class="card p-3 text-center" id="openBoardDetails">
+        <small class="text-muted">BOO's</small>
+        <h3>98</h3>
+      </div>
+    
+      <div class="card p-3 text-center">
+        <small class="text-muted">New Arrival</small>
+        <h3>45/48</h3>
+      </div>
+    
+      <div class="card p-3 text-center" style="cursor:pointer" id="openSensitive">
+        <small class="text-muted">Sensitive Indl</small>
+        <h3>4</h3>
+      </div>
+    
+    </div>
+    
+
+
   </div>
 
 
   <!-- Add Event Modal -->
-<div class="modal fade" id="addEventModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
+  <div class="modal fade" id="addEventModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
 
-      <div class="modal-header">
-        <h5 class="modal-title">Add Today's Event</h5>
+        <div class="modal-header">
+          <h5 class="modal-title">Add Today's Event</h5>
+        </div>
+
+        <div class="modal-body">
+          <form id="eventForm">
+
+            <label>Event Date:</label>
+            <input type="date" class="form-control" name="event_date" value="{{ today }}" required>
+
+            <label class="mt-2">Event Name:</label>
+            <input type="text" class="form-control" name="event_name" required>
+
+            <label class="mt-2">Venue:</label>
+            <input type="text" class="form-control" name="venue" required>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-success" onclick="saveEvent()">Save</button>
+        </div>
+
       </div>
-
-      <div class="modal-body">
-        <form id="eventForm">
-
-          <label>Event Date:</label>
-          <input type="date" class="form-control" name="event_date" value="{{ today }}" required>
-
-          <label class="mt-2">Event Name:</label>
-          <input type="text" class="form-control" name="event_name" required>
-
-          <label class="mt-2">Venue:</label>
-          <input type="text" class="form-control" name="venue" required>
-
-        </form>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-success" onclick="saveEvent()">Save</button>
-      </div>
-
     </div>
   </div>
-</div>
 
 
 
 
-{% include 'modals/detachmentModal/detachment.html'%}
-{% include 'modals/personnelModal/personal_modal.html' %}
-{% include 'modals/salesmodal/salesModal.html' %}
-{% include 'modals/leaverequest/leave_request.html' %}
-{% include 'modals/alarm/alarm.html' %}
 
-<script>
 
-  function saveEvent() {
-    let form = document.getElementById("eventForm");
-    let formData = new FormData(form);
+  {% include 'modals/detachmentModal/detachment.html'%}
+  {% include 'modals/personnelModal/personal_modal.html' %}
+  {% include 'modals/salesmodal/salesModal.html' %}
+  {% include 'modals/leaverequest/leave_request.html' %}
+  {% include 'modals/alarm/alarm.html' %}
+  {% include 'modals/interview_pending/modal.html' %}
 
-    fetch("/add_event", {
+  <!-- Interview Pending Modal -->
+  
+
+  <script>
+
+    function saveEvent() {
+      let form = document.getElementById("eventForm");
+      let formData = new FormData(form);
+
+      fetch("/add_event", {
         method: "POST",
         body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === "success") {
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
             alert("Event Added!");
 
             // Reload page to update table
             location.reload();
-        }
-    });
-}
-  // References
-  const contentLoader = document.getElementById("contentLoader");
-  const mainContent = document.getElementById("mainContent");
-
-  // This function will be called when ALL async operations are done
-  function hideLoaderAndShowContent() {
-    contentLoader.classList.add("hidden");
-    mainContent.classList.add("loaded");
-  }
-
-  // Fetch detachment count
-  async function loadDashboardData() {
-    try {
-      const res = await fetch('/get_dets');
-      if (!res.ok) throw new Error("Failed to fetch detachments");
-      const data = await res.json();
-      document.getElementById('locationCount').innerText = data.count || '—';
-    } catch (err) {
-      console.error("Error loading detachments:", err);
-      document.getElementById('locationCount').innerText = '—';
-    } finally {
-      // All promises are settled → now hide loader
-      hideLoaderAndShowContent();
+          }
+        });
     }
-  }
+    // References
+    const contentLoader = document.getElementById("contentLoader");
+    const mainContent = document.getElementById("mainContent");
 
-  // Start loading when page is ready
-  document.addEventListener('DOMContentLoaded', () => {
-    loadDashboardData();
-  });
+    // This function will be called when ALL async operations are done
+    function hideLoaderAndShowContent() {
+      contentLoader.classList.add("hidden");
+      mainContent.classList.add("loaded");
+    }
 
-  // Leave Requests Button
-  document.getElementById("leaveRequestsBtn")?.addEventListener("click", async () => {
-    const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
-    modal.show();
-    await loadLeaveRequests();
-  });
+    // Fetch detachment count
+    async function loadDashboardData() {
+      try {
+        const res = await fetch('/get_dets');
+        if (!res.ok) throw new Error("Failed to fetch detachments");
+        const data = await res.json();
+        document.getElementById('locationCount').innerText = data.count || '—';
+      } catch (err) {
+        console.error("Error loading detachments:", err);
+        document.getElementById('locationCount').innerText = '—';
+      } 
+    }
 
-  async function loadLeaveRequests() {
-    const spinner = document.getElementById("leaveRequestsSpinner");
-    const table = document.getElementById("leaveRequestsTable");
-    const tbody = document.getElementById("leaveRequestsTableBody");
+    async function getInterviewCount() {
+      try {
+        const res = await fetch('/get_interview_pending_count');
+        if (!res.ok) throw new Error('Network error')
+        const data = await res.json()
+        console.log(data, "this is interview data")
+        document.getElementById('interview-Count').innerText = data.result.pending_count
+        document.getElementById('total-count').innerText = data.result.total_count
+        document.getElementById('interview%').innerText = data.percentage + '%'
+      }
+      catch (err) {
+        consoel.log('Error loading', err)
 
-    if (!spinner || !table || !tbody) return;
+      } 
+    }
 
-    spinner.classList.remove("d-none");
-    table.classList.add("d-none");
-    tbody.innerHTML = "";
+    // Start loading when page is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      Promise.all([loadDashboardData(),getInterviewCount()]).finally(()=>{
+        hideLoaderAndShowContent()
+      })
+    });
 
-    try {
-      const res = await fetch("/apply_leave/get_leave_requests");
-      if (!res.ok) throw new Error("Network error");
-      const result = await res.json();
+    // Leave Requests Button
+    document.getElementById("leaveRequestsBtn")?.addEventListener("click", async () => {
+      const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
+      modal.show();
+      await loadLeaveRequests();
+    });
 
-      result.data.forEach(row => {
-        tbody.innerHTML += `
+    async function loadLeaveRequests() {
+      const spinner = document.getElementById("leaveRequestsSpinner");
+      const table = document.getElementById("leaveRequestsTable");
+      const tbody = document.getElementById("leaveRequestsTableBody");
+
+      if (!spinner || !table || !tbody) return;
+
+      spinner.classList.remove("d-none");
+      table.classList.add("d-none");
+      tbody.innerHTML = "";
+
+      try {
+        const res = await fetch("/apply_leave/get_leave_requests");
+        if (!res.ok) throw new Error("Network error");
+        const result = await res.json();
+
+        result.data.forEach(row => {
+          tbody.innerHTML += `
           <tr>
             <td>${row.army_number}</td>
             <td>${row.leave_type}</td>
@@ -453,27 +492,32 @@
             <td>${row.actions || row.request_status}</td>
           </tr>
         `;
-      });
+        });
 
-      spinner.classList.add("d-none");
-      table.classList.remove("d-none");
-    } catch (err) {
-      console.error(err);
-      spinner.innerHTML = `<p class="text-danger fw-bold mt-3">Failed to load leave requests</p>`;
+        spinner.classList.add("d-none");
+        table.classList.remove("d-none");
+      } catch (err) {
+        console.error(err);
+        spinner.innerHTML = `<p class="text-danger fw-bold mt-3">Failed to load leave requests</p>`;
+      }
     }
-  }
 
-  document.getElementById("openBoardDetails").addEventListener("click", function() {
-    window.location.href = "/board_details";
-});
+    document.getElementById("openBoardDetails").addEventListener("click", function () {
+      window.location.href = "/board_details";
+    });
 
-  document.getElementById("openSensitive").addEventListener("click", function() {
-    window.location.href = "/mark_personnel";
-});
+    document.getElementById("openSensitive").addEventListener("click", function () {
+      window.location.href = "/mark_personnel";
+    });
 
-  document.getElementById("overAllParadeState").addEventListener("click", function() {
-    window.location.href = "/paradeState";
-});
+    document.getElementById("overAllParadeState").addEventListener("click", function () {
+      window.location.href = "/paradeState";
+    });
+
+
+    
+
+
   </script>
 
-{% endblock %}
+  {% endblock %}

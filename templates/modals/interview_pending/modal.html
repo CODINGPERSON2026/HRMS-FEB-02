@@ -1,0 +1,110 @@
+<div class="modal fade" id="interviewModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="modal-title">Interview Management</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <!-- Top controls: Search -->
+        <div class="d-flex mb-3 align-items-center">
+          <div class="input-group w-50">
+            <input type="text" class="form-control" placeholder="type army number" id="interview-search">
+            
+          </div>
+        </div>
+
+        <!-- Spinner -->
+        <div class="text-center my-3" id="spinner" style="display: none;">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <!-- Table -->
+        <div style="max-height: 400px; overflow-y: auto;">
+
+          <table class="table table-bordered table-striped mb-0">
+            <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+              <tr>
+                <th>Name</th>
+                <th>Army Number</th>
+                <th>Home State</th>
+              </tr>
+            </thead>
+            <tbody id="interview-table-body">
+              <!-- Dynamic rows go here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+      const searchInput = document.getElementById("interview-search");
+      const tableBody = document.getElementById("interview-table-body");
+      const spinner = document.getElementById("spinner");
+  
+      // Debounce function
+      function debounce(func, delay) {
+          let timer;
+          return function (...args) {
+              clearTimeout(timer);
+              timer = setTimeout(() => func.apply(this, args), delay);
+          };
+      }
+  
+      // Fetch and update table
+      async function fetchInterviews(query = "") {
+          spinner.style.display = "block";
+          tableBody.innerHTML = "";
+  
+          try {
+              const url = `/get_pending_interview_list?search=${encodeURIComponent(query)}`;
+              const response = await fetch(url);
+              const data = await response.json();
+  
+              spinner.style.display = "none";
+  
+              if (!data || (data.data && data.data.length === 0) || data.length === 0) {
+                  tableBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No personnel found</td></tr>`;
+              } else {
+                  (data.data || data).forEach(item => {
+                      const row = `
+                          <tr>
+                              <td>${item.name}</td>
+                              <td>${item.army_number}</td>
+                              <td>${item.home_state}</td>
+                          </tr>`;
+                      tableBody.innerHTML += row;
+                  });
+              }
+  
+          } catch (err) {
+              spinner.style.display = "none";
+              tableBody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Error loading data</td></tr>`;
+              console.error(err);
+          }
+      }
+  
+      // Debounced version
+      const debouncedFetch = debounce(fetchInterviews, 500);
+  
+      // Event listener for typing
+      searchInput.addEventListener("input", (e) => {
+          const query = e.target.value.trim();
+          debouncedFetch(query);
+      });
+  
+      // Optional: load initial data when modal opens
+      document.getElementById("interview-card").addEventListener("click", () => {
+          debouncedFetch(""); // empty query loads default list
+          new bootstrap.Modal(document.getElementById("interviewModal")).show();
+      });
+  });
+  </script>
+  

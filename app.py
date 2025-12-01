@@ -182,6 +182,61 @@ def get_dets():
     conn.close()
     return jsonify({'count': result['count']})
 
+@app.route('/get_interview_pending_count')
+def interview():
+    conn = get_db_connection()
+    cursor  =  conn.cursor(dictionary=True)
+    query = """
+    SELECT 
+        SUM(interview_status = 0) AS pending_count,
+        COUNT(*) AS total_count
+    FROM personnel
+"""
+
+    cursor.execute(query)
+    result = cursor.fetchone()
+    pending_count = result["pending_count"]
+    print(pending_count)
+    total_count = result["total_count"]
+    print(total_count)
+    percentage = 0
+    if total_count > 0:
+        percentage = pending_count/total_count * 100
+        print(percentage)
+    cursor.close()
+    conn.close()
+    return jsonify({'result':result,'percentage':round(percentage, 2)})
+
+
+@app.route('/get_pending_interview_list')
+def get_pending_interview_list():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    search = request.args.get("search", "").strip()
+    try:
+        query = """
+            SELECT name, army_number, home_state
+            FROM personnel
+            WHERE interview_status = 0
+        """
+        params = []
+
+        if search:
+            query += " AND army_number LIKE %s"
+            params.append(f"%{search}%")
+
+        
+        cursor.execute(query, params)
+        data = cursor.fetchall()
+        return jsonify({"status": "success", "data": data})
+
+    except Exception as e:
+        print("Error fetching pending interview list:", e)
+        return jsonify({"status": "error", "message": "Server error"}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 # Assign selected personnel
