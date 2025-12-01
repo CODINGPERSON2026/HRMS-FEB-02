@@ -1,4 +1,6 @@
 from imports import *
+import os
+from datetime import date
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # Cache static files for 1 year (in seconds)
@@ -134,7 +136,7 @@ def view_personal():
     return render_template('personalInfoView.html', form_view='view')
 
 @app.route('/search_personnel')
-def search_personnel():
+def search_person():
     query = request.args.get('query', '')
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -344,6 +346,346 @@ def submit_running():
 
     return jsonify({"message": "Saved successfully"})
 
+
+#boards code
+
+@app.route('/board_details')
+def board_details():
+    return render_template('boo/board_details.html')
+
+
+@app.route("/get_boards")
+def get_boards():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM boards ORDER BY id DESC")
+    boards = cur.fetchall()
+    cur.close()
+    conn.close()
+    return jsonify(boards)
+
+
+# -------------------------
+# ADD BOARD
+# -------------------------
+@app.route("/add_board", methods=["POST"])
+def add_board():
+    data = request.form
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    query = """
+        INSERT INTO boards 
+        (order_no, entry_date, authority, subject, presiding_officer, completion_date, remarks)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """
+
+    cur.execute(query, (
+        data.get("order_no"),
+        data.get("entry_date"),
+        data.get("authority"),
+        data.get("subject"),
+        data.get("presiding_officer"),
+        data.get("completion_date"),
+        data.get("remarks"),
+    ))
+
+    conn.commit()
+    cur.close()
+
+    return jsonify({"status": "success"})
+
+
+# -------------------------
+# DELETE BOARD
+# -------------------------
+@app.route("/delete_board/<int:board_id>", methods=["DELETE"])
+def delete_board(board_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM boards WHERE id=%s", (board_id,))
+    conn.commit()
+    cur.close()
+    return jsonify({"status": "success"})
+
+
+# -------------------------
+# EDIT BOARD
+# -------------------------
+@app.route("/edit_board/<int:board_id>", methods=["POST"])
+def edit_board(board_id):
+    data = request.form
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    query = """
+        UPDATE boards
+        SET order_no=%s, entry_date=%s, authority=%s, subject=%s,
+            presiding_officer=%s, completion_date=%s, remarks=%s
+        WHERE id=%s
+    """
+
+    cur.execute(query, (
+        data.get("order_no"),
+        data.get("entry_date"),
+        data.get("authority"),
+        data.get("subject"),
+        data.get("presiding_officer"),
+        data.get("completion_date"),
+        data.get("remarks"),
+        board_id
+    ))
+
+    conn.commit()
+    cur.close()
+
+    return jsonify({"status": "success"})
+
+
+# --------------------------------------------------
+# MEMBERS SECTION
+# --------------------------------------------------
+
+@app.route("/get_board_members/<int:order_no>")
+def get_board_members(order_no):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM board_members WHERE order_no=%s", (order_no,))
+    members = cur.fetchall()
+    print("membersss", members)
+    cur.close()
+    return jsonify(members)
+
+
+@app.route("/add_member", methods=["POST"])
+def add_member():
+    data = request.form
+    print("Show me",data.get("board_id"))
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO board_members (order_no, member_name, army_number)
+        VALUES (%s, %s, %s)
+    """, (data.get("order_no"), data.get("member_name"), data.get("army_number")))
+    conn.commit()
+    cur.close()
+
+    return jsonify({"status": "success"})
+
+
+@app.route("/delete_member/<int:member_id>", methods=["DELETE"])
+def delete_member(member_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM board_members WHERE id=%s", (member_id,))
+    conn.commit()
+    cur.close()
+    return jsonify({"status": "success"})
+
+
+@app.route("/edit_member/<int:member_id>", methods=["POST"])
+def edit_member(member_id):
+    data = request.form
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        UPDATE board_members
+        SET member_name=%s, army_number=%s
+        WHERE id=%s
+    """, (data.get("member_name"), data.get("army_number"), member_id))
+
+    conn.commit()
+    cur.close()
+
+    return jsonify({"status": "success"})
+
+# Mark Sensitive code
+
+@app.route("/mark_personnel", methods=["GET"])
+def mark_personnel():
+    conn = get_db_connection()
+    cursor = conn.cursor()   
+    cursor.execute("""
+    SELECT s.id, s.army_number, s.reason, s.marked_on, 
+            p.name, p.rank
+    FROM sensitive_marking s
+    JOIN personnel p ON s.army_number = p.army_number
+    ORDER BY s.marked_on DESC
+    """)
+    rows = cursor.fetchall()
+
+    # Structure data
+    sensitive_list = []
+    for r in rows:
+        sensitive_list.append({
+            "id": r[0],
+            "army_number": r[1],
+            "reason": r[2],
+            "marked_on": r[3],
+            "name": r[4],
+            "rank": r[5]
+        })
+    return render_template("sensitive_indl/mark_personnel.html", sensitive_list=sensitive_list)
+
+# ---- AJAX Search Personnel ----
+@app.route("/search_personnel", methods=["POST"])
+def search_personnel():
+    name = request.form.get("name", "").strip()
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = "SELECT army_number, name, `rank` FROM personnel WHERE name LIKE %s"
+    cursor.execute(query, ("%" + name + "%",))
+    results = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(results)
+
+# ---- Mark Sensitive ----
+@app.route("/mark_sensitive", methods=["POST"])
+def mark_sensitive():
+    army_number = request.form.get("army_number")
+    reason = request.form.get("reason")
+    try :
+        if not army_number or not reason:
+            return "Missing data", 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """INSERT INTO sensitive_marking (army_number, reason, marked_on)
+                VALUES (%s, %s, %s)"""
+
+        cursor.execute(query, (army_number, reason, datetime.now()))
+        conn.commit()
+
+        cursor.execute("""
+        SELECT s.id, s.army_number, s.reason, s.marked_on, 
+               p.name, p.rank
+        FROM sensitive_marking s
+        JOIN personnel p ON s.army_number = p.army_number
+        ORDER BY s.marked_on DESC
+        """)
+        rows = cursor.fetchall()
+
+        # Structure data
+        sensitive_list = []
+        for r in rows:
+            sensitive_list.append({
+                "id": r[0],
+                "army_number": r[1],
+                "reason": r[2],
+                "marked_on": r[3],
+                "name": r[4],
+                "rank": r[5]
+            })
+
+        return render_template("sensitive_indl/mark_personnel.html", sensitive_list=sensitive_list)
+    except Exception as e:
+        print("ERROR:", e)
+        return jsonify({"error": str(e)})
+    
+
+# parade state code
+
+@app.route("/leave_status")
+def leave_status():
+    conn = get_db_connection()
+    cur = conn.cursor(dictionary=True)
+
+    cur.execute("""
+        SELECT 
+    company,
+    SUM(CASE WHEN onleave_status = '1' THEN 1 ELSE 0 END) AS leave_count,
+    COUNT(*) AS total_count,
+    ROUND((SUM(CASE WHEN onleave_status = '1' THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) AS leave_percentage
+    FROM personnel
+    GROUP BY company
+    ORDER BY company
+    """)
+
+    data = cur.fetchall()
+    cur.close()
+    conn.close()
+    return jsonify(data)
+
+
+@app.route("/company_status")
+def company_status():
+    conn = get_db_connection()
+    cur = conn.cursor(dictionary=True)
+    data = []
+
+    rank_sql = """
+    SELECT
+        SUM(CASE WHEN `rank` IN ('agniveer', 'Signal Man','nk','lnk','hav') THEN 1 ELSE 0 END) AS other_rank_count,
+        SUM(CASE WHEN `rank` IN ('nbsub','subedar','JCO','sub maj') THEN 1 ELSE 0 END) AS jco_count,
+        SUM(CASE WHEN `rank` IN ('lt','capt','maj','ltcol','col','OC') THEN 1 ELSE 0 END) AS officer_count
+    FROM personnel
+    """
+
+    try:
+        # 1) Overall counts (no WHERE)
+        cur.execute(rank_sql)
+        overall = cur.fetchone() or {"other_rank_count": 0, "jco_count": 0, "officer_count": 0}
+        # Add a label so frontend knows this is overall (optional)
+        overall["company"] = "15 XYZ"
+        data.append(overall)
+
+        # 2) Company-wise counts
+        companies = ["1 company", "2 company", "3 company", "4 company"]
+        sql_with_where = rank_sql + " WHERE company = %s"
+
+        for company in companies:
+            cur.execute(sql_with_where, (company,))
+            row = cur.fetchone() or {"other_rank_count": 0, "jco_count": 0, "officer_count": 0}
+            row["company"] = company
+            data.append(row)
+
+        return jsonify(data)
+
+    finally:
+        cur.close()
+        conn.close()
+
+
+@app.route("/paradeState")
+def paradeState():
+    return render_template("daily_state/daily_parade_state.html")
+
+@app.route("/add_event", methods=["POST"])
+def add_event():
+    event_date = request.form["event_date"]
+    event_name = request.form["event_name"]
+    venue = request.form["venue"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO daily_events (event_date, event_name, venue) VALUES (%s, %s, %s)",
+        (event_date, event_name, venue)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({"status": "success"})
+
+@app.route("/daily_event")
+def index():
+    today = date.today()
+
+    conn = get_db_connection()
+    cur = conn.cursor(dictionary=True)
+    cur.execute("SELECT * FROM daily_events WHERE event_date = %s", (today,))
+    data = cur.fetchall()
+    cur.close()
+    conn.close()
+    return jsonify(data)
 
 
 
