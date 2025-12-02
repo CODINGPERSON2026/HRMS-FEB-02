@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}15CESR Navbar{% endblock %}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family:sans-serif;
+        }
+        .navbar {
+            margin-top: 4px;
+            height: 80px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            background: linear-gradient(
+                90deg,
+                #ff9933 0%,
+                #ff9933 55%,
+                #ffffff 60%,
+                #ffffff 80%,
+                #138808 85%,
+                #138808 100%
+            );
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .navbar ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+        .navbar li {
+            margin: 0 15px;
+        }
+        .navbar a {
+            text-decoration: none;
+            color: #000;
+            font-weight: bold;
+            font-size: 18px;
+            position: relative;
+        }
+        .navbar a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -3px;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(
+                90deg,
+                #000000 0%,
+                #ff9933 33.33%,
+                #ffffff 33.33% 66.66%,
+                #138808 66.66% 100%
+            );
+            transition: width 0.3s ease-in-out;
+        }
+        .navbar a:hover::after {
+            width: 100%;
+        }
+        .navbar-logo {
+            height: 90px;
+            width: auto;
+            max-width: 100px;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/weight_system/api/about-page">About</a></li>
+
+        </ul>
+        <img src="/static/logo1.png" alt="15CESR Logo" class="navbar-logo">
+    </nav>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

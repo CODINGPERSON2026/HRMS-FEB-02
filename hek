@@ -1,0 +1,486 @@
+[33mcommit b2e25dad8820a2510b438e5cf01a3b856b8556f4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
+Author: Vipul Ghadge <vipulghadge1999@example.com>
+Date:   Mon Dec 1 18:18:09 2025 +0530
+
+    project changes
+
+[33mcommit 2d7dd4987abcd1a3fbf138066c1f5b0bdd4ab04c[m
+Merge: 435ac37 982801e
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Dec 1 15:01:43 2025 +0530
+
+    Merge remote-tracking branch 'origin/DETS'
+
+[33mcommit 982801e4d8566bfe00442a4f1c05295edcb3f461[m
+Author: Ubaid <codinperson126@gmai.com>
+Date:   Mon Dec 1 14:57:33 2025 +0530
+
+    branch update
+
+[33mcommit 435ac37f1ceb1d3642cfc4bca083ee6c4da8ff75[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Dec 1 14:55:26 2025 +0530
+
+    UPDATE
+
+[33mcommit 4d02288de558e96ce5c41d6a053859614a7bc60d[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Dec 1 14:49:51 2025 +0530
+
+    interview
+
+[33mcommit f7acc6e1b7a60bc2d0edd222c6f1e7a629faffbd[m
+Merge: c3fb6d6 a2b34e3
+Author: vipulGhadge <47784612+vipulGhadge@users.noreply.github.com>
+Date:   Mon Dec 1 11:41:58 2025 +0530
+
+    Merge pull request #3 from CODINGPERSON2026/booChanges
+    
+    vipul changes
+
+[33mcommit a2b34e3843c74b927aad0c3049a4a974f9fdf9e1[m
+Author: Vipul Ghadge <vipulghadge1999@example.com>
+Date:   Mon Dec 1 11:38:43 2025 +0530
+
+    vipul changes
+
+[33mcommit c3fb6d600b733de3085a5754a8a4e5d4e0e214fc[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 20:59:55 2025 +0530
+
+    MINOR FIXES
+
+[33mcommit 638c655641918bf7b071de4f26ffd0e877e787ec[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 20:48:38 2025 +0530
+
+    UPDATE
+
+[33mcommit a3a8d6d6d57792464692fff011b2e22cac361cb7[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 20:47:46 2025 +0530
+
+    UPDATED CODE
+
+[33mcommit fe9cf808ed5b852bd8f2d2f633be9264e23f2725[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 20:40:07 2025 +0530
+
+    UPDATED THE CODE
+
+[33mcommit c438539d0ab1295da52a5dc830991979fd71eb03[m
+Merge: 46aefbf c3953dd
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 20:02:36 2025 +0530
+
+    Merge branch 'sports-section'
+
+[33mcommit c3953ddaacaff6601d72492429f3bb7ac19a37b8[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 19:59:28 2025 +0530
+
+    UPDATE
+
+[33mcommit 46aefbf036fc26d3471f2b3958e8a793042af9f7[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 19:29:16 2025 +0530
+
+    DONE
+
+[33mcommit 051f75a14b7e3530f4a97bc24780bd3c9ec6c135[m
+Merge: bf4f7c0 7aef71d
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 19:09:11 2025 +0530
+
+    Resolved merge conflict - kept main version
+
+[33mcommit bf4f7c09c3ffb620ee3188d2b7a1d5c6657e6753[m
+Merge: 3905324 7794fd0
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 19:04:32 2025 +0530
+
+    Merge branch 'task'
+
+[33mcommit 39053241204bf30e18bef92ab3f06fa4f89542ef[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 19:01:58 2025 +0530
+
+    ACCOUNT
+
+[33mcommit 7aef71dcc3583c69a5caa3253261531289cdf60a[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Fri Nov 28 12:43:09 2025 +0530
+
+    CHANGES
+
+[33mcommit 47dcde1e996c9acde8031c8c8b113022c8b249e6[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Thu Nov 27 14:37:56 2025 +0530
+
+    your commit message
+
+[33mcommit 81870266cb29944c96382eb081bc96cd75d9de10[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Thu Nov 27 12:17:58 2025 +0530
+
+    Add sports section with checkboxes, validation, and backend integration
+
+[33mcommit 7794fd082dd0f1f8617a0d5709c8e3e68970bd13[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Thu Nov 27 12:16:21 2025 +0530
+
+     TASK
+
+[33mcommit a0df267ecb1283ace1eaa0f9ce0c325c429f9ddf[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Wed Nov 26 20:45:48 2025 +0530
+
+    NAVBAR
+
+[33mcommit cde7552c8a09f7be1289991a3c72cab1ef7bcbb1[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Wed Nov 26 20:37:29 2025 +0530
+
+    NAVBAR
+
+[33mcommit bbea2ab4ab8da5a00c23eefa05872a0a3c9eb8ae[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Nov 26 15:33:27 2025 +0530
+
+    latest sql attached
+
+[33mcommit 8cc1ca5dd4cb3a81721dadaf21ed185e31ef98ad[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Nov 26 15:30:50 2025 +0530
+
+    TASK
+
+[33mcommit 52ef0eb59b05c426bcad8eae15213fec31a66204[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Nov 26 13:50:38 2025 +0530
+
+    DET FUNCTIONALITY
+
+[33mcommit bd04a00f4ce4fcafab698a64d2843ec0a16c7973[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Tue Nov 25 07:25:19 2025 +0530
+
+    DETS UPDATED
+
+[33mcommit 36cb6f6421ac117b671745f5f2847e12bb334728[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Tue Nov 25 07:22:12 2025 +0530
+
+    Updated UI changes (dashboard & modals)
+
+[33mcommit 30e6e649da7578010fe1ae6c549fe985d9958d9b[m
+Merge: 58ed797 c1738dd
+Author: vipulGhadge <47784612+vipulGhadge@users.noreply.github.com>
+Date:   Tue Nov 25 14:04:15 2025 +0530
+
+    Merge pull request #2 from CODINGPERSON2026/mtch
+    
+    mtchanges
+
+[33mcommit c1738dd907ba59ae89e229710ebe367662877f7a[m
+Author: Vipul Ghadge <vipulghadge1999@example.com>
+Date:   Tue Nov 25 14:02:57 2025 +0530
+
+    mtchanges
+
+[33mcommit 58ed79790d98a0069f6cc1568c4822cfd5534635[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Tue Nov 25 03:15:49 2025 +0530
+
+    lattest updated
+
+[33mcommit b1b5c61e5ec79e78903381e88780f9d717b60787[m
+Merge: 73550d9 04fb7bd
+Author: CODER <codinperson126@gmail.com>
+Date:   Tue Nov 25 03:04:24 2025 +0530
+
+    Merge branch 'main' of https://github.com/CODINGPERSON2026/HRMS
+    t merge sentleav# the commit.
+
+[33mcommit 73550d9569510f0251fee2ad272f5f44714af0db[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Tue Nov 25 03:01:11 2025 +0530
+
+    UPDATED
+
+[33mcommit ea7efdb4dffbf0561923dbca18c4737d7d9571a7[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Tue Nov 25 02:21:11 2025 +0530
+
+    minor fixes
+
+[33mcommit 04fb7bdd20b726035cfcf999239aba478fb0c0ea[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Mon Nov 24 21:11:00 2025 +0530
+
+    READ ME
+
+[33mcommit 8fa702755f993eed509e461e67bc1c2d59e97b2e[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Nov 24 14:50:01 2025 +0530
+
+    UPDATED
+
+[33mcommit f76c495761893821a88f07e72a78f0eccbe09b6d[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Nov 24 14:16:25 2025 +0530
+
+    DATABASE MERGED
+
+[33mcommit 0a74c7a932f994abf0d04c8dd2a1001d589d4819[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Nov 24 14:13:55 2025 +0530
+
+    DATABASE MERGED
+
+[33mcommit 66a76bf71fe60a4d8efba1aa2785231d6d46b86a[m
+Merge: 57d9724 6dc17b3
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Nov 24 13:49:33 2025 +0530
+
+    Merge branch 'main' of https://github.com/CODINGPERSON2026/HRMS into dashboard
+
+[33mcommit 6dc17b33fbf4c6755ede77d71f87d3b9b2a650cf[m
+Merge: 5da4b66 1b301e2
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Nov 24 13:44:34 2025 +0530
+
+    Merge remote-tracking branch 'origin/updatefix'
+    Merge branch 'updatefix' into main
+
+[33mcommit 1b301e2d03ac6f0b0434924034fb10cb8894b11a[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Nov 24 13:44:19 2025 +0530
+
+    Remove pycache and ignore pyc
+
+[33mcommit 5da4b66f0ecab903fb5fd420167297cfb53ca6ca[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Nov 24 13:35:41 2025 +0530
+
+    Remove pyc files and update .gitignore
+
+[33mcommit 57d9724856b166e554a9e5d66ad58a45c1aae9cf[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Nov 24 13:33:11 2025 +0530
+
+    DASHBOARD
+
+[33mcommit 23c4f2b704e0d5e0691e59eec562c3dad7593db0[m
+Author: Ubaid <codinperson126@gmai.com>
+Date:   Mon Nov 24 13:32:08 2025 +0530
+
+    update personnel
+
+[33mcommit 496006ca22efd3b9b6a55eb115eb4bbeec363a8c[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Nov 24 12:49:30 2025 +0530
+
+    Fixing
+
+[33mcommit 83fa2bd480f1c426e60c54aacbc2d67571a52a55[m
+Author: Ubaid <codinperson126@gmai.com>
+Date:   Mon Nov 24 11:38:15 2025 +0530
+
+    Your commit message
+
+[33mcommit 14bf356bdf090cccc860d398555c716680b6bbe9[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Mon Nov 24 11:29:47 2025 +0530
+
+    imports fixed
+
+[33mcommit 0dd7ef4a8386e1b9a1652def3ca84ee26b91a91c[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Thu Nov 20 13:59:46 2025 +0530
+
+    FINAL UPDATES
+
+[33mcommit a6393f5eb948fef18f83930a6afe692854de8e5d[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Thu Nov 20 13:11:33 2025 +0530
+
+    DONT
+
+[33mcommit c1ea3c98c23e61cca53ee9faaf8f1402497e512d[m
+Merge: 89d3860 e94d85b
+Author: CODER <codinperson126@gmail.com>
+Date:   Thu Nov 20 11:17:55 2025 +0530
+
+    Remove .pyc files from Git tracking
+
+[33mcommit 89d38605e0af2fafa41338adc050d32922b80f80[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Nov 19 15:38:49 2025 +0530
+
+    graph fixed
+
+[33mcommit e94d85b074510d1ef3dbf53fb635c1a756d3174e[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Nov 19 14:24:54 2025 +0530
+
+    DONE
+
+[33mcommit 08cf6565dfe592a29f6dcfdfd255397b6fe62bf4[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Nov 19 13:46:04 2025 +0530
+
+    login functionaliy
+
+[33mcommit d4b6306aa98c02d7a90050d603d19cc998f2db90[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Nov 19 13:04:30 2025 +0530
+
+    login folder
+
+[33mcommit aed73b488b470efb75309d09eee5a0249da12cf7[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Tue Nov 18 14:36:22 2025 +0530
+
+    cache updated
+
+[33mcommit bfc181b09e6beab32116d5cab85d767f596546ce[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Tue Nov 18 14:30:47 2025 +0530
+
+    CODE WILL WORK WITHOUT INTERNET
+
+[33mcommit d457b03bf53e2ca40d82a05521b5c344341ca018[m
+Merge: 571d2fd 5eb10c0
+Author: vipulGhadge <47784612+vipulGhadge@users.noreply.github.com>
+Date:   Tue Nov 18 10:59:41 2025 +0530
+
+    Merge pull request #1 from CODINGPERSON2026/store_csd_update
+    
+    changes related to store and csd earning chart
+
+[33mcommit 5eb10c01756b92700b86edb7658b50aa037b136f[m
+Author: Vipul Ghadge <vipulghadge1999@example.com>
+Date:   Tue Nov 18 10:57:20 2025 +0530
+
+    changes related to store and csd earning chart
+
+[33mcommit 571d2fd2e953db41f12caa665a8070500609e515[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Thu Nov 13 14:43:46 2025 +0530
+
+    updated
+
+[33mcommit e57dd6b599b3f5f7fb6a03ed63a44640dd6abcc0[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Thu Nov 13 13:37:52 2025 +0530
+
+    WEIGHT MANAGEMENT SYSYEM UPDATED
+
+[33mcommit 0b30473929cdaca36fee5ce310d64d2379eff6c1[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Thu Nov 13 13:33:28 2025 +0530
+
+    WEIGHT MANAGEMENT MERGED
+
+[33mcommit a8d8f18eb314004f5694375cabf1b308cf1a580b[m
+Author: Vipul Ghadge <vipulghadge1999@example.com>
+Date:   Wed Nov 12 10:06:40 2025 +0530
+
+    Restored and updated code after stash 12112025
+
+[33mcommit ab7f3be17fc7856ad263f2e4ed6bd186ad80e79a[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Thu Nov 6 15:07:01 2025 +0530
+
+    CODE MERGED
+
+[33mcommit ccb3c0731a8a3ac9589a7ea8c6dfa1e0f4a6c7ba[m
+Author: Ubaid <codinperson126@gmai.com>
+Date:   Thu Nov 6 12:48:05 2025 +0530
+
+    pushedonsixnov
+
+[33mcommit 730b4b98e0245b0bf80eb612e04bf2232d454775[m
+Author: Ubaid <codinperson126@gmai.com>
+Date:   Tue Nov 4 12:46:20 2025 +0530
+
+    essage-
+
+[33mcommit 7b96301b20093b22fd741687755601bd8ce931b1[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Wed Oct 29 19:31:08 2025 +0530
+
+    update
+
+[33mcommit ed89d41ad8c9856f7fafd8fff7e73ed3e18abb4c[m
+Author: YawarWani <waniyawar91@gmail.com>
+Date:   Wed Oct 29 19:12:09 2025 +0530
+
+    update main
+
+[33mcommit 7ac602813151f4f1ec6a15f167134fd52abd9358[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Oct 29 15:18:59 2025 +0530
+
+    updated
+
+[33mcommit f0856a2b99c6c1c2a52e396c9cc3eda721903fdd[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Oct 29 13:51:12 2025 +0530
+
+    new update
+
+[33mcommit 3ec88ce0cd82df15e5afa88277cb36d64374d188[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Oct 29 13:49:47 2025 +0530
+
+    Reports tab removed
+
+[33mcommit 8781017836f127e6bf6c45cdfe7d229300f2eee0[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Oct 29 13:48:52 2025 +0530
+
+    Reports tab removed
+
+[33mcommit ef96215e7fff110460c96da7865039d84ab55d3c[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Oct 29 13:13:34 2025 +0530
+
+    removed the imports
+
+[33mcommit 3edfdac05dff06a675b7fa950f944dce1fff6ec2[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Oct 29 13:12:20 2025 +0530
+
+    test remvoed
+
+[33mcommit 9e1ba0c0a307ec69e613396d47a0da9cf09c65a3[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Oct 29 13:05:28 2025 +0530
+
+    message added
+
+[33mcommit 2c99faae861041ca4f2603aaa252b38c19a3eb5a[m
+Author: Ubaid <codinperson126@gmai.com>
+Date:   Wed Oct 29 12:59:17 2025 +0530
+
+    ubaid
+
+[33mcommit 44653b4daa26d7fb7457311c433323aebc6edb3e[m
+Author: Ubaid <codinperson126@gmai.com>
+Date:   Wed Oct 29 12:56:33 2025 +0530
+
+    testing file
+
+[33mcommit dfab09a88bc6a5142f09b0261293a2ce6e46c47b[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Oct 29 12:31:44 2025 +0530
+
+    Sql file attached
+
+[33mcommit 41bf7023a5a98859f010027aea1a338ba7115ad5[m
+Author: CODER <codinperson126@gmail.com>
+Date:   Wed Oct 29 12:23:24 2025 +0530
+
+    Initial commit
