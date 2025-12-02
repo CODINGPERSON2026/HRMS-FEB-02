@@ -279,8 +279,13 @@
     <div class="action-section">
       <h2 style="margin: 0 0 10px 0; color: #1e293b; font-weight: 700;">
         Welcome Back, {{ role }} {{ username }}
+        
       </h2>
-      <div class="action-section-title">Quick Actions</div>
+      <div style="margin-bottom: 10px;">
+        {% include 'modals/alarm/alarm.html' %}
+      </div>
+      
+      
       <div class="action-buttons">
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
           Assign Personnel
@@ -376,7 +381,6 @@
   {% include 'modals/personnelModal/personal_modal.html' %}
   {% include 'modals/salesmodal/salesModal.html' %}
   {% include 'modals/leaverequest/leave_request.html' %}
-  {% include 'modals/alarm/alarm.html' %}
   {% include 'modals/interview_pending/modal.html' %}
 
   <!-- Interview Pending Modal -->

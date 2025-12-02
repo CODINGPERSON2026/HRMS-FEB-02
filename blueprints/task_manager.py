@@ -44,3 +44,13 @@ def update_task():
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
+
+
+
+@task_bp.route("/view_task")
+def view_task():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT task_name, assigned_to, task_status FROM tasks ORDER BY id DESC")
+    tasks = cursor.fetchall()
+    return jsonify(tasks)
