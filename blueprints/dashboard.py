@@ -11,21 +11,27 @@ def get_det_personnel():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        query = """
-    SELECT 
-        p.name,
-        p.army_number,
-        p.rank,
-        p.company,
-        ad.det_id,
-        ad.det_status,
-        d.det_name
-    FROM personnel p
-    LEFT JOIN assigned_det ad ON p.army_number = ad.army_number
-    LEFT JOIN dets d ON ad.det_id = d.det_id
-    WHERE p.detachment_status = 1
-      AND ad.det_status = 1
-"""
+        query = '''
+SELECT 
+    p.name,
+    p.army_number,
+    p.rank,
+    p.company,
+    ad.det_id,
+    ad.det_status,
+    d.det_name,
+    ad.assigned_on,
+
+    -- Days on duty
+    DATEDIFF(NOW(), ad.assigned_on) AS days_on_det
+
+FROM personnel p
+LEFT JOIN assigned_det ad ON p.army_number = ad.army_number
+LEFT JOIN dets d ON ad.det_id = d.det_id
+
+WHERE p.detachment_status = 1
+  AND ad.det_status = 1 ORDER BY ad.assigned_on ASC;
+'''
 
         params = []
 

@@ -774,23 +774,28 @@ def assigned_alarm():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Fetch all rows where assigned_on > 10 seconds and get det_name
-        query = '''SELECT 
-    ad.army_number, 
-    p.name,
-    ad.det_id, 
-    d.det_name, 
-    ad.assigned_on,
-    ad.det_status
-FROM assigned_det ad
-LEFT JOIN dets d ON ad.det_id = d.det_id
-LEFT JOIN personnel p ON ad.army_number = p.army_number
-WHERE TIMESTAMPDIFF(SECOND, ad.assigned_on, NOW()) > 10
-  AND ad.det_status = 1
-ORDER BY ad.assigned_on ASC '''
+        query = '''
+        SELECT 
+            ad.army_number, 
+            p.name,
+            p.rank,
+            p.company,
+            ad.det_id, 
+            d.det_name, 
+            ad.assigned_on,
+            ad.det_status,
+            DATEDIFF(NOW(), ad.assigned_on) AS days_on_det
+        FROM assigned_det ad
+        LEFT JOIN dets d ON ad.det_id = d.det_id
+        LEFT JOIN personnel p ON ad.army_number = p.army_number
+        WHERE DATEDIFF(NOW(), ad.assigned_on) > 2
+          AND ad.det_status = 1
+        ORDER BY ad.assigned_on ASC;
+        '''
+
         cursor.execute(query)
         rows = cursor.fetchall()
-        print(rows,"this is rows")
+        print(rows,"these are rowaasjdfjadsjfjsdfskl sdfkljadslkfjlsfjdslfjl fdslkjlfj ")
 
         return jsonify({"status": "success", "rows": rows})
 

@@ -1,55 +1,52 @@
+
+
+<style>
+    .blink {
+        animation: blinkEffect 3s 5;
+    }
+    
+    @keyframes blinkEffect {
+        0% { opacity: 1; }
+        50% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    </style>
+
 <!-- Toast Container -->
-<div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055"></div>
+<span id="alarmAlert" class="badge bg-danger d-none" style="cursor:pointer;">
+    🔔 You have Detachment alarms!
+</span>
+
 
 <script>
-async function showAssignedAlarms() {
-    try {
-        const res = await fetch('/api/assigned_alarm');
-        if (!res.ok) throw new Error("Network error");
-        const result = await res.json();
-
-        const container = document.getElementById("toastContainer");
-        container.innerHTML = ""; // Clear previous toasts
-
-        if(result.rows && result.rows.length > 0) {
-            result.rows.forEach((row, index) => {
-                // Create toast element
-                const toastEl = document.createElement("div");
-                toastEl.className = "toast align-items-center text-bg-danger border-0 mb-2";
-                toastEl.role = "alert";
-                toastEl.ariaLive = "assertive";
-                toastEl.ariaAtomic = "true";
-
-                toastEl.innerHTML = `
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            🔔 DET ALARM! Name : ${row.name},
-                             Army Number: ${row.army_number}, Det Name: ${row.det_name}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                `;
-
-                // Append toast but hide initially for smooth fade-in
-                toastEl.style.opacity = 0;
-                container.appendChild(toastEl);
-
-                // Delay each toast appearance slightly for smooth stacking
-                setTimeout(() => {
-                    const bsToast = new bootstrap.Toast(toastEl, { autohide: true, delay: 30000 });
-                    bsToast.show();
-
-                    // Fade-in effect
-                    toastEl.style.transition = "opacity 0.5s ease-in-out";
-                    toastEl.style.opacity = 1;
-                }, index * 600); // stagger by 300ms for each toast
-            });
+    async function showAssignedAlarms() {
+        try {
+            const res = await fetch('/api/assigned_alarm');
+            if (!res.ok) throw new Error("Network error");
+            const result = await res.json();
+    
+            const alarmAlert = document.getElementById("alarmAlert");
+    
+            if(result.rows && result.rows.length > 0) {
+                alarmAlert.classList.remove("d-none");
+                alarmAlert.classList.add("blink");
+                alarmAlert.innerText = `🔔 You have ${result.rows.length} Detachment alarm(s)!`;
+            } else {
+                alarmAlert.classList.add("d-none");
+                alarmAlert.classList.remove("blink");
+            }
+    
+        } catch (err) {
+            console.error("Error fetching assigned alarms:", err);
         }
-    } catch (err) {
-        console.error("Error fetching assigned alarms:", err);
     }
-}
-
-// Run only on page load / refresh
-document.addEventListener('DOMContentLoaded', showAssignedAlarms);
-</script>
+    
+    document.addEventListener('DOMContentLoaded', showAssignedAlarms);
+    document.getElementById("alarmAlert").addEventListener("click", function () {
+        const detModal = new bootstrap.Modal(document.getElementById('detModal'));
+        detModal.show();
+        load_det_personnel();
+      });
+    </script>
+    
+    

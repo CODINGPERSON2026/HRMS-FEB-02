@@ -1,7 +1,21 @@
 
+<style>
+  /* Increase width */
+  .custom-size {
+      max-width: 90% !important;   /* Adjust width percentage */
+      width: 90% !important;
+  }
+  
+  /* Increase height */
+  .custom-size .modal-content {
+      height: 85vh !important;      /* 85% of screen height */
+      overflow-y: auto;             /* Enable scroll inside */
+  }
+  
+  </style>
 <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-free-7.1.0-web/css/all.min.css') }}"/>
 <div class="modal fade" id="detModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg custom-size">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Personnel in DET</h5>
@@ -33,9 +47,9 @@
             <thead>
               <tr>
                 <th>Det Name</th>
+                <th>Days on Det</th>
                 <th>Name</th>
                 <th>Army Number</th>
-                <th>Rank</th>
                 <th>Company</th>
                 <th>Action</th> <!-- New column -->
               </tr>
@@ -60,31 +74,33 @@
   document.getElementById("companyFilter").addEventListener("change", function () {
     load_det_personnel(this.value);
   });
-  
   async function load_det_personnel(company = "") {
     const spinner = document.getElementById("detSpinner");
     const table = document.getElementById("detTable");
     const tbody = document.getElementById("detTableBody");
-  
+    
     spinner.classList.remove("d-none");
     table.classList.add("d-none");
     tbody.innerHTML = "";
-  
+    
     try {
       // Send selected company as query param
       const url = company ? `/stats/get_detachment_details?company=${encodeURIComponent(company)}` : `/stats/get_detachment_details`;
       const response = await fetch(url);
       const result = await response.json();
-  
+      console.log(result,"this is result")
+      
       if (result.status !== "success") throw new Error("Fetch failed");
-  
+      
       if (result.data.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center">No personnel found</td></tr>`;
       } else {
         result.data.forEach(row => {
+          let colorClass = row.days_on_det > 2 ? 'text-danger fw-bold' : '';
           tbody.innerHTML += `
             <tr>
-              <td>${row.det_name}</td>
+              <td class="${colorClass}">${row.det_name}</td>
+              <td class="${colorClass}">${row.days_on_det}</td>
               <td>${row.name}</td>
               <td>${row.army_number}</td>
               <td>${row.rank}</td>
