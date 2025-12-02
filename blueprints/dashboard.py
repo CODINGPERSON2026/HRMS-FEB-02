@@ -4,44 +4,44 @@ dashboard_bp =  Blueprint('dasboard',__name__,url_prefix='/stats')
 
 @dashboard_bp.route('/get_detachment_details')
 def get_det_personnel():
-    print("yawar")
-    company = request.args.get('company')  # <-- get company filter
+    
+    company = request.args.get('company')
+    print(company, 'this is company')
 
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
         query = '''
-SELECT 
-    p.name,
-    p.army_number,
-    p.rank,
-    p.company,
-    ad.det_id,
-    ad.det_status,
-    d.det_name,
-    ad.assigned_on,
-
-    -- Days on duty
-    DATEDIFF(NOW(), ad.assigned_on) AS days_on_det
-
-FROM personnel p
-LEFT JOIN assigned_det ad ON p.army_number = ad.army_number
-LEFT JOIN dets d ON ad.det_id = d.det_id
-
-WHERE p.detachment_status = 1
-  AND ad.det_status = 1 ORDER BY ad.assigned_on ASC;
-'''
+        SELECT 
+            p.name,
+            p.army_number,
+            p.rank,
+            p.company,
+            ad.det_id,
+            ad.det_status,
+            d.det_name,
+            ad.assigned_on,
+            DATEDIFF(NOW(), ad.assigned_on) AS days_on_det
+        FROM personnel p
+        LEFT JOIN assigned_det ad ON p.army_number = ad.army_number
+        LEFT JOIN dets d ON ad.det_id = d.det_id
+        WHERE p.detachment_status = 1
+          AND ad.det_status = 1
+        '''
 
         params = []
 
-        if company:  # <-- inject filter
+        # Add filter before ORDER BY
+        if company:
             query += " AND p.company = %s"
             params.append(company)
 
+        query += " ORDER BY ad.assigned_on ASC"  # Move ORDER BY to end
+
         cursor.execute(query, params)
         result = cursor.fetchall()
-        print(result)
+
         return jsonify({"status": "success", "data": result})
 
     except Exception as e:
