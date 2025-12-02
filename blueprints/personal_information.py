@@ -759,7 +759,7 @@ def religion_chart():
     connection = get_db_connection()
     cursor= connection.cursor(dictionary=True)
     try:
-        cursor.execute("""SELECT religion,count(religion) as religion_count FROM army_personnel_db.personnel group by religion""")
+        cursor.execute("""SELECT religion,count(religion) as religion_count FROM personnel group by religion""")
         result = cursor.fetchall()
       
         print(result)

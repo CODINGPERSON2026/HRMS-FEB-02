@@ -880,6 +880,27 @@ def update_stage():
 
 
 
+@app.route("/search_officer")
+def search_officer():
+    name_query = request.args.get("name", "")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT name,`rank`, company
+        FROM personnel
+        WHERE name LIKE %s AND `rank` = 'JCO'
+        LIMIT 10
+    """, (f"%{name_query}%",))
+
+    results = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return jsonify(results)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=1000)
