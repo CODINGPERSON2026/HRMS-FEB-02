@@ -185,13 +185,14 @@
           <p class="mt-2 text-muted">Loading tasks...</p>
         </div>
 
-        <table class="table table-hover align-middle" id="taskTable" style="display:none;">
+        <table class="table table-hover" id="taskTable" style="display:none;">
           <thead class="table-primary">
             <tr>
+              <th>Id</th>
               <th>Task Name</th>
               <th>Assigned To</th>
               <th>Status</th>
-              <th style="width:110px;">Action</th>
+              <th style="width:210px;">Action</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -200,6 +201,7 @@
     </div>
   </div>
 </div>
+{% include 'modals/view_task_status/task_status.html'%}
 
 <script>
   const btnCreate   = document.getElementById("btnCreateTask");
@@ -269,6 +271,7 @@
 
     const res = await fetch("/task_manager/view_task");
     const tasks = await res.json();
+    console.log('task',tasks)
 
     const filtered = status === "all" ? tasks : tasks.filter(t => t.task_status === status);
     renderTasks(filtered);
@@ -293,13 +296,22 @@
 
       const row = `
         <tr>
+          <td>${task.id}</td>
           <td>${task.task_name}</td>
           <td>${task.assigned_to}</td>
           <td><span class="badge ${badge}">${task.task_status || "Unknown"}</span></td>
-          <td>
-            <button class="btn btn-sm btn-info me-1" title="Edit"><i class="fa-solid fa-pen"></i></button>
-            <button class="btn btn-sm btn-danger" title="Delete"><i class="fa-solid fa-trash"></i></button>
-          </td>
+        <td>
+  <button class="btn btn-sm btn-info me-1 edit-btn" title="Edit" data-id="${task.id}">
+    <i class="fa-solid fa-pen"></i>
+  </button>
+  <button class="btn btn-sm btn-danger delete-btn" title="Delete" data-id="${task.id}">
+    <i class="fa-solid fa-trash"></i>
+  </button>
+  <button class="btn btn-sm btn-primary view-btn" title="View Details" data-id="${task.id}">
+    <i class="fa-solid fa-eye"></i>
+  </button>
+</td>
+
         </tr>`;
       taskTableBody.innerHTML += row;
     });

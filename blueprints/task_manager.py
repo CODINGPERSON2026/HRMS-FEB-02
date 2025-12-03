@@ -51,6 +51,20 @@ def update_task():
 def view_task():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT task_name, assigned_to, task_status FROM tasks ORDER BY id DESC")
+    cursor.execute("SELECT id,task_name, assigned_to, task_status FROM tasks ORDER BY id DESC")
     tasks = cursor.fetchall()
     return jsonify(tasks)
+
+
+@task_bp.route("/get_task/<int:id>")
+def get_task_details(id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    print(id,"this is id")
+    cursor.execute("SELECT * FROM tasks WHERE id=%s", (id,))
+    task = cursor.fetchone()
+    print(task)
+    cursor.close()
+    conn.close()
+
+    return jsonify(task)
