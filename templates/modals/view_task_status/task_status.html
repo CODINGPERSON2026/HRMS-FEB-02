@@ -18,6 +18,7 @@
       padding: 1.5rem;
       border: none;
     }
+    
 
     .modal-title {
       font-weight: 600;
@@ -37,10 +38,7 @@
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .info-card:hover {
-      transform: translateX(4px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-    }
+    
 
     .info-row {
       display: flex;
@@ -85,7 +83,7 @@
     }
 
     .description-scroll {
-      max-height: 150px;
+      max-height: 80px;
       overflow-y: auto;
       padding-right: 10px;
     }
@@ -182,6 +180,9 @@
       background: #f8f9fa;
       border-radius: 0 0 16px 16px;
     }
+   
+    
+   
 
     .btn-close-custom {
       background: white;
@@ -311,10 +312,13 @@
 
 
 <script>
-  document.addEventListener("click", async function(e) {
-    if (!e.target.closest(".view-btn")) return;
+   async function  viewModal(taskid){
+        console.log("in this function ", taskid)
+
+       
+    
   
-    const taskId = e.target.closest(".view-btn").dataset.id;
+    const taskId = taskid
   
     const res = await fetch(`/task_manager/get_task/${taskId}`);
     const task = await res.json();
@@ -345,7 +349,8 @@ console.log(dateOnly); // "2025-12-02"
     document.getElementById("sliderValue").innerText = `${slider.value}%`;
   
     new bootstrap.Modal(document.getElementById("taskDetailModal")).show();
-  });
+  };
+
+    
 </script>
 
-\

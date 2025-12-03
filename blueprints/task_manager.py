@@ -68,3 +68,33 @@ def get_task_details(id):
     conn.close()
 
     return jsonify(task)
+
+@task_bp.route('delete_task/<int:id>',methods = ['DELETE'])
+def delete_task(id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        query = 'DELETE FROM tasks where id = %s'
+        cursor.execute(query,(id,))
+    except Exception as e:
+        print('Exception',str(e))
+    return jsonify({'message': f'{id} deleted'}),200
+
+
+
+@task_bp.route('/get_task_update/<int:task_id>')
+def get_task(task_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM tasks WHERE id=%s", (task_id,))
+    task = cursor.fetchone()
+    print(task)
+    cursor.close()
+    conn.close()
+    
+    if task:
+        # Format date as yyyy-mm-dd for input[type=date]
+        task['due_date'] = task['due_date'].strftime('%Y-%m-%d') if task['due_date'] else ''
+        return jsonify(task)
+    else:
+        return jsonify({"error": "Task not found"}), 404
