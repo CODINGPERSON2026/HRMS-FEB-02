@@ -1,10 +1,6 @@
-{% extends 'personnel_info/base.html' %}
+{% extends 'baseView.html' %}
 
-{% block title %}View Data - Medical Cases - Army Personnel System{% endblock %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% block extra_css %}
-
-
+{% block content %}
 <style>
   :root {
     --primary: #667eea;
@@ -17,10 +13,87 @@
     --text-secondary: #718096;
     --bg-light: #f8fafc;
   }
+  
+  /* Fix sidebar overlap */
+  .container-fluid {
+      margin-left: 240px !important; /* Same as dashboard sidebar */
+      padding: 1.5rem !important;
+      min-height: 100vh;
+      width: calc(100% - 240px) !important;
+  }
+
+  /* Make it responsive */
+  @media (max-width: 768px) {
+      .container-fluid {
+          margin-left: 0 !important;
+          width: 100% !important;
+          padding: 1rem !important;
+      }
+  }
 
   body {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     min-height: 100vh;
+  }
+
+  /* Dashboard Navbar Styles - ADD THIS SECTION */
+  .dashboard-navbar {
+    background: linear-gradient(180deg, #ff9933, #ffffff 50%, #138808);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .navbar-left img {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+  }
+
+  .navbar-left h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+  }
+
+  .navbar-right {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .nav-link {
+    padding: 0.6rem 1.2rem;
+    background: rgba(255, 255, 255, 0.3);
+    color: #000 !important;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-link:hover {
+    background: #000080;
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
   }
 
   .dashboard-header {
@@ -43,6 +116,17 @@
     .stats-grid {
       grid-template-columns: 1fr;
     }
+    
+    .dashboard-navbar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .navbar-right {
+      width: 100%;
+      justify-content: flex-start;
+    }
   }
 
   .stats-card {
@@ -63,7 +147,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--danger), var(--warning), var(--success));
+    background: linear-gradient(90deg, var(--warning), var(--success));
     border-radius: 20px 20px 0 0;
   }
 
@@ -82,27 +166,25 @@
     transform: translate(-50%, -50%);
     width: 70px;
     height: 70px;
-    background: linear-gradient(135deg, rgba(245, 87, 108, 0.1), rgba(240, 147, 251, 0.1));
+    background: linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(78, 205, 196, 0.1));
     border-radius: 50%;
     z-index: -1;
   }
 
   .stats-icon i {
-    background: linear-gradient(135deg, var(--danger), var(--warning));
+    background: linear-gradient(135deg, var(--warning), var(--success));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .stats-number {
-    /* color:red; */
     color: chocolate;
     font-size: 3.5rem;
     font-weight: 800;
     margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, var(--danger), var(--warning));
+    background: linear-gradient(135deg, var(--warning), var(--success));
     -webkit-background-clip: text;
-    /* -webkit-text-fill-color: transparent; */
     background-clip: text;
   }
 
@@ -142,20 +224,27 @@
   }
 
   .btn-view-details {
-    background: linear-gradient(135deg, var(--danger), var(--warning));
-    color: rgb(111, 16, 16);
+    background: linear-gradient(135deg, var(--warning), var(--success));
+    color: white;
     border: none;
     padding: 1rem 2.5rem;
     border-radius: 50px;
     font-weight: 600;
     font-size: 1.1rem;
     margin-top: 1rem;
-    box-shadow: 0 8px 25px rgba(245, 87, 108, 0.3);
+    box-shadow: 0 8px 25px rgba(240, 147, 251, 0.3);
     position: relative;
     overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
   }
 
-  /* ==================== MODAL STYLES - COMPACT VERSION ==================== */
+  .btn-view-details:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(240, 147, 251, 0.4);
+  }
+
+  /* ==================== MODAL STYLES ==================== */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -258,35 +347,6 @@
 
   .tab-content.active { display: flex; }
 
-  /* Statistics Tab - Compact Chart */
-  .statistics-content {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .statistics-content .chart-title {
-    font-size: 1.1rem;
-    margin-bottom: 0.8rem;
-    text-align: center;
-  }
-
-  .statistics-chart {
-    flex: 1;
-    min-height: 340px !important;
-    max-height: 380px;
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
-    overflow: hidden;
-  }
-
-  #modalCompanyChart {
-    max-height: 320px !important;
-    width: 100% !important;
-  }
-
   /* Tabular Tab */
   .tabular-content {
     height: 100%;
@@ -388,21 +448,16 @@
     background: white;
   }
 
-  .personnel-table tr:last-child td:first-child { border-radius: 0 0 0 10px; }
-  .personnel-table tr:last-child td:last-child { border-radius: 0 0 10px 0; }
-
-  .company-badge,
-  .medical-badge {
+  .company-badge {
     padding: 0.35rem 0.85rem;
     border-radius: 16px;
     font-weight: 600;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.4px;
+    background: linear-gradient(135deg, var(--info), var(--accent-color));
+    color: white;
   }
-
-  .badge-medical-yes { background: linear-gradient(135deg, var(--danger), var(--warning)); color: white; }
-  .badge-medical-no { background: linear-gradient(135deg, var(--success), #44a08d); color: white; }
 
   /* ==================== MOBILE RESPONSIVE (≤768px) ==================== */
   @media (max-width: 768px) {
@@ -421,9 +476,6 @@
 
     .tab-content { padding: 0.8rem; }
 
-    .statistics-chart { min-height: 280px !important; padding: 0.8rem; }
-    #modalCompanyChart { max-height: 240px !important; }
-
     .filter-controls { flex-direction: column; align-items: stretch; gap: 0.6rem; }
     .company-select { min-width: auto; font-size: 0.9rem; padding: 0.5rem 0.7rem; }
 
@@ -434,14 +486,33 @@
     .personnel-table th,
     .personnel-table td { padding: 0.7rem 0.4rem; }
 
-    .company-badge,
-    .medical-badge { font-size: 0.7rem; padding: 0.3rem 0.7rem; }
+    .company-badge { font-size: 0.7rem; padding: 0.3rem 0.7rem; }
   }
 </style>
-{% endblock %}
 
-{% block content %}
 <div class="container-fluid px-4 py-4">
+  <!-- Dashboard Navbar with Add/Update Person Links -->
+  <div class="dashboard-navbar">
+    <div class="navbar-left">
+      <img src="/static/logo1.png" alt="Army Logo">
+      <h1>Army Personnel System</h1>
+    </div>
+    <div class="navbar-right">
+      <a href="/personnel_information/add-personnel" class="nav-link">
+        <i class="fas fa-user-plus"></i>
+        Add Personnel
+      </a>
+      <a href="/personnel_information/update-personnel" class="nav-link">
+        <i class="fas fa-user-edit"></i>
+        Update Personnel
+      </a>
+      <a href="/personnel_information/personnel" class="nav-link">
+        <i class="fas fa-user-edit"></i>
+        View Personnel
+      </a>
+    </div>
+  </div>
+
   <!-- Dashboard Header -->
   <div class="dashboard-header">
     <h1 class="h3 mb-2">Medical Cases Monitoring</h1>
@@ -492,8 +563,6 @@
 
     <!-- Modal Body -->
     <div class="modal-body">
-      <!-- Statistics Tab -->
-
       <!-- Tabular Tab -->
       <div class="tab-content" id="tabularTab">
         <div class="tabular-content">
@@ -539,6 +608,7 @@
     </div>
   </div>
 </div>
+
 <script src="/static/Chart.umd.min.js"></script>
 <script>
   // Chart instances
@@ -569,7 +639,9 @@
       const ctx = document.getElementById("companyChart").getContext("2d");
   
       // Destroy previous chart if it exists
-     
+      if (companyChart) {
+        companyChart.destroy();
+      }
   
       // Color palette
       const colors = [
@@ -582,7 +654,7 @@
       ];
   
       // Create new Chart.js instance
-      window.companyChart = new Chart(ctx, {
+      companyChart = new Chart(ctx, {
         type: "doughnut",
         data: {
           labels: companies,
@@ -623,68 +695,9 @@
         }
       });
   
-      // Update total count display (optional)
-      const totalEl = document.getElementById("totalMedicalCount");
-      if (totalEl) totalEl.textContent = totalMedical;
-  
     } catch (error) {
       console.error("Error initializing company chart:", error);
     }
-  }
-  
-
-  // Initialize Modal Company Chart
-  function initModalCompanyChart() {
-    const ctx = document.getElementById('modalCompanyChart').getContext('2d');
-    
-    if (modalCompanyChart) {
-      modalCompanyChart.destroy();
-    }
-    
-
-
-    const companies = ['1 Company', '2 Company', '3 Company', '4 Company'];
-    const counts = companies.map(company => companyData[company] || 0);
-    const colors = ['#667eea', '#f093fb', '#4ecdc4', '#ff6b6b'];
-
-    modalCompanyChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: companies,
-        datasets: [{
-          data: counts,
-          backgroundColor: colors,
-          borderColor: colors.map(color => color + 'CC'),
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 20,
-              usePointStyle: true,
-              font: { size: 12, weight: '600' }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.raw || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                return `${label}: ${value} (${percentage}%)`;
-              }
-            }
-          }
-        },
-        cutout: '65%'
-      }
-    });
   }
 
   // Modal Functions
@@ -695,21 +708,20 @@
     document.body.style.overflow = 'hidden';
 
     // Activate the Tabular tab and content
-  const tabularTab = document.querySelector('.nav-tab[data-tab="tabular"]');
-  const tabularContent = document.getElementById('tabularTab');
+    const tabularTab = document.querySelector('.nav-tab[data-tab="tabular"]');
+    const tabularContent = document.getElementById('tabularTab');
 
-  if (tabularTab && tabularContent) {
-    // Activate the tab
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    tabularTab.classList.add('active');
+    if (tabularTab && tabularContent) {
+      // Activate the tab
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      tabularTab.classList.add('active');
 
-    // Show the content
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    tabularContent.classList.add('active');
-  }
+      // Show the content
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tabularContent.classList.add('active');
+    }
     
     loadAllPersonnelData();
-    
   }
 
   function closeModal() {
@@ -733,10 +745,6 @@
       closeModal();
     }
   });
-
-  // Tab Navigation
-  
-  
 
   // Load all personnel data for modal
   async function loadAllPersonnelData() {
@@ -797,18 +805,9 @@
         ? new Date(person.date_of_enrollment).toLocaleDateString('en-GB')
         : 'N/A';
       
-      let companyBadge = '';
-      if (company === '1 Company') {
-        companyBadge = `<span class="company-badge badge-1">${company}</span>`;
-      } else if (company === '2 Company') {
-        companyBadge = `<span class="company-badge badge-2">${company}</span>`;
-      } else if (company === '3 Company') {
-        companyBadge = `<span class="company-badge badge-3">${company}</span>`;
-      } else if (company === '4 Company') {
-        companyBadge = `<span class="company-badge badge-4">${company}</span>`;
-      } else {
-        companyBadge = `<span class="badge bg-secondary">${company}</span>`;
-      }
+      const companyBadge = company !== 'Unknown' 
+        ? `<span class="company-badge">${company}</span>`
+        : `<span class="badge bg-secondary">${company}</span>`;
   
       return `
         <tr data-company="${company}" data-medical="${person.med_cat || 'No'}">
@@ -822,7 +821,6 @@
       `;
     }).join('');
   }
-  
 
   function setupModalCompanyFilter() {
     const companyFilter = document.getElementById('modalCompanyFilter');
@@ -850,9 +848,8 @@
   }
 
   // Initialize when page loads
-  document.addEventListener('DOMContentLoaded',async function() {
-    initCompanyChart();
-    
+  document.addEventListener('DOMContentLoaded', async function() {
+    await initCompanyChart();
     setupModalCompanyFilter();
     
     window.addEventListener('resize', function() {

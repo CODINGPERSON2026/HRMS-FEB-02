@@ -1,14 +1,78 @@
-{% extends "personnel_info/base.html" %}
+{% extends 'baseView.html' %}
 
-{% block extra_css %}
+{% block content %}
 <style>
   :root {
     --primary-color: #2c5aa0;
     --secondary-color: #8a0a0a;
     --light-bg: #f8f9fa; 
     --accent-color: #d4af37;
+    --saffron: #ff9933;
+    --white: #ffffff;
+    --green: #138808;
+    --accent: #000080;
   }
   
+  .dashboard-navbar {
+  background: linear-gradient(180deg, var(--saffron), var(--white) 50%, var(--green));
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  margin-top: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-left: 250px !important;
+}
+
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .navbar-left img {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+  }
+
+  .navbar-left h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+  }
+
+  .navbar-right {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .nav-link {
+    padding: 0.6rem 1.2rem;
+    background: rgba(255, 255, 255, 0.3);
+    color: #000 !important;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-link:hover {
+    background: var(--accent);
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
+  }
   /* Increased width for the entire page */
   .container-fluid {
     max-width: 80%;
@@ -20,9 +84,14 @@
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     padding: 30px;
-    margin: 20px auto;
+    margin: 20px 20px 20px 250px;
     border: 1px solid #e1e5eb;
+    max-width: calc(100% - 270px);
+  }
+  .container-fluid {
     max-width: 100%;
+    padding: 0;
+    margin-left: 0;
   }
   
   /* Search section styles */
@@ -360,10 +429,30 @@
     border-color: #198754 !important;
   }
 </style>
-{% endblock %}
 
-{% block content %}
 <div class="container-fluid">
+  <!-- Dashboard Navbar -->
+  <div class="dashboard-navbar">
+    <div class="navbar-left">
+      <img src="/static/logo1.png" alt="Army Logo">
+      <h1>Army Personnel System</h1>
+    </div>
+    <div class="navbar-right">
+      <a href="/personnel_information/add-personnel" class="nav-link">
+        <i class="fas fa-user-plus"></i>
+        Add Personnel
+      </a>
+      <a href="/personnel_information/update-personnel" class="nav-link">
+        <i class="fas fa-user-edit"></i>
+        Update Personnel
+      </a>
+      <a href="/personnel_information/personnel" class="nav-link">
+        <i class="fas fa-user-edit"></i>
+        View Personnel
+      </a>
+    </div>
+  </div>
+  
   <div class="row justify-content-center">
     <div class="col-xxl-12">
       <div class="form-container">
@@ -1679,9 +1768,6 @@
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   // ========== SEARCH FUNCTIONALITY ==========

@@ -1,13 +1,8 @@
-{% extends "personnel_info/base.html" %}
-{% block title %}Dashboard{% endblock %}
-{% block extra_css %}
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+{% extends 'baseView.html' %}
 
+{% block content %}
+<style>
+  /* Copy all the existing CSS from your current file */
   :root {
     /* Light Theme - Professional */
     --bg-primary: #f8fafc;
@@ -25,6 +20,13 @@
     --warning-color: #f59e0b;
     --danger-color: #ef4444;
     --grid-gap: 1.25rem;
+    --saffron: #ff9933;
+    --white: #ffffff;
+    --green: #138808;
+    --accent: #000080;
+    --dark-bg: #0f2027;
+    --dark-bg-2: #203a43;
+    --dark-bg-3: #2c5364;
   }
 
   [data-theme="dark"] {
@@ -39,93 +41,113 @@
     --card-bg: #1e293b;
   }
 
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
   body {
     background: var(--bg-primary);
     color: var(--text-primary);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background Decorative Layers */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+        circle at 20% 50%,
+        rgba(102, 126, 234, 0.15),
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        rgba(118, 75, 162, 0.15),
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 40% 20%,
+        rgba(67, 233, 123, 0.1),
+        transparent 40%
+      );
+    pointer-events: none;
+    z-index: 0;
   }
 
   .dashboard-container {
-    max-width: 1800px;
-    margin: 0 auto;
+    margin-left: 240px; /* Adjust for sidebar from baseView.html */
     padding: 1.5rem;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
   }
 
-  /* Header Section */
+  /* Header Section - Simplified */
   .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-    padding: 1.5rem 2rem;
-    background: var(--card-bg);
+    padding: 1rem 1.5rem;
+    background: linear-gradient(180deg, var(--saffron), var(--white) 50%, var(--green));
     border-radius: 12px;
     box-shadow: var(--shadow-md);
-    border: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .header-left img {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
   }
 
   .header-left h1 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-  }
-
-  .header-left p {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
+    color: #000;
+    margin: 0;
   }
 
   .header-right {
     display: flex;
-    gap: 1rem;
-    align-items: center;
+    gap: 0.75rem;
   }
 
-  /* Theme Toggle */
-  .theme-toggle {
-    width: 48px;
-    height: 48px;
+  .header-link {
+    padding: 0.6rem 1.2rem;
+    background: rgba(255, 255, 255, 0.3);
+    color: #000 !important;
+    text-decoration: none;
     border-radius: 10px;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .theme-toggle:hover {
-    border-color: var(--accent-color);
-  }
-
-  .theme-toggle i {
-    font-size: 1.1rem;
-    color: var(--accent-color);
-  }
-
-  .refresh-btn {
-    padding: 0.75rem 1.5rem;
-    background: var(--bg-accent);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
   }
 
-  .refresh-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-lg);
+  .header-link:hover {
+    background: var(--accent);
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
   }
 
-  /* Stats Grid */
+  /* Stats Grid - Only 2 cards now */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -278,75 +300,8 @@
 
   .chart-container {
     position: relative;
-    height: 250px; /* Reduced height for professional look */
+    height: 250px;
     width: 100%;
-  }
-
-  /* Recent Personnel Table */
-  .recent-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .recent-table th {
-    text-align: left;
-    padding: 0.75rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    border-bottom: 2px solid var(--border-color);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .recent-table td {
-    padding: 0.75rem;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-  }
-
-  .recent-table tr:hover {
-    background: var(--bg-primary);
-  }
-
-  .rank-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--accent-color);
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-
-  /* Actions Section */
-  .actions-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-
-  .action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    font-size: 0.9rem;
-  }
-
-  .action-btn:hover {
-    border-color: var(--accent-color);
-    transform: translateX(4px);
   }
 
   /* Responsive */
@@ -358,19 +313,19 @@
 
   @media (max-width: 768px) {
     .dashboard-container {
+      margin-left: 0;
       padding: 1rem;
     }
 
     .page-header {
       flex-direction: column;
-      gap: 1rem;
       align-items: flex-start;
-      padding: 1.25rem;
+      gap: 1rem;
     }
 
     .header-right {
       width: 100%;
-      justify-content: space-between;
+      justify-content: flex-start;
     }
 
     .stats-grid {
@@ -386,7 +341,7 @@
     }
   }
 
-  /* Loader styles remain the same */
+  /* Loader styles */
   #loader {
     position: fixed;
     top: 0;
@@ -424,33 +379,39 @@
     100% { background-position: 250% 0, 250% 0; }
   }
 </style>
-{% endblock %}
 
-{% block content %}
+<!-- Link external CSS and JS -->
+<script src="/static/Chart.umd.min.js"></script>
+<link rel="stylesheet" href="/static/fontawesome-free-7.1.0-web/css/all.min.css">
 
 <div id="loader">
   <div class="loader"></div>
 </div>
 
-
 <div class="dashboard-container">
-  <!-- Page Header -->
+  <!-- Header Section - Simplified -->
   <div class="page-header">
     <div class="header-left">
-      <h1> 15 CESR</h1>
-      <p>Real-time personnel analytics and insights</p>
+      <img src="/static/logo1.png" alt="Army Logo">
+      <h1>Army Personnel System</h1>
     </div>
     <div class="header-right">
-      <div class="theme-toggle" onclick="toggleTheme()">
-        <i class="fas fa-moon" id="theme-icon"></i>
-      </div>
-      <button class="refresh-btn" onclick="refreshData()">
-        <i class="fas fa-sync-alt"></i>
-        Refresh
-      </button>
+      <a href="/personnel_information/add-personnel" class="header-link">
+        <i class="fas fa-user-plus"></i>
+        Add Personnel
+      </a>
+      <a href="/personnel_information/update-personnel" class="header-link">
+        <i class="fas fa-user-edit"></i>
+        Update Personnel
+      </a>
+      <a href="/personnel_information/personnel" class="header-link">
+        <i class="fas fa-user-plus"></i>
+        View Personnel
+      </a>
     </div>
   </div>
-  <!-- Stats Grid -->
+  
+  <!-- Stats Grid - Only 2 cards now (Total Personnel and Medical Cases) -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon">
@@ -459,15 +420,13 @@
       <div class="stat-label">Total Personnel</div>
       <div class="stat-value" id="totalPersonnelCount"></div>
     </div>
-
-    <div class="stat-card">
+     <div class="stat-card">
       <div class="stat-icon">
         <i class="fas fa-shield-alt"></i>
       </div>
       <div class="stat-label">Det Duty</div>
       <div class="stat-value">0</div>
     </div>
-
     <div class="stat-card">
       <div class="stat-icon">
         <i class="fas fa-medkit"></i>
@@ -538,19 +497,21 @@
         <canvas id="employmentChart"></canvas>
       </div>
     </div>
-<!-- Sports Distribution Chart -->
-<div class="chart-card">
-  <div class="chart-header">
-    <h3 class="chart-title">
-      <i class="fas fa-running"></i>
-      Sports Distribution
-    </h3>
-    <span class="chart-badge">Live</span>
-  </div>
-  <div class="chart-container">
-    <canvas id="sportsChart"></canvas>
-  </div>
-</div>
+
+    <!-- Sports Distribution Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <i class="fas fa-running"></i>
+          Sports Distribution
+        </h3>
+        <span class="chart-badge">Live</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="sportsChart"></canvas>
+      </div>
+    </div>
+    
     <!-- Years in Service -->
     <div class="chart-card">
       <div class="chart-header">
@@ -564,6 +525,8 @@
         <canvas id="serviceChart"></canvas>
       </div>
     </div>
+    
+    <!-- Loan Amounts -->
     <div class="chart-card">
       <div class="chart-header">
         <h3 class="chart-title">
@@ -576,35 +539,29 @@
         <canvas id="loanChart"></canvas>
       </div>
     </div>
+  </div>
+</div>
 
-    
-{% endblock %}
-
-{% block extra_js %}
-<script src="/static/Chart.umd.min.js"></script>
 <script>
   // Chart instances
   let ageChart, rankChart, religionChart, employmentChart, serviceChart, loanChart, sportsChart;
 
-  // Theme Management
+  // Theme Management - Removed from header but kept for functionality
   function toggleTheme() {
     const html = document.documentElement;
-    const icon = document.getElementById('theme-icon');
     const currentTheme = html.getAttribute('data-theme');
     
     if (currentTheme === 'dark') {
       html.removeAttribute('data-theme');
-      icon.className = 'fas fa-moon';
       localStorage.setItem('theme', 'light');
     } else {
       html.setAttribute('data-theme', 'dark');
-      icon.className = 'fas fa-sun';
       localStorage.setItem('theme', 'dark');
     }
     initializeCharts();
   }
 
-  // Fetch Medical Cases trade graph , loan info, overweight
+  // Fetch Medical Cases
   async function loadMedicalCases() {
     const countStat = document.getElementById('medical_count');
     countStat.textContent = 'Loading...';
@@ -652,14 +609,13 @@
     }
   }
 
+  // Initialize on page load
   document.addEventListener('DOMContentLoaded', async function() {
-    const icon = document.getElementById('theme-icon');
     const savedTheme = localStorage.getItem('theme');
     const loader = document.getElementById('loader');
 
     if (savedTheme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
-      icon.className = 'fas fa-sun';
     }
 
     try {
@@ -681,7 +637,7 @@
     }
   });
 
-  // Refresh button handler
+  // Refresh data function - removed button but keeping function
   async function refreshData() {
     const loader = document.getElementById('loader');
     try {
@@ -698,15 +654,11 @@
     }
   }
 
-  function exportReport() { alert('Export functionality to be implemented'); }
-  function searchRecords() { alert('Search functionality to be implemented'); }
-  function openSettings() { alert('Settings functionality to be implemented'); }
-
   // Chart initialization
   async function initializeCharts() {
-    // Destroy previous instances - add sportsChart to the array
+    // Destroy previous instances
     [ageChart, rankChart, religionChart, employmentChart, serviceChart, loanChart, sportsChart].forEach(chart => {
-        if (chart) chart.destroy();
+      if (chart) chart.destroy();
     });
 
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -715,279 +667,273 @@
 
     // Chart colors
     const chartColors = [
-        'rgba(99, 102, 241, 0.8)',   // Indigo
-        'rgba(16, 185, 129, 0.8)',   // Emerald
-        'rgba(239, 68, 68, 0.8)',    // Red
-        'rgba(245, 158, 11, 0.8)',   // Amber
-        'rgba(59, 130, 246, 0.8)',   // Blue
-        'rgba(168, 85, 247, 0.8)',   // Purple
-        'rgba(34, 197, 94, 0.8)',    // Green
-        'rgba(236, 72, 153, 0.8)'    // Pink
+      'rgba(99, 102, 241, 0.8)',   // Indigo
+      'rgba(16, 185, 129, 0.8)',   // Emerald
+      'rgba(239, 68, 68, 0.8)',    // Red
+      'rgba(245, 158, 11, 0.8)',   // Amber
+      'rgba(59, 130, 246, 0.8)',   // Blue
+      'rgba(168, 85, 247, 0.8)',   // Purple
+      'rgba(34, 197, 94, 0.8)',    // Green
+      'rgba(236, 72, 153, 0.8)'    // Pink
     ];
 
     const borderColors = chartColors.map(color => color.replace('0.8', '1'));
 
     try {
-        // Fetch all chart data in parallel - add sports data
-        const [ageData, rankData, religionData, employmentData, serviceData, loanData, sportsData] = await Promise.all([
-            fetch('/personnel_information/age_bar_graph').then(r => r.json()),
-            fetch('/personnel_information/rank_based_bar_graph_').then(r => r.json()),
-            fetch('/personnel_information/religion_donut_chart').then(r => r.json()),
-            fetch('/personnel_information/employment_type_chart').then(r => r.json()),
-            fetch('/personnel_information/years_in_service_chart').then(r => r.json()),
-            fetch('/personnel_information/loan_amounts_chart').then(r => r.json()),
-            fetch('/personnel_information/sports_distribution_chart').then(r => r.json())  // NEW
-        ]);
+      // Fetch all chart data in parallel
+      const [ageData, rankData, religionData, employmentData, serviceData, loanData, sportsData] = await Promise.all([
+        fetch('/personnel_information/age_bar_graph').then(r => r.json()),
+        fetch('/personnel_information/rank_based_bar_graph_').then(r => r.json()),
+        fetch('/personnel_information/religion_donut_chart').then(r => r.json()),
+        fetch('/personnel_information/employment_type_chart').then(r => r.json()),
+        fetch('/personnel_information/years_in_service_chart').then(r => r.json()),
+        fetch('/personnel_information/loan_amounts_chart').then(r => r.json()),
+        fetch('/personnel_information/sports_distribution_chart').then(r => r.json())
+      ]);
 
-        // Age Distribution Chart
-        const ageCtx = document.getElementById('ageDonutChart').getContext('2d');
-        ageChart = new Chart(ageCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ageData.age_distribution?.map(item => item.range) || [],
-                datasets: [{
-                    data: ageData.age_distribution?.map(item => item.count) || [],
-                    backgroundColor: chartColors,
-                    borderColor: borderColors,
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: { color: textColor, font: { size: 11 } }
-                    }
-                }
+      // Age Distribution Chart
+      const ageCtx = document.getElementById('ageDonutChart').getContext('2d');
+      ageChart = new Chart(ageCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ageData.age_distribution?.map(item => item.range) || [],
+          datasets: [{
+            data: ageData.age_distribution?.map(item => item.count) || [],
+            backgroundColor: chartColors,
+            borderColor: borderColors,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: textColor, font: { size: 11 } }
             }
-        });
+          }
+        }
+      });
 
-        // Rank Distribution Chart
-        const rankCtx = document.getElementById('rankChart').getContext('2d');
-        console.log(rankData.rank_distribution,"this is distribution")
-        rankChart = new Chart(rankCtx, {
-            type: 'bar',
-            data: {
-                labels: rankData.rank_distribution?.map(item => item.rank) || [],
-                datasets: [{
-                    label: 'Personnel Count',
-                    data: [20,78,5,32],
-                    backgroundColor: chartColors[0],
-                    borderColor: borderColors[0],
-                    borderWidth: 1,
-                    borderRadius: 6
-                }]
+      // Rank Distribution Chart
+      const rankCtx = document.getElementById('rankChart').getContext('2d');
+      console.log(rankData.rank_distribution, "this is distribution")
+      rankChart = new Chart(rankCtx, {
+        type: 'bar',
+        data: {
+          labels: rankData.rank_distribution?.map(item => item.rank) || [],
+          datasets: [{
+            label: 'Personnel Count',
+            data: [20, 78, 5, 32],
+            backgroundColor: chartColors[0],
+            borderColor: borderColors[0],
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { 
+              ticks: { color: textColor, font: { size: 11 } }, 
+              grid: { color: gridColor } 
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { 
-                        ticks: { color: textColor, font: { size: 11 } }, 
-                        grid: { color: gridColor } 
-                    },
-                    y: { 
-                        ticks: { color: textColor, font: { size: 11 } }, 
-                        grid: { color: gridColor } 
-                    }
-                }
+            y: { 
+              ticks: { color: textColor, font: { size: 11 } }, 
+              grid: { color: gridColor } 
             }
-        });
+          }
+        }
+      });
 
-        // Religion Chart
-        const religionCtx = document.getElementById('religionChart').getContext('2d');
-        religionChart = new Chart(religionCtx, {
-            type: 'doughnut',
-            data: {
-                labels: religionData.data?.map(item => item.religion) || [],
-                datasets: [{
-                    data: religionData.data?.map(item => item.religion_count) || [],
-                    backgroundColor: chartColors,
-                    borderColor: borderColors,
-                    borderWidth: 2
-                }]
+      // Religion Chart
+      const religionCtx = document.getElementById('religionChart').getContext('2d');
+      religionChart = new Chart(religionCtx, {
+        type: 'doughnut',
+        data: {
+          labels: religionData.data?.map(item => item.religion) || [],
+          datasets: [{
+            data: religionData.data?.map(item => item.religion_count) || [],
+            backgroundColor: chartColors,
+            borderColor: borderColors,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: textColor, font: { size: 11 } }
+            }
+          }
+        }
+      });
+
+      // Employment Type Chart
+      const employmentCtx = document.getElementById('employmentChart').getContext('2d');
+      employmentChart = new Chart(employmentCtx, {
+        type: 'pie',
+        data: {
+          labels: employmentData.employment_distribution?.map(item => item.type) || [],
+          datasets: [{
+            data: employmentData.employment_distribution?.map(item => item.count) || [],
+            backgroundColor: [chartColors[0], chartColors[1]],
+            borderColor: [borderColors[0], borderColors[1]],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: textColor, font: { size: 11 } }
+            }
+          }
+        }
+      });
+
+      // Years in Service Chart
+      const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+      serviceChart = new Chart(serviceCtx, {
+        type: 'bar',
+        data: {
+          labels: serviceData.service_distribution?.map(item => item.range) || [],
+          datasets: [{
+            label: 'Personnel Count',
+            data: serviceData.service_distribution?.map(item => item.count) || [],
+            backgroundColor: chartColors[4],
+            borderColor: borderColors[4],
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { 
+              ticks: { color: textColor, font: { size: 11 } }, 
+              grid: { color: gridColor } 
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: { color: textColor, font: { size: 11 } }
-                    }
-                }
+            y: { 
+              ticks: { color: textColor, font: { size: 11 } }, 
+              grid: { color: gridColor } 
             }
-        });
+          }
+        }
+      });
 
-        // Employment Type Chart
-        const employmentCtx = document.getElementById('employmentChart').getContext('2d');
-        employmentChart = new Chart(employmentCtx, {
-            type: 'pie',
-            data: {
-                labels: employmentData.employment_distribution?.map(item => item.type) || [],
-                datasets: [{
-                    data: employmentData.employment_distribution?.map(item => item.count) || [],
-                    backgroundColor: [chartColors[0], chartColors[1]],
-                    borderColor: [borderColors[0], borderColors[1]],
-                    borderWidth: 2
-                }]
+      // Loan Amounts Chart
+      const loanCtx = document.getElementById('loanChart').getContext('2d');
+      loanChart = new Chart(loanCtx, {
+        type: 'bar',
+        data: {
+          labels: loanData.loan_distribution?.map(item => item.range) || [],
+          datasets: [{
+            label: 'Loan Count',
+            data: loanData.loan_distribution?.map(item => item.count) || [],
+            backgroundColor: chartColors[2],
+            borderColor: borderColors[2],
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { 
+              ticks: { color: textColor, font: { size: 11 } }, 
+              grid: { color: gridColor } 
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: { color: textColor, font: { size: 11 } }
-                    }
-                }
+            y: { 
+              ticks: { color: textColor, font: { size: 11 } }, 
+              grid: { color: gridColor } 
             }
-        });
+          }
+        }
+      });
 
-        // Years in Service Chart
-        const serviceCtx = document.getElementById('serviceChart').getContext('2d');
-        serviceChart = new Chart(serviceCtx, {
-            type: 'bar',
-            data: {
-                labels: serviceData.service_distribution?.map(item => item.range) || [],
-                datasets: [{
-                    label: 'Personnel Count',
-                    data: serviceData.service_distribution?.map(item => item.count) || [],
-                    backgroundColor: chartColors[4],
-                    borderColor: borderColors[4],
-                    borderWidth: 1,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { 
-                        ticks: { color: textColor, font: { size: 11 } }, 
-                        grid: { color: gridColor } 
-                    },
-                    y: { 
-                        ticks: { color: textColor, font: { size: 11 } }, 
-                        grid: { color: gridColor } 
-                    }
-                }
-            }
-        });
-
-        // Loan Amounts Chart
-        const loanCtx = document.getElementById('loanChart').getContext('2d');
-        loanChart = new Chart(loanCtx, {
-            type: 'bar',
-            data: {
-                labels: loanData.loan_distribution?.map(item => item.range) || [],
-                datasets: [{
-                    label: 'Loan Count',
-                    data: loanData.loan_distribution?.map(item => item.count) || [],
-                    backgroundColor: chartColors[2],
-                    borderColor: borderColors[2],
-                    borderWidth: 1,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { 
-                        ticks: { color: textColor, font: { size: 11 } }, 
-                        grid: { color: gridColor } 
-                    },
-                    y: { 
-                        ticks: { color: textColor, font: { size: 11 } }, 
-                        grid: { color: gridColor } 
-                    }
-                }
-            }
-        });
-
-        // ✅ SPORTS DISTRIBUTION CHART - ADDED IN THE CORRECT PLACE
-        // ... your existing charts (age, rank, religion, employment, service, loan) ...
-
-// Sports Distribution Chart - SIMPLE BAR GRAPH
-const sportsCtx = document.getElementById('sportsChart').getContext('2d');
-sportsChart = new Chart(sportsCtx, {
-    type: 'bar',
-    data: {
-        labels: sportsData.sports_distribution?.map(item => item.sport) || [],
-        datasets: [{
+      // Sports Distribution Chart
+      const sportsCtx = document.getElementById('sportsChart').getContext('2d');
+      sportsChart = new Chart(sportsCtx, {
+        type: 'bar',
+        data: {
+          labels: sportsData.sports_distribution?.map(item => item.sport) || [],
+          datasets: [{
             label: 'Number of Players',
             data: sportsData.sports_distribution?.map(item => item.count) || [],
             backgroundColor: [
-                'rgba(59, 130, 246, 0.8)',   // Blue
-                'rgba(16, 185, 129, 0.8)',   // Green
-                'rgba(239, 68, 68, 0.8)',    // Red
-                'rgba(245, 158, 11, 0.8)',   // Yellow
-                'rgba(168, 85, 247, 0.8)',   // Purple
-                'rgba(34, 197, 94, 0.8)',    // Light Green
-                'rgba(236, 72, 153, 0.8)'    // Pink
+              'rgba(59, 130, 246, 0.8)',
+              'rgba(16, 185, 129, 0.8)',
+              'rgba(239, 68, 68, 0.8)',
+              'rgba(245, 158, 11, 0.8)',
+              'rgba(168, 85, 247, 0.8)',
+              'rgba(34, 197, 94, 0.8)',
+              'rgba(236, 72, 153, 0.8)'
             ],
             borderColor: [
-                'rgb(59, 130, 246)',
-                'rgb(16, 185, 129)',
-                'rgb(239, 68, 68)',
-                'rgb(245, 158, 11)',
-                'rgb(168, 85, 247)',
-                'rgb(34, 197, 94)',
-                'rgb(236, 72, 153)'
+              'rgb(59, 130, 246)',
+              'rgb(16, 185, 129)',
+              'rgb(239, 68, 68)',
+              'rgb(245, 158, 11)',
+              'rgb(168, 85, 247)',
+              'rgb(34, 197, 94)',
+              'rgb(236, 72, 153)'
             ],
             borderWidth: 1,
             borderRadius: 6
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                titleColor: textColor,
-                bodyColor: textColor,
-                borderColor: gridColor,
-                borderWidth: 1
-            }
+          }]
         },
-        scales: {
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: isDark ? '#1e293b' : '#ffffff',
+              titleColor: textColor,
+              bodyColor: textColor,
+              borderColor: gridColor,
+              borderWidth: 1
+            }
+          },
+          scales: {
             x: { 
-                ticks: { 
-                    color: textColor, 
-                    font: { size: 11 }
-                }, 
-                grid: { 
-                    color: gridColor,
-                    display: false
-                } 
+              ticks: { 
+                color: textColor, 
+                font: { size: 11 }
+              }, 
+              grid: { 
+                color: gridColor,
+                display: false
+              } 
             },
             y: { 
-                beginAtZero: true,
-                ticks: { 
-                    color: textColor, 
-                    font: { size: 11 },
-                    precision: 0
-                }, 
-                grid: { color: gridColor } 
+              beginAtZero: true,
+              ticks: { 
+                color: textColor, 
+                font: { size: 11 },
+                precision: 0
+              }, 
+              grid: { color: gridColor } 
             }
+          }
         }
+      });
+
+    } catch (error) {
+      console.error('Error initializing charts:', error);
     }
-});
-
-} catch (error) {
-    console.error('Error initializing charts:', error);
-}
-}
+  }
 </script>
-
 {% endblock %}
