@@ -98,3 +98,42 @@ def get_task(task_id):
         return jsonify(task)
     else:
         return jsonify({"error": "Task not found"}), 404
+
+
+
+
+
+# the below route is for updating the task
+@task_bp.route('/update_task/<int:task_id>', methods=['POST'])
+def edit_task(task_id):
+    try:
+        data = request.form  
+        print(data,"this is data from form")
+
+        task_name = data.get("task_name")
+        description = data.get("description")
+        priority = data.get("priority")
+        assigned_to = data.get("assigned_to")
+        due_date = data.get("due_date")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+            UPDATE tasks
+            SET task_name=%s, description=%s, priority=%s,
+                assigned_to=%s, due_date=%s
+            WHERE id=%s
+        """
+
+        cursor.execute(query, (task_name, description, priority, assigned_to, due_date, task_id))
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({"status": "success", "message": "Task updated successfully"}), 200
+
+    except Exception as e:
+        print("Update Task Error:", e)
+        return jsonify({"status": "error", "message": "Failed to update task"}), 500

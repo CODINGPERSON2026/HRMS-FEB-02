@@ -74,9 +74,25 @@ async function openEditModal(taskId) {
     document.getElementById('editAssignedTo').value = task.assigned_to;
     document.getElementById('editSearchPersonnel').value = task.assigned_to;
     document.getElementById('editDueDate').value = task.due_date; // format: yyyy-mm-dd
-  
     modal.show();
   }
-          
- </script>
-  
+    document.getElementById("editTaskForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const taskId = document.getElementById("editTaskId").value;
+    const formData = new FormData(this);
+    const res = await fetch(`/task_manager/update_task/${taskId}`, {
+        method: "POST",
+        body: formData
+    });
+    const result = await res.json();
+    if (result.status === "success") {
+        showStatusModal("Task Updated", "Green", 2500);
+        bootstrap.Modal.getInstance(document.getElementById("editTaskModal")).hide();
+        loadTasks(); 
+    } else {
+        alert("Update failed!");
+    }
+});
+
+  </script>
