@@ -429,7 +429,7 @@
         <i class="fas fa-shield-alt"></i>
       </div>
       <div class="stat-label">Det Duty</div>
-      <div class="stat-value">0</div>
+      <div class="stat-value" id="detDutyCount">0</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">
@@ -584,32 +584,52 @@
   // Load Total Personnel
   async function loadTotalPersonal() {
     const totalPersonnelElement = document.getElementById('totalPersonnelCount');
-    
+
     if (!totalPersonnelElement) {
       console.warn("Element with ID 'totalPersonnelCount' not found.");
       return;
     }
-  
+
     try {
       const response = await fetch('/personnel_information/get_total_personnel_count_and_courses', { cache: 'no-cache' });
-      
+
       if (!response.ok) {
         throw new Error(`Network response was not ok (status: ${response.status})`);
       }
-  
+
       const data = await response.json();
       console.log("Personnel count data:", data);
-  
+
       if (data && typeof data.total_army_personnel !== 'undefined') {
         totalPersonnelElement.textContent = data.total_army_personnel;
       } else {
         console.warn("Unexpected response format:", data);
         totalPersonnelElement.textContent = "N/A";
       }
-  
+
     } catch (error) {
       console.error("Error loading total personnel count:", error);
       totalPersonnelElement.textContent = "Error";
+    }
+  }
+
+  // Load Det Duty Count
+  async function loadDetDutyCount() {
+    const detDutyElement = document.getElementById('detDutyCount');
+
+    if (!detDutyElement) {
+      console.warn("Element with ID 'detDutyCount' not found.");
+      return;
+    }
+
+    try {
+      const response = await fetch('/get_dets');
+      if (!response.ok) throw new Error("Failed to fetch detachments");
+      const data = await response.json();
+      detDutyElement.textContent = data.count || '0';
+    } catch (err) {
+      console.error("Error loading detachments:", err);
+      detDutyElement.textContent = '0';
     }
   }
 
@@ -630,7 +650,8 @@
       await Promise.all([
         initializeCharts(),
         loadMedicalCases(),
-        loadTotalPersonal()
+        loadTotalPersonal(),
+        loadDetDutyCount()
       ]);
 
     } catch (error) {
@@ -939,5 +960,22 @@
       console.error('Error initializing charts:', error);
     }
   }
+
+  // Det Duty Modal Handler
+  document.addEventListener('DOMContentLoaded', function() {
+    const detDutyCard = document.getElementById('detDutyCount').closest('.stat-card');
+    if (detDutyCard) {
+      detDutyCard.style.cursor = 'pointer';
+      detDutyCard.addEventListener('click', function() {
+        const detModal = new bootstrap.Modal(document.getElementById('detModal'));
+        detModal.show();
+        load_det_personnel();
+      });
+    }
+  });
 </script>
+
+<!-- Detachment Modal -->
+{% include 'modals/detachmentModal/detachment.html' %}
+
 {% endblock %}

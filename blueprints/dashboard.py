@@ -13,7 +13,7 @@ def get_det_personnel():
         cursor = conn.cursor(dictionary=True)
 
         query = '''
-        SELECT 
+        SELECT
             p.name,
             p.army_number,
             p.rank,
@@ -34,7 +34,7 @@ def get_det_personnel():
 
         # Add filter before ORDER BY
         if company:
-            query += " AND p.company = %s"
+    # ***********************************************************DELETE DETACHMENT**********************
             params.append(company)
 
         query += " ORDER BY ad.assigned_on ASC"  # Move ORDER BY to end
@@ -50,15 +50,8 @@ def get_det_personnel():
 
     finally:
         if conn.is_connected():
-            cursor.close()
+    
             conn.close()
-
-
-
-
-
-# ***********************************************************DELETE DETACHMENT**********************
-
 @dashboard_bp.route('/delete_personnel', methods=['POST'])
 def delete_personnel():
     data = request.get_json()

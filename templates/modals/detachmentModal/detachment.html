@@ -71,11 +71,16 @@
     load_det_personnel();
   });
   
-  // Filter dropdown listener
+  // Filter dropdown listeners
   document.getElementById("companyFilter").addEventListener("change", function () {
-    load_det_personnel(this.value);
+    load_det_personnel(this.value, document.getElementById("detFilter").value);
   });
-  async function load_det_personnel(company = "") {
+
+  document.getElementById("detFilter").addEventListener("change", function () {
+    load_det_personnel(document.getElementById("companyFilter").value, this.value);
+  });
+
+  async function load_det_personnel(company = "", det = "") {
     const spinner = document.getElementById("detSpinner");
     const table = document.getElementById("detTable");
     const tbody = document.getElementById("detTableBody");
@@ -94,7 +99,7 @@
       if (result.status !== "success") throw new Error("Fetch failed");
       
       if (result.data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center">No personnel found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center">No personnel found</td></tr>`;
       } else {
         result.data.forEach(row => {
           let colorClass = row.days_on_det > 2 ? 'text-danger fw-bold' : '';
