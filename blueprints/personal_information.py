@@ -394,7 +394,7 @@ def create_personnel():
             aadhar_card_no, aadhar_part_ii, joint_account_no, joint_account_bank, joint_account_ifsc,
             home_house_no, home_village, home_phone, home_to, home_po, home_ps, home_teh,
             home_nrs, home_nmh, home_district, home_state, border_area, distance_from_ib,
-            height, weight, chest, identification_marks,status_type,category_type, restrictions,  court_cases, loan, total_leaves_encashed,
+            height, weight, chest, identification_marks, court_cases, loan, total_leaves_encashed,
             participation_activities, present_family_location, prior_station, prior_station_date,
             worked_it, worked_unit_tenure, med_cat, last_recat_bd_date, last_recat_bd_at,
             next_recat_due, medical_problem, restrictions, computer_knowledge, it_literature,
@@ -406,7 +406,7 @@ def create_personnel():
             weaknesses, detailed_course
         ) VALUES (
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
@@ -462,9 +462,6 @@ def create_personnel():
             get_float('weight'),
             get_float('chest'),
             get_value('identificationMarks'),
-            get_value('status_type'),
-            get_value('category_type'),
-            get_value('restrictions'),
             get_value('courtCases'),
             get_value('loan'),
             get_int('totalLeavesEncashed'),
