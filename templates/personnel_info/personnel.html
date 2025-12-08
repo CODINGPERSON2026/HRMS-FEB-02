@@ -38,7 +38,7 @@
 
   /* Dashboard Navbar Styles - ADD THIS SECTION */
   .dashboard-navbar {
-    background: linear-gradient(180deg, #ff9933, #ffffff 50%, #138808);
+    background-color: lightgray;
     border-radius: 12px;
     padding: 1rem 1.5rem;
     margin-bottom: 2rem;
@@ -75,26 +75,12 @@
   }
 
   .nav-link {
-    padding: 0.6rem 1.2rem;
-    background: rgba(255, 255, 255, 0.3);
-    color: #000 !important;
     text-decoration: none;
-    border-radius: 10px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
     gap: 0.5rem;
     transition: all 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    
   }
 
-  .nav-link:hover {
-    background: #000080;
-    color: #fff !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
-  }
 
   .dashboard-header {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
@@ -309,26 +295,6 @@
     padding: 0 1.2rem;
   }
 
-  .nav-tabs {
-    display: flex;
-    list-style: none;
-    margin: 0; padding: 0;
-    gap: 1.3rem;
-  }
-
-  .nav-tab {
-    padding: 0.9rem 0;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--text-secondary);
-    border-bottom: 3px solid transparent;
-    font-size: 0.95rem;
-  }
-
-  .nav-tab.active {
-    color: var(--primary);
-    border-bottom-color: var(--primary);
-  }
 
   .modal-body {
     flex: 1;
@@ -471,8 +437,7 @@
     .modal-close { width: 32px; height: 32px; font-size: 1.2rem; }
 
     .modal-nav { padding: 0 0.8rem; }
-    .nav-tabs { gap: 0.8rem; }
-    .nav-tab { padding: 0.7rem 0; font-size: 0.9rem; }
+ 
 
     .tab-content { padding: 0.8rem; }
 
@@ -488,40 +453,73 @@
 
     .company-badge { font-size: 0.7rem; padding: 0.3rem 0.7rem; }
   }
+  
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-left img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.header-left h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.header-link {
+  padding: 0.6rem 1.2rem;
+  background: rgba(255, 255, 255, 0.3);
+  color: #000 !important;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.header-link:hover {
+  background: var(--accent);
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
+}
 </style>
 
 <div class="container-fluid px-4 py-4">
   <!-- Dashboard Navbar with Add/Update Person Links -->
-  <div class="dashboard-navbar">
-    <div class="navbar-left">
-      <img src="/static/logo1.png" alt="Army Logo">
-      <h1>Army Personnel System</h1>
-    </div>
-    <div class="navbar-right">
-      <a href="/personnel_information" class="nav-link">
-        <i class="fas fa-user-plus"></i>
-        Dashboard
-      </a>
-      <a href="/personnel_information/add-personnel" class="nav-link">
-        <i class="fas fa-user-plus"></i>
-        Add Personnel
-      </a>
-      <a href="/personnel_information/update-personnel" class="nav-link">
-        <i class="fas fa-user-edit"></i>
-        Update Personnel
-      </a>
-      <a href="/personnel_information/personnel" class="nav-link">
-        <i class="fas fa-user-edit"></i>
-        View Personnel
-      </a>
+  <div class="wrapper">
+    {% set header = "Personnel Management" %}
+    {% set subscript = "Add Personnel → Update Personnel → View Personnel" %}
+    {% include 'navbar/navbar.html' %}
+    <div class="page-header">
+      
+      <div class="header-right">
+        <a href="/personnel_information" class="header-link">Dashboard</a>
+        <a href="/personnel_information/add-personnel" class="header-link">Add Personnel</a>
+        <a href="/personnel_information/update-personnel" class="header-link">Update Personnel</a>
+        
+      </div>
     </div>
   </div>
 
   <!-- Dashboard Header -->
-  <div class="dashboard-header">
-    <h1 class="h3 mb-2">Medical Cases Monitoring</h1>
-    <p class="text-muted">Overview of personnel with medical shape below Shape-I</p>
-  </div>
+ 
 
   <!-- Stats Grid -->
   <div class="stats-grid">

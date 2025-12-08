@@ -1,981 +1,466 @@
 {% extends 'baseView.html' %}
-
 {% block content %}
+
 <style>
-  /* Copy all the existing CSS from your current file */
-  :root {
-    /* Light Theme - Professional */
-    --bg-primary: #f8fafc;
-    --bg-secondary: #ffffff;
-    --bg-accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.03);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.05);
-    --card-bg: #ffffff;
-    --accent-color: #3b82f6;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --danger-color: #ef4444;
-    --grid-gap: 1.25rem;
-    --saffron: #ff9933;
-    --white: #ffffff;
-    --green: #138808;
-    --accent: #000080;
-    --dark-bg: #0f2027;
-    --dark-bg-2: #203a43;
-    --dark-bg-3: #2c5364;
-  }
+:root {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.03);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.05);
+  --card-bg: #ffffff;
+  --accent-color: #3b82f6;
+  --grid-gap: 1.25rem;
+  --saffron: #ff9933;
+  --white: #ffffff;
+  --green: #138808;
+}
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
+  --card-bg: #1e293b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
 
-  [data-theme="dark"] {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --border-color: #334155;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
-    --card-bg: #1e293b;
-  }
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(102,126,234,0.15), transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(118,75,162,0.15), transparent 50%),
+              radial-gradient(circle at 40% 20%, rgba(67,233,123,0.1), transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+.dashboard-container {
+  margin-top: -40px;
+  margin-left: 240px;
+  padding: 1.5rem;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+.dashboard-loader {
+  position: absolute;
+  inset: 0;
+  background: rgba(248,250,252,0.95);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Move loader to top */
+  align-items: center;
+  padding-top: 30px; /* Optional: adjust spacing from top */
+  z-index: 1000;
+  border-radius: 12px;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.6s ease;
+}
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+.dashboard-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+[data-theme="dark"] .dashboard-loader { background: rgba(15,23,42,0.97); }
 
-  body {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* Beautiful Spinner */
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #e0e7ff;
+  border-top: 5px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  box-shadow: 0 0 20px rgba(59,130,246,0.3);
+}
+[data-theme="dark"] .spinner {
+  border-color: #1e293b;
+  
+}
+.spinner-text {
+  margin-top: 20px;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-  /* Background Decorative Layers */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(
-        circle at 20% 50%,
-        rgba(102, 126, 234, 0.15),
-        transparent 50%
-      ),
-      radial-gradient(
-        circle at 80% 80%,
-        rgba(118, 75, 162, 0.15),
-        transparent 50%
-      ),
-      radial-gradient(
-        circle at 40% 20%,
-        rgba(67, 233, 123, 0.1),
-        transparent 40%
-      );
-    pointer-events: none;
-    z-index: 0;
-  }
+.page-header { display: flex; justify-content: space-between; align-items: center;margin-top: 5px; margin-bottom: 2rem; padding: 1rem 1.5rem; background-color: lightgray; border-radius: 20px; }
+.header-left { display: flex; align-items: center; gap: 15px; }
+.header-left img { width: 45px; height: 45px; object-fit: contain; }
+.header-left h1 { font-size: 1.5rem; font-weight: 700; color: #000; margin: 0; }
+.header-right { display: flex; gap: 0.75rem; }
+.header-link { padding: 0.6rem 1.2rem; background: rgba(255,255,255,0.3); color: #000 !important; text-decoration: none; border-radius: 10px; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s; border: 1px solid rgba(0,0,0,0.1); }
+.header-link:hover { background: #000080; color: #fff !important; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,128,0.3); }
 
-  .dashboard-container {
-    margin-left: 240px; /* Adjust for sidebar from baseView.html */
-    padding: 1.5rem;
-    min-height: 100vh;
-    position: relative;
-    z-index: 1;
-  }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--grid-gap); margin-bottom: 2rem; }
+.stat-card { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); position: relative; overflow: hidden; transition: 0.2s; }
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.stat-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--bg-accent); }
+.stat-icon { width: 44px; height: 44px; border-radius: 10px; background: var(--bg-accent); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+.stat-icon i { font-size: 1.3rem; color: white; }
+.stat-label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-value { font-size: 2rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
+.view-btn { padding: 0.5rem 1rem; background: var(--accent-color); color: white; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem; transition: 0.2s; }
+.view-btn:hover { opacity: 0.85; transform: translateY(-1px); }
 
-  /* Header Section - Simplified */
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding: 1rem 1.5rem;
-    background: linear-gradient(180deg, var(--saffron), var(--white) 50%, var(--green));
-    border-radius: 12px;
-    box-shadow: var(--shadow-md);
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
+.charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: var(--grid-gap); margin-bottom: 2rem; }
+.chart-card { background: var(--card-bg); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); transition: 0.2s; }
+.chart-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.chart-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+.chart-title i { width: 32px; height: 32px; border-radius: 8px; background: var(--bg-accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+.chart-badge { padding: 0.3rem 0.7rem; background: rgba(59,130,246,0.1); color: var(--accent-color); border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+.chart-container { position: relative; height: 250px; width: 100%; }
 
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-
-  .header-left img {
-    width: 45px;
-    height: 45px;
-    object-fit: contain;
-  }
-
-  .header-left h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #000;
-    margin: 0;
-  }
-
-  .header-right {
-    display: flex;
-    gap: 0.75rem;
-  }
-
-  .header-link {
-    padding: 0.6rem 1.2rem;
-    background: rgba(255, 255, 255, 0.3);
-    color: #000 !important;
-    text-decoration: none;
-    border-radius: 10px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-  }
-
-  .header-link:hover {
-    background: var(--accent);
-    color: #fff !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
-  }
-
-  /* Stats Grid - Only 2 cards now */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--grid-gap);
-    margin-bottom: 2rem;
-  }
-
-  .stat-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--border-color);
-    position: relative;
-    overflow: hidden;
-    transition: all 0.2s ease;
-  }
-
-  .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .stat-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--bg-accent);
-  }
-
-  .stat-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: var(--bg-accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-  }
-
-  .stat-icon i {
-    font-size: 1.3rem;
-    color: white;
-  }
-
-  .stat-label {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    line-height: 1;
-    margin-bottom: 0.5rem;
-  }
-
-  .view-btn {
-    padding: 0.5rem 1rem;
-    background: var(--accent-color);
-    color: white;
-    border: 1px solid var(--accent-color);
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .view-btn:hover {
-    background: var(--accent-color);
-    color: white;
-    opacity: 0.7;
-    transform: translateY(-1px);
-  }
-
-  /* Charts Grid */
-  .charts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: var(--grid-gap);
-    margin-bottom: 2rem;
-  }
-
-  .chart-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 1.25rem;
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--border-color);
-    transition: all 0.2s ease;
-  }
-
-  .chart-card:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-
-  .chart-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .chart-title i {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--bg-accent);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-  }
-
-  .chart-badge {
-    padding: 0.3rem 0.7rem;
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--accent-color);
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .chart-container {
-    position: relative;
-    height: 250px;
-    width: 100%;
-  }
-
-  /* Responsive */
-  @media (max-width: 1200px) {
-    .charts-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .dashboard-container {
-      margin-left: 0;
-      padding: 1rem;
-    }
-
-    .page-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-
-    .header-right {
-      width: 100%;
-      justify-content: flex-start;
-    }
-
-    .stats-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .charts-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .chart-container {
-      height: 220px;
-    }
-  }
-
-  /* Loader styles */
-  #loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
-  }
-
-  #loader.hidden {
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  .loader {
-    height: 4px;
-    width: 130px;
-    --c: no-repeat linear-gradient(#3b82f6 0 0);
-    background: var(--c), var(--c), #dbeafe;
-    background-size: 60% 100%;
-    animation: l16 3s infinite;
-    border-radius: 5px;
-  }
-
-  @keyframes l16 {
-    0%   { background-position: -150% 0, -150% 0; }
-    66%  { background-position: 250% 0, -150% 0; }
-    100% { background-position: 250% 0, 250% 0; }
-  }
+@media (max-width: 1200px) { .charts-grid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) {
+  .dashboard-container { margin-left: 0; padding: 1rem; }
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .header-right { width: 100%; justify-content: flex-start; }
+  .stats-grid, .charts-grid { grid-template-columns: 1fr; }
+  .chart-container { height: 220px; }
+}
+.wrapper {
+  padding-left: 240px;
+  padding-top: 1px;
+  
+  
+  
+}
 </style>
 
-<!-- Link external CSS and JS -->
 <script src="/static/Chart.umd.min.js"></script>
 <link rel="stylesheet" href="/static/fontawesome-free-7.1.0-web/css/all.min.css">
 
-<div id="loader">
-  <div class="loader"></div>
+<div class="wrapper">
+  {% set header = "Personnel Management" %}
+  {% set subscript = "Add Personnel → Update Personnel → View Personnel" %}
+  {% include 'navbar/navbar.html' %}
+  <div class="page-header">
+    
+    <div class="header-right">
+      <a href="/personnel_information" class="header-link">Dashboard</a>
+      <a href="/personnel_information/add-personnel" class="header-link">Add Personnel</a>
+      <a href="/personnel_information/update-personnel" class="header-link">Update Personnel</a>
+      
+    </div>
+  </div>
 </div>
 
 <div class="dashboard-container">
-  <!-- Header Section - Simplified -->
-  <div class="page-header">
-    <div class="header-left">
-      <img src="/static/logo1.png" alt="Army Logo">
-      <h1>Army Personnel System</h1>
-    </div>
-    <div class="header-right">
-      <a href="/personnel_information" class="header-link">
-        <i class="fas fa-user-dashboard"></i>
-        Dashboard
-      </a>
-      <a href="/personnel_information/add-personnel" class="header-link">
-        <i class="fas fa-user-plus"></i>
-        Add Personnel
-      </a>
-      <a href="/personnel_information/update-personnel" class="header-link">
-        <i class="fas fa-user-edit"></i>
-        Update Personnel
-      </a>
-      <a href="/personnel_information/personnel" class="header-link">
-        <i class="fas fa-user-plus"></i>
-        View Personnel
-      </a>
-    </div>
-  </div>
+
   
-  <!-- Stats Grid - Only 2 cards now (Total Personnel and Medical Cases) -->
+  <div class="dashboard-loader" id="dashboardLoader">
+    <div class="spinner"></div>
+    <div class="spinner-text">Loading Dashboard...</div>
+  </div>
+
+
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-users"></i>
-      </div>
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
       <div class="stat-label">Total Personnel</div>
-      <div class="stat-value" id="totalPersonnelCount"></div>
+      <div class="stat-value" id="totalPersonnelCount">Loading...</div>
     </div>
-     <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-shield-alt"></i>
-      </div>
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
       <div class="stat-label">Det Duty</div>
       <div class="stat-value" id="detDutyCount">0</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-medkit"></i>
-      </div>
+      <div class="stat-icon"><i class="fas fa-medkit"></i></div>
       <div class="stat-label">Medical Cases</div>
-      <div class="stat-value" id="medical_count"></div>
-      <button class="view-btn" onclick="window.location.href='/personnel_information/personnel'">
-        <i class="fas fa-eye"></i>
-        View Details
-      </button>
+      <div class="stat-value" id="medical_count">Loading...</div>
+      <button class="view-btn" onclick="window.location.href='/personnel_information/personnel'">View Details</button>
     </div>
   </div>
 
-  <!-- Charts Grid -->
   <div class="charts-grid">
-    <!-- Age Distribution -->
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">
-          <i class="fas fa-chart-pie"></i>
-          Age Distribution
-        </h3>
+        <h3 class="chart-title">Age Distribution</h3>
         <span class="chart-badge">Live</span>
       </div>
-      <div class="chart-container">
-        <canvas id="ageDonutChart"></canvas>
-      </div>
+      <div class="chart-container"><canvas id="ageDonutChart"></canvas></div>
     </div>
-    
-    <!-- Rank Distribution -->
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">
-          <i class="fas fa-chart-bar"></i>
-          Rank Distribution
-        </h3>
+        <h3 class="chart-title">Rank Distribution</h3>
         <span class="chart-badge">Updated</span>
       </div>
-      <div class="chart-container">
-        <canvas id="rankChart"></canvas>
-      </div>
+      <div class="chart-container"><canvas id="rankChart"></canvas></div>
     </div>
-    
-    <!-- Religion Distribution -->
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">
-          <i class="fas fa-pray"></i>
-          Religion Chart
-        </h3>
+        <h3 class="chart-title">Religion Chart</h3>
         <span class="chart-badge">Live</span>
       </div>
-      <div class="chart-container">
-        <canvas id="religionChart"></canvas>
-      </div>
+      <div class="chart-container"><canvas id="religionChart"></canvas></div>
     </div>
-
-    <!-- Employment Type -->
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">
-          <i class="fas fa-briefcase"></i>
-          Employment Type
-        </h3>
+        <h3 class="chart-title">Employment Type</h3>
         <span class="chart-badge">Live</span>
       </div>
-      <div class="chart-container">
-        <canvas id="employmentChart"></canvas>
-      </div>
+      <div class="chart-container"><canvas id="employmentChart"></canvas></div>
     </div>
-
-    <!-- Sports Distribution Chart -->
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">
-          <i class="fas fa-running"></i>
-          Sports Distribution
-        </h3>
+        <h3 class="chart-title">Sports Distribution</h3>
         <span class="chart-badge">Live</span>
       </div>
-      <div class="chart-container">
-        <canvas id="sportsChart"></canvas>
-      </div>
+      <div class="chart-container"><canvas id="sportsChart"></canvas></div>
     </div>
-    
-    <!-- Years in Service -->
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">
-          <i class="fas fa-clock"></i>
-          Years in Service
-        </h3>
+        <h3 class="chart-title">Years in Service</h3>
         <span class="chart-badge">Updated</span>
       </div>
-      <div class="chart-container">
-        <canvas id="serviceChart"></canvas>
-      </div>
+      <div class="chart-container"><canvas id="serviceChart"></canvas></div>
     </div>
-    
-    <!-- Loan Amounts -->
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">
-          <i class="fas fa-credit-card"></i>
-          Loan Amounts
-        </h3>
+        <h3 class="chart-title">Loan Amounts</h3>
         <span class="chart-badge">Live</span>
       </div>
-      <div class="chart-container">
-        <canvas id="loanChart"></canvas>
-      </div>
+      <div class="chart-container"><canvas id="loanChart"></canvas></div>
     </div>
   </div>
 </div>
 
 <script>
-  // Chart instances
-  let ageChart, rankChart, religionChart, employmentChart, serviceChart, loanChart, sportsChart;
+let ageChart, rankChart, religionChart, employmentChart, serviceChart, loanChart, sportsChart;
 
-  // Theme Management - Removed from header but kept for functionality
-  function toggleTheme() {
-    const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-theme');
-    
-    if (currentTheme === 'dark') {
-      html.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
-    } else {
-      html.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-    }
-    initializeCharts();
+async function loadMedicalCases() {
+  const el = document.getElementById('medical_count');
+  el.textContent = 'Loading...';
+  try {
+    const res = await fetch('/personnel_information/get_medical_category_count');
+    const data = await res.json();
+    el.textContent = data.total_medical_category_count || '0';
+  } catch (err) {
+    el.textContent = 'Error';
   }
+}
 
-  // Fetch Medical Cases
-  async function loadMedicalCases() {
-    const countStat = document.getElementById('medical_count');
-    countStat.textContent = 'Loading...';
-
-    try {
-      const response = await fetch('/personnel_information/get_medical_category_count');
-      if (!response.ok) throw new Error('Network response was not ok');
-      const data = await response.json();
-      countStat.innerText = data.total_medical_category_count;
-    } catch (error) {
-      console.error('Error fetching medical category count:', error);
-      countStat.textContent = 'Error';
-    }
+async function loadTotalPersonal() {
+  const el = document.getElementById('totalPersonnelCount');
+  try {
+    const res = await fetch('/personnel_information/get_total_personnel_count_and_courses', { cache: 'no-cache' });
+    const data = await res.json();
+    el.textContent = data.total_army_personnel || 'N/A';
+  } catch (err) {
+    el.textContent = 'Error';
   }
+}
 
-  // Load Total Personnel
-  async function loadTotalPersonal() {
-    const totalPersonnelElement = document.getElementById('totalPersonnelCount');
+async function loadDetDutyCount() {
+  const el = document.getElementById('detDutyCount');
+  try {
+    const res = await fetch('/get_dets');
+    const data = await res.json();
+    el.textContent = data.count || '0';
+  } catch (err) {
+    el.textContent = '0';
+  }
+}
 
-    if (!totalPersonnelElement) {
-      console.warn("Element with ID 'totalPersonnelCount' not found.");
-      return;
-    }
+async function initializeCharts() {
+  [ageChart, rankChart, religionChart, employmentChart, serviceChart, loanChart, sportsChart].forEach(c => c && c.destroy && c.destroy());
 
-    try {
-      const response = await fetch('/personnel_information/get_total_personnel_count_and_courses', { cache: 'no-cache' });
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const textColor = isDark ? '#f1f5f9' : '#1e293b';
+  const gridColor = isDark ? '#334155' : '#e2e8f0';
 
-      if (!response.ok) {
-        throw new Error(`Network response was not ok (status: ${response.status})`);
+  const chartColors = [
+    'rgba(99,102,241,0.8)', 'rgba(16,185,129,0.8)', 'rgba(239,68,68,0.8)',
+    'rgba(245,158,11,0.8)', 'rgba(59,130,246,0.8)', 'rgba(168,85,247,0.8)',
+    'rgba(34,197,94,0.8)', 'rgba(236,72,153,0.8)'
+  ];
+  const borderColors = chartColors.map(c => c.replace('0.8', '1'));
+
+  try {
+    const [
+      ageData, rankData, religionData, employmentData,
+      serviceData, loanData, sportsData
+    ] = await Promise.all([
+      fetch('/personnel_information/age_bar_graph').then(r => r.json()),
+      fetch('/personnel_information/rank_based_bar_graph_').then(r => r.json()),
+      fetch('/personnel_information/religion_donut_chart').then(r => r.json()),
+      fetch('/personnel_information/employment_type_chart').then(r => r.json()),
+      fetch('/personnel_information/years_in_service_chart').then(r => r.json()),
+      fetch('/personnel_information/loan_amounts_chart').then(r => r.json()),
+      fetch('/personnel_information/sports_distribution_chart').then(r => r.json())
+    ]);
+
+    ageChart = new Chart(document.getElementById('ageDonutChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ageData.age_distribution?.map(i => i.range) || [],
+        datasets: [{ data: ageData.age_distribution?.map(i => i.count) || [], backgroundColor: chartColors, borderColor: borderColors, borderWidth: 2 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { color: textColor, font: { size: 11 } } } }
       }
-
-      const data = await response.json();
-      console.log("Personnel count data:", data);
-
-      if (data && typeof data.total_army_personnel !== 'undefined') {
-        totalPersonnelElement.textContent = data.total_army_personnel;
-      } else {
-        console.warn("Unexpected response format:", data);
-        totalPersonnelElement.textContent = "N/A";
-      }
-
-    } catch (error) {
-      console.error("Error loading total personnel count:", error);
-      totalPersonnelElement.textContent = "Error";
-    }
-  }
-
-  // Load Det Duty Count
-  async function loadDetDutyCount() {
-    const detDutyElement = document.getElementById('detDutyCount');
-
-    if (!detDutyElement) {
-      console.warn("Element with ID 'detDutyCount' not found.");
-      return;
-    }
-
-    try {
-      const response = await fetch('/get_dets');
-      if (!response.ok) throw new Error("Failed to fetch detachments");
-      const data = await response.json();
-      detDutyElement.textContent = data.count || '0';
-    } catch (err) {
-      console.error("Error loading detachments:", err);
-      detDutyElement.textContent = '0';
-    }
-  }
-
-  // Initialize on page load
-  document.addEventListener('DOMContentLoaded', async function() {
-    const savedTheme = localStorage.getItem('theme');
-    const loader = document.getElementById('loader');
-
-    if (savedTheme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-
-    try {
-      // Show loader before everything starts
-      loader.classList.remove('hidden');
-
-      // Load all data in parallel
-      await Promise.all([
-        initializeCharts(),
-        loadMedicalCases(),
-        loadTotalPersonal(),
-        loadDetDutyCount()
-      ]);
-
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      // Hide loader after all data is fetched
-      loader.classList.add('hidden');
-    }
-  });
-
-  // Refresh data function - removed button but keeping function
-  async function refreshData() {
-    const loader = document.getElementById('loader');
-    try {
-      loader.classList.remove('hidden');
-      await Promise.all([
-        loadTotalPersonal(),
-        loadMedicalCases(),
-        initializeCharts()
-      ]);
-    } catch (error) {
-      console.error("Error refreshing data:", error);
-    } finally {
-      loader.classList.add('hidden');
-    }
-  }
-
-  // Chart initialization
-  async function initializeCharts() {
-    // Destroy previous instances
-    [ageChart, rankChart, religionChart, employmentChart, serviceChart, loanChart, sportsChart].forEach(chart => {
-      if (chart) chart.destroy();
     });
 
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const textColor = isDark ? '#f1f5f9' : '#1e293b';
-    const gridColor = isDark ? '#334155' : '#e2e8f0';
+    rankChart = new Chart(document.getElementById('rankChart'), {
+      type: 'bar',
+      data: {
+        labels: rankData.rank_distribution?.map(i => i.rank) || [],
+        datasets: [{
+          data: rankData.rank_distribution?.map(i => i.count) || [],
+          backgroundColor: chartColors[0],
+          borderColor: borderColors[0],
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } }
+      }
+    });
 
-    // Chart colors
-    const chartColors = [
-      'rgba(99, 102, 241, 0.8)',   // Indigo
-      'rgba(16, 185, 129, 0.8)',   // Emerald
-      'rgba(239, 68, 68, 0.8)',    // Red
-      'rgba(245, 158, 11, 0.8)',   // Amber
-      'rgba(59, 130, 246, 0.8)',   // Blue
-      'rgba(168, 85, 247, 0.8)',   // Purple
-      'rgba(34, 197, 94, 0.8)',    // Green
-      'rgba(236, 72, 153, 0.8)'    // Pink
-    ];
+    religionChart = new Chart(document.getElementById('religionChart'), {
+      type: 'doughnut',
+      data: {
+        labels: religionData.data?.map(i => i.religion) || [],
+        datasets: [{ data: religionData.data?.map(i => i.religion_count) || [], backgroundColor: chartColors, borderColor: borderColors, borderWidth: 2 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { color: textColor, font: { size: 11 } } } }
+      }
+    });
 
-    const borderColors = chartColors.map(color => color.replace('0.8', '1'));
+    employmentChart = new Chart(document.getElementById('employmentChart'), {
+      type: 'pie',
+      data: {
+        labels: employmentData.employment_distribution?.map(i => i.type) || [],
+        datasets: [{ data: employmentData.employment_distribution?.map(i => i.count) || [], backgroundColor: [chartColors[0], chartColors[1]], borderColor: [borderColors[0], borderColors[1]], borderWidth: 2 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { color: textColor, font: { size: 11 } } } }
+      }
+    });
 
-    try {
-      // Fetch all chart data in parallel
-      const [ageData, rankData, religionData, employmentData, serviceData, loanData, sportsData] = await Promise.all([
-        fetch('/personnel_information/age_bar_graph').then(r => r.json()),
-        fetch('/personnel_information/rank_based_bar_graph_').then(r => r.json()),
-        fetch('/personnel_information/religion_donut_chart').then(r => r.json()),
-        fetch('/personnel_information/employment_type_chart').then(r => r.json()),
-        fetch('/personnel_information/years_in_service_chart').then(r => r.json()),
-        fetch('/personnel_information/loan_amounts_chart').then(r => r.json()),
-        fetch('/personnel_information/sports_distribution_chart').then(r => r.json())
-      ]);
+    serviceChart = new Chart(document.getElementById('serviceChart'), {
+      type: 'bar',
+      data: {
+        labels: serviceData.service_distribution?.map(i => i.range) || [],
+        datasets: [{
+          data: serviceData.service_distribution?.map(i => i.count) || [],
+          backgroundColor: chartColors[4],
+          borderColor: borderColors[4],
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { ticks: { color: textColor } }, y: { ticks: { color: textColor } } }
+      }
+    });
 
-      // Age Distribution Chart
-      const ageCtx = document.getElementById('ageDonutChart').getContext('2d');
-      ageChart = new Chart(ageCtx, {
-        type: 'doughnut',
-        data: {
-          labels: ageData.age_distribution?.map(item => item.range) || [],
-          datasets: [{
-            data: ageData.age_distribution?.map(item => item.count) || [],
-            backgroundColor: chartColors,
-            borderColor: borderColors,
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: { color: textColor, font: { size: 11 } }
-            }
-          }
+    loanChart = new Chart(document.getElementById('loanChart'), {
+      type: 'bar',
+      data: {
+        labels: loanData.loan_distribution?.map(i => i.range) || [],
+        datasets: [{
+          data: loanData.loan_distribution?.map(i => i.count) || [],
+          backgroundColor: chartColors[2],
+          borderColor: borderColors[2],
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } }
+      }
+    });
+
+    sportsChart = new Chart(document.getElementById('sportsChart'), {
+      type: 'bar',
+      data: {
+        labels: sportsData.sports_distribution?.map(i => i.sport) || [],
+        datasets: [{
+          data: sportsData.sports_distribution?.map(i => i.count) || [],
+          backgroundColor: chartColors,
+          borderColor: borderColors,
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: textColor }, grid: { display: false } },
+          y: { beginAtZero: true, ticks: { color: textColor, precision: 0 }, grid: { color: gridColor } }
         }
-      });
+      }
+    });
 
-      // Rank Distribution Chart
-      const rankCtx = document.getElementById('rankChart').getContext('2d');
-      console.log(rankData.rank_distribution, "this is distribution")
-      rankChart = new Chart(rankCtx, {
-        type: 'bar',
-        data: {
-          labels: rankData.rank_distribution?.map(item => item.rank) || [],
-          datasets: [{
-            label: 'Personnel Count',
-            data: [20, 78, 5, 32],
-            backgroundColor: chartColors[0],
-            borderColor: borderColors[0],
-            borderWidth: 1,
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { 
-              ticks: { color: textColor, font: { size: 11 } }, 
-              grid: { color: gridColor } 
-            },
-            y: { 
-              ticks: { color: textColor, font: { size: 11 } }, 
-              grid: { color: gridColor } 
-            }
-          }
-        }
-      });
+  } catch (err) {
+    console.error('Chart error:', err);
+  }
+}
 
-      // Religion Chart
-      const religionCtx = document.getElementById('religionChart').getContext('2d');
-      religionChart = new Chart(religionCtx, {
-        type: 'doughnut',
-        data: {
-          labels: religionData.data?.map(item => item.religion) || [],
-          datasets: [{
-            data: religionData.data?.map(item => item.religion_count) || [],
-            backgroundColor: chartColors,
-            borderColor: borderColors,
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: { color: textColor, font: { size: 11 } }
-            }
-          }
-        }
-      });
-
-      // Employment Type Chart
-      const employmentCtx = document.getElementById('employmentChart').getContext('2d');
-      employmentChart = new Chart(employmentCtx, {
-        type: 'pie',
-        data: {
-          labels: employmentData.employment_distribution?.map(item => item.type) || [],
-          datasets: [{
-            data: employmentData.employment_distribution?.map(item => item.count) || [],
-            backgroundColor: [chartColors[0], chartColors[1]],
-            borderColor: [borderColors[0], borderColors[1]],
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: { color: textColor, font: { size: 11 } }
-            }
-          }
-        }
-      });
-
-      // Years in Service Chart
-      const serviceCtx = document.getElementById('serviceChart').getContext('2d');
-      serviceChart = new Chart(serviceCtx, {
-        type: 'bar',
-        data: {
-          labels: serviceData.service_distribution?.map(item => item.range) || [],
-          datasets: [{
-            label: 'Personnel Count',
-            data: serviceData.service_distribution?.map(item => item.count) || [],
-            backgroundColor: chartColors[4],
-            borderColor: borderColors[4],
-            borderWidth: 1,
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { 
-              ticks: { color: textColor, font: { size: 11 } }, 
-              grid: { color: gridColor } 
-            },
-            y: { 
-              ticks: { color: textColor, font: { size: 11 } }, 
-              grid: { color: gridColor } 
-            }
-          }
-        }
-      });
-
-      // Loan Amounts Chart
-      const loanCtx = document.getElementById('loanChart').getContext('2d');
-      loanChart = new Chart(loanCtx, {
-        type: 'bar',
-        data: {
-          labels: loanData.loan_distribution?.map(item => item.range) || [],
-          datasets: [{
-            label: 'Loan Count',
-            data: loanData.loan_distribution?.map(item => item.count) || [],
-            backgroundColor: chartColors[2],
-            borderColor: borderColors[2],
-            borderWidth: 1,
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { 
-              ticks: { color: textColor, font: { size: 11 } }, 
-              grid: { color: gridColor } 
-            },
-            y: { 
-              ticks: { color: textColor, font: { size: 11 } }, 
-              grid: { color: gridColor } 
-            }
-          }
-        }
-      });
-
-      // Sports Distribution Chart
-      const sportsCtx = document.getElementById('sportsChart').getContext('2d');
-      sportsChart = new Chart(sportsCtx, {
-        type: 'bar',
-        data: {
-          labels: sportsData.sports_distribution?.map(item => item.sport) || [],
-          datasets: [{
-            label: 'Number of Players',
-            data: sportsData.sports_distribution?.map(item => item.count) || [],
-            backgroundColor: [
-              'rgba(59, 130, 246, 0.8)',
-              'rgba(16, 185, 129, 0.8)',
-              'rgba(239, 68, 68, 0.8)',
-              'rgba(245, 158, 11, 0.8)',
-              'rgba(168, 85, 247, 0.8)',
-              'rgba(34, 197, 94, 0.8)',
-              'rgba(236, 72, 153, 0.8)'
-            ],
-            borderColor: [
-              'rgb(59, 130, 246)',
-              'rgb(16, 185, 129)',
-              'rgb(239, 68, 68)',
-              'rgb(245, 158, 11)',
-              'rgb(168, 85, 247)',
-              'rgb(34, 197, 94)',
-              'rgb(236, 72, 153)'
-            ],
-            borderWidth: 1,
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: isDark ? '#1e293b' : '#ffffff',
-              titleColor: textColor,
-              bodyColor: textColor,
-              borderColor: gridColor,
-              borderWidth: 1
-            }
-          },
-          scales: {
-            x: { 
-              ticks: { 
-                color: textColor, 
-                font: { size: 11 }
-              }, 
-              grid: { 
-                color: gridColor,
-                display: false
-              } 
-            },
-            y: { 
-              beginAtZero: true,
-              ticks: { 
-                color: textColor, 
-                font: { size: 11 },
-                precision: 0
-              }, 
-              grid: { color: gridColor } 
-            }
-          }
-        }
-      });
-
-    } catch (error) {
-      console.error('Error initializing charts:', error);
-    }
+document.addEventListener('DOMContentLoaded', async () => {
+  if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
   }
 
-  // Det Duty Modal Handler
-  document.addEventListener('DOMContentLoaded', function() {
-    const detDutyCard = document.getElementById('detDutyCount').closest('.stat-card');
-    if (detDutyCard) {
-      detDutyCard.style.cursor = 'pointer';
-      detDutyCard.addEventListener('click', function() {
-        const detModal = new bootstrap.Modal(document.getElementById('detModal'));
-        detModal.show();
-        load_det_personnel();
-      });
-    }
-  });
+  const loader = document.getElementById('dashboardLoader');
+  loader.classList.remove('hidden');
+
+  try {
+    await Promise.all([
+      initializeCharts(),
+      loadMedicalCases(),
+      loadTotalPersonal(),
+      loadDetDutyCount()
+    ]);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setTimeout(() => loader.classList.add('hidden'), 300); // smooth fade
+  }
+
+  const detCard = document.querySelector('#detDutyCount')?.closest('.stat-card');
+  if (detCard) {
+    detCard.style.cursor = 'pointer';
+    detCard.addEventListener('click', () => {
+      const modal = new bootstrap.Modal(document.getElementById('detModal'));
+      modal.show();
+      if (typeof load_det_personnel === 'function') load_det_personnel();
+    });
+  }
+});
 </script>
 
-<!-- Detachment Modal -->
 {% include 'modals/detachmentModal/detachment.html' %}
 
 {% endblock %}

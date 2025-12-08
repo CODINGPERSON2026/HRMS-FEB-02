@@ -336,7 +336,7 @@ function updateDoughnutCharts() {
 }
 
 function resetChartVisibility() {
-  document.getElementById("bar-charts-container").style.display = "flex";
+  document.getElementById("bar-charts-container").style.display = "block";
 }
 
 async function fetchSummary(company = "All") {

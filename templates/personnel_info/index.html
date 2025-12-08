@@ -28,7 +28,7 @@
   align-items: center;
   margin-bottom: 2rem;
   padding: 1rem 1.5rem;
-  background: linear-gradient(180deg, var(--saffron), var(--white) 50%, var(--green));
+  background-color: lightgray;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
   flex-wrap: wrap;
@@ -397,36 +397,32 @@
   .table input.form-control.is-valid {
     border-color: #198754 !important;
   }
-</style>
 
+  .wrapper {
+    padding-left: 240px;
+    
+    padding-top: 1px;
+
+  }
+</style>
+<div class="wrapper">
+  {% set header = "Personnel Management" %}
+  {% set subscript = "Add Personnel → Update Personnel → View Personnel" %}
+  {% include 'navbar/navbar.html' %}
+  <div class="page-header">
+    
+    <div class="header-right">
+      <a href="/personnel_information" class="header-link">Dashboard</a>
+      <a href="/personnel_information/add-personnel" class="header-link">Add Personnel</a>
+      <a href="/personnel_information/update-personnel" class="header-link">Update Personnel</a>
+      
+    </div>
+  </div>
+</div>
 <div class="container-fluid">
   <div class="row justify-content-center">
     <div class="col-xxl-12">
       <div class="form-container">
-<div class="page-header">
-  <div class="header-left">
-    <img src="/static/logo1.png" alt="Army Logo">
-    <h1>Army Personnel Information Form</h1>
-  </div>
-  <div class="header-right">
-    <a href="/personnel_information" class="header-link">
-        <i class="fas fa-user-plus"></i>
-        Dashboard
-      </a>
-    <a href="/personnel_information/add-personnel" class="header-link">
-      <i class="fas fa-list"></i>
-      Add Personnel
-    </a>
-    <a href="/personnel_information/update-personnel" class="header-link">
-      <i class="fas fa-user-edit"></i>
-      Update Personnel
-    </a>
-    <a href="/personnel_information/personnel" class="header-link">
-      <i class="fas fa-list"></i>
-      View Personnel
-    </a>
-  </div>
-</div>
 
         <div class="progress-container">
           <div class="progress" style="height: 10px">
