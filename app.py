@@ -907,6 +907,23 @@ def search_officer():
 
 
 
+
+@app.route('/get_man_power')
+def manPower():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        query= 'select count(*) as total_count from personnel'
+        cursor.execute(query,)
+        total_count = cursor.fetchone()
+        count = total_count['total_count']
+        print(count,"this is count")
+        return jsonify({'count':count}),200
+    except Exception as e:
+        print('There was an exception',str(e))
+        return jsonify({'error':'Internal Server Error'}),500
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=1000)
 
