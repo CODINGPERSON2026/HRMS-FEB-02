@@ -1,6 +1,6 @@
-{% extends "personnel_info/base.html" %}
+{% extends 'baseView.html' %}
 
-{% block extra_css %}
+{% block content %}
 <style>
   :root {
     --primary-color: #2c5aa0;
@@ -14,16 +14,86 @@
     max-width: 80%;
     padding: 0 20px;
   }
-  
+  /* Add these styles to your existing CSS */
+:root {
+  --saffron: #ff9933;
+  --white: #ffffff;
+  --green: #138808;
+  --accent: #000080;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(180deg, var(--saffron), var(--white) 50%, var(--green));
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-left img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.header-left h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.header-link {
+  padding: 0.6rem 1.2rem;
+  background: rgba(255, 255, 255, 0.3);
+  color: #000 !important;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.header-link:hover {
+  background: var(--accent);
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
+}
   .form-container {
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     padding: 30px;
-    margin: 20px auto;
+    margin: 20px 20px 20px 250px;
     border: 1px solid #e1e5eb;
+    max-width: calc(100% - 270px);
+}
+.container-fluid {
     max-width: 100%;
-  }
+    padding: 0;
+    margin-left: 0;
+}
   
   /* Black color for all input fields */
   .form-control,
@@ -166,14 +236,16 @@
     border-left: 4px solid var(--secondary-color);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   }
-.sports-checkbox {
-  margin-right: 8px;
-}
+  
+  .sports-checkbox {
+    margin-right: 8px;
+  }
 
-.form-check-label {
-  font-weight: 500;
-  color: #444;
-}
+  .form-check-label {
+    font-weight: 500;
+    color: #444;
+  }
+  
   .btn-submit {
     background: linear-gradient(135deg, var(--secondary-color), #6a0505);
     color: white;
@@ -326,21 +398,35 @@
     border-color: #198754 !important;
   }
 </style>
-{% endblock %}
 
-{% block content %}
 <div class="container-fluid">
   <div class="row justify-content-center">
     <div class="col-xxl-12">
       <div class="form-container">
-        <div class="header-section">
-          <h1>
-            <i class="fas fa-id-card-alt"></i> Army Personnel Information Form
-          </h1>
-          <p>
-            Complete and comprehensive personnel record management system
-          </p>
-        </div>
+<div class="page-header">
+  <div class="header-left">
+    <img src="/static/logo1.png" alt="Army Logo">
+    <h1>Army Personnel Information Form</h1>
+  </div>
+  <div class="header-right">
+    <a href="/personnel_information" class="header-link">
+        <i class="fas fa-user-plus"></i>
+        Dashboard
+      </a>
+    <a href="/personnel_information/add-personnel" class="header-link">
+      <i class="fas fa-list"></i>
+      Add Personnel
+    </a>
+    <a href="/personnel_information/update-personnel" class="header-link">
+      <i class="fas fa-user-edit"></i>
+      Update Personnel
+    </a>
+    <a href="/personnel_information/personnel" class="header-link">
+      <i class="fas fa-list"></i>
+      View Personnel
+    </a>
+  </div>
+</div>
 
         <div class="progress-container">
           <div class="progress" style="height: 10px">
@@ -2644,8 +2730,6 @@
         </div>
       </div>
     </div>
-{%endblock%}
-{% block extra_js %}
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
 <script>
@@ -3480,40 +3564,18 @@
         input.id = `${fieldName}-${rows.length + 1}-${index}`;
       });
 
-      // Update serial number
-      const newSerial = rows.length + 1;
-      newRow.cells[0].textContent = newSerial;
+      // Update serial number only if not familyTable
+      if (tableId !== "familyTable") {
+        const newSerial = rows.length + 1;
+        newRow.cells[0].textContent = newSerial;
+      }
 
-      // Add error message elements
-      newRow.querySelectorAll("td").forEach((td, index) => {
-        if (index > 0) {
-          const input = td.querySelector("input");
-          if (input) {
-            const existingError = td.querySelector(".error-message");
-            if (existingError) existingError.remove();
-            const errorDiv = document.createElement("div");
-            errorDiv.className = "error-message";
-            errorDiv.id = `${input.id}-error`;
-            errorDiv.style.display = "none";
-            errorDiv.textContent = `Invalid ${input.name.replace("[]", "")}`;
-            td.appendChild(errorDiv);
-          }
+      // Remove any delete buttons from the new row to keep it identical to the first row
+      newRow.querySelectorAll('button').forEach(button => {
+        if (button.classList.contains('btn-delete') || button.textContent.toLowerCase().includes('delete') || button.querySelector('.fa-trash')) {
+          button.remove();
         }
       });
-
-      // Add delete button
-      const deleteBtn = document.createElement("button");
-      deleteBtn.type = "button";
-      deleteBtn.className = "btn btn-sm btn-danger btn-delete-row";
-      deleteBtn.textContent = "Delete";
-      deleteBtn.addEventListener("click", function () {
-        if (tbody.querySelectorAll("tr").length > 1) {
-          newRow.remove();
-          updateSerialNumbers(tbody);
-        }
-      });
-      newRow.cells[newRow.cells.length - 1].innerHTML = "";
-      newRow.cells[newRow.cells.length - 1].appendChild(deleteBtn);
 
       if (inputClass) {
         newRow.querySelectorAll("input").forEach((input) => {
@@ -3770,5 +3832,3 @@
   });
 </script>
 {% endblock %}
-  </body>
-</html>
