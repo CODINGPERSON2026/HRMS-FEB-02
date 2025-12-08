@@ -1,13 +1,34 @@
-{% extends "personnel_info/base.html" %}
+{% extends 'baseView.html' %}
 
-{% block extra_css %}
+{% block content %}
 <style>
   :root {
     --primary-color: #2c5aa0;
     --secondary-color: #8a0a0a;
     --light-bg: #f8f9fa; 
     --accent-color: #d4af37;
+    --saffron: #ff9933;
+    --white: #ffffff;
+    --green: #138808;
+    --accent: #000080;
   }
+  
+  .dashboard-navbar {
+  background: linear-gradient(180deg, var(--saffron), var(--white) 50%, var(--green));
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  margin-top: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-left: 250px !important;
+}
+
+ 
   
   /* Increased width for the entire page */
   .container-fluid {
@@ -20,9 +41,14 @@
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     padding: 30px;
-    margin: 20px auto;
+    margin: 20px 20px 20px 250px;
     border: 1px solid #e1e5eb;
+    max-width: calc(100% - 270px);
+  }
+  .container-fluid {
     max-width: 100%;
+    padding: 0;
+    margin-left: 0;
   }
   
   /* Search section styles */
@@ -227,30 +253,8 @@
     background: linear-gradient(135deg, #9a0a0a, #6a0505);
   }
   
-  .nav-tabs {
-    border-bottom: 2px solid var(--primary-color);
-    margin-bottom: 25px;
-  }
+ 
   
-  .nav-tabs .nav-link {
-    color: var(--primary-color);
-    font-weight: 600;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 8px 8px 0 0;
-    margin-right: 5px;
-    transition: all 0.3s ease;
-  }
-  
-  .nav-tabs .nav-link:hover {
-    background-color: rgba(44, 90, 160, 0.1);
-  }
-  
-  .nav-tabs .nav-link.active {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-  }
   
   .error-message {
     color: red;
@@ -359,11 +363,94 @@
   .table input.form-control.is-valid {
     border-color: #198754 !important;
   }
-</style>
-{% endblock %}
 
-{% block content %}
+  .wrapper {
+    padding-left: 240px;
+    
+    padding-top: 1px;
+    
+  }
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem 1.5rem;
+    background-color: lightgray;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-left img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.header-left h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.header-link {
+  padding: 0.6rem 1.2rem;
+  background: rgba(255, 255, 255, 0.3);
+  color: #000 !important;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.header-link:hover {
+  background: var(--accent);
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
+}
+    
+</style>
+
+
+<div class="wrapper">
+  {% set header = "Personnel Management" %}
+  {% set subscript = "Add Personnel → Update Personnel → View Personnel" %}
+  {% include 'navbar/navbar.html' %}
+  <div class="page-header">
+    
+    <div class="header-right">
+      <a href="/personnel_information" class="header-link">Dashboard</a>
+      <a href="/personnel_information/add-personnel" class="header-link">Add Personnel</a>
+      <a href="/personnel_information/update-personnel" class="header-link">Update Personnel</a>
+      
+    </div>
+  </div>
+</div>
+
 <div class="container-fluid">
+  <!-- Dashboard Navbar -->
+  
+  
   <div class="row justify-content-center">
     <div class="col-xxl-12">
       <div class="form-container">
@@ -1679,9 +1766,6 @@
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   // ========== SEARCH FUNCTIONALITY ==========

@@ -132,7 +132,8 @@ def validate_integer(value, field_name, min_val=None, max_val=None):
     except ValueError:
         return f"{field_name} must be a whole number"
 
-# --- Existing Endpoints ---
+ 
+
 @weight_ms.route('/api/add-user', methods=['POST'])
 def add_user():
     try:
@@ -263,8 +264,8 @@ def add_user():
 
         # Prepare and log the INSERT query
         query = "INSERT INTO weight_info (`name`, `army_number`, `age`, `rank`, `height`, `actual_weight`, `company`, `status_type`, `category_type`, `restrictions`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        # Log the exact query with values (for debugging)
-        formatted_query = query % (f"'{name}'", f"'{army_number}'", age, f"'{rank}'", height_cm, actual_weight, f"'{company}'", f"'{status_type}'", f"'{category_type or 'NULL'}'", f"'{restrictions or 'NULL'}'")
+        
+        
         # Execute with parameterized values
         cursor.execute(query, (name, army_number, age, rank, height_cm, actual_weight, company, status_type, category_type, restrictions))
 
