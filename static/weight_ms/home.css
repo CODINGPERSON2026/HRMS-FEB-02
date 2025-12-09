@@ -75,9 +75,7 @@
     --shadow: rgba(0, 0, 0, 0.1);
     --shadow-light: rgba(0, 0, 0, 0.05);
 }
-#bar-charts-container{
-    display: flex;
-}
+
 [data-theme="blue"] {
     --primary: #1e40af;
     --primary-light: #3b82f6;
