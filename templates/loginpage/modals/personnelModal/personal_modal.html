@@ -1,0 +1,168 @@
+<!-- Modal -->
+<div class="modal fade" id="personnelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Assign Personnel</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Search -->
+        <div class="d-flex mb-3">
+          <input type="text" id="searchInput" class="form-control me-2" placeholder="Search by name or trade">
+          <button class="btn btn-success" id="searchBtn">Search</button>
+        </div>
+
+        <!-- Action Selector -->
+        <div class="mb-3">
+          <label class="form-label">Select Action</label>
+          <select id="actionType" class="form-select">
+            <option value="">-- Select Action --</option>
+            <option value="det">Detachment</option>
+            <option value="posting">Posting</option>
+            <option value="TD">TD</option>
+            <option value="any_other">Any Other</option>
+          </select>
+        </div>
+
+        <!-- Location Dropdown -->
+        <div class="mb-3" id="locationBox">
+          <label for="locationDropdown" class="form-label">Select Location:</label>
+          <select id="locationDropdown" class="form-select"></select>
+        </div>
+
+        <!-- Input field for TD / Any Other -->
+        <div class="mb-3" id="remarksBox" style="display:none;">
+          <label class="form-label">Enter Remarks:</label>
+          <input type="text" id="remarksInput" class="form-control" placeholder="Enter TD or other reason...">
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Select</th>
+                <th>Name</th>
+                <th>Army Number</th>
+                <th>Rank</th>
+                <th>Trade</th>
+                <th>Coy</th>
+              </tr>
+            </thead>
+            <tbody id="personnelTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p id="warningMessage" style="color: red; font-weight: bold;"></p>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="assignBtn">Assign Selected</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedPersonnel = new Set();
+const dropdown = document.getElementById('locationDropdown');
+const actionSelect = document.getElementById('actionType');
+
+// Change input fields based on action selected
+actionSelect.addEventListener("change", async function () {
+    const selectedAction = this.value;
+
+    dropdown.innerHTML = "";
+    document.getElementById('remarksBox').style.display = "none";
+    document.getElementById('locationBox').style.display = "block";
+
+    if (selectedAction === "posting") {
+        dropdown.innerHTML = ["P1", "P2", "P3", "P4"]
+            .map(p => `<option value="${p}">${p}</option>`).join('');
+
+    } else if (selectedAction === "det") {
+        const res = await fetch('/get_locations');
+        const locations = await res.json();
+        dropdown.innerHTML = locations.map(l => `<option value="${l.det_id}">${l.det_name}</option>`).join('');
+
+    } else if (selectedAction === "TD" || selectedAction === "any_other") {
+        document.getElementById('locationBox').style.display = "none";
+        document.getElementById('remarksBox').style.display = "block";
+    }
+});
+
+// Load detachment list when modal opens
+document.getElementById('personnelModal').addEventListener('shown.bs.modal', async () => {
+    const res = await fetch('/get_locations');
+    const locations = await res.json();
+    dropdown.innerHTML = locations.map(l => `<option value="${l.det_id}">${l.det_name}</option>`).join('');
+});
+
+// Search functionality
+document.getElementById('searchBtn').addEventListener('click', async () => {
+    const query = document.getElementById('searchInput').value;
+    const res = await fetch(`/search_personnel?query=${encodeURIComponent(query)}`);
+    const personnel = await res.json();
+
+    personnel.sort((a, b) => (selectedPersonnel.has(a.id) ? -1 : 1));
+
+    const tbody = document.getElementById('personnelTableBody');
+    tbody.innerHTML = "";
+
+    personnel.forEach(person => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><input type="checkbox" class="personnel-checkbox" data-id="${person.army_number}" ${selectedPersonnel.has(person.army_number) ? "checked" : ""}></td>
+            <td>${person.name}</td>
+            <td>${person.army_number}</td>
+            <td>${person.rank}</td>
+            <td>${person.trade}</td>
+            <td>${person.company}</td>
+        `;
+    });
+});
+
+// Track selections
+document.addEventListener('change', e => {
+    if (e.target.classList.contains('personnel-checkbox')) {
+        const id = e.target.getAttribute('data-id');
+        e.target.checked ? selectedPersonnel.add(id) : selectedPersonnel.delete(id);
+    }
+});
+
+// Submit
+document.getElementById('assignBtn').addEventListener('click', async () => {
+    const actionType = actionSelect.value;
+    let remarks = "";
+
+    if (!actionType) return alert("Select Action First!");
+
+    // Remarks logic
+    if (actionType === "TD" || actionType === "any_other") {
+        remarks = document.getElementById('remarksInput').value.trim();
+        if (!remarks) return alert("Enter Remarks for TD / Any Other");
+    } else {
+        remarks = dropdown.value;
+        if (!remarks) return alert("Select a location");
+    }
+
+    if (selectedPersonnel.size === 0) return alert("Select at least one person.");
+
+    const res = await fetch('/assign_personnel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            army_number: Array.from(selectedPersonnel),
+            status: actionType,
+            remarks: remarks
+        })
+    });
+
+    const data = await res.json();
+    alert(data.message || data.error);
+    location.reload();
+});
+</script>
