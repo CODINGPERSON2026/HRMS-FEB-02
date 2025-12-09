@@ -150,7 +150,8 @@ def search_person():
             trade, 
             company,
             detachment_status AS det_status,
-            posting_status
+            posting_status,
+            onleave_status as leave_status
         FROM personnel
         WHERE army_number = %s
     """, (query,))

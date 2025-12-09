@@ -6,15 +6,19 @@
         <h5 class="modal-title">Assign Personnel</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-
+      
       <div class="modal-body">
-
+        
         <!-- Search -->
         <div class="d-flex mb-3">
-          <input type="text" id="searchInput" class="form-control me-2" placeholder="Search by name or trade">
+          <input type="text" id="searchInput" class="form-control me-2" placeholder="Enter army number">
           <button class="btn btn-success" id="searchBtn">Search</button>
         </div>
-
+        
+        <p id="warningMessage" style="color: orange; font-weight: bold; font-size: 16px;">
+          
+        </p>
+        
         <!-- Action Selector -->
         <div class="mb-3">
           <label class="form-label">Select Action</label>
@@ -57,7 +61,6 @@
         </div>
       </div>
 
-      <p id="warningMessage" style="color: red; font-weight: bold;"></p>
 
       <div class="modal-footer">
         <button class="btn btn-primary" id="assignBtn">Assign Selected</button>
@@ -106,7 +109,7 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
     const query = document.getElementById('searchInput').value;
     const res = await fetch(`/search_personnel?query=${encodeURIComponent(query)}`);
     const personnel = await res.json();
-
+    
     personnel.sort((a, b) => (selectedPersonnel.has(a.id) ? -1 : 1));
 
     const tbody = document.getElementById('personnelTableBody');
@@ -123,6 +126,33 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
             <td>${person.company}</td>
         `;
     });
+    document.getElementById('warningMessage').innerHTML = 'Personnel is Available'
+    document.getElementById('warningMessage').style.color = 'Green'
+    document.getElementById('assignBtn').disabled = false
+
+    
+    if(personnel[0].posting_status === 1){
+      
+      document.getElementById('warningMessage').innerText = 'Personnel is already on Posting'
+      document.getElementById('warningMessage').style.color = 'Red'
+      document.getElementById('assignBtn').disabled = true
+
+    }
+    if(personnel[0].leave_status === 1){
+
+      
+      document.getElementById('warningMessage').innerText = 'Personnel is on Leave'
+      document.getElementById('warningMessage').style.color = 'Red'
+      document.getElementById('assignBtn').disabled = true
+    }
+    if(personnel[0].det_status === 1){
+      
+      document.getElementById('warningMessage').innerText = 'Personnel is already on DET'
+      document.getElementById('warningMessage').style.color = 'Red'
+      document.getElementById('assignBtn').disabled =true
+
+    }
+    
 });
 
 // Track selections
