@@ -123,17 +123,19 @@
   }
 
   .action-buttons {
+    margin: 4px 10px;
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
+    
   }
 
   .btn {
     border-radius: 12px;
     font-weight: 600;
-    padding: 14px 32px;
+    padding: 10px 12px;
     border: none;
-    font-size: 1rem;
+    font-size: 0.8rem;
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -173,6 +175,7 @@
   }
 
   .card {
+    margin-top: 5px;
     border: none;
     border-radius: 20px;
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
@@ -198,7 +201,7 @@
   }
 
   .card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-3px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
   }
 
@@ -274,32 +277,28 @@
     <div class="loader-text">Loading your dashboard...</div>
   </div>
 
+
+  {% set header = "15CORPS HRMS Dashboard" %}
+  {% set subscript ='Welcome '~ role ~ ' ' ~ username %}
+
+  {% include 'navbar/navbar.html' %}
   <!-- Main Content (initially hidden) -->
   <div class="main-content" id="mainContent">
-    <div class="action-section">
-      <h2 style="margin: 0 0 10px 0; color: #1e293b; font-weight: 700;">
-        Welcome Back, {{ role }} {{ username }}
-        
-      </h2>
-      <div style="margin-bottom: 10px;">
-        {% include 'modals/alarm/alarm.html' %}
-      </div>
-      
-      
-      <div class="action-buttons">
-        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
-          Assign Personnel
-        </button>
-        <button id="leaveRequestsBtn" class="btn btn-warning">
-          Leave Requests
-        </button>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">Add Event</button>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#countModal">
-          View Count
-        </button>
-        
-
-      </div>
+    
+    <div style="margin-bottom: 10px;">
+      {% include 'modals/alarm/alarm.html' %}
+    </div>
+    <div class="action-buttons">
+      <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
+        Assign Personnel
+      </button>
+      <button id="leaveRequestsBtn" class="btn btn-primary">
+        Leave Requests
+      </button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">Add Event</button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#countModal">
+        View Count
+      </button>
     </div>
 
 <div class="stats-grid">

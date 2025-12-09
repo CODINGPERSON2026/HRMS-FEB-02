@@ -15,7 +15,7 @@
     .modal-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 16px 16px 0 0;
-      padding: 1.5rem;
+      padding: 1.0rem;
       border: none;
     }
     
@@ -50,18 +50,7 @@
       margin-bottom: 0;
     }
 
-    .info-icon {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      margin-right: 1rem;
-      font-size: 1.1rem;
-    }
+    
 
     .info-content {
       flex: 1;
@@ -207,7 +196,7 @@
     .custom-position{
         position: absolute;
         top:0px;    
-        left: 400px;
+        left: 250px;
     
     }
     .modal-dialog{
@@ -234,7 +223,6 @@
         <!-- Description -->
         <div class="info-card">
           <div class="info-row">
-            <div class="info-icon"><i class="fas fa-align-left"></i></div>
             <div class="info-content">
               <div class="info-label">Description</div>
               <div class="info-value description-scroll" id="taskDescription"></div>
@@ -247,7 +235,6 @@
           <div class="col-md-4">
             <div class="info-card">
               <div class="info-row">
-                <div class="info-icon"><i class="fas fa-user"></i></div>
                 <div class="info-content">
                   <div class="info-label">Assigned To</div>
                   <div class="info-value" id="taskAssignedTo"></div>
@@ -258,7 +245,6 @@
           <div class="col-md-4">
             <div class="info-card">
               <div class="info-row">
-                <div class="info-icon"><i class="fas fa-flag"></i></div>
                 <div class="info-content">
                   <div class="info-label">Priority</div>
                   <div class="info-value"><span id="taskPriority" class="priority-badge"></span></div>
@@ -269,7 +255,6 @@
           <div class="col-md-4">
             <div class="info-card">
               <div class="info-row">
-                <div class="info-icon"><i class="fas fa-calendar"></i></div>
                 <div class="info-content">
                   <div class="info-label">Due Date & Time</div>
                   <div class="info-value" id="taskDueDate"></div>
@@ -292,7 +277,6 @@
         <h5 class="mt-4 mb-3" style="color: #495057; font-weight: 600;"><i class="fas fa-sticky-note me-2"></i>Latest Remarks</h5>
         <div class="info-card mt-3">
           <div class="info-row">
-            <div class="info-icon"><i class="fas fa-comment"></i></div>
             <div class="info-content">
               <div class="info-label">Remarks</div>
               <div class="info-value" id="taskRemarks"></div>

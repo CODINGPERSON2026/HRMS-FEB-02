@@ -101,7 +101,7 @@
         tbody.innerHTML = `<tr><td colspan="7" class="text-center">No personnel found</td></tr>`;
       } else {
         result.data.forEach(row => {
-          let colorClass = row.days_on_det > 2 ? 'text-danger fw-bold' : '';
+          let colorClass = row.days_on_det > 12 ? 'text-danger fw-bold' : '';
           tbody.innerHTML += `
             <tr>
               <td class="${colorClass}">${row.det_name}</td>

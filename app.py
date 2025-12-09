@@ -61,10 +61,12 @@ def logout():
 @app.route('/')
 def dashboard():
     user = require_login()
-    print(user)
+    username = user['username'].capitalize()
+
+    print(username)
     if not user:
         return redirect(url_for('admin_login'))
-    return render_template('dashboard.html', username = user['username'],role = user['role'])
+    return render_template('dashboard.html', username = username,role = user['role'])
 
 
 @app.route('/mt', methods=['GET', 'POST'])
@@ -789,7 +791,7 @@ def assigned_alarm():
         FROM assigned_det ad
         LEFT JOIN dets d ON ad.det_id = d.det_id
         LEFT JOIN personnel p ON ad.army_number = p.army_number
-        WHERE DATEDIFF(NOW(), ad.assigned_on) > 2
+        WHERE DATEDIFF(NOW(), ad.assigned_on) > 12
           AND ad.det_status = 1
         ORDER BY ad.assigned_on ASC;
         '''
