@@ -924,6 +924,42 @@ def manPower():
         return jsonify({'error':'Internal Server Error'}),500
 
 
+@app.route('/api/get-parade-count')
+def get_parade_count():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT `rank`, `company`, COUNT(*) AS count 
+        FROM personnel
+        GROUP BY `rank`, `company`
+        ORDER BY `rank`;
+    """)
+
+    results = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    formatted = {}
+
+    for row in results:
+        rank = row['rank']
+        company_name = row['company']
+        count = row['count']
+
+        # Extract company number (e.g., "1 Company" -> 1)
+        company_number = ''.join(filter(str.isdigit, company_name))
+        company_key = f"c{company_number}"
+
+        if rank not in formatted:
+            formatted[rank] = {"c1": 0, "c2": 0, "c3": 0, "c4": 0}
+
+        formatted[rank][company_key] = count
+
+    return jsonify(formatted)
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=1000)
 
