@@ -72,11 +72,9 @@
   });
   
   // Filter dropdown listeners
+  
   document.getElementById("companyFilter").addEventListener("change", function () {
-    load_det_personnel(this.value, document.getElementById("detFilter").value);
-  });
-
-  document.getElementById("detFilter").addEventListener("change", function () {
+    
     load_det_personnel(document.getElementById("companyFilter").value, this.value);
   });
 
@@ -92,6 +90,7 @@
     try {
       // Send selected company as query param
       const url = company ? `/stats/get_detachment_details?company=${encodeURIComponent(company)}` : `/stats/get_detachment_details`;
+      console.log(url)
       const response = await fetch(url);
       const result = await response.json();
       console.log(result,"this is result")

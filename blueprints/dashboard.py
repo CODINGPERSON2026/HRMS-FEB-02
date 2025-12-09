@@ -34,10 +34,12 @@ def get_det_personnel():
 
         # Add filter before ORDER BY
         if company:
-    # ***********************************************************DELETE DETACHMENT**********************
+            print(company,"this is company")
+            query += ' AND p.company = %s'
             params.append(company)
 
         query += " ORDER BY ad.assigned_on ASC"  # Move ORDER BY to end
+        print(query)
 
         cursor.execute(query, params)
         result = cursor.fetchall()

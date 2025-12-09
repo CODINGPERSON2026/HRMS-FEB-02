@@ -100,14 +100,6 @@ body::before {
 .header-link { padding: 0.6rem 1.2rem; background: rgba(255,255,255,0.3); color: #000 !important; text-decoration: none; border-radius: 10px; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s; border: 1px solid rgba(0,0,0,0.1); }
 .header-link:hover { background: #000080; color: #fff !important; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,128,0.3); }
 
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--grid-gap); margin-bottom: 2rem; }
-.stat-card { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); position: relative; overflow: hidden; transition: 0.2s; }
-.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-.stat-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--bg-accent); }
-.stat-icon { width: 44px; height: 44px; border-radius: 10px; background: var(--bg-accent); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
-.stat-icon i { font-size: 1.3rem; color: white; }
-.stat-label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
-.stat-value { font-size: 2rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
 .view-btn { padding: 0.5rem 1rem; background: var(--accent-color); color: white; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem; transition: 0.2s; }
 .view-btn:hover { opacity: 0.85; transform: translateY(-1px); }
 
@@ -120,6 +112,88 @@ body::before {
 .chart-badge { padding: 0.3rem 0.7rem; background: rgba(59,130,246,0.1); color: var(--accent-color); border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
 .chart-container { position: relative; height: 250px; width: 100%; }
 
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  position: relative;
+  transition: 0.15s ease;
+  text-align: center; /* Center everything */
+}
+
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--bg-accent);
+}
+
+.stat-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--bg-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.5rem auto; /* Center icon */
+}
+
+.stat-icon i {
+  font-size: 0.9rem;
+  color: white;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.stat-value {
+  font-size: 1.7rem;
+  font-weight: 1000;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.view-btn {
+  display: block;
+  margin: 0.4rem auto 0;
+  padding: 3px 8px;
+  font-size: 0.65rem;
+  border-radius: 5px;
+  background: var(--bg-accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.view-btn:hover {
+  opacity: 0.9;
+}
+
 @media (max-width: 1200px) { .charts-grid { grid-template-columns: 1fr; } }
 @media (max-width: 768px) {
   .dashboard-container { margin-left: 0; padding: 1rem; }
@@ -130,10 +204,7 @@ body::before {
 }
 .wrapper {
   padding-left: 240px;
-  padding-top: 1px;
-  
-  
-  
+  padding-top: 1px;  
 }
 </style>
 
