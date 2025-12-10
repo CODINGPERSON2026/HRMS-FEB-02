@@ -269,7 +269,7 @@
 
     <div class="cards-toggle-container">
         <button id="toggle-cards-btn">
-            <i class="fas fa-chevron-up"></i>
+            <i class="fas fa-chevron-down"></i>
         </button>
     </div>
 
@@ -447,7 +447,7 @@
         </div>
     </div>
 
-    <div class="cards  hidden" id="summary-cards" >
+    <div class="cards" id="summary-cards" >
         <div class="card card-info">
             <div class="card-content">
                 <div>
@@ -643,7 +643,7 @@
         </table>
     </div>
 </div>
-
+{% include 'weight_system/modals/modal.html'%}
 <script type="module" src="/static/weight_ms/home.js"></script>
 <script>
     document.getElementById('toggle-cards-btn').addEventListener('click', function () {
