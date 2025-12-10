@@ -283,7 +283,7 @@
     const result = await res.json();
 
     if (result.status === "success") {
-      alert("Task created successfully!");
+      showStatusModal("Task created successfull!", "Green", 2500);
       taskForm.reset();
       document.getElementById("searchPersonnel").value = "";
       formDiv.classList.remove("show");

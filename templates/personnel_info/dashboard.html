@@ -92,7 +92,7 @@ body::before {
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-.page-header { display: flex; justify-content: space-between; align-items: center;margin-top: 5px; margin-bottom: 2rem; padding: 1rem 1.5rem; background-color: lightgray; border-radius: 20px; }
+.page-header { display: flex; justify-content: space-between; align-items: center;padding: 1rem 1.5rem;margin:10px 25px 1.5rem  25px;background-color: lightgray; border-radius: 20px; }
 .header-left { display: flex; align-items: center; gap: 15px; }
 .header-left img { width: 45px; height: 45px; object-fit: contain; }
 .header-left h1 { font-size: 1.5rem; font-weight: 700; color: #000; margin: 0; }
@@ -206,6 +206,7 @@ body::before {
   padding-left: 240px;
   padding-top: 1px;  
 }
+
 </style>
 
 <script src="/static/Chart.umd.min.js"></script>
@@ -217,7 +218,7 @@ body::before {
   {% include 'navbar/navbar.html' %}
   <div class="page-header">
     
-    <div class="header-right">
+    <div class="header-right " >
       <a href="/personnel_information" class="header-link">Dashboard</a>
       <a href="/personnel_information/add-personnel" class="header-link">Add Personnel</a>
       <a href="/personnel_information/update-personnel" class="header-link">Update Personnel</a>
