@@ -946,6 +946,8 @@
                     </div>
                   </div>
                 </div>
+
+
               </div>
 
               <div class="form-section">
@@ -1200,6 +1202,7 @@
                       <textarea
                         class="form-control"
                         id="physicalRestrictions"
+                        name="restrictions"
                         rows="3"
                         placeholder="Enter restrictions"
                       ></textarea>
@@ -3768,6 +3771,9 @@
         weight: document.getElementById("weight").value,
         chest: document.getElementById("chest").value,
         identificationMarks: document.getElementById("identificationMarks").value,
+        physicalStatus: document.querySelector('input[name="physicalStatus"]:checked')?.value || "shape",
+        categoryType: document.querySelector('input[name="categoryType"]:checked')?.value || "",
+        physicalRestrictions: document.getElementById("physicalRestrictions").value,
         courtCases: document.getElementById("courtCases").value,
         loan: document.querySelector('input[name="loan"]:checked')?.value || "",
         totalLeavesEncashed: document.getElementById("totalLeavesEncashed").value,
@@ -3913,6 +3919,50 @@
         alert("An unexpected error occurred");
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
+      }
+    }
+
+    // Photo preview function
+    function previewPhoto(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById('photoPreview');
+      const uploadArea = document.querySelector('.photo-upload-area');
+
+      if (file) {
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+          alert('Please select a valid image file (JPG, PNG, GIF).');
+          event.target.value = '';
+          return;
+        }
+
+        // Check file size (2MB = 2 * 1024 * 1024 bytes)
+        if (file.size > 2 * 1024 * 1024) {
+          alert('File size must be less than 2MB.');
+          event.target.value = '';
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          uploadArea.innerHTML = `
+            <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 10px;"></i>
+            <p>Photo selected successfully</p>
+            <small class="text-muted">Click to change photo</small>
+          `;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // Reset if no file selected
+        preview.style.display = 'none';
+        preview.src = '';
+        uploadArea.innerHTML = `
+          <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 10px;"></i>
+          <p>Click to upload personnel photo</p>
+          <small class="text-muted">Supported formats: JPG, PNG, GIF. Max size: 2MB</small>
+        `;
       }
     }
 
