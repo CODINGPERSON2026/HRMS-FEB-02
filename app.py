@@ -61,11 +61,10 @@ def logout():
 @app.route('/')
 def dashboard():
     user = require_login()
-    username = user['username'].capitalize()
 
-    print(username)
     if not user:
         return redirect(url_for('admin_login'))
+    username = user['username'].capitalize()
     return render_template('dashboard.html', username = username,role = user['role'])
 
 

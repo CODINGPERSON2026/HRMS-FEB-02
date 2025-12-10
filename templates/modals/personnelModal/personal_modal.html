@@ -109,6 +109,11 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
     const query = document.getElementById('searchInput').value;
     const res = await fetch(`/search_personnel?query=${encodeURIComponent(query)}`);
     const personnel = await res.json();
+    if(personnel.length === 0) {
+      document.getElementById('warningMessage').innerText = "Army no.  doesnot match"
+      return
+    }
+    
     
     personnel.sort((a, b) => (selectedPersonnel.has(a.id) ? -1 : 1));
 
