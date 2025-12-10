@@ -172,6 +172,13 @@
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 25px;
     margin-bottom: 35px;
+    transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    max-height 0.5s ease,
+    padding 0.3s ease,
+    margin 0.3s ease;
+  overflow: hidden;
   }
 
   .card {
@@ -186,6 +193,7 @@
     text-align: center;
     padding: 20px;
     position: relative;
+
   }
 
   .card::before {
@@ -266,6 +274,42 @@
       font-size: 1.2rem;
     }
   }
+
+  .stats-grid.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+    max-height: 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .stats-grid.show {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 2000px;   /* must be bigger than actual content height */
+    padding-top: 10px;
+    margin-top: 10px;
+  }
+  #show-btn {
+    background: #6885c3;   /* simple blue */
+    color: white;
+    border: none;
+    padding: 2px 4px;
+    font-size: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s ease;
+  }
+  
+  #show-btn:hover {
+    background: #1d4ed8;   /* slightly darker */
+  }
+  
+  
 </style>
 
 <!-- Dashboard with Local Loader -->
@@ -301,7 +345,12 @@
       </button>
     </div>
 
-<div class="stats-grid">
+
+    <button id="show-btn">
+      <i class="fas fa-chevron-down"></i>
+  </button>
+  
+<div id="stats-card-grid" class="stats-grid show">
 
   <!-- First Row Cards -->
   <div class="card p-3 text-center" style="cursor:pointer" id="overAllParadeState">
@@ -529,6 +578,21 @@ const mainPower= document.getElementById('mainPower')
     window.location.href = "/projects";
 });
 
+document.getElementById("show-btn").addEventListener("click", function() {
+
+  let grid = document.getElementById("stats-card-grid");
+  btn = this
+
+  if (grid.classList.contains("hide")) {
+    grid.classList.remove("hide");
+    grid.classList.add("show");
+    btn.innerHTML = '<i class="fas fa-chevron-down"></i>'
+  } else {
+    grid.classList.remove("show");
+    grid.classList.add("hide");
+    btn.innerHTML = '<i class="fas fa-chevron-up"></i>'
+  }
+});
 
     
 

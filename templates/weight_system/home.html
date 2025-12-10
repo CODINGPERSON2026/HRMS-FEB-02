@@ -257,8 +257,8 @@
 
 
     <div class="cards-toggle-container">
-        <button id="toggle-cards-btn" class="btn-primary" style="margin: 15px 0; padding: 10px 20px;">
-            <i class="fas fa-eye"></i> Show Summary Cards
+        <button id="toggle-cards-btn" class="btn-primary" style="margin: 5px 0; padding: 5px 6px; background-color:rgb(189, 170, 170)">
+            <i class="fas fa-chevron-up"></i>
         </button>
     </div>
 
@@ -641,10 +641,10 @@
     
         if (cards.classList.contains('hidden')) {
             cards.classList.remove('hidden');
-            btn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Summary Cards';
+            btn.innerHTML = '<i class="fas fa-chevron-down"></i>';
         } else {
             cards.classList.add('hidden');
-            btn.innerHTML = '<i class="fas fa-eye"></i> Show Summary Cards';
+            btn.innerHTML = '<i class="fas fa-chevron-up"></i>';
         }
     });
 </script>
