@@ -85,7 +85,7 @@ async function fetchBarGraphData() {
               data: [110, 42]
           },
           safeCategory: {
-              labels: ['Safe', 'Category'],
+              labels: ['shape', 'Category'],
               data: [34, 118]
           },
           jcoOrFit: {
@@ -185,9 +185,9 @@ function drawBarGraphs(data) {
   window.safeCategoryChartInstance = new Chart(safeCategoryCtx, {
       type: 'bar',
       data: {
-          labels: data.safeCategory?.labels || ['Safe', 'Category'],
+          labels: data.safeCategory?.labels || ['shape', 'Category'],
           datasets: [{
-              label: 'Safe',
+              label: 'shape',
               data: data.safeCategory?.data || [34, 118],
               backgroundColor: ['#3182ce', '#d69e2e'],
               borderColor: ['#2c5282', '#b7791f'],
