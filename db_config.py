@@ -5,7 +5,7 @@ DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
     'password': 'qaz123QAZ!@#',
-    'database': 'army_personnel_db',
+    'database': 'hrms',
     'autocommit': True
 }
 

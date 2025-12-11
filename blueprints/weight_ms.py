@@ -411,6 +411,7 @@ def api_status_summary():
 def api_status_data():
     status_type = request.args.get('status_type')
     company = request.args.get('company', 'All')
+    print("incoming status status",status_type)
     
     if not status_type:
         return jsonify({'error': 'status_type parameter is required'}), 400
@@ -491,7 +492,7 @@ def api_status_data():
                 "weight_deviation_percent": weight_deviation_percent,
                 "weight_deviation_kg": weight_deviation_kg
             })
-        
+        print(results,"these are resutls")
         return jsonify({
             "count": len(results),
             "rows": results,
@@ -720,6 +721,4 @@ def update_user():
     finally:
         cursor.close()
         connection.close()
-@weight_ms.route('/api/about-page')
-def about():
-    return render_template('/weight_system/about.html')
+
