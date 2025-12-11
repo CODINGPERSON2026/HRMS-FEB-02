@@ -645,7 +645,7 @@ function handleScroll() {
 
 document.getElementById("load-unauth-btn").addEventListener("click", () => fetchAndShow("/weight_system/api/unauthorized", "unauth"));
 document.getElementById("load-auth-btn").addEventListener("click", () => fetchAndShow("/weight_system/api/authorized", "auth"));
-document.getElementById("load-safe-btn").addEventListener("click", () => fetchStatusData("safe"));
+document.getElementById("load-safe-btn").addEventListener("click", () => fetchStatusData("sHape"));
 document.getElementById("load-category-btn").addEventListener("click", () => fetchStatusData("category"));
 document.getElementById("close-table-btn").addEventListener("click", closeTable);
 document.getElementById("table-wrapper").addEventListener("scroll", handleScroll);

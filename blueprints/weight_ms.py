@@ -151,7 +151,7 @@ def add_user():
         height_cm = data.get('height_cm')
         actual_weight = data.get('actual_weight')
         company = data.get('company', '').strip()
-        status_type = data.get('status_type', 'safe').strip()
+        status_type = data.get('status_type', 'shape').strip()
         category_type = data.get('category_type')  # Can be None
         restrictions = data.get('restrictions')   # Can be None
 
@@ -204,8 +204,8 @@ def add_user():
                 validation_errors.append('Weight must be between 30kg and 200kg')
 
         # Validate status_type
-        if status_type not in ['safe', 'category']:
-            validation_errors.append('Status type must be either "safe" or "category"')
+        if status_type not in ['shape', 'category']:
+            validation_errors.append('Status type must be either "shape" or "category"')
 
         # Validate category_type and restrictions if status_type is 'category'
         if status_type == 'category':
@@ -389,7 +389,7 @@ def api_status_summary():
         
         # Extract counts from query results
         for row in status_counts:
-            if row['status_type'] == 'safe':
+            if row['status_type'] == 'shape':
                 safe_count = row['count']
             elif row['status_type'] == 'category':
                 category_count = row['count']
@@ -510,7 +510,7 @@ def api_status_data():
 def api_bar_graph_data():
     company = request.args.get('company', 'All')
     fit_unfit_filter = request.args.get('fitUnfitFilter', 'Fit')
-    safe_category_filter = request.args.get('safeCategoryFilter', 'safe')  # 'safe' or 'category'
+    safe_category_filter = request.args.get('safeCategoryFilter', 'shape')  # 'shape' or 'category'
     
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
@@ -527,9 +527,9 @@ def api_bar_graph_data():
         
         # === 3. Total Safe & Category counts (unchanged) ===
         if company != "All":
-            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE company = %s AND status_type = 'safe'", (company,))
+            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE company = %s AND status_type = 'shape'", (company,))
         else:
-            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'safe'")
+            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'shape'")
         total_safe_count = cursor.fetchone()['count'] or 0
         
         if company != "All":
@@ -540,24 +540,24 @@ def api_bar_graph_data():
 
 
         # === 4. jcoSafeOrCategory – SMART LOGIC BASED ON FILTER ===
-        if safe_category_filter == 'safe':
+        if safe_category_filter == 'shape':
             # For "safe" → no temporary/permanent → just show total JCO vs OR
             if company != "All":
                 cursor.execute("""
                     SELECT COUNT(*) as count FROM weight_info 
-                    WHERE company = %s AND status_type = 'safe' AND `rank` = 'JCO'
+                    WHERE company = %s AND status_type = 'shape' AND `rank` = 'JCO'
                 """, (company,))
             else:
-                cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'safe' AND `rank` = 'JCO'")
+                cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'shape' AND `rank` = 'JCO'")
             jco_val = cursor.fetchone()['count'] or 0
 
             if company != "All":
                 cursor.execute("""
                     SELECT COUNT(*) as count FROM weight_info 
-                    WHERE company = %s AND status_type = 'safe' AND `rank` != 'JCO'
+                    WHERE company = %s AND status_type = 'shape' AND `rank` != 'JCO'
                 """, (company,))
             else:
-                cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'safe' AND `rank` != 'JCO'")
+                cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'shape' AND `rank` != 'JCO'")
             or_val = cursor.fetchone()['count'] or 0
 
             jcoSafeOrCategory = {
