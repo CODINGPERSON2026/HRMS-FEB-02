@@ -121,9 +121,29 @@ def submit_leave_request():
 
     if not all([army_number, leave_type, days]):
         return jsonify({"message": "Missing required fields"}), 400
+    
 
+    # check the company of the leave applicat first
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        query= 'SELECT company from personnel where army_number = %s'
+        cursor.execute(query,(army_number,))
+        result = cursor.fetchone()
+        company_name =  result['company']
+        if company_name:
+            query = 'SELECT email from users  where company = %s AND role = "CLERK"'
+            cursor.execute(query,(company_name,))
+            result = cursor.fetchone()
+            request_sent_to =  result['email']
+    except Exception as e:
+        print('Database error',str(e))
+    finally:
+        conn.close()
+    
+    
     # Set request to be sent to OC
-    request_sent_to = "OC"
+    
     request_status = "Pending"
 
     conn = get_db_connection()
@@ -148,43 +168,6 @@ def submit_leave_request():
     except Exception as e:
         conn.rollback()
         return jsonify({"message": "Failed to apply leave", "error": str(e)}), 500
-    finally:
-        cursor.close()
-        conn.close()
-@leave_bp.route("/get_leave_requests", methods=["GET"])
-def get_leave_requests():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)  # Use dictionary cursor for JSON
-    user = require_login()
-    role = user['role']
-    print(user)
-    try:
-        cursor.execute("""
-    SELECT id, army_number, leave_type, leave_days, request_status, remarks, created_at
-    FROM leave_status_info
-    WHERE request_sent_to = %s
-    ORDER BY created_at DESC
-""", (role,))
-
-        rows = cursor.fetchall()
-
-        # Add approve/reject buttons HTML
-        data = []
-        for row in rows:
-            row_data = row.copy()
-            if row['request_status'] == 'Pending':
-                row_data['actions'] = f"""
-                    <button class="btn btn-success btn-sm me-1" onclick="updateLeaveStatus({row['id']}, 'Approved')">Approve</button>
-                    <button class="btn btn-danger btn-sm" onclick="updateLeaveStatus({row['id']}, 'Rejected')">Reject</button>
-                """
-            else:
-                row_data['actions'] = row['request_status']
-            data.append(row_data)
-
-        return jsonify({"status": "success", "data": data})
-    except Exception as e:
-        print("Error fetching leave requests:", e)
-        return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         cursor.close()
         conn.close()
@@ -217,6 +200,32 @@ def update_leave_status():
         return jsonify({"status": "success"})
     except Exception as e:
         conn.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@leave_bp.route("/get_leave_requests", methods=["GET"])
+def get_leave_requests():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    email = user['email']
+
+    try:
+        cursor.execute("""
+            SELECT id, army_number, leave_type, leave_days,
+                   request_status, remarks, created_at
+            FROM leave_status_info
+            WHERE request_sent_to = %s
+            ORDER BY created_at DESC
+        """, (email,))
+
+        rows = cursor.fetchall()
+        return jsonify({"status": "success", "data": rows})
+
+    except Exception as e:
+        print("Error fetching leave requests:", e)
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         cursor.close()

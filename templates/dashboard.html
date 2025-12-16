@@ -171,7 +171,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 25px;
-    margin-bottom: 35px;
+    margin-bottom:  5px;
     transition:
     opacity 0.3s ease,
     transform 0.3s ease,
@@ -182,7 +182,7 @@
   }
 
   .card {
-    margin-top: 5px;
+    
     border: none;
     border-radius: 20px;
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
@@ -434,11 +434,11 @@
 
   <!-- Interview Pending Modal -->
   
-  <div class="card mt-4">
-    <h5 class="text-muted text-center mb-3">
+  <div class="card">
+    <h5 class="text-muted text-center">
       Unfit Personnel Trend (Month-wise)
     </h5>
-    <div class="d-flex justify-content-end mb-2">
+    <div class="d-flex justify-content-end">
       <select id="companyFilter" class="form-select w-auto">
         <option value="All" selected>ALL</option>
         <option value="1 Company">1 COMPANY</option>
@@ -491,82 +491,90 @@
     console.log("Initial company:", defaultCompany);
     loadUnfitGraph(defaultCompany);
   });   
-function drawAreaLineGraph(months, values) {
-  const canvas = document.getElementById("unfitChart");
-  const ctx = canvas.getContext("2d");
-
-  const padding = 55;
-  const maxVal = Math.max(...values, 5);
-  const width = canvas.width - padding * 2;
-  const height = canvas.height - padding * 2;
-
-  const pointCount = values.length === 1 ? 1 : values.length - 1;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  /* -------- Y AXIS -------- */
-  ctx.fillStyle = "#6b7280";
-  ctx.font = "11px Segoe UI";
-  ctx.strokeStyle = "#e5e7eb";
-
-  const steps = 5;
-  for (let i = 0; i <= steps; i++) {
-    const val = Math.round((maxVal / steps) * i);
-    const y = canvas.height - padding - (val / maxVal) * height;
-    ctx.fillText(val, 15, y + 3);
-  }
-
-  /* -------- AREA -------- */
-  ctx.beginPath();
-  values.forEach((val, i) => {
-    const x = padding + (i * width) / pointCount;
-    const y = canvas.height - padding - (val / maxVal) * height;
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
-
-  ctx.lineTo(canvas.width - padding, canvas.height - padding);
-  ctx.lineTo(padding, canvas.height - padding);
-  ctx.closePath();
-  ctx.fillStyle = "rgba(253,224,71,0.45)";
-  ctx.fill();
-
-  /* -------- LINE -------- */
-  ctx.beginPath();
-  values.forEach((val, i) => {
-    const x = padding + (i * width) / pointCount;
-    const y = canvas.height - padding - (val / maxVal) * height;
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
-
-  ctx.strokeStyle = "#ef4444";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  /* -------- POINTS -------- */
-  ctx.fillStyle = "#ef4444";
-  values.forEach((val, i) => {
-    const x = padding + (i * width) / pointCount;
-    const y = canvas.height - padding - (val / maxVal) * height;
+  function drawAreaLineGraph(months, values) {
+    const canvas = document.getElementById("unfitChart");
+    const ctx = canvas.getContext("2d");
+  
+    const padding = 55;
+    const maxVal = Math.max(...values, 5);
+    const width = canvas.width - padding * 2;
+    const height = canvas.height - padding * 2;
+  
+    const pointCount = values.length === 1 ? 1 : values.length - 1;
+  
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+    /* -------- Y AXIS -------- */
+    ctx.fillStyle = "#6b7280";
+    ctx.font = "11px Segoe UI";
+    ctx.strokeStyle = "#e5e7eb";
+  
+    const steps = 5;
+    for (let i = 0; i <= steps; i++) {
+      const val = Math.round((maxVal / steps) * i);
+      const y = canvas.height - padding - (val / maxVal) * height;
+      ctx.fillText(val, 15, y + 3);
+    }
+  
+    /* -------- AREA -------- */
     ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    values.forEach((val, i) => {
+      const x = padding + (i * width) / pointCount;
+      const y = canvas.height - padding - (val / maxVal) * height;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+  
+    ctx.lineTo(canvas.width - padding, canvas.height - padding);
+    ctx.lineTo(padding, canvas.height - padding);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(253,224,71,0.45)";
     ctx.fill();
-  });
-
-  /* -------- MONTH LABELS -------- */
-  ctx.fillStyle = "#374151";
-  months.forEach((m, i) => {
-    const x = padding + (i * width) / pointCount;
-    ctx.fillText(m, x - 10, canvas.height - 15);
-  });
-
-  /* -------- Y AXIS TITLE -------- */
-  ctx.save();
-  ctx.translate(20, canvas.height / 2);
-  ctx.rotate(-Math.PI / 2);
-  ctx.fillText("Unfit Count", 0, 0);
-  ctx.restore();
-}
-
+  
+    /* -------- LINE -------- */
+    ctx.beginPath();
+    values.forEach((val, i) => {
+      const x = padding + (i * width) / pointCount;
+      const y = canvas.height - padding - (val / maxVal) * height;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+  
+    ctx.strokeStyle = "#ef4444";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  
+    /* -------- POINTS -------- */
+    ctx.fillStyle = "#ef4444";
+    values.forEach((val, i) => {
+      const x = padding + (i * width) / pointCount;
+      const y = canvas.height - padding - (val / maxVal) * height;
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  
+    /* -------- MONTH LABELS + VALUES -------- */
+    ctx.fillStyle = "#374151";
+    ctx.font = "11px Segoe UI";
+    months.forEach((m, i) => {
+      const x = padding + (i * width) / pointCount;
+      const y = canvas.height - 15;
+  
+      // Draw month label
+      ctx.fillText(m, x - 10, y);
+  
+      // Draw value above the point
+      const valY = canvas.height - padding - (values[i] / maxVal) * height - 10;
+      ctx.fillText(values[i], x - 5, valY);
+    });
+  
+    /* -------- Y AXIS TITLE -------- */
+    ctx.save();
+    ctx.translate(20, canvas.height / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText("Unfit Count", 0, 0);
+    ctx.restore();
+  }
+  
     
  </script>
       
@@ -650,50 +658,7 @@ const mainPower= document.getElementById('mainPower')
     });
 
     // Leave Requests Button
-    document.getElementById("leaveRequestsBtn")?.addEventListener("click", async () => {
-      const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
-      modal.show();
-      await loadLeaveRequests();
-    });
-
-    async function loadLeaveRequests() {
-      const spinner = document.getElementById("leaveRequestsSpinner");
-      const table = document.getElementById("leaveRequestsTable");
-      const tbody = document.getElementById("leaveRequestsTableBody");
-
-      if (!spinner || !table || !tbody) return;
-
-      spinner.classList.remove("d-none");
-      table.classList.add("d-none");
-      tbody.innerHTML = "";
-
-      try {
-        const res = await fetch("/apply_leave/get_leave_requests");
-        if (!res.ok) throw new Error("Network error");
-        const result = await res.json();
-
-        result.data.forEach(row => {
-          tbody.innerHTML += `
-          <tr>
-            <td>${row.army_number}</td>
-            <td>${row.leave_type}</td>
-            <td>${row.leave_days}</td>
-            <td>${row.request_status}</td>
-            <td>${row.remarks}</td>
-            <td>${row.created_at}</td>
-            <td>${row.actions || row.request_status}</td>
-          </tr>
-        `;
-        });
-
-        spinner.classList.add("d-none");
-        table.classList.remove("d-none");
-      } catch (err) {
-        console.error(err);
-        spinner.innerHTML = `<p class="text-danger fw-bold mt-3">Failed to load leave requests</p>`;
-      }
-    }
-
+    
     document.getElementById("openBoardDetails").addEventListener("click", function () {
       window.location.href = "/board_details";
     });

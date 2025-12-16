@@ -1,6 +1,7 @@
 <!-- Leave Requests Modal -->
 <div class="modal fade" id="leaveRequestsModal" tabindex="-1" aria-labelledby="leaveRequestsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-sm-down">
+
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="leaveRequestsModalLabel">Leave Requests</h5>
@@ -16,10 +17,10 @@
                 <th>Army Number</th>
                 <th>Leave Type</th>
                 <th>Days</th>
-                <th>Status</th>
-                <th>Remarks</th>
-                <th>Applied At</th>
-                <th>Actions</th> <!-- NEW COLUMN -->
+                <!-- <th>Status</th> -->
+                <!-- <th>Remarks</th> -->
+                <!-- <th>Applied At</th> -->
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="leaveRequestsTableBody"></tbody>
@@ -29,4 +30,56 @@
       </div>
     </div>
   </div>
+
+  <script>
+    document.getElementById("leaveRequestsBtn")?.addEventListener("click", async () => {
+      const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
+      modal.show();
+      await loadLeaveRequests();
+    });
+    
+    async function loadLeaveRequests() {
+      const spinner = document.getElementById("leaveRequestsSpinner");
+      const table = document.getElementById("leaveRequestsTable");
+      const tbody = document.getElementById("leaveRequestsTableBody");
+    
+      spinner.classList.remove("d-none");
+      table.classList.add("d-none");
+      tbody.innerHTML = "";
+    
+      try {
+        const res = await fetch("/apply_leave/get_leave_requests");
+        const result = await res.json();
+    
+        result.data.forEach(row => {
+    
+          
+    
+          let actions = `
+          <button class="btn btn-primary btn-sm"
+            onclick="viewLeaveRequest(${row.id})">
+            View
+          </button>
+        `;
+    
+          tbody.innerHTML += `
+            <tr>
+              <td>${row.army_number}</td>
+              <td>${row.leave_type}</td>
+              <td>${row.leave_days}</td>
+              <td>${actions}</td>
+            </tr>
+          `;
+        });
+    
+        spinner.classList.add("d-none");
+        table.classList.remove("d-none");
+    
+      } catch (err) {
+        console.error(err);
+        spinner.innerHTML = `<p class="text-danger fw-bold mt-3">Failed to load leave requests</p>`;
+      }
+    }
+    </script>
+    
   
