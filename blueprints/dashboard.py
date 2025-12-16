@@ -97,3 +97,6 @@ def delete_personnel():
         print(e)
         conn.rollback()  # rollback on error
         return jsonify({"status": "error", "message": "Database error"}), 500
+
+
+

@@ -438,103 +438,137 @@
     <h5 class="text-muted text-center mb-3">
       Unfit Personnel Trend (Month-wise)
     </h5>
+    <div class="d-flex justify-content-end mb-2">
+      <select id="companyFilter" class="form-select w-auto">
+        <option value="All" selected>ALL</option>
+        <option value="1 Company">1 COMPANY</option>
+        <option value="2 Company">2 COMPANY</option>
+        <option value="3 Company">3 COMPANY</option>
+        <option value="4 Company">4 COMPANY</option>
+      </select>
+    </div>
     <canvas id="unfitChart" width="900" height="300"></canvas>
+    
   </div>
-  <script>
-    function drawAreaLineGraph() {
-      const canvas = document.getElementById("unfitChart");
-      const ctx = canvas.getContext("2d");
-    
-      // Dummy Data
-      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"];
-      const values = [12, 18, 22, 15, 9, 13, 6, 14];
-    
-      const padding = 55;
-      const maxVal = Math.max(...values) + 5;
-      const width = canvas.width - padding * 2;
-      const height = canvas.height - padding * 2;
-    
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-      /* ---------- Y AXIS (COUNT LABELS) ---------- */
-      ctx.fillStyle = "#6b7280";
-      ctx.font = "11px Segoe UI";
-      ctx.strokeStyle = "#e5e7eb";
-      ctx.lineWidth = 1;
-    
-      const steps = 5;
-      for (let i = 0; i <= steps; i++) {
-        const val = Math.round((maxVal / steps) * i);
-        const y = canvas.height - padding - (val / maxVal) * height;
-    
-        // Count label
-        ctx.fillText(val, 15, y + 3);
-    
-        // Tick mark
-        ctx.beginPath();
-        ctx.moveTo(padding - 6, y);
-        ctx.lineTo(padding, y);
-        ctx.stroke();
+ <script>
+ 
+
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  async function loadUnfitGraph(company) {
+    console.log("loadUnfitGraph called for company:", company);
+  
+    try {
+      const res = await fetch(`/api/unfit-graph?company=${encodeURIComponent(company)}`);
+      const data = await res.json();
+  
+      if (!data || !data.length) {
+        console.warn("No data returned for company:", company);
+        return;
       }
-    
-      /* ---------- AREA FILL ---------- */
-      ctx.beginPath();
-      values.forEach((val, i) => {
-        const x = padding + (i * width) / (values.length - 1);
-        const y = canvas.height - padding - (val / maxVal) * height;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-    
-      ctx.lineTo(canvas.width - padding, canvas.height - padding);
-      ctx.lineTo(padding, canvas.height - padding);
-      ctx.closePath();
-    
-      ctx.fillStyle = "rgba(253, 224, 71, 0.45)"; // yellow fill
-      ctx.fill();
-    
-      /* ---------- LINE ---------- */
-      ctx.beginPath();
-      values.forEach((val, i) => {
-        const x = padding + (i * width) / (values.length - 1);
-        const y = canvas.height - padding - (val / maxVal) * height;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-    
-      ctx.strokeStyle = "#ef4444";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    
-      /* ---------- POINTS ---------- */
-      ctx.fillStyle = "#ef4444";
-      values.forEach((val, i) => {
-        const x = padding + (i * width) / (values.length - 1);
-        const y = canvas.height - padding - (val / maxVal) * height;
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    
-      /* ---------- MONTH LABELS ---------- */
-      ctx.fillStyle = "#374151";
-      ctx.font = "11px Segoe UI";
-      months.forEach((m, i) => {
-        const x = padding + (i * width) / (months.length - 1);
-        ctx.fillText(m, x - 10, canvas.height - 15);
-      });
-    
-      /* ---------- Y AXIS TITLE ---------- */
-      ctx.save();
-      ctx.translate(20, canvas.height / 2);
-      ctx.rotate(-Math.PI / 2);
-      ctx.fillStyle = "#374151";
-      ctx.fillText("Unfit Count", 0, 0);
-      ctx.restore();
+  
+      const months = data.map(d => MONTHS[d.month - 1]);
+      const values = data.map(d => d.unfit_count);
+  
+      drawAreaLineGraph(months, values);
+    } catch (err) {
+      console.error("Error fetching unfit data:", err);
     }
+  }
+  
+  // Event delegation for dynamically added elements
+  document.addEventListener("change", (e) => {
+    if (e.target && e.target.id === "companyFilter") {
+      const selectedCompany = e.target.value || "All";
+      loadUnfitGraph(selectedCompany);
+    }
+  });
+  
+  // Initial load with default value
+  document.addEventListener("DOMContentLoaded", () => {
+    const companySelect = document.getElementById("companyFilter");
+    const defaultCompany = companySelect.value || "All";
+    console.log("Initial company:", defaultCompany);
+    loadUnfitGraph(defaultCompany);
+  });   
+function drawAreaLineGraph(months, values) {
+  const canvas = document.getElementById("unfitChart");
+  const ctx = canvas.getContext("2d");
+
+  const padding = 55;
+  const maxVal = Math.max(...values, 5);
+  const width = canvas.width - padding * 2;
+  const height = canvas.height - padding * 2;
+
+  const pointCount = values.length === 1 ? 1 : values.length - 1;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  /* -------- Y AXIS -------- */
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "11px Segoe UI";
+  ctx.strokeStyle = "#e5e7eb";
+
+  const steps = 5;
+  for (let i = 0; i <= steps; i++) {
+    const val = Math.round((maxVal / steps) * i);
+    const y = canvas.height - padding - (val / maxVal) * height;
+    ctx.fillText(val, 15, y + 3);
+  }
+
+  /* -------- AREA -------- */
+  ctx.beginPath();
+  values.forEach((val, i) => {
+    const x = padding + (i * width) / pointCount;
+    const y = canvas.height - padding - (val / maxVal) * height;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+
+  ctx.lineTo(canvas.width - padding, canvas.height - padding);
+  ctx.lineTo(padding, canvas.height - padding);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(253,224,71,0.45)";
+  ctx.fill();
+
+  /* -------- LINE -------- */
+  ctx.beginPath();
+  values.forEach((val, i) => {
+    const x = padding + (i * width) / pointCount;
+    const y = canvas.height - padding - (val / maxVal) * height;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+
+  ctx.strokeStyle = "#ef4444";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  /* -------- POINTS -------- */
+  ctx.fillStyle = "#ef4444";
+  values.forEach((val, i) => {
+    const x = padding + (i * width) / pointCount;
+    const y = canvas.height - padding - (val / maxVal) * height;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  /* -------- MONTH LABELS -------- */
+  ctx.fillStyle = "#374151";
+  months.forEach((m, i) => {
+    const x = padding + (i * width) / pointCount;
+    ctx.fillText(m, x - 10, canvas.height - 15);
+  });
+
+  /* -------- Y AXIS TITLE -------- */
+  ctx.save();
+  ctx.translate(20, canvas.height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText("Unfit Count", 0, 0);
+  ctx.restore();
+}
+
     
-    document.addEventListener("DOMContentLoaded", drawAreaLineGraph);
-    </script>
+ </script>
       
   <script>
 
@@ -696,5 +730,6 @@ document.getElementById("show-btn").addEventListener("click", function() {
 
 
   </script>
+  
 
   {% endblock %}

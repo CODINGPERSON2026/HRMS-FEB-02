@@ -117,14 +117,14 @@ def mt():
     
 @app.route('/personal_info')
 def personal_info():
-    print("in this app route")
+    #"in this app route")
     return render_template('personalInfoView.html')
 
 @app.route('/personal/create', methods=['GET', 'POST'])
 def create_personal():
     if request.method == 'POST':
         data = request.form.to_dict()
-        print(data)  # For now, simulate saving to DB
+        #data)  # For now, simulate saving to DB
         #return redirect(url_for('personal_info'))
     return render_template('personalInfoView.html', form_view='create')
 
@@ -141,7 +141,7 @@ def search_person():
     query = request.args.get('query', '')
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    print(query)
+    #query)
 
     cursor.execute("""
         SELECT 
@@ -158,7 +158,7 @@ def search_person():
     """, (query,))
 
     results = cursor.fetchall()
-    print(results)
+    #results)
     conn.close()
     return jsonify(results)
 
@@ -179,7 +179,7 @@ def get_dets():
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT COUNT(*) AS count from personnel where detachment_status = 1")
     result = cursor.fetchone()
-    print(result['count'])
+    #result['count'])
     cursor.close()
     conn.close()
     return jsonify({'count': result['count']})
@@ -198,13 +198,13 @@ def interview():
     cursor.execute(query)
     result = cursor.fetchone()
     pending_count = result["pending_count"]
-    print(pending_count)
+    #pending_count)
     total_count = result["total_count"]
-    print(total_count)
+    #total_count)
     percentage = 0
     if total_count > 0:
         percentage = pending_count/total_count * 100
-        print(percentage)
+        #percentage)
     cursor.close()
     conn.close()
     return jsonify({'result':result,'percentage':round(percentage, 2)})
@@ -233,7 +233,7 @@ def get_pending_interview_list():
         return jsonify({"status": "success", "data": data})
 
     except Exception as e:
-        print("Error fetching pending interview list:", e)
+        #"Error fetching pending interview list:", e)
         return jsonify({"status": "error", "message": "Server error"}), 500
 
     finally:
@@ -382,13 +382,13 @@ def daily_running():
 @app.route('/get_vehicle_details', methods=['POST'])
 def get_vehicle_details():
     vehicle_no = request.form.get('vehicle_no')
-    print(vehicle_no)
+    #vehicle_no)
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("SELECT type, class FROM vehicle_detail WHERE vehicle_no=%s", (vehicle_no,))
     result = cursor.fetchone()
-    print(result)
+    #result)
     cursor.close()
     conn.close()
 
@@ -526,7 +526,7 @@ def get_board_members(order_no):
     cur = conn.cursor()
     cur.execute("SELECT * FROM board_members WHERE order_no=%s", (order_no,))
     members = cur.fetchall()
-    print("membersss", members)
+    #"membersss", members)
     cur.close()
     return jsonify(members)
 
@@ -534,7 +534,7 @@ def get_board_members(order_no):
 @app.route("/add_member", methods=["POST"])
 def add_member():
     data = request.form
-    print("Show me",data.get("board_id"))
+    #"Show me",data.get("board_id"))
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
@@ -797,7 +797,7 @@ def assigned_alarm():
 
         cursor.execute(query)
         rows = cursor.fetchall()
-        print(rows,"these are rowaasjdfjadsjfjsdfskl sdfkljadslkfjlsfjdslfjl fdslkjlfj ")
+        #rows,"these are rowaasjdfjadsjfjsdfskl sdfkljadslkfjlsfjdslfjl fdslkjlfj ")
 
         return jsonify({"status": "success", "rows": rows})
 
@@ -829,7 +829,7 @@ def home():
         cur.execute("SELECT * FROM projects")
 
     projects = cur.fetchall()
-    print("projects", projects)
+    #"projects", projects)
     conn.close()
 
     # Add calculated percentage
@@ -919,7 +919,7 @@ def manPower():
         cursor.execute(query,)
         total_count = cursor.fetchone()
         count = total_count['total_count']
-        print(count,"this is count")
+        #count,"this is count")
         return jsonify({'count':count}),200
     except Exception as e:
         print('There was an exception',str(e))
@@ -960,6 +960,26 @@ def get_parade_count():
         formatted[rank][company_key] = count
 
     return jsonify(formatted)
+@app.route('/api/unfit-graph')
+def line_unfit_graph():
+    company = request.args.get('company', 'All')
+    print('the value is',company)
+    #'this is incomming company')
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT month, unfit_count
+        FROM monthly_medical_status
+        WHERE year = YEAR(CURDATE())
+          AND unit = %s
+        ORDER BY month
+    """, (company,))
+    result = cursor.fetchall()
+    #"this is returning data")
+    #result)
+    return jsonify(result)
 
 
 if __name__ == '__main__':

@@ -30,3 +30,4 @@ from blueprints.apply_leave import leave_bp
 from blueprints.dashboard import dashboard_bp
 from blueprints.task_manager import task_bp
 from blueprints.account_management import accounts_bp
+from blueprints.weight_ms import compute_authorization
