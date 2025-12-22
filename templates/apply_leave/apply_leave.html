@@ -209,6 +209,8 @@
     </div>
 
 </div>
+{% include 'modals/success-modal/modal.html'%}
+
 
 <!-- JS remains unchanged -->
 <script>
@@ -359,8 +361,10 @@
             });
     
             const response = await res.json();
-            alert(response.message);
-            if (res.ok) location.reload();
+            showStatusModal("Leave request has been sent", "Green", 2000);
+            setTimeout(()=>{
+                if (res.ok) location.reload();
+            },2000)
         } catch (err) {
             alert("Failed to apply leave.");
         } finally {
