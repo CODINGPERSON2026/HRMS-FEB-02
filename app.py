@@ -3,7 +3,7 @@ import os
 from datetime import date
 
 app = Flask(__name__)
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # Cache static files for 1 year (in seconds)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 app.secret_key = os.urandom(24)
 
 app.register_blueprint(personnel_info)
@@ -241,7 +241,6 @@ def get_pending_interview_list():
         conn.close()
 
 
-# Assign selected personnel
 @app.route('/assign_personnel', methods=['POST'])
 def assign_personnel():
     data = request.get_json()
@@ -257,9 +256,6 @@ def assign_personnel():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # -----------------------------
-        # STEP 1: VALIDATION FIRST
-        # -----------------------------
         for pid in personnel_ids:
             cursor.execute("""
     SELECT detachment_status, posting_status, td_status
