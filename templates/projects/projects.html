@@ -1,224 +1,1008 @@
 {% extends "baseView.html" %}
 {% block content %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Project Dashboard</title>
-
     <link rel="stylesheet" 
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-
+    <link rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        .card-header { font-size: 20px; font-weight: bold; }
-        .container {
-            padding-left: 10rem;
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --card-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.12);
+            --transition-smooth: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --sidebar-width: 260px;
+            --glow-primary: 0 0 15px rgba(102, 126, 234, 0.2);
+            --glow-success: 0 0 15px rgba(67, 233, 123, 0.2);
         }
-        .project-card {
-            transition: transform 0.2s ease-in-out;
+
+        * {
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
         }
-        .project-card:hover {
+
+        body {
+            background: #f8fafc;
+            min-height: 100vh;
+            padding-bottom: 2rem;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .main-container {
+            padding-left: var(--sidebar-width);
+            transition: padding-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .container-fluid {
+            padding: 0;
+        }
+
+        .content-wrapper {
+            padding: 20px;
+        }
+
+        /* If baseView.html doesn't have sidebar-collapsed class, add this */
+        .sidebar-collapsed .main-container {
+            padding-left: 0;
+        }
+
+        /* Dashboard Header - Smaller */
+        .dashboard-header {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1.8rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #43e97b);
+            background-size: 200% 100%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .dashboard-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.5px;
+        }
+
+        .dashboard-subtitle {
+            color: #718096;
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        /* Stats Cards - Smaller */
+        .stats-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 1.2rem;
+            border: 1px solid #e2e8f0;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .stats-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-}
+            box-shadow: var(--card-shadow-hover);
+            border-color: #cbd5e0;
+        }
+
+        .stats-card:hover::before {
+            opacity: 1;
+        }
+
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-count {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+
+        .stats-label {
+            color: #718096;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Filter Buttons - Smaller */
+        .filter-btn {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #4a5568;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+            color: #2d3748;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+            box-shadow: var(--glow-primary);
+        }
+
+        /* Project Cards - Smaller */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .project-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+            position: relative;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: var(--card-shadow-hover);
+            border-color: #cbd5e0;
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .project-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #2d3748;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .project-title i {
+            font-size: 1rem;
+            color: #667eea;
+        }
+
+        .cost-badge {
+            background: #f7fafc;
+            color: #2d3748;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .stage-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: var(--glow-primary);
+        }
+
+        .project-body {
+            padding: 1.5rem;
+        }
+
+        .project-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #4a5568;
+            font-size: 0.9rem;
+            padding: 0.6rem;
+            background: #f7fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .meta-item i {
+            width: 18px;
+            text-align: center;
+            color: #718096;
+        }
+
+        /* Progress Container - Smaller */
+        .progress-container {
+            margin: 1.2rem 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            color: #4a5568;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .progress {
+            height: 10px;
+            background: #edf2f7;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: width 1s cubic-bezier(0.65, 0, 0.35, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            to { left: 100%; }
+        }
+
+        /* Card Actions - Smaller */
+        .card-actions {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 1.2rem;
+        }
+
+        .btn-view, .btn-update {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(250, 112, 154, 0.2);
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(250, 112, 154, 0.3);
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.2);
+        }
+
+        .btn-update:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        /* Advanced Button - Smaller */
+        .btn-advanced {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            box-shadow: var(--glow-primary);
+            font-size: 0.9rem;
+        }
+
+        .btn-advanced:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-advanced.pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        /* Floating Action Button - Smaller */
+        .floating-add-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+        }
+
+        .floating-add-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Modal Styling - Smaller */
+        .modal-content {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px 16px 0 0;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .modal-title {
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e2e8f0;
+            padding: 1.25rem 1.5rem;
+            background: #f8fafc;
+        }
+
+        .form-label {
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+        }
+
+        .form-control, .form-select {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #2d3748;
+            border-radius: 10px;
+            padding: 0.75rem 0.9rem;
+            transition: var(--transition-smooth);
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: #ffffff;
+            border-color: #667eea;
+            color: #2d3748;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+        }
+
+        .form-control::placeholder {
+            color: #a0aec0;
+        }
+
+        .btn-close-white {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+
+        .btn-close-white:hover {
+            opacity: 1;
+        }
+
+        /* Empty State - Smaller */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: #f8fafc;
+            border-radius: 16px;
+            border: 2px dashed #cbd5e0;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #cbd5e0;
+            margin-bottom: 1.2rem;
+        }
+
+        .empty-state h4 {
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            font-size: 1.2rem;
+        }
+
+        .empty-state p {
+            color: #718096;
+            font-size: 0.95rem;
+        }
+
+        /* Additional animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .project-card {
+            animation: fadeInUp 0.5s ease backwards;
+        }
+
+        .project-card:nth-child(1) { animation-delay: 0.1s; }
+        .project-card:nth-child(2) { animation-delay: 0.2s; }
+        .project-card:nth-child(3) { animation-delay: 0.3s; }
+        .project-card:nth-child(4) { animation-delay: 0.4s; }
+        .project-card:nth-child(5) { animation-delay: 0.5s; }
+        .project-card:nth-child(6) { animation-delay: 0.6s; }
     </style>
 </head>
-<body class="bg-light">
-    <div class="container py-4" >
-    {% set header = "Project Management" %}
-    {% set subscript = "Click on Add project to add a new project" %}
-    {% include 'navbar/navbar.html' %}
+<body>
+    <!-- The sidebar will be automatically included from baseView.html -->
+    
+    <div class="main-container">
+        <div class="content-wrapper">
+            <div class="container py-3">
+                {% set header = "Project Management" %}
+                {% set subscript = "Monitor and manage all your projects in one place" %}
+                
+                <!-- Dashboard Header -->
+                <div class="dashboard-header">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h1 class="dashboard-title">Project Monitoring Dashboard</h1>
+                            <p class="dashboard-subtitle">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Real-time tracking and management of all projects
+                            </p>
+                        </div>
+                        <button class="btn-advanced pulse" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                            <i class="fas fa-plus"></i>
+                            Add New Project
+                        </button>
+                    </div>
 
-    <div class="d-flex justify-content-between mb-3">
-        <h2>Project Monitoring Dashboard</h2>
-        <div class="btn-group mb-3" role="group" id="stageFilters">
-        <button class="btn btn-dark" data-stage="all">All</button>
-        <button class="btn btn-secondary" data-stage="AON">AON Stage</button>
-        <button class="btn btn-secondary" data-stage="TOB">TOB & TEC Stage</button>
-        <button class="btn btn-secondary" data-stage="ATP">ATP Stage</button>
-        <button class="btn btn-success" data-stage="Completed">Completed</button>
-    </div>
+                    <!-- Stats Overview -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon" style="background: var(--primary-gradient);">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <div class="stats-count">{{ projects|length }}</div>
+                                <div class="stats-label">Total Projects</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon" style="background: var(--success-gradient);">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stats-count">{{ projects|selectattr('current_stage', 'equalto', 'Completed')|list|length }}</div>
+                                <div class="stats-label">Completed</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon" style="background: var(--warning-gradient);">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stats-count">{{ projects|rejectattr('current_stage', 'equalto', 'Completed')|list|length }}</div>
+                                <div class="stats-label">In Progress</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon" style="background: var(--secondary-gradient);">
+                                    <i class="fas fa-indian-rupee-sign"></i>
+                                </div>
+                                <div class="stats-count">₹{{ projects|sum(attribute='project_cost')|default(0)|int }}</div>
+                                <div class="stats-label">Total Budget</div>
+                            </div>
+                        </div>
+                    </div>
 
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProjectModal">Add Project</button>
-    </div>
+                    <!-- Filter Buttons -->
+                    <div class="mb-3">
+                        <h6 style="color: #718096; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem;">Filter by Stage:</h6>
+                        <div class="d-flex flex-wrap gap-2" id="stageFilters">
+                            <button class="filter-btn active" data-stage="all">
+                                <i class="fas fa-border-all me-2"></i>All Projects
+                            </button>
+                            <button class="filter-btn" data-stage="AON">
+                                <i class="fas fa-hourglass-start me-2"></i>AON Stage
+                            </button>
+                            <button class="filter-btn" data-stage="TOB">
+                                <i class="fas fa-tasks me-2"></i>TOB & TEC Stage
+                            </button>
+                            <button class="filter-btn" data-stage="ATP">
+                                <i class="fas fa-rocket me-2"></i>ATP Stage
+                            </button>
+                            <button class="filter-btn" data-stage="Completed">
+                                <i class="fas fa-check-circle me-2"></i>Completed
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-{% for p in projects %}
-<div style="display: flex;">
-    <div class="col-md-4">
-      <div class="card project-card shadow-sm mb-4" data-stage="{{ p.current_stage }}" style="border-radius: 15px;">
-        <div class="card-body">
-          <h5 class="card-title fw-bold">{{ p.project_name }}</h5>
-  
-          <div class="mb-2">
-            <span class="text-muted small">Cost:</span>
-            <span class="fw-semibold">₹{{ p.project_cost }}</span>
-          </div>
-  
-          <div class="mb-3">
-            <span class="text-muted small">Stage:</span>
-            <span class="fw-semibold">{{ p.current_stage }}</span>
-          </div>
-  
-          <!-- safe id fallback: if project_id missing, use loop.index -->
-          {% set pid = p.project_id|default(loop.index) %}
-  
-          <!-- Progress Bar (data-percent ensures safe rendering) -->
-          <div class="progress mb-2" style="height:12px; border-radius:12px; overflow:hidden;">
-            <div class="progress-bar"
-                 role="progressbar"
-                 aria-valuemin="0" aria-valuemax="100"
-                 data-pid="{{ pid }}"
-                 data-percent="{{ p.percent|int }}"
-                 id="progress-{{ pid }}">
-              {{ p.percent|int }}%
+                <!-- Projects Grid -->
+                <div class="projects-grid">
+                    {% for p in projects %}
+                        <div class="project-card {{ p.current_stage }}" data-stage="{{ p.current_stage }}">
+                            <div class="project-header">
+                                <h5 class="project-title">
+                                    <i class="fas fa-project-diagram"></i>
+                                    {{ p.project_name }}
+                                </h5>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="cost-badge">
+                                        <i class="fas fa-indian-rupee-sign"></i>
+                                        ₹{{ p.project_cost }}
+                                    </span>
+                                    <span class="stage-badge">
+                                        {{ p.current_stage }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-body">
+                                <div class="project-meta">
+                                    <div class="meta-item">
+                                        <i class="fas fa-box"></i>
+                                        <span>{{ p.project_items or 'No items specified' }}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-hashtag"></i>
+                                        <span>Qty: {{ p.quantity or 'N/A' }}</span>
+                                    </div>
+                                </div>
+
+                                {% if p.project_description %}
+                                <div class="mb-3" style="padding: 0.9rem; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
+                                    <p style="color: #718096; font-size: 0.8rem; margin-bottom: 0.4rem; font-weight: 600;">
+                                        <i class="fas fa-align-left me-1"></i> Description:
+                                    </p>
+                                    <p class="mb-0" style="color: #4a5568; font-size: 0.85rem; line-height: 1.5;">{{ p.project_description|truncate(100) }}</p>
+                                </div>
+                                {% endif %}
+
+                                <div class="progress-container">
+                                    <div class="progress-label">
+                                        <span>Progress</span>
+                                        <span class="fw-bold">{{ p.percent|int }}%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar"
+                                             role="progressbar"
+                                             aria-valuemin="0" aria-valuemax="100"
+                                             data-pid="{{ p.project_id|default(loop.index) }}"
+                                             data-percent="{{ p.percent|int }}"
+                                             id="progress-{{ p.project_id|default(loop.index) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    {% set pid = p.project_id|default(loop.index) %}
+                                    <button class="btn-view" onclick="openUpdateModal('{{ pid }}', '{{ p.current_stage }}')">
+                                        <i class="fas fa-edit me-2"></i>Update Stage
+                                    </button>
+                                    <button class="btn-update" onclick="viewProjectDetails('{{ pid }}')">
+                                        <i class="fas fa-eye me-2"></i>View Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <h4 class="mb-2">No Projects Found</h4>
+                            <p style="color: #718096;">Click "Add New Project" to create your first project</p>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-          </div>
-  
-          <button class="btn btn-warning btn-sm"
-                  onclick="openUpdateModal('{{ pid }}', '{{ p.current_stage }}')">
-            Update Stage
-          </button>
+
+            <!-- Floating Action Button -->
+            <button class="floating-add-btn pulse" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                <i class="fas fa-plus"></i>
+            </button>
+
+            <!-- Add Project Modal -->
+            <div class="modal fade" id="addProjectModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                Add New Project
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addProjectForm" class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Project Name *</label>
+                                    <input class="form-control" name="project_name" placeholder="Enter project name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Current Stage *</label>
+                                    <select class="form-select" name="current_stage" required>
+                                        <option value="">Select Stage</option>
+                                        <option value="AON">AON Stage</option>
+                                        <option value="TOB">TOB & TEC Stage</option>
+                                        <option value="ATP">ATP Stage</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Project Cost (₹) *</label>
+                                    <input class="form-control" name="project_cost" type="number" placeholder="Enter cost" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Items</label>
+                                    <input class="form-control" name="project_items" placeholder="e.g., Generators, Laptops">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Quantity</label>
+                                    <input class="form-control" name="quantity" type="number" placeholder="Enter quantity">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-control" name="project_description" rows="3" placeholder="Project description..."></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0;">Cancel</button>
+                            <button type="button" class="btn-advanced" onclick="addProject()">
+                                <i class="fas fa-save me-2"></i>Save Project
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Stage Modal -->
+            <div class="modal fade" id="updateStageModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                            <h5 class="modal-title">
+                                <i class="fas fa-sync-alt me-2"></i>
+                                Update Project Stage
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="edit_project_id">
+                            <div class="mb-3">
+                                <label class="form-label">New Stage</label>
+                                <select class="form-select" id="new_stage">
+                                    <option value="">Select New Stage</option>
+                                    <option value="AON">AON Stage</option>
+                                    <option value="TOB">TOB & TEC Stage</option>
+                                    <option value="ATP">ATP Stage</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0;">Cancel</button>
+                            <button type="button" class="btn-advanced" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);" onclick="updateStage()">
+                                <i class="fas fa-check me-2"></i>Update Stage
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
-</div>
-{% endfor %}
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-</div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Animate progress bars
+            document.querySelectorAll(".progress-bar[data-percent]").forEach(function(bar){
+                const pct = parseInt(bar.dataset.percent) || 0;
+                
+                // Set initial width to 0 for animation
+                bar.style.width = "0%";
+                
+                // Wait for next frame to start animation
+                setTimeout(() => {
+                    bar.style.width = pct + "%";
+                    bar.textContent = pct + "%";
 
-<!-- ---------------- ADD PROJECT MODAL ---------------- -->
-<div class="modal fade" id="addProjectModal">
-  <div class="modal-dialog">
-    <div class="modal-content">
+                    // Color coding based on percentage
+                    if (pct >= 100) {
+                        bar.style.background = "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)";
+                    } else if (pct >= 66) {
+                        bar.style.background = "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)";
+                    } else if (pct >= 33) {
+                        bar.style.background = "linear-gradient(135deg, #fa709a 0%, #fee140 100%)";
+                    } else {
+                        bar.style.background = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+                    }
+                }, 100);
+            });
 
-      <div class="modal-header bg-primary text-white">
-        <h5>Add New Project</h5>
-      </div>
+            // Filter functionality
+            document.querySelectorAll("#stageFilters button").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    // Update active state
+                    document.querySelectorAll("#stageFilters button").forEach(b => b.classList.remove("active"));
+                    this.classList.add("active");
 
-      <div class="modal-body">
+                    const stage = this.dataset.stage;
+                    const cards = document.querySelectorAll(".project-card");
 
-        <form id="addProjectForm">
-            <input class="form-control mb-2" name="project_name" placeholder="Project Name" required>
-            <input class="form-control mb-2" name="current_stage" placeholder="Current Stage" required>
-            <input class="form-control mb-2" name="project_cost" placeholder="Project Cost" required>
-            <input class="form-control mb-2" name="project_items" placeholder="Items (Generators, Laptops etc.)">
-            <input class="form-control mb-2" name="quantity" placeholder="Quantity">
-            <textarea class="form-control mb-2" name="project_description" placeholder="Description"></textarea>
-        </form>
-
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button class="btn btn-success" onclick="addProject()">Save</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
-<!-- ---------------- UPDATE STAGE MODAL ---------------- -->
-<div class="modal fade" id="updateStageModal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-
-      <div class="modal-header bg-warning text-dark">
-        <h5>Update Project Stage</h5>
-      </div>
-
-      <div class="modal-body">
-        <input type="hidden" id="edit_project_id">
-        <input class="form-control" id="new_stage" placeholder="Enter New Stage">
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button class="btn btn-success" onclick="updateStage()">Update</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-
-console.log("Pro");
-document.addEventListener("DOMContentLoaded", function () {
-  // set widths and color-code by percent or stage if you like
-  document.querySelectorAll(".progress-bar[data-percent]").forEach(function(bar){
-    const pct = parseInt(bar.dataset.percent) || 0;
-    bar.style.width = pct + "%";
-    bar.textContent = pct + "%";
-
-    // optional: colour by pct or by stage:
-    if (pct >= 100) {
-      bar.classList.add("bg-success");
-    } else if (pct >= 66) {
-      bar.classList.add("bg-info");
-    } else if (pct >= 33) {
-      bar.classList.add("bg-warning");
-    } else {
-      bar.classList.add("bg-secondary");
-    }
-  });
-});
-
-// ---------- ADD PROJECT ----------
-function addProject() {
-    $.post("/add_project", $("#addProjectForm").serialize(), function (res) {
-        if (res.status === "success") location.reload();
-    });
-}
-
-// ---------- OPEN UPDATE MODAL ----------
-function openUpdateModal(id, stage) {
-    $("#edit_project_id").val(id);
-    $("#new_stage").val(stage);
-    new bootstrap.Modal(document.getElementById("updateStageModal")).show();
-}
-
-// ---------- UPDATE STAGE ----------
-function updateStage() {
-    $.post("/update_stage", {
-        project_id: $("#edit_project_id").val(),
-        new_stage: $("#new_stage").val()
-    }, function(res) {
-        if (res.status === "success") location.reload();
-    });
-}
-
-document.querySelectorAll("#stageFilters button").forEach(btn => {
-    btn.addEventListener("click", function () {
-        // Remove active state
-        document.querySelectorAll("#stageFilters button").forEach(b => b.classList.remove("active"));
-        this.classList.add("active");
-
-        const stage = this.dataset.stage;
-        const cards = document.querySelectorAll(".project-card");
-
-        cards.forEach(card => {
-            const cardStage = card.dataset.stage;
-
-            if (stage === "all" || stage === cardStage) {
-                card.style.display = "";
-            } else if (stage === "Completed" && cardStage === "Completed") {
-                card.style.display = "";
-            } else {
-                card.style.display = "none";
-            }
+                    cards.forEach(card => {
+                        const cardStage = card.dataset.stage;
+                        
+                        if (stage === "all" || stage === cardStage) {
+                            card.style.display = "block";
+                            setTimeout(() => {
+                                card.style.opacity = "1";
+                                card.style.transform = "translateY(0)";
+                            }, 50);
+                        } else {
+                            card.style.opacity = "0";
+                            card.style.transform = "translateY(20px)";
+                            setTimeout(() => {
+                                card.style.display = "none";
+                            }, 300);
+                        }
+                    });
+                });
+            });
         });
-    });
-});
 
-</script>
+        function addProject() {
+            $.post("/add_project", $("#addProjectForm").serialize(), function (res) {
+                if (res.status === "success") {
+                    // Show success message before reload
+                    showNotification("Project added successfully!", "success");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification("Error adding project", "error");
+                }
+            });
+        }
 
+        function openUpdateModal(id, stage) {
+            $("#edit_project_id").val(id);
+            $("#new_stage").val(stage);
+            new bootstrap.Modal(document.getElementById("updateStageModal")).show();
+        }
+
+        function updateStage() {
+            const projectId = $("#edit_project_id").val();
+            const newStage = $("#new_stage").val();
+            
+            if (!newStage) {
+                showNotification("Please select a stage", "warning");
+                return;
+            }
+
+            $.post("/update_stage", {
+                project_id: projectId,
+                new_stage: newStage
+            }, function(res) {
+                if (res.status === "success") {
+                    showNotification("Stage updated successfully!", "success");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification("Error updating stage", "error");
+                }
+            });
+        }
+
+        function viewProjectDetails(projectId) {
+            // Implement view details functionality
+            showNotification("View details for project " + projectId, "info");
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                ${message}
+            `;
+            
+            // Add styles
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' : 
+                           type === 'error' ? 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)' :
+                           type === 'warning' ? 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' :
+                           'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+                z-index: 10000;
+                transform: translateX(150%);
+                transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                display: flex;
+                align-items: center;
+                font-weight: 500;
+                font-size: 0.9rem;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(150%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
 {% endblock %}
