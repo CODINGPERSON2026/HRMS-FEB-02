@@ -1,6 +1,14 @@
+<style>
+  .leave-modal-wide {
+    min-height: 40%;
+  }
+</style>
+
+
 <!-- Leave Requests Modal -->
 <div class="modal fade" id="leaveRequestsModal" tabindex="-1" aria-labelledby="leaveRequestsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-sm-down">
+
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="leaveRequestsModalLabel">Leave Requests</h5>
@@ -16,10 +24,10 @@
                 <th>Army Number</th>
                 <th>Leave Type</th>
                 <th>Days</th>
-                <th>Status</th>
-                <th>Remarks</th>
-                <th>Applied At</th>
-                <th>Actions</th> <!-- NEW COLUMN -->
+                <!-- <th>Status</th> -->
+                <!-- <th>Remarks</th> -->
+                <!-- <th>Applied At</th> -->
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="leaveRequestsTableBody"></tbody>
@@ -29,4 +37,190 @@
       </div>
     </div>
   </div>
+<!-- View Leave Request Modal -->
+<div class="modal fade" id="viewLeaveModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog leave-modal-wide modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content shadow-lg">
+      
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-calendar-check me-2"></i> Leave Request Details
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div id="viewLeaveSpinner" class="text-center my-4">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <div id="viewLeaveContent" class="d-none">
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="fw-bold">Army Number</label>
+              <div class="form-control bg-light" id="v_army_number"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="fw-bold">Name</label>
+              <div class="form-control bg-light" id="name"></div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="fw-bold">Total Days Requested</label>
+              <div class="form-control bg-light" id="v_leave_days"></div>
+            </div>
+
+
+            <div class="col-md-6">
+              <label class="fw-bold">Leave Type</label>
+              <div class="form-control bg-light" id="v_leave_type"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="fw-bold" id="lable-id">Available Days</label>
+              <div class="form-control bg-light" id="bucket_leave_days"></div>
+            </div>
+           
+            <div class="col-md-6">
+              <label class="fw-bold">From Date</label>
+              <div class="form-control bg-light" id="v_from_date"></div>
+            </div>
+
+          
+
+            <div class="col-12">
+              <label class="fw-bold">Reason</label>
+              <div class="form-control bg-light" style="min-height: 80px" id="v_reason"></div>
+            </div>
+
+            <div class="col-12">
+              <label class="fw-bold">Status</label>
+              <span class="badge fs-6" id="v_status"></span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success">Forward</button>
+        <button id="reject-button" onclick="rejected(this)"   class="btn btn-danger">Reject</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+
+  function rejected(btn) {
+  const leaveId = btn.dataset.unique_id;
+  alert(`${leaveId}`);
+
+  if (!leaveId) {
+    alert("Leave ID missing");
+    return;
+  }
+}
+
+  
+
+
+
+  async function viewLeaveRequest(id) {
+    const modal = new bootstrap.Modal(document.getElementById("viewLeaveModal"));
+    modal.show();
+
+    const spinner = document.getElementById("viewLeaveSpinner");
+    const content = document.getElementById("viewLeaveContent");
+
+    spinner.classList.remove("d-none");
+    content.classList.add("d-none");
+
+    try {
+      const res = await fetch(`/apply_leave/get_leave_request/${id}`);
+      const result = await res.json();
+      const data = result.data;
+      console.log(id,'this is id')
+      document.getElementById("v_army_number").innerText = data.army_number;
+      document.getElementById("reject-button").dataset.unique_id = id;
+      
+      document.getElementById("v_leave_type").innerText = data.leave_type;
+      document.getElementById("lable-id").innerText = `${data.leave_type} Days Available`;
+      document.getElementById("v_leave_days").innerText = data.leave_days;
+      document.getElementById("v_from_date").innerText = data.created_at;
+      
+      document.getElementById("v_reason").innerText = data.leave_reason;
+      document.getElementById("name").innerText = data.name;
+      document.getElementById("bucket_leave_days").innerText = data.days_left;
+
+      const statusBadge = document.getElementById("v_status");
+      statusBadge.innerText = data.request_status;
+
+      statusBadge.className = "badge fs-6 " +
+        (data.status === "Pending" ? "bg-warning" :
+         data.status === "Approved" ? "bg-success" :
+         "bg-danger");
+
+      spinner.classList.add("d-none");
+      content.classList.remove("d-none");
+
+    } catch (err) {
+      console.error(err);
+      spinner.innerHTML = `<p class="text-danger fw-bold">Failed to load details</p>`;
+    }
+  }
+</script>
+
+  <script>
+    document.getElementById("leaveRequestsBtn")?.addEventListener("click", async () => {
+      const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
+      modal.show();
+      await loadLeaveRequests();
+    });
+    
+    async function loadLeaveRequests() {
+      const spinner = document.getElementById("leaveRequestsSpinner");
+      const table = document.getElementById("leaveRequestsTable");
+      const tbody = document.getElementById("leaveRequestsTableBody");
+    
+      spinner.classList.remove("d-none");
+      table.classList.add("d-none");
+      tbody.innerHTML = "";
+    
+      try {
+        const res = await fetch("/apply_leave/get_leave_requests");
+        const result = await res.json();
+    
+        result.data.forEach(row => {
+    
+          
+    
+          let actions = `
+          <button class="btn btn-primary btn-sm"
+            onclick="viewLeaveRequest(${row.id})">
+            View
+          </button>
+        `;
+    
+          tbody.innerHTML += `
+            <tr>
+              <td>${row.army_number}</td>
+              <td>${row.leave_type}</td>
+              <td>${row.leave_days}</td>
+              <td>${actions}</td>
+            </tr>
+          `;
+        });
+    
+        spinner.classList.add("d-none");
+        table.classList.remove("d-none");
+    
+      } catch (err) {
+        console.error(err);
+        spinner.innerHTML = `<p class="text-danger fw-bold mt-3">Failed to load leave requests</p>`;
+      }
+    }
+    </script>
+    
   

@@ -68,7 +68,7 @@
     </div>
   </div>
 </div>
-
+{% include 'modals/success-modal/modal.html'%}
 <script>
 let selectedPersonnel = new Set();
 const dropdown = document.getElementById('locationDropdown');
@@ -197,7 +197,11 @@ document.getElementById('assignBtn').addEventListener('click', async () => {
     });
 
     const data = await res.json();
-    alert(data.message || data.error);
-    location.reload();
+    
+    showStatusModal(`Personnel ${data.message}`, "Green", 2500);
+    setTimeout(()=>{
+      location.reload();
+
+    },2500)
 });
 </script>

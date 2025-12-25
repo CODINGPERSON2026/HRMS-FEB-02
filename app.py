@@ -52,10 +52,9 @@ def admin_login():
 
 @app.route("/logout")
 def logout():
-    resp = redirect(url_for("admin_login"))  # change to your login route name
-    resp.set_cookie("token", "", expires=0)  # delete cookie
+    resp = redirect(url_for("admin_login"))
+    resp.set_cookie("token", "", expires=0)
     return resp
-
 
 
 @app.route('/')
@@ -73,7 +72,6 @@ def mt():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # 👉 If form submitted
     if request.method == 'POST':
         vehicle_no = request.form['vehicle_no']
         vtype = request.form['type']
@@ -81,7 +79,7 @@ def mt():
         detailment = request.form['detailment']
         dist_travelled = request.form['dist_travelled']
         quantity = request.form['quantity']
-        bullet_proof = request.form.get('bullet_proof', 'N')  # default N
+        bullet_proof = request.form.get('bullet_proof', 'N')
 
         insert_query = """
             INSERT INTO Vehicle_detail 
@@ -93,15 +91,13 @@ def mt():
 
         cursor.close()
         conn.close()
-        return redirect(url_for('mt'))  # reload page after add
+        return redirect(url_for('mt'))
 
-    # 👉 Fetch vehicles for display
     cursor.execute("SELECT * FROM Vehicle_detail")
     vehicles = cursor.fetchall()
     cursor.close()
     conn.close()
 
-    # Sample data for now
     drivers = [
         {"name": "Rajesh Kumar", "license": "MH14A12345", "hill_test": True, "vehicle": "Jeep"},
         {"name": "Amit Verma", "license": "MH12B67890", "hill_test": False, "vehicle": "Truck"},
@@ -117,15 +113,12 @@ def mt():
     
 @app.route('/personal_info')
 def personal_info():
-    print("in this app route")
     return render_template('personalInfoView.html')
 
 @app.route('/personal/create', methods=['GET', 'POST'])
 def create_personal():
     if request.method == 'POST':
         data = request.form.to_dict()
-        print(data)  # For now, simulate saving to DB
-        #return redirect(url_for('personal_info'))
     return render_template('personalInfoView.html', form_view='create')
 
 @app.route('/personal/update')
@@ -141,7 +134,6 @@ def search_person():
     query = request.args.get('query', '')
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    print(query)
 
     cursor.execute("""
         SELECT 
@@ -158,12 +150,10 @@ def search_person():
     """, (query,))
 
     results = cursor.fetchall()
-    print(results)
     conn.close()
     return jsonify(results)
 
 
-# Fetch dropdown locations
 @app.route('/get_locations')
 def get_locations():
     conn = get_db_connection()
@@ -179,7 +169,6 @@ def get_dets():
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT COUNT(*) AS count from personnel where detachment_status = 1")
     result = cursor.fetchone()
-    print(result['count'])
     cursor.close()
     conn.close()
     return jsonify({'count': result['count']})
@@ -198,13 +187,10 @@ def interview():
     cursor.execute(query)
     result = cursor.fetchone()
     pending_count = result["pending_count"]
-    print(pending_count)
     total_count = result["total_count"]
-    print(total_count)
     percentage = 0
     if total_count > 0:
         percentage = pending_count/total_count * 100
-        print(percentage)
     cursor.close()
     conn.close()
     return jsonify({'result':result,'percentage':round(percentage, 2)})
@@ -233,7 +219,6 @@ def get_pending_interview_list():
         return jsonify({"status": "success", "data": data})
 
     except Exception as e:
-        print("Error fetching pending interview list:", e)
         return jsonify({"status": "error", "message": "Server error"}), 500
 
     finally:
@@ -266,12 +251,10 @@ def assign_personnel():
         if not status:
             return jsonify({"error": f"{pid} not found"}), 404
 
-# Convert values safely
         det_flag = int(status['detachment_status']) if status['detachment_status'] else 0
         post_flag = int(status['posting_status']) if status['posting_status'] else 0
         td_flag = int(status['td_status']) if status['td_status'] else 0
 
-# Prevent duplicate assignment
         if action_type == "det" and det_flag == 1:
             return jsonify({"error": f"{pid} is already in Detachment"}), 400
 
@@ -281,10 +264,6 @@ def assign_personnel():
         if action_type == "td" and td_flag == 1:
             return jsonify({"error": f"{pid} is already on TD"}), 400
 
-
-        # -----------------------------
-        # STEP 2: IF VALID → APPLY ACTION TO ALL
-        # -----------------------------
         for pid in personnel_ids:
 
             if action_type == "det":
@@ -323,6 +302,31 @@ def assign_personnel():
         conn.close()
 
 
+@app.route("/get_personnel_details/<army_number>")
+def get_personnel_details(army_number):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        cursor.execute("""
+            SELECT company 
+            FROM personnel 
+            WHERE army_number = %s
+        """, (army_number,))
+        
+        result = cursor.fetchone()
+        
+        if result:
+            return jsonify(result)
+        else:
+            return jsonify({"company": "N/A"}), 404
+            
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 
 @app.route("/get_sales_data")
@@ -364,8 +368,6 @@ def get_sales_data():
         return jsonify({"error": str(e)}), 500
     
 
-# Leave Application
-
 @app.route('/apply_leave')
 def apply_leave():
     return render_template('apply_leave.html')
@@ -378,13 +380,11 @@ def daily_running():
 @app.route('/get_vehicle_details', methods=['POST'])
 def get_vehicle_details():
     vehicle_no = request.form.get('vehicle_no')
-    print(vehicle_no)
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("SELECT type, class FROM vehicle_detail WHERE vehicle_no=%s", (vehicle_no,))
     result = cursor.fetchone()
-    print(result)
     cursor.close()
     conn.close()
 
@@ -417,8 +417,6 @@ def submit_running():
     return jsonify({"message": "Saved successfully"})
 
 
-#boards code
-
 @app.route('/board_details')
 def board_details():
     return render_template('boo/board_details.html')
@@ -435,9 +433,6 @@ def get_boards():
     return jsonify(boards)
 
 
-# -------------------------
-# ADD BOARD
-# -------------------------
 @app.route("/add_board", methods=["POST"])
 def add_board():
     data = request.form
@@ -466,9 +461,6 @@ def add_board():
     return jsonify({"status": "success"})
 
 
-# -------------------------
-# DELETE BOARD
-# -------------------------
 @app.route("/delete_board/<int:board_id>", methods=["DELETE"])
 def delete_board(board_id):
     conn = get_db_connection()
@@ -479,9 +471,6 @@ def delete_board(board_id):
     return jsonify({"status": "success"})
 
 
-# -------------------------
-# EDIT BOARD
-# -------------------------
 @app.route("/edit_board/<int:board_id>", methods=["POST"])
 def edit_board(board_id):
     data = request.form
@@ -512,17 +501,12 @@ def edit_board(board_id):
     return jsonify({"status": "success"})
 
 
-# --------------------------------------------------
-# MEMBERS SECTION
-# --------------------------------------------------
-
 @app.route("/get_board_members/<int:order_no>")
 def get_board_members(order_no):
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT * FROM board_members WHERE order_no=%s", (order_no,))
     members = cur.fetchall()
-    print("membersss", members)
     cur.close()
     return jsonify(members)
 
@@ -530,7 +514,6 @@ def get_board_members(order_no):
 @app.route("/add_member", methods=["POST"])
 def add_member():
     data = request.form
-    print("Show me",data.get("board_id"))
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
@@ -570,7 +553,10 @@ def edit_member(member_id):
 
     return jsonify({"status": "success"})
 
-# Mark Sensitive code
+
+# ===============================================
+# SENSITIVE PERSONNEL MANAGEMENT - FIXED
+# ===============================================
 
 @app.route("/mark_personnel", methods=["GET"])
 def mark_personnel():
@@ -578,14 +564,13 @@ def mark_personnel():
     cursor = conn.cursor()   
     cursor.execute("""
     SELECT s.id, s.army_number, s.reason, s.marked_on, 
-            p.name, p.rank
+           p.name, p.rank, p.company
     FROM sensitive_marking s
     JOIN personnel p ON s.army_number = p.army_number
     ORDER BY s.marked_on DESC
     """)
     rows = cursor.fetchall()
 
-    # Structure data
     sensitive_list = []
     for r in rows:
         sensitive_list.append({
@@ -594,73 +579,134 @@ def mark_personnel():
             "reason": r[2],
             "marked_on": r[3],
             "name": r[4],
-            "rank": r[5]
+            "rank": r[5],
+            "company": r[6]
         })
-    return render_template("sensitive_indl/mark_personnel.html", sensitive_list=sensitive_list)
-
-# ---- AJAX Search Personnel ----
-@app.route("/search_personnel", methods=["POST"])
-def search_personnel():
-    name = request.form.get("name", "").strip()
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    query = "SELECT army_number, name, `rank` FROM personnel WHERE name LIKE %s"
-    cursor.execute(query, ("%" + name + "%",))
-    results = cursor.fetchall()
-
+    
     cursor.close()
     conn.close()
+    
+    # Prevent browser caching
+    response = make_response(render_template("sensitive_indl/mark_personnel.html", sensitive_list=sensitive_list))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
-    return jsonify(results)
 
-# ---- Mark Sensitive ----
 @app.route("/mark_sensitive", methods=["POST"])
 def mark_sensitive():
     army_number = request.form.get("army_number")
     reason = request.form.get("reason")
-    try :
-        if not army_number or not reason:
-            return "Missing data", 400
+    
+    if not army_number or not reason:
+        return "Missing data", 400
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-        query = """INSERT INTO sensitive_marking (army_number, reason, marked_on)
-                VALUES (%s, %s, %s)"""
-
-        cursor.execute(query, (army_number, reason, datetime.now()))
+    try:
+        cursor.execute("""INSERT INTO sensitive_marking (army_number, reason, marked_on)
+                          VALUES (%s, %s, %s)""", (army_number, reason, datetime.now()))
         conn.commit()
 
+        # Re-fetch updated list
         cursor.execute("""
-        SELECT s.id, s.army_number, s.reason, s.marked_on, 
-               p.name, p.rank
-        FROM sensitive_marking s
-        JOIN personnel p ON s.army_number = p.army_number
-        ORDER BY s.marked_on DESC
+            SELECT s.id, s.army_number, s.reason, s.marked_on, 
+                   p.name, p.rank, p.company
+            FROM sensitive_marking s
+            JOIN personnel p ON s.army_number = p.army_number
+            ORDER BY s.marked_on DESC
         """)
         rows = cursor.fetchall()
 
-        # Structure data
         sensitive_list = []
         for r in rows:
             sensitive_list.append({
-                "id": r[0],
-                "army_number": r[1],
-                "reason": r[2],
-                "marked_on": r[3],
-                "name": r[4],
-                "rank": r[5]
+                "id": r[0], "army_number": r[1], "reason": r[2], "marked_on": r[3],
+                "name": r[4], "rank": r[5], "company": r[6]
             })
 
         return render_template("sensitive_indl/mark_personnel.html", sensitive_list=sensitive_list)
-    except Exception as e:
-        print("ERROR:", e)
-        return jsonify({"error": str(e)})
-    
 
-# parade state code
+    except Exception as e:
+        conn.rollback()
+        print("ERROR in mark_sensitive:", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/update_sensitive_reason", methods=["POST"])
+def update_sensitive_reason():
+    army_number = request.form.get("army_number")
+    reason = request.form.get("reason")
+    
+    if not army_number or not reason:
+        return jsonify({"success": False, "error": "Missing data"}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("UPDATE sensitive_marking SET reason = %s WHERE army_number = %s", (reason, army_number))
+        conn.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        conn.rollback()
+        print("Error:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/remove_sensitive", methods=["POST"])
+def remove_sensitive():
+    army_number = request.form.get("army_number")
+    
+    if not army_number:
+        return "Missing data", 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("DELETE FROM sensitive_marking WHERE army_number = %s", (army_number,))
+        conn.commit()
+
+        # Re-fetch fresh list and re-render full page
+        cursor.execute("""
+            SELECT s.id, s.army_number, s.reason, s.marked_on, 
+                   p.name, p.rank, p.company
+            FROM sensitive_marking s
+            JOIN personnel p ON s.army_number = p.army_number
+            ORDER BY s.marked_on DESC
+        """)
+        rows = cursor.fetchall()
+
+        sensitive_list = []
+        for r in rows:
+            sensitive_list.append({
+                "id": r[0], "army_number": r[1], "reason": r[2], "marked_on": r[3],
+                "name": r[4], "rank": r[5], "company": r[6]
+            })
+
+        return render_template("sensitive_indl/mark_personnel.html", sensitive_list=sensitive_list)
+
+    except Exception as e:
+        conn.rollback()
+        print("ERROR in remove_sensitive:", e)
+        return "Server error", 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ===============================================
+# PARADE STATE
+# ===============================================
 
 @app.route("/leave_status")
 def leave_status():
@@ -699,14 +745,11 @@ def company_status():
     """
 
     try:
-        # 1) Overall counts (no WHERE)
         cur.execute(rank_sql)
         overall = cur.fetchone() or {"other_rank_count": 0, "jco_count": 0, "officer_count": 0}
-        # Add a label so frontend knows this is overall (optional)
         overall["company"] = "15 XYZ"
         data.append(overall)
 
-        # 2) Company-wise counts
         companies = ["1 company", "2 company", "3 company", "4 company"]
         sql_with_where = rank_sql + " WHERE company = %s"
 
@@ -758,11 +801,9 @@ def index():
     return jsonify(data)
 
 
-
-
-
-
-# // ************************ ALARM FUNCTIONALITY//**************************
+# ===============================================
+# ALARM FUNCTIONALITY
+# ===============================================
 
 @app.route('/api/assigned_alarm')
 def assigned_alarm():
@@ -793,7 +834,6 @@ def assigned_alarm():
 
         cursor.execute(query)
         rows = cursor.fetchall()
-        print(rows,"these are rowaasjdfjadsjfjsdfskl sdfkljadslkfjlsfjdslfjl fdslkjlfj ")
 
         return jsonify({"status": "success", "rows": rows})
 
@@ -805,6 +845,10 @@ def assigned_alarm():
         if conn:
             conn.close()
 
+
+# ===============================================
+# PROJECTS
+# ===============================================
 
 @app.route("/projects")
 def home():
@@ -825,10 +869,8 @@ def home():
         cur.execute("SELECT * FROM projects")
 
     projects = cur.fetchall()
-    print("projects", projects)
     conn.close()
 
-    # Add calculated percentage
     for p in projects:
         p["percent"] = stage_to_percent(p["current_stage"])
 
@@ -846,7 +888,6 @@ def stage_to_percent(stage):
     return 0
 
 
-# ---------------- ADD PROJECT ----------------
 @app.route("/add_project", methods=["POST"])
 def add_project():
     data = request.form
@@ -867,7 +908,7 @@ def add_project():
     conn.close()
     return jsonify({"status": "success"})
 
-# ---------------- UPDATE STAGE ----------------
+
 @app.route("/update_stage", methods=["POST"])
 def update_stage():
     conn = get_db_connection()
@@ -880,7 +921,6 @@ def update_stage():
     conn.commit()
     conn.close()
     return jsonify({"status": "success"})
-
 
 
 @app.route("/search_officer")
@@ -904,8 +944,6 @@ def search_officer():
     return jsonify(results)
 
 
-
-
 @app.route('/get_man_power')
 def manPower():
     conn = get_db_connection()
@@ -915,7 +953,6 @@ def manPower():
         cursor.execute(query,)
         total_count = cursor.fetchone()
         count = total_count['total_count']
-        print(count,"this is count")
         return jsonify({'count':count}),200
     except Exception as e:
         print('There was an exception',str(e))
@@ -946,7 +983,6 @@ def get_parade_count():
         company_name = row['company']
         count = row['count']
 
-        # Extract company number (e.g., "1 Company" -> 1)
         company_number = ''.join(filter(str.isdigit, company_name))
         company_key = f"c{company_number}"
 
@@ -958,7 +994,24 @@ def get_parade_count():
     return jsonify(formatted)
 
 
+@app.route('/api/unfit-graph')
+def line_unfit_graph():
+    company = request.args.get('company', 'All')
+    print('the value is',company)
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT month, unfit_count
+        FROM monthly_medical_status
+        WHERE year = YEAR(CURDATE())
+          AND unit = %s
+        ORDER BY month
+    """, (company,))
+    result = cursor.fetchall()
+    return jsonify(result)
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=1000)
-
-

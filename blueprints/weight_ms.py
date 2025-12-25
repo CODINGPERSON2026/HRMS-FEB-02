@@ -310,6 +310,7 @@ def add_user():
 
 @weight_ms.route('/api/summary')
 def api_summary():
+    auto_save_monthly_unfit()
     company = request.args.get('company', 'All')
     data = compute_authorization(company)
     total = len(data)
@@ -350,7 +351,7 @@ def api_companies():
 @weight_ms.route('/')
 def dashboard():
     user = require_login()
-    print(user)
+    
     if not user:
         return redirect(url_for('admin_login'))
     return render_template('weight_system/home.html')
@@ -411,7 +412,7 @@ def api_status_summary():
 def api_status_data():
     status_type = request.args.get('status_type')
     company = request.args.get('company', 'All')
-    print("incoming status status",status_type)
+    #"incoming status status",status_type)
     
     if not status_type:
         return jsonify({'error': 'status_type parameter is required'}), 400
@@ -492,7 +493,7 @@ def api_status_data():
                 "weight_deviation_percent": weight_deviation_percent,
                 "weight_deviation_kg": weight_deviation_kg
             })
-        print(results,"these are resutls")
+        #results,"these are resutls")
         return jsonify({
             "count": len(results),
             "rows": results,
@@ -583,7 +584,7 @@ def api_bar_graph_data():
 
             cursor.execute(query, params)
             results = cursor.fetchall()
-            print(results,"these are results")
+            #results,"these are results")
 
             jco_temp = jco_perm = or_temp = or_perm = 0
 
@@ -604,7 +605,7 @@ def api_bar_graph_data():
                     elif cat_type in ('permanent', 'perm'):
                         or_perm += cnt
 
-            print(jco_temp, jco_perm, or_temp, or_perm)
+            #jco_temp, jco_perm, or_temp, or_perm)
 
             jcoSafeOrCategory = {
                 "labels": ["JCO Temporary", "JCO Permanent", "OR Temporary", "OR Permanent"],
@@ -613,8 +614,8 @@ def api_bar_graph_data():
             }
 
 
-        print(total_safe_count, total_category_count, "→ bar graph")
-        print(jco_status_count, or_status_count, "→ donut graph (fit)")
+        #total_safe_count, total_category_count, "→ bar graph")
+        #jco_status_count, or_status_count, "→ donut graph (fit)")
 
         return jsonify({
             "fitUnfit": {
@@ -721,4 +722,54 @@ def update_user():
     finally:
         cursor.close()
         connection.close()
+@weight_ms.route('/api/unfit-graph')
+def unfit_graph():
+    company = request.args.get('company', 'ALL')
 
+    cursor = get_db_connection().cursor(dictionary=True)
+    cursor.execute("""
+        SELECT month, unfit_count
+        FROM monthly_medical_status
+        WHERE year = YEAR(CURDATE())
+          AND unit = %s
+        ORDER BY month
+    """, (company,))
+
+    return jsonify(cursor.fetchall())
+
+COMPANIES = [
+    "All",
+    "1 Company",
+    "2 Company",
+    "3 Company",
+    "4 Company"
+]
+
+def auto_save_monthly_unfit():
+    print('***************************************************')
+    now = datetime.now()
+    year = now.year
+    month = now.month
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    for company in COMPANIES:
+        # Check if already saved
+        cursor.execute("""
+            SELECT id FROM monthly_medical_status
+            WHERE year=%s AND month=%s AND unit=%s
+        """, (year, month, company))
+
+        if cursor.fetchone():
+            continue
+
+        # Compute official count
+        data = compute_authorization(company)
+        unFit = sum(1 for d in data if d['status'] == "UnFit")
+        print("THIS IS UNFIT COUNT",unFit)
+
+        cursor.execute("""
+            INSERT INTO monthly_medical_status (year, month, unit, unfit_count)
+            VALUES (%s, %s, %s, %s)
+        """, (year, month, company, unFit))
+
+    
