@@ -5,252 +5,313 @@
 <head>
     <title>Mark Sensitive Personnel</title>
 
-    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body {
-            background: #f5f6fa;
-            font-family: "Segoe UI", sans-serif;
+        body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .container { padding-left: 12rem; padding-top: 1.5rem; padding-bottom: 2rem; }
+
+        .page-header {
+            background: white; padding: 20px 25px; border-radius: 8px; margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid #dc3545;
+        }
+        .page-header h2 { font-size: 1.5rem; font-weight: 600; color: #2c3e50; margin: 0; }
+        .page-header .subtitle { font-size: 0.875rem; color: #6c757d; margin-top: 5px; }
+
+        .card { border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; background: white; }
+        .card-header-custom { padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-weight: 600; font-size: 0.95rem; color: #495057; }
+
+        .table { font-size: 0.9rem; margin: 0; }
+        .table thead th { background: #f8f9fa; color: #495057; font-weight: 600; font-size: 0.85rem; border-bottom: 2px solid #dee2e6; padding: 12px; white-space: nowrap; }
+        .table tbody td { padding: 12px; vertical-align: middle; }
+
+        .action-btn { padding: 5px 12px; border-radius: 4px; font-size: 0.8rem; border: none; margin: 0 2px; }
+        .btn-view { background: #667eea; color: white; }
+        .btn-view:hover { background: #5568d3; }
+        .btn-edit { background: #ffc107; color: #212529; }
+        .btn-edit:hover { background: #e0a800; }
+        .btn-remove { background: #dc3545; color: white; }
+        .btn-remove:hover { background: #c82333; }
+
+        .personnel-photo-large { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 2px solid #e9ecef; }
+        .modal-name { font-size: 1.4rem; font-weight: 600; color: #2c3e50; margin-top: 15px; }
+        .modal-rank { font-size: 1rem; color: #6c757d; margin-top: 5px; }
+
+        .detail-row { display: flex; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { width: 35%; font-weight: 600; font-size: 0.875rem; color: #495057; }
+        .detail-value { width: 65%; font-size: 0.9rem; color: #212529; }
+
+        .reason-box {
+            background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 3px solid #dc3545;
+            max-height: 180px; overflow-y: auto; line-height: 1.6; font-size: 0.9rem; color: #495057;
         }
 
-        .search-card, .mark-card {
-            border-radius: 15px;
-        }
-
-        table tbody tr:hover {
-            background-color: #f1f1f1;
-            cursor: pointer;
-        }
-
-        .selected-row {
-            background-color: #d0ebff !important;
-        }
-
-        .btn-primary {
-            border-radius: 30px;
-            padding: 8px 25px;
-        }
-
-        .btn-success {
-            border-radius: 30px;
-        }
-
-        textarea {
-            border-radius: 10px !important;
-        }
-
-        .container {
-            padding-left: 12rem;
-        }
-        .sensitive-card .card {
-            border-left: 6px solid #d9534f;
-            border-radius: 10px;
-            padding: 12px;
-            transition: 0.2s;
-        }
-
-        .sensitive-card .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-        }
-
-        .alert-badge {
-            background: #d9534f;
-            color: #fff;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 700;
-            display: inline-block;
-            margin-bottom: 4px;
-        }
-
-        .card-img-top {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-
+        @media (max-width: 768px) { .container { padding-left: 15px; padding-right: 15px; } }
     </style>
 </head>
 <body>
 
 <div class="container">
 
-    <h2 class="text-center mb-4 fw-bold">🔐 Mark Personnel as Sensitive</h2>
+    <div class="page-header">
+        <h2><i class="bi bi-shield-exclamation me-2"></i>Sensitive Personnel Management</h2>
+        <p class="subtitle mb-0">Manage and track classified personnel records</p>
+    </div>
 
-    <!-- Search Panel -->
-    <div class="card shadow search-card p-4">
-        <div class="row align-items-center">
-            <div class="col-md-9">
-                <label class="form-label fw-semibold">Search Personnel by Name</label>
-                <div class="input-group">
-                    <span class="input-group-text">🔍</span>
-                    <input type="text" id="search_name" class="form-control" placeholder="Enter name">
+    <div class="card">
+        <div class="card-header-custom"><i class="bi bi-search me-2"></i>Search Personnel</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-9">
+                    <label class="form-label">Personnel Name</label>
+                    <input type="text" id="search_name" class="form-control" placeholder="Enter name...">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button id="searchBtn" class="btn btn-primary w-100"><i class="bi bi-search me-1"></i>Search</button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="col-md-3 mt-3 mt-md-0 text-end">
-                <button id="searchBtn" class="btn btn-primary">Search</button>
+    <div id="resultsSection" class="card" style="display:none;">
+        <div class="card-header-custom"><i class="bi bi-list-check me-2"></i>Search Results</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table mb-0" id="resultTable">
+                    <thead><tr><th width="10%">Select</th><th>Name</th><th>Rank</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Results -->
-    <div id="resultsSection" class="mt-4" style="display:none;">
-        <div class="card shadow p-3">
-            <h5 class="fw-bold mb-3">Search Results</h5>
-
-            <table class="table table-hover table-bordered" id="resultTable">
-                <thead class="table-light">
-                    <tr>
-                        <th>Select</th>
-                        <th>Name</th>
-                        <th>rank</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+    <div class="card">
+        <div class="card-header-custom"><i class="bi bi-pencil-square me-2"></i>Mark as Sensitive</div>
+        <div class="card-body">
+            <form id="markForm" action="/mark_sensitive" method="POST">
+                <input type="hidden" name="army_number" id="army_number">
+                <label class="form-label">Reason for Classification</label>
+                <textarea class="form-control" name="reason" rows="4" required placeholder="Enter reason..."></textarea>
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-success"><i class="bi bi-shield-check me-1"></i>Mark Sensitive</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Mark Sensitive -->
-    <div class="card shadow mark-card p-4 mt-4">
-        <form id="markForm" action="/mark_sensitive" method="POST">
-            <input type="hidden" name="army_number" id="army_number">
-
-            <h5 class="fw-bold">Reason for Marking Sensitive</h5>
-            <textarea class="form-control mt-2" name="reason" rows="3" required placeholder="Enter reason..."></textarea>
-
-            <div class="text-end mt-3">
-                <button type="submit" class="btn btn-success">Mark Sensitive</button>
+    <div class="card">
+        <div class="d-flex justify-content-between align-items-center p-3 bg-light border-bottom">
+            <h5 class="mb-0"><i class="bi bi-shield-fill-exclamation me-2"></i>Classified Personnel</h5>
+            <select id="filterCount" class="form-select w-auto">
+                <option value="5">Show 5</option>
+                <option value="10" selected>Show 10</option>
+                <option value="25">Show 25</option>
+                <option value="50">Show 50</option>
+                <option value="all">Show All</option>
+            </select>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th width="20%">Name</th>
+                            <th width="15%">Army No.</th>
+                            <th width="12%">Rank</th>
+                            <th width="12%">Company</th>
+                            <th width="23%" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in sensitive_list %}
+                        <tr class="sensitive-row">
+                            <td><strong>{{ s.name }}</strong></td>
+                            <td><code>{{ s.army_number }}</code></td>
+                            <td>{{ s.rank }}</td>
+                            <td>{{ s.company if s.company else 'N/A' }}</td>
+                            <td class="text-center">
+                                <button class="btn action-btn btn-view"
+                                        onclick="showPersonnelDetails('{{ s.army_number }}', '{{ s.name }}', '{{ s.rank }}', '{{ s.company if s.company else "N/A" }}', '{{ s.reason | replace("'", "\\'") | replace('"', '&quot;') | replace("\n", "\\n") }}', '{{ s.marked_on }}')">
+                                    <i class="bi bi-eye"></i> View
+                                </button>
+                                <button class="btn action-btn btn-edit"
+                                        onclick="editPersonnel('{{ s.army_number }}', '{{ s.reason | replace("'", "\\'") | replace('"', '&quot;') | replace("\n", "\\n") }}')">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </button>
+                                <button class="btn action-btn btn-remove"
+                                        onclick="removePersonnel('{{ s.army_number }}', '{{ s.name }}')">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        </form>
-    </div>
-
-    <div class="mt-4">
-
-    <h3 class="fw-bold mb-3">Recently Marked Sensitive Personnel</h3>
-
-    <!-- Filter Dropdown -->
-    <div class="d-flex justify-content-end mb-3">
-        <select id="filterCount" class="form-select w-auto">
-            <option value="5">Show 5</option>
-            <option value="10">Show 10</option>
-            <option value="25">Show 25</option>
-            <option value="50">Show 50</option>
-        </select>
-    </div>
-
-    <!-- Container for cards -->
-     
-    <div id="sensitiveContainer" class="row gy-3">
-        {% for s in sensitive_list %}
-        <div class="col-md-3 mb-3 sensitive-card">
-        <div class="card shadow-sm">
-
-            <span class="alert-badge">SENSITIVE</span>
-
-            <img src="/static/photos/{{ s.army_number }}.jpeg"
-                class="card-img-top"
-                onerror="this.src='/static/photos/default.jpeg';">
-
-            <h6 class="fw-bold mt-2">{{ s.name }} ({{ s.rank }})</h6>
-
-            <p class="m-0"><small>Army No: <b>{{ s.army_number }}</b></small></p>
-            <p class="m-0"><small>Reason: <b>{{ s.reason }}</b></small></p>
         </div>
-       </div>
-        {% endfor %}
     </div>
 </div>
 
+<!-- View Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-shield-fill-exclamation me-2"></i>Sensitive Personnel Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <img id="viewPhoto" src="/static/photos/default.jpeg" alt="Personnel Photo" class="personnel-photo-large">
+                    <div class="modal-name" id="viewName">-</div>
+                    <div class="modal-rank" id="viewRank">-</div>
+                </div>
 
+                <div class="detail-row"><div class="detail-label">Army Number</div><div class="detail-value" id="viewArmyNumber">-</div></div>
+                <div class="detail-row"><div class="detail-label">Company</div><div class="detail-value" id="viewCompany">-</div></div>
+                <div class="detail-row"><div class="detail-label">Marked On</div><div class="detail-value" id="viewMarkedOn">-</div></div>
 
+                <div class="mt-4">
+                    <label class="detail-label mb-2">Classification Reason</label>
+                    <div class="reason-box" id="viewReason">-</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Classification Reason</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editArmyNumber">
+                    <label class="form-label">Reason for Classification</label>
+                    <textarea class="form-control" id="editReason" rows="6" required></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-
-    // ----------------- Search Button -----------------
+    // Search
     document.getElementById("searchBtn").addEventListener("click", function() {
-        let name = document.getElementById("search_name").value.trim();
-        console.log("search personnel");
-        if (!name) {
-            alert("Enter a name to search!");
-            return;
-        }
+        const name = document.getElementById("search_name").value.trim();
+        if (!name) return alert("Please enter a name!");
 
         fetch("/search_personnel", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({ name: name })
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
-            let tbody = document.querySelector("#resultTable tbody");
+            const tbody = document.querySelector("#resultTable tbody");
             tbody.innerHTML = "";
-
             if (data.length === 0) {
                 alert("No personnel found!");
                 document.getElementById("resultsSection").style.display = "none";
                 return;
             }
-
-            data.forEach(person => {
-                let row = document.createElement("tr");
-                row.innerHTML = `
-                    <td><input type="radio" name="select_person" value="${person.army_number}"></td>
-                    <td>${person.name}</td>
-                    <td>${person.rank}</td>
-                `;
-
-                row.addEventListener("click", () => selectRow(person.army_number, row));
+            data.forEach(p => {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td><input type="radio" name="select_person" value="${p.army_number}"></td><td>${p.name}</td><td>${p.rank}</td>`;
+                row.onclick = () => selectRow(p.army_number, row);
                 tbody.appendChild(row);
             });
-
             document.getElementById("resultsSection").style.display = "block";
         });
     });
 
-    // ----------------- Helper Functions -----------------
-
     function selectRow(army_number, row) {
-        document.querySelectorAll("#resultTable tbody tr")
-            .forEach(tr => tr.classList.remove("selected-row"));
-
+        document.querySelectorAll("#resultTable tbody tr").forEach(tr => tr.classList.remove("selected-row"));
         row.classList.add("selected-row");
-
-        document.querySelector(`input[name='select_person'][value='${army_number}']`).checked = true;
-
+        document.querySelector(`input[value='${army_number}']`).checked = true;
         document.getElementById("army_number").value = army_number;
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-    const filter = document.getElementById("filterCount");
-    const cards = [...document.querySelectorAll(".sensitive-card")];
+    // Filter rows
+    document.getElementById("filterCount").addEventListener("change", function() {
+        const val = this.value;
+        document.querySelectorAll(".sensitive-row").forEach((row, i) => {
+            row.style.display = (val === "all" || i < parseInt(val)) ? "" : "none";
+        });
+    });
 
-    function applyFilter() {
-        let value = filter.value;
+    // View Details
+    function showPersonnelDetails(armyNumber, name, rank, company, reason, markedOn) {
+        const photo = document.getElementById('viewPhoto');
+        photo.src = `/static/photos/${armyNumber}.jpeg`;
+        photo.onerror = () => photo.src = '/static/photos/default.jpeg';
 
-        cards.forEach((card, index) => {
-            if (value === "all" || index < value) {
-                card.style.display = "block";
+        document.getElementById('viewName').textContent = name;
+        document.getElementById('viewRank').textContent = rank;
+        document.getElementById('viewArmyNumber').textContent = armyNumber;
+        document.getElementById('viewCompany').textContent = company;
+        document.getElementById('viewReason').textContent = reason;
+        document.getElementById('viewMarkedOn').textContent = markedOn;
+
+        new bootstrap.Modal(document.getElementById('viewModal')).show();
+    }
+
+    // Edit
+    function editPersonnel(armyNumber, reason) {
+        document.getElementById('editArmyNumber').value = armyNumber;
+        document.getElementById('editReason').value = reason;
+        new bootstrap.Modal(document.getElementById('editModal')).show();
+    }
+
+    function saveEdit() {
+        const fd = new FormData();
+        fd.append('army_number', document.getElementById('editArmyNumber').value);
+        fd.append('reason', document.getElementById('editReason').value);
+
+        fetch('/update_sensitive_reason', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('Reason updated successfully!');
+                location.reload();
             } else {
-                card.style.display = "none";
+                alert('Error: ' + (data.error || 'Unknown'));
             }
         });
     }
 
-    filter.addEventListener("change", applyFilter);
-   });
+    // Remove - now replaces entire page with fresh HTML
+    function removePersonnel(armyNumber, name) {
+        if (!confirm(`Remove ${name} from sensitive list?`)) return;
 
+        const fd = new FormData();
+        fd.append('army_number', armyNumber);
 
-
+        fetch('/remove_sensitive', { method: 'POST', body: fd })
+        .then(r => r.text())
+        .then(html => {
+            document.documentElement.innerHTML = html;
+            alert(`${name} removed successfully!`);
+        })
+        .catch(() => alert('Error removing personnel'));
+    }
 </script>
 
 </body>
 </html>
-
 {% endblock %}
