@@ -1,375 +1,289 @@
 {% extends "baseView.html" %}
 {% block content %}
+
 <style>
-    /* Custom CSS for Apply Leave Page */
-    .content-wrapper {
-        padding-left: 240px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        padding-top: 1px;
-        
-    }
-
-    .card {
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        background: white;
-        animation: fadeInUp 0.6s ease-out;
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
-    }
-
-    .card h5 {
-        color: #667eea;
-        font-weight: 700;
-        border-bottom: 3px solid #667eea;
-        padding-bottom: 0.75rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .search-box {
-        border-radius: 50px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .search-box input {
-        border: 2px solid #e0e7ff;
-        border-right: none;
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-        transition: border-color 0.3s ease;
-    }
-
-    .search-box input:focus {
-        border-color: #667eea;
-        box-shadow: none;
-        outline: none;
-    }
-
-    .search-box button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .search-box button:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        transform: scale(1.05);
-    }
-
-    .table thead {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .table thead th {
-        border: none;
-        padding: 1rem;
-        font-weight: 600;
-    }
-
-    .form-label {
-        font-weight: 600;
-        color: #4a5568;
-        margin-bottom: 0.5rem;
-    }
-
-    .form-control, .form-select {
-        border: 2px solid #e0e7ff;
-        border-radius: 10px;
-        padding: 0.75rem;
-        transition: all 0.3s ease;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
-    }
-
-    input[type="radio"] {
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-        accent-color: #667eea;
-    }
-
-    #applyLeaveBtn {
-        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-        border: none;
-        padding: 0.75rem;
-        font-weight: 600;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
-    }
-
-    #applyLeaveBtn:hover {
-        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
-    }
-
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
+.content-wrapper {
+    padding-left: 240px;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    padding-top: 1px;
+}
+.card {
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+.toggle-btn {
+    cursor: pointer;
+    font-size: 18px;
+}
 </style>
 
-    <!-- MODALS + LOADING remain unchanged -->
-<div class="modal fade" id="notFoundModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Not Found</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <p class="mb-0">Army Number does not exist or not found.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="loadingOverlay" class="position-fixed top-50 start-50 translate-middle d-none" style="z-index: 9999;">
-    <div class="spinner-border text-primary" role="status"></div>
+<!-- Loader -->
+<div id="loadingOverlay" class="position-fixed top-50 start-50 translate-middle d-none" style="z-index:9999;">
+  <div class="spinner-border text-primary"></div>
 </div>
 
 <div class="content-wrapper">
     {% set header = "Leave Management" %}
     {% set subscript = "Search employee → Select employee → View leave balance → Apply leave" %}
 {% include 'navbar/navbar.html' %}
-    <!-- Search Box -->
-    <div class="card shadow-sm p-4 mb-4">
-        <h5 class="mb-3">Search Employee</h5>
-        <div class="input-group search-box">
-            <input type="text" id="searchArmyNumber" class="form-control" placeholder="Enter Army Number">
-            <button class="btn btn-primary" id="searchBtn">Search</button>
-        </div>
-    </div>
 
-    <!-- Search Results -->
-    <div id="resultsSection" class="card shadow-sm p-4 mb-4" style="display:none;">
-        <h5 class="mb-3">Select Employee</h5>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th>Army Number</th>
-                    <th>Rank</th>
-                    <th>Name</th>
-                    <th>Trade</th>
-                </tr>
-            </thead>
-            <tbody id="resultsTable"></tbody>
-        </table>
-    </div>
-    
-    <!-- Leave Details -->
-    <div id="leaveDetailsDiv" class="card shadow-sm p-4" style="display:none;">
-        <h5 class="mb-3">Leave Balance</h5>
-        <table class="table table-bordered table-striped mb-4">
-            <thead>
-                <tr>
-                    <th>Leave Type</th>
-                    <th>Total</th>
-                    <th>Taken</th>
-                    <th>Balance</th>
-                </tr>
-            </thead>
-            <tbody id="leaveTable"></tbody>
-        </table>
-        
-        <h6 class="fw-bold mb-3">Apply for Leave</h6>
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">Leave Type</label>
-                <select id="leaveType" class="form-select"></select>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Number of Days</label>
-                <input type="number" id="days" class="form-control" placeholder="Enter days">
-            </div>
-            
-            <div class="col-md-4 d-flex align-items-end">
-                <button id="applyLeaveBtn" class="btn btn-success w-100">Apply Leave</button>
-            </div>
-        </div>
-    </div>
-
+<!-- SEARCH -->
+<div class="card p-4 mb-4">
+  <h5>Search Employee</h5>
+  <div class="input-group">
+    <input type="text" id="searchArmyNumber" class="form-control" placeholder="Enter Army Number">
+    <button class="btn btn-primary" id="searchBtn">Search</button>
+  </div>
 </div>
+
+<!-- RESULTS -->
+<div id="resultsSection" class="card p-4 mb-4" style="display:none;">
+  <h5>Select Employee</h5>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Select</th>
+        <th>Army No</th>
+        <th>Rank</th>
+        <th>Name</th>
+        <th>Trade</th>
+        <th>Company</th>
+      </tr>
+    </thead>
+    <tbody id="resultsTable"></tbody>
+  </table>
+</div>
+
+<!-- LEAVE DETAILS -->
+<div id="leaveDetailsDiv" class="card p-4" style="display:none;">
+
+  <!-- Toggle -->
+  <div class="d-flex justify-content-between align-items-center">
+    <h5>Leave Balance</h5>
+    <span id="toggleLeaveTable" class="toggle-btn">⬆️</span>
+  </div>
+
+  <div id="leaveBalanceTable">
+    <table class="table table-bordered mb-4">
+      <thead>
+        <tr>
+          <th>Leave Type</th>
+          <th>Total</th>
+          <th>Taken</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody id="leaveTable"></tbody>
+    </table>
+  </div>
+
+  <h6 class="fw-bold mb-3">Apply for Leave</h6>
+
+  <div class="row g-3">
+    <div class="col-md-3">
+      <label class="form-label">Leave Type</label>
+      <select id="leaveType" class="form-select"></select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">From Date</label>
+      <input type="date" id="fromDate" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">To Date</label>
+      <input type="date" id="toDate" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Total Leave Days</label>
+      <input type="number" id="days" class="form-control" readonly>
+    </div>
+
+    <!-- PREFIX / SUFFIX CHECKBOX -->
+    <div class="col-md-6">
+      <div class="form-check mt-4">
+        <input class="form-check-input" type="checkbox" id="prefixCheck">
+        <label class="form-check-label">
+          Prefix (Holiday before leave)
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="suffixCheck">
+        <label class="form-check-label">
+          Suffix (Holiday after leave)
+        </label>
+      </div>
+    </div>
+
+    <div class="col-md-12">
+      <label class="form-label">Reason</label>
+      <textarea id="reason" class="form-control" rows="3"
+        placeholder="Enter reason for leave"></textarea>
+    </div>
+
+    <div class="col-md-12">
+      <div id="leaveSummary" class="alert alert-info d-none"></div>
+    </div>
+
+    <div class="col-md-4 ms-auto">
+      <button id="applyLeaveBtn" class="btn btn-success w-100">
+        Apply Leave
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
 {% include 'modals/success-modal/modal.html'%}
 
-
-<!-- JS remains unchanged -->
 <script>
-    let selectedPersonArmyNumber = null;
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    const notFoundModal = new bootstrap.Modal(document.getElementById("notFoundModal"));
-    
-    // Show spinner
-    function showLoading() {
-        loadingOverlay.classList.remove("d-none");
+let selectedPersonArmyNumber = null;
+
+const showLoading = () => loadingOverlay.classList.remove("d-none");
+const hideLoading = () => loadingOverlay.classList.add("d-none");
+
+/* Toggle leave balance table */
+toggleLeaveTable.onclick = () => {
+  const div = document.getElementById("leaveBalanceTable");
+  if (div.style.display === "none") {
+    div.style.display = "block";
+    toggleLeaveTable.textContent = "⬆️";
+  } else {
+    div.style.display = "none";
+    toggleLeaveTable.textContent = "⬇️";
+  }
+};
+
+/* SEARCH */
+searchBtn.onclick = async () => {
+  if (!searchArmyNumber.value.trim()) return alert("Enter Army Number");
+
+  showLoading();
+  const res = await fetch(`/apply_leave/search_personnel?query=${searchArmyNumber.value}`);
+  const data = await res.json();
+
+  resultsTable.innerHTML = "";
+  resultsSection.style.display = "block";
+
+  data.forEach(p => {
+    const r = resultsTable.insertRow();
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "selectPerson";
+    radio.onchange = () => {
+      selectedPersonArmyNumber = p.army_number;
+      getLeaveDetails(p.army_number);
+    };
+    r.insertCell().appendChild(radio);
+    r.insertCell().textContent = p.army_number;
+    r.insertCell().textContent = p.rank;
+    r.insertCell().textContent = p.name;
+    r.insertCell().textContent = p.trade;
+    r.insertCell().textContent = p.company;
+
+  });
+  hideLoading();
+};
+
+/* FETCH LEAVE DETAILS */
+async function getLeaveDetails(id) {
+  showLoading();
+  const res = await fetch("/apply_leave/get_leave_details", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ person_id: id })
+  });
+  const data = await res.json();
+
+  leaveTable.innerHTML = "";
+  leaveType.innerHTML = "";
+  leaveDetailsDiv.style.display = "block";
+
+  data.leave_balance.forEach(l => {
+    leaveTable.insertRow().innerHTML =
+      `<td>${l.leave_type}</td>
+       <td>${l.total_leave}</td>
+       <td>${l.leave_taken}</td>
+       <td>${l.balance_leave}</td>`;
+
+    leaveType.add(new Option(l.leave_type, l.leave_type));
+  });
+  hideLoading();
+}
+
+/* ARMY LEAVE DAY CALCULATION */
+function calculateLeaveDays() {
+  if (!fromDate.value || !toDate.value) return;
+
+  const from = new Date(fromDate.value);
+  const to = new Date(toDate.value);
+
+  if (to < from) {
+    alert("To Date cannot be before From Date");
+    toDate.value = "";
+    return;
+  }
+
+  // Base leave days (inclusive)
+  let totalDays = Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
+
+  // Prefix & Suffix logic
+  if (prefixCheck.checked) totalDays += 1;
+  if (suffixCheck.checked) totalDays += 1;
+
+  days.value = totalDays;
+
+  leaveSummary.innerHTML = `
+    <strong>${totalDays} days ${leaveType.value}</strong><br>
+    Leave Period: ${fromDate.value} to ${toDate.value}<br>
+    Prefix: ${prefixCheck.checked ? "Yes (+1 day)" : "No"}<br>
+    Suffix: ${suffixCheck.checked ? "Yes (+1 day)" : "No"}
+  `;
+  leaveSummary.classList.remove("d-none");
+}
+
+[fromDate, toDate, prefixCheck, suffixCheck, leaveType]
+  .forEach(el => el.addEventListener("change", calculateLeaveDays));
+
+/* APPLY LEAVE */
+/* APPLY LEAVE */
+applyLeaveBtn.onclick = async () => {
+    if (!selectedPersonArmyNumber) return alert("Select employee");
+    if (!days.value) return alert("Select leave dates");
+    if (!reason.value.trim()) return alert("Enter reason");
+
+    showLoading();
+
+    try {
+        const res = await fetch("/apply_leave/submit_leave", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                person_id: selectedPersonArmyNumber,
+                leave_type: leaveType.value,
+                from_date: fromDate.value,
+                to_date: toDate.value,
+                total_days: days.value, // includes prefix/suffix automatically
+                reason: reason.value
+            })
+        });
+
+        const response = await res.json();
+        console.log(response)
+        showStatusModal("Leave request has been sent", "Green", 2000);
+
+        setTimeout(() => {
+            if (res.ok) location.reload();
+        }, 2000);
+    } catch (err) {
+        console.error(err);
+        alert("Failed to apply leave.");
+    } finally {
+        hideLoading();
     }
-    
-    // Hide spinner
-    function hideLoading() {
-        loadingOverlay.classList.add("d-none");
-    }
-    
-    // Search button click
-    document.getElementById("searchBtn").addEventListener("click", async function() {
-        const armyNumber = document.getElementById("searchArmyNumber").value.trim();
-        if (!armyNumber) {
-            alert("Please enter an Army Number to search.");
-            return;
-        }
-    
-        showLoading(); // ← SHOW SPINNER
-    
-        try {
-            const res = await fetch(`/apply_leave/search_personnel?query=${encodeURIComponent(armyNumber)}`);
-            const personnel = await res.json();
-    
-            const resultsSection = document.getElementById("resultsSection");
-            const resultsTable = document.getElementById("resultsTable");
-            resultsTable.innerHTML = ""; // clear previous results
-    
-            if (!personnel || personnel.length === 0) {
-                // ← NOT FOUND → SHOW MODAL
-                resultsSection.style.display = "none";
-                notFoundModal.show();
-                hideLoading();
-                return;
-            }
-    
-            resultsSection.style.display = "block";
-    
-            personnel.forEach(function(row) {
-                const tr = resultsTable.insertRow();
-    
-                // Select (Radio)
-                const tdSelect = tr.insertCell();
-                const radio = document.createElement("input");
-                radio.type = "radio";
-                radio.name = "selectPerson";
-                radio.value = row.army_number;
-                tdSelect.appendChild(radio);
-    
-                // Army Number, Name, Trade, Rank
-                tr.insertCell().textContent = row.army_number;
-                tr.insertCell().textContent = row.rank;
-                tr.insertCell().textContent = row.name;
-                tr.insertCell().textContent = row.trade;
-    
-                radio.addEventListener("change", function() {
-                    selectedPersonArmyNumber = this.value;
-                    getLeaveDetails(selectedPersonArmyNumber);
-                });
-            });
-    
-        } catch (err) {
-            console.error(err);
-            alert("Something went wrong. Please try again.");
-        } finally {
-            hideLoading(); // ← HIDE SPINNER ALWAYS
-        }
-    });
-    
-    // Fetch leave details (unchanged except spinner)
-    async function getLeaveDetails(armyNumber) {
-        showLoading();
-    
-        try {
-            const res = await fetch("/apply_leave/get_leave_details", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ person_id: armyNumber })
-            });
-    
-            const data = await res.json();
-            const arrayData = data.leave_balance || [];
-    
-            const leaveDetailsDiv = document.getElementById("leaveDetailsDiv");
-            const leaveTable = document.getElementById("leaveTable");
-            const leaveTypeSelect = document.getElementById("leaveType");
-    
-            leaveTable.innerHTML = "";
-            leaveTypeSelect.innerHTML = "";
-            leaveDetailsDiv.style.display = "block";
-    
-            arrayData.forEach(function(row) {
-                const newRow = leaveTable.insertRow();
-                newRow.insertCell().textContent = row.leave_type;
-                newRow.insertCell().textContent = row.total_leave;
-                newRow.insertCell().textContent = row.leave_taken;
-                newRow.insertCell().textContent = row.balance_leave;
-    
-                const option = document.createElement("option");
-                option.value = row.leave_type;
-                option.textContent = row.leave_type;
-                leaveTypeSelect.appendChild(option);
-            });
-        } catch (err) {
-            console.error(err);
-            alert("Failed to load leave details.");
-        } finally {
-            hideLoading();
-        }
-    }
-    
-    // Apply leave button (unchanged)
-    document.getElementById("applyLeaveBtn").addEventListener("click", async function() {
-        const leave_type = document.getElementById("leaveType").value;
-        const days = document.getElementById("days").value;
-    
-        if (!selectedPersonArmyNumber) {
-            alert("Please select an employee first.");
-            return;
-        }
-        if (!leave_type) {
-            alert("Please select a leave type.");
-            return;
-        }
-        if (!days || days <= 0) {
-            alert("Enter valid number of days.");
-            return;
-        }
-    
-        showLoading();
-    
-        try {
-            const res = await fetch("/apply_leave/submit_leave", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    person_id: selectedPersonArmyNumber,
-                    leave_type: leave_type,
-                    days: days
-                })
-            });
-    
-            const response = await res.json();
-            showStatusModal("Leave request has been sent", "Green", 2000);
-            setTimeout(()=>{
-                if (res.ok) location.reload();
-            },2000)
-        } catch (err) {
-            alert("Failed to apply leave.");
-        } finally {
-            hideLoading();
-        }
-    });
+};
+
 </script>
+
 {% endblock %}
