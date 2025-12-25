@@ -3,7 +3,7 @@ import os
 from datetime import date
 
 app = Flask(__name__)
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # Cache static files for 1 year (in seconds)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  
 app.secret_key = os.urandom(24)
 
 app.register_blueprint(personnel_info)
@@ -26,13 +26,14 @@ def admin_login():
 
     cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (email, password))
     user = cursor.fetchone()
+
+    if not user:
+        return jsonify({"success": False, "error": "Invalid email or password"}), 401
     username  =  user['username']
     
     cursor.close()
     conn.close()
 
-    if not user:
-        return jsonify({"success": False, "error": "Invalid email or password"}), 401
 
     # create JWT
     payload = {
@@ -790,7 +791,7 @@ def assigned_alarm():
         FROM assigned_det ad
         LEFT JOIN dets d ON ad.det_id = d.det_id
         LEFT JOIN personnel p ON ad.army_number = p.army_number
-        WHERE DATEDIFF(NOW(), ad.assigned_on) > 12
+        WHERE DATEDIFF(NOW(), ad.assigned_on) > 5
           AND ad.det_status = 1
         ORDER BY ad.assigned_on ASC;
         '''
