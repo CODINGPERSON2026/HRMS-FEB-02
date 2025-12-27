@@ -157,17 +157,43 @@ toggleLeaveTable.onclick = () => {
 
 /* SEARCH */
 searchBtn.onclick = async () => {
-  if (!searchArmyNumber.value.trim()) return alert("Enter Army Number");
+  if (!searchArmyNumber.value.trim()) {
+    alert("Enter Army Number");
+    return;
+  }
 
   showLoading();
-  const res = await fetch(`/apply_leave/search_personnel?query=${searchArmyNumber.value}`);
-  const data = await res.json();
 
+  const res = await fetch(
+    `/apply_leave/search_personnel?query=${searchArmyNumber.value}`
+  );
+  const data = await res.json();
+  console.log(data);
+
+  // ✅ CASE 1: Existing leave already present
+  if (data.exists) {
+    resultsSection.style.display = "block";
+    resultsTable.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center; color:red; font-weight:bold;">
+          An existing <b>${data.existing_leave.leave_type}</b> leave request for Army No
+          <b>${data.existing_leave.army_number}</b> is already
+          <b>${data.existing_leave.request_status}</b>.
+          <br>Please wait until the current leave is processed.
+        </td>
+      </tr>
+    `;
+    hideLoading();
+    return; // ⛔ stop further execution
+  }
+
+  // ✅ CASE 2: No existing leave → show personnel list
   resultsTable.innerHTML = "";
   resultsSection.style.display = "block";
 
   data.forEach(p => {
     const r = resultsTable.insertRow();
+
     const radio = document.createElement("input");
     radio.type = "radio";
     radio.name = "selectPerson";
@@ -175,16 +201,18 @@ searchBtn.onclick = async () => {
       selectedPersonArmyNumber = p.army_number;
       getLeaveDetails(p.army_number);
     };
+
     r.insertCell().appendChild(radio);
     r.insertCell().textContent = p.army_number;
     r.insertCell().textContent = p.rank;
     r.insertCell().textContent = p.name;
     r.insertCell().textContent = p.trade;
     r.insertCell().textContent = p.company;
-
   });
+
   hideLoading();
 };
+
 
 /* FETCH LEAVE DETAILS */
 async function getLeaveDetails(id) {
@@ -270,7 +298,11 @@ applyLeaveBtn.onclick = async () => {
         });
 
         const response = await res.json();
+
         console.log(response)
+        if (response.status === 'error'){
+            alert(response.error)
+        }
         showStatusModal("Leave request has been sent", "Green", 2000);
 
         setTimeout(() => {

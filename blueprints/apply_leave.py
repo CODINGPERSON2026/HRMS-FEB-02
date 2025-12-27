@@ -92,24 +92,28 @@ def search_personnel():
         return jsonify([])
 
     try:
+
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
+        existing_leave_query = '''select army_number,request_status,leave_type from leave_status_info where army_number = %s'''
+        cursor.execute(existing_leave_query,(query,))
+        existing = cursor.fetchone()
+        print(existing)
+        if not existing:
 
         # Search by army number (exact or partial)
-        cursor.execute("""
-            SELECT name, army_number,`rank`,trade,company
-            FROM personnel
-            WHERE army_number LIKE %s
-            LIMIT 1
-        """, (f"%{query}%",))
-
-        results = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
+            cursor.execute("""
+                SELECT name, army_number,`rank`,trade,company
+                FROM personnel
+                WHERE army_number LIKE %s
+                LIMIT 1
+            """, (f"%{query}%",))
+            results = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            return jsonify(results)
+        return jsonify({'exists':'True','existing_leave':existing})
         
-        return jsonify(results)
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
@@ -140,14 +144,16 @@ def submit_leave_request():
         if not result:
             return jsonify({"message": "Invalid Army Number. Personnel not found"}), 404
         company_name = result['company']
-
+        print(company_name,'this is company')
         # Find SEC NCO of the same company
-        cursor.execute('SELECT email FROM users WHERE company = %s AND role = "SEC NCO"', (company_name,))
+        cursor.execute('SELECT role FROM users WHERE company = %s AND role = %s', (company_name,'SEC NCO'))
         sec_nco = cursor.fetchone()
-        request_sent_to = sec_nco['email'] if sec_nco else None
+        print('#########################################################################################')
+        print(sec_nco,'this is sec nco')
+        request_sent_to = 'SEC NCO'
 
     except Exception as e:
-        return jsonify({"message": "Database error", "error": str(e)}), 500
+        return jsonify({"message": "Database error", "error": str(e),'status':'error'}), 500
     finally:
         cursor.close()
         conn.close()
@@ -223,8 +229,10 @@ def get_leave_requests():
 
     cursor = conn.cursor(dictionary=True)
     user = require_login()
-    email = user['role']
-    print(email)
+    email = user["role"]
+    current_user_role = user['role']
+
+    
 
     try:
         cursor.execute("""
@@ -260,7 +268,6 @@ def get_leave_request(leave_id):
             SELECT 
                 id,
                 army_number,
-                
                 leave_type,
                 leave_days,
                 from_date,
@@ -311,7 +318,17 @@ def recommend_leave():
 
     if not leave_id:
         return jsonify({"message": "Leave ID missing"}), 400
-
+    user =  require_login()
+    current_user_role = user['role']
+    print('current_user_role',current_user_role)
+    if current_user_role == 'SEC NCO':
+        sent_request_to = 'SEC JCO'
+        
+        request_status  = 'Pending at SEC JCO'
+    if current_user_role == 'SEC JCO':
+        sent_request_to = 'OC'
+        request_status = 'Pending at OC'
+    
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -335,10 +352,7 @@ def recommend_leave():
             return jsonify({"message": "Leave request not found"}), 404
         print(leave,"this is leave")
         # Logged-in user (SEC NCO)
-        user = require_login()
-        print(user)
-        recommended_by = user['role']
-        print(recommended_by,"the is user")
+        
  
         # 2️⃣ Insert into leave_history
         cursor.execute("""
@@ -362,7 +376,7 @@ def recommend_leave():
             leave["from_date"],
             leave["to_date"],
             leave["leave_days"],
-            recommended_by,
+            current_user_role,
             leave["leave_reason"]
         ))
 
@@ -370,13 +384,13 @@ def recommend_leave():
         cursor.execute("""
             UPDATE leave_status_info
             SET
-                request_sent_to = 'SEC JCO',
-                request_status = 'Pending at SEC JCO',
+                request_sent_to = %s,
+                request_status = %s,
                 recommend_date = NOW(),
                 rejected_date = NULL,
                 updated_at = NOW()
             WHERE id = %s
-        """, (leave_id,))
+        """, (sent_request_to,request_status,leave_id))
 
         conn.commit()
 
@@ -390,3 +404,83 @@ def recommend_leave():
     finally:
         cursor.close()
         conn.close()
+
+
+
+
+
+
+
+
+@leave_bp.route("/get_recommended_requests")
+def get_recommended_requests():
+    print("in this recommended route")
+
+    user = require_login()
+    recommended_by = user['role']
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            lh.id,                      -- used by View button
+            lh.leave_request_id,
+            lh.army_number,
+            lh.leave_type,
+            lsi.leave_days,
+            lsi.from_date,
+            lsi.to_date,
+            lh.status,
+            lh.recommended_at
+        FROM leave_history lh
+        JOIN leave_status_info lsi
+            ON lh.leave_request_id = lsi.id
+        WHERE lh.recommended_by = %s
+        ORDER BY lh.recommended_at DESC
+    """, (recommended_by,))
+
+    data = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return jsonify({"data": data})
+
+
+@leave_bp.route("/get_leave_history/<int:id>")
+def get_leave_history(id):
+    user = require_login()
+    recommended_by = user['role']
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            lh.id,
+            lh.leave_request_id,
+            lh.army_number,
+            lh.name,
+            lh.leave_type,
+            lsi.leave_days,
+            lsi.from_date,
+            lsi.to_date,
+            lsi.leave_reason,
+            lh.status,
+            lh.remarks,
+            lh.recommended_at
+        FROM leave_history lh
+        JOIN leave_status_info lsi
+            ON lh.leave_request_id = lsi.id
+        WHERE lh.id = %s
+          AND lh.recommended_by = %s
+    """, (id, recommended_by))
+
+    data = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not data:
+        return jsonify({"message": "Record not found"}), 404
+
+    return jsonify({"data": data})

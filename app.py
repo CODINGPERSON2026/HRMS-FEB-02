@@ -3,11 +3,7 @@ import os
 from datetime import date
 
 app = Flask(__name__)
-<<<<<<< HEAD
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
-=======
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  
->>>>>>> 7604b41bd537326c716f9226531dc7ce49a10f64
 app.secret_key = os.urandom(24)
 
 app.register_blueprint(personnel_info)
