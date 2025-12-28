@@ -404,14 +404,6 @@ def recommend_leave():
     finally:
         cursor.close()
         conn.close()
-
-
-
-
-
-
-
-
 @leave_bp.route("/get_recommended_requests")
 def get_recommended_requests():
     print("in this recommended route")
