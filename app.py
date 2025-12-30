@@ -40,7 +40,8 @@ def admin_login():
         "user_id": user["id"],
         "email": user["email"],
         'username':user['username'],
-        "role": user["role"]
+        "role": user["role"],
+        'company':user['company']
     }
 
     token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")

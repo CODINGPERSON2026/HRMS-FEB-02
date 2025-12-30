@@ -199,7 +199,8 @@ searchBtn.onclick = async () => {
     radio.name = "selectPerson";
     radio.onchange = () => {
       selectedPersonArmyNumber = p.army_number;
-      getLeaveDetails(p.army_number);
+      personnel_name = p.name
+      getLeaveDetails(p.army_number,personnel_name);
     };
 
     r.insertCell().appendChild(radio);
@@ -215,7 +216,7 @@ searchBtn.onclick = async () => {
 
 
 /* FETCH LEAVE DETAILS */
-async function getLeaveDetails(id) {
+async function getLeaveDetails(id,name) {
   showLoading();
   const res = await fetch("/apply_leave/get_leave_details", {
     method: "POST",
@@ -293,7 +294,8 @@ applyLeaveBtn.onclick = async () => {
                 from_date: fromDate.value,
                 to_date: toDate.value,
                 total_days: days.value, // includes prefix/suffix automatically
-                reason: reason.value
+                reason: reason.value,
+                name:personnel_name
             })
         });
 
