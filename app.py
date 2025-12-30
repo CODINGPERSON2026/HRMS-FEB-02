@@ -205,7 +205,7 @@ def get_pending_interview_list():
     search = request.args.get("search", "").strip()
     try:
         query = """
-            SELECT name, army_number, home_state
+            SELECT name, army_number, home_state,company
             FROM personnel
             WHERE interview_status = 0
         """
