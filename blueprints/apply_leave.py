@@ -418,11 +418,7 @@ def recommend_leave():
             request_status = 'Approved'
         print(sent_request_to)
         print(request_status)
-        
-        
-            
-            
-
+    
         if not leave:
             return jsonify({"message": "Leave request not found"}), 404
         print(leave,"this is leave")

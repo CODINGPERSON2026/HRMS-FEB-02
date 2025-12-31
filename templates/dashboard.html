@@ -368,7 +368,7 @@
 
   <div class="card p-3 text-center" style="cursor:pointer" id="openProjects">
     <small class="text-muted">Total Projects</small>
-    <h3>90/125</h3>
+    <h3 id = 'get_projects_count' >90/125</h3>
   </div>
 
   <div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
@@ -651,11 +651,25 @@ const mainPower= document.getElementById('mainPower')
 
       } 
     }
+    async function loadProjects() {
+      try {
+        const res = await fetch('/get_projects_count');
+        if (!res.ok) throw new Error('Network error')
+        const data = await res.json()
+        console.log(data, "this is project count")
+        document.getElementById('get_projects_count').innerText = data.count
+        
+      }
+      catch (err) {
+        consoel.log('Error loading', err)
+
+      } 
+    }
 
     // Start loading when page is ready
     document.addEventListener('DOMContentLoaded', () => {
       
-      Promise.all([loadDashboardData(),getInterviewCount(),getManpower()]).finally(()=>{
+      Promise.all([loadDashboardData(),getInterviewCount(),getManpower(),loadProjects()]).finally(()=>{
         hideLoaderAndShowContent()
       })
     });

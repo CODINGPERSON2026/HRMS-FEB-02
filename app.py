@@ -946,6 +946,16 @@ def add_project():
     conn.commit()
     conn.close()
     return jsonify({"status": "success"})
+@app.route("/get_projects_count", methods=["GET"])
+def get_project_count():
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('select count(*) as count from projects')
+    project_count = cursor.fetchone()
+    count = project_count['count']
+    conn.close()
+    return jsonify({"status": "success",'count':count})
 
 
 @app.route("/update_stage", methods=["POST"])
