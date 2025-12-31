@@ -1,0 +1,68 @@
+
+
+<style>
+    .blink {
+        animation: blinkEffect 4s 5;
+    }
+    
+    @keyframes blinkEffect {
+        0% { opacity: 1; }
+        50% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    </style>
+
+<!-- Toast Container -->
+<span id="leave_alarm_alert" class="badge bg-danger d-none" style="cursor:pointer;">
+    🔔 You have leave alarms!
+</span>
+
+
+<script>
+    async function showLeavePendingAlarm() {
+        try {
+            const res = await fetch('/api/leave_pending_alarm');
+            if (!res.ok) throw new Error("Network error");
+    
+            const result = await res.json();
+            const alarmAlert = document.getElementById("leave_alarm_alert");
+    
+            if (result.pending && result.pending > 0) {
+                alarmAlert.classList.remove("d-none");
+                alarmAlert.classList.add("blink");
+                alarmAlert.innerText = `🔔 ${result.pending} leave request(s) pending > 7 days`;
+            } else {
+                alarmAlert.classList.add("d-none");
+                alarmAlert.classList.remove("blink");
+            }
+    
+        } catch (err) {
+            console.error("Error fetching leave alarms:", err);
+        }
+    }
+    
+    // Run on EVERY page load / refresh
+    document.addEventListener('DOMContentLoaded', () => {
+        showLeavePendingAlarm();
+    });
+    
+    // Click → Redirect to pending leave page
+    document.getElementById("leave_alarm_alert").addEventListener("click", () => {
+        const modal = new bootstrap.Modal(document.getElementById("leaveRequestsModal"));
+        modal.show();
+      
+        const activeTab = document.querySelector("#leaveRequestsModal .nav-link.active");
+        if (activeTab.id === "pending-tab") loadLeaveRequests();
+        else if (activeTab.id === "recommended-tab") loadRecommendedLeaves();
+        else if (activeTab.id === "rejected-tab") loadRejectedLeaves();
+      });
+      
+      // Load data when switching tabs
+      document.getElementById("pending-tab").addEventListener("shown.bs.tab", loadLeaveRequests);
+      document.getElementById("recommended-tab").addEventListener("shown.bs.tab", loadRecommendedLeaves);
+      document.getElementById("rejected-tab").addEventListener("shown.bs.tab", loadRejectedLeaves);
+    </script>
+    
+    
+    
+    

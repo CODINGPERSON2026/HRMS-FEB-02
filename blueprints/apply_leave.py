@@ -143,19 +143,24 @@ def submit_leave_request():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT company FROM personnel WHERE army_number = %s", (army_number,))
+        cursor.execute("SELECT company,`rank` FROM personnel WHERE army_number = %s", (army_number,))
         result = cursor.fetchone()
         if not result:
             return jsonify({"message": "Invalid Army Number. Personnel not found"}), 404
         company_name = result['company'].lower()
+        rank = result['rank']
         print(company_name,'this is company')
         # Find SEC NCO of the same company
         cursor.execute('SELECT role FROM users WHERE company = %s AND role = %s', (company_name,'SEC NCO'))
         sec_nco = cursor.fetchone()
         print('#########################################################################################')
-        print(sec_nco,'this is sec nco')
-        request_sent_to = 'SEC NCO'
-
+        request_status = ''
+        if rank =='Subedar' or rank == 'Naib Subedar' or rank  == 'Subedar Major':
+            request_sent_to = 'OC'
+            request_status = 'Pending at OC'
+        else : 
+            request_sent_to = 'SEC NCO'
+            request_status = 'Pending at SEC NCO'
     except Exception as e:
         return jsonify({"message": "Database error", "error": str(e),'status':'error'}), 500
     finally:
@@ -182,7 +187,7 @@ def submit_leave_request():
             from_date,
             to_date,
             request_sent_to,
-            "Pending at SEC NCO",
+            request_status,
             f"{leave_type} for {total_days} day(s)",
             reason
         ))
@@ -235,6 +240,7 @@ def update_leave_status():
 def get_leave_requests():
     print('in this route')
     conn = get_db_connection()
+    print("hitting this from the dashboard of co")
 
     cursor = conn.cursor(dictionary=True)
     user = require_login()
@@ -244,19 +250,39 @@ def get_leave_requests():
     print(current_user_role)
     request_status = f'Pending at {current_user_role}'
     print(request_status)
-
-    
-
     try:
-        cursor.execute("""
-            SELECT id,name, army_number, leave_type, leave_days,
+        query = '''
+  SELECT id,name, army_number, leave_type, leave_days,
                    request_status, remarks, created_at
             FROM leave_status_info
-            WHERE request_sent_to = %s AND request_status = %s AND company = %s
-            ORDER BY created_at DESC
-        """, (current_user_role,request_status,current_user_company))
+            WHERE request_sent_to = %s AND request_status = %s 
+            
+'''
+        
+        if current_user_role != '2IC' and current_user_role != 'CO':
+            query = query + 'AND company = %s' + 'ORDER BY created_at DESC'
+            cursor.execute(query, (current_user_role,request_status,current_user_company))
+        elif current_user_role == 'CO':
+            print('IN CO USER ROLE')
+            query =  '''SELECT
+    id,
+    name,
+    army_number,
+    leave_type,
+    leave_days,
+    request_status
+FROM leave_status_info
+WHERE request_status LIKE 'Pending%'
+AND updated_at < NOW() - INTERVAL 5 MINUTE;'''
+            cursor.execute(query)
+            print('in CO TYPE')
+        
+        else:
+            query = query + 'ORDER BY created_at DESC'
+            cursor.execute(query, (current_user_role,request_status,))
 
         rows = cursor.fetchall()
+        print(rows)
         return jsonify({"status": "success", "data": rows})
 
     except Exception as e:
@@ -294,14 +320,17 @@ def get_leave_request(leave_id):
             WHERE id = %s
         """, (leave_id,))
         leave = cursor.fetchone()
-        cursor.execute("select name from personnel where army_number = %s",(leave['army_number'],))
+        cursor.execute("select name,`rank`from personnel where army_number = %s",(leave['army_number'],))
         name_result = cursor.fetchone()        
         leave['name'] = name_result['name']
+        leave['rank'] = name_result['rank']
         
         print("this request is called before")
         user = require_login()
         if user['role'] == 'OC':
-            leave['OC'] = 'OC'
+            leave['leave_request_type'] = 'OR'
+        elif user['role'] == '2IC':
+            leave['leave_request_type'] = 'OFFICER'
 
         if not leave:
             return jsonify({
@@ -336,6 +365,7 @@ def get_leave_request(leave_id):
 @leave_bp.route("/recommend_leave", methods=["POST"])
 def recommend_leave():
     data = request.get_json()
+    print(data)
     leave_id = data.get("leave_id")
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -353,11 +383,6 @@ def recommend_leave():
     if current_user_role == 'SEC JCO':
         sent_request_to = 'OC'
         request_status = 'Pending at OC'
-
-
-        
-    
-
     try:
         # 1️⃣ Fetch leave request details
         cursor.execute("""
@@ -374,10 +399,28 @@ def recommend_leave():
             WHERE id = %s
         """, (leave_id,))
         leave = cursor.fetchone()
-        if current_user_role == 'OC':
+        request_status = ''
+        sent_request_to = ''
+    # check what the rank of the personnel 
+        cursor.execute('select `rank` from personnel where army_number = %s',(leave['army_number'],))
+        result_rank = cursor.fetchone()
+        rank =  result_rank['rank']
+
+        if current_user_role == 'OC' and rank != 'Subedar' and rank !='Naib Subedar' and rank !='Subedar Major':
             sent_request_to = 'Approved'
             request_status  = 'Approved'
             cursor.execute('update personnel set onleave_status = 1 where army_number = %s',(leave['army_number'],))
+        elif current_user_role == 'OC':
+            sent_request_to = '2IC'
+            request_status = 'Pending at 2IC' 
+        elif current_user_role == '2IC':
+            sent_request_to = 'Approved'
+            request_status = 'Approved'
+        print(sent_request_to)
+        print(request_status)
+        
+        
+            
             
 
         if not leave:
@@ -397,19 +440,21 @@ def recommend_leave():
                 to_date,
                 total_days,
                 recommended_by,
-                remarks
+                remarks,
+                status
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s,%s)
         """, (
             leave["id"],
             leave["army_number"],
-            "N/A",  # replace with actual name if available
+            leave['name'],  # replace with actual name if available
             leave["leave_type"],
             leave["from_date"],
             leave["to_date"],
             leave["leave_days"],
             current_user_role,
-            leave["leave_reason"]
+            leave["leave_reason"],
+            request_status
         ))
 
         # 3️⃣ Update main leave table
@@ -446,27 +491,36 @@ def get_recommended_requests():
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
+    query = '''
+    SELECT
+        lh.id,                      -- used by View button
+        lh.leave_request_id,
+        lh.army_number,
+        lsi.name,
+        lh.leave_type,
+        lsi.leave_days,
+        lsi.from_date,
+        lsi.to_date,
+        lh.status,
+        lh.recommended_at
+    FROM leave_history lh
+    JOIN leave_status_info lsi
+        ON lh.leave_request_id = lsi.id
+    WHERE lh.recommended_by = %s
+'''
 
-    cursor.execute("""
-        SELECT
-            lh.id,                      -- used by View button
-            lh.leave_request_id,
-            lh.army_number,
-                   lsi.name,
-            lh.leave_type,
-            lsi.leave_days,
-            lsi.from_date,
-            lsi.to_date,
-            lh.status,
-            lh.recommended_at
-        FROM leave_history lh
-        JOIN leave_status_info lsi
-            ON lh.leave_request_id = lsi.id
-        WHERE lh.recommended_by = %s AND lsi.company = %s
-        ORDER BY lh.recommended_at DESC
-    """, (recommended_by,user_company))
+    # UNIT 2IC → sees ALL companies
+    if recommended_by == '2IC':
+        query += ' ORDER BY lh.recommended_at DESC'
+        cursor.execute(query, (recommended_by,))
+
+    # Company-level users → restricted by company
+    else:
+        query += ' AND lsi.company = %s ORDER BY lh.recommended_at DESC'
+        cursor.execute(query, (recommended_by, user_company))
 
     data = cursor.fetchall()
+
     
     cursor.close()
     conn.close()
@@ -505,9 +559,20 @@ def get_leave_history(id):
     """, (id, recommended_by))
 
     data = cursor.fetchone()
+    
+# get the rannk
+
+    cursor.execute('select `rank` from personnel where army_number =%s',(data['army_number'],))
+    result_rank = cursor.fetchone()
+    rank = result_rank['rank']
+
+
+
     user_data = {}
-    if recommended_by == 'OC':
-        user_data['OC'] = 'OC'
+    if recommended_by == 'OC' and rank !='Subedar' and rank != 'Naib Subedar' and rank !='Subedar Major':
+        user_data['leave_request_type'] = 'OR'
+    elif recommended_by == 'OC':
+        user_data['leave_request_type'] = 'OFFICER'
     cursor.close()
     conn.close()
 
@@ -646,22 +711,32 @@ def get_rejected_requests():
     cursor = conn.cursor(dictionary=True)
     user = require_login()
     company = user['company']
+    role = user['role']
     print(user,"this is user")
+    query = """
+    SELECT
+        id,
+        army_number,
+        name,
+        leave_type,
+        leave_days,
+        reject_reason,
+        company,
+        request_status
+    FROM leave_status_info
+    WHERE request_status LIKE '%Rejected at%'
+"""
+
     try:
-        cursor.execute("""
-            SELECT
-                id,
-                army_number,
-                       name,
-                leave_type,
-                leave_days,
-                reject_reason,
-                company,
-                request_status
-            FROM leave_status_info
-            WHERE request_status like '%Rejected at%' AND company = %s
-            ORDER BY updated_at DESC
-        """,(company,))
+        # Unit 2IC → sees all companies
+        if role == '2IC':
+            query += " ORDER BY updated_at DESC"
+            cursor.execute(query)
+
+        # Company-level users → restricted to own company
+        else:
+            query += " AND company = %s ORDER BY updated_at DESC"
+            cursor.execute(query, (company,))
 
         data = cursor.fetchall()
         print(data)

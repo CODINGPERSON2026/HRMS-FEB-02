@@ -848,6 +848,43 @@ def assigned_alarm():
             conn.close()
 
 
+
+@app.route("/api/leave_pending_alarm", methods=["GET"])
+def leave_pending_alarm():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    role = user['role']
+
+    try:
+        query = """
+            SELECT
+                COUNT(*) AS pending_count
+            FROM leave_status_info
+            WHERE request_status LIKE 'Pending%'
+            AND updated_at < NOW() - INTERVAL 5 MINUTE
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if role != 'CO':
+            result['pending_count'] = 0
+            print(result,"THIS IS RESULT FOR ALARM")
+
+        return jsonify({
+            "pending": result["pending_count"]
+        })
+
+    except Exception as e:
+        print(str(e))
+        return jsonify({
+            "pending": 0,
+            "error": str(e)
+        }), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
 # ===============================================
 # PROJECTS
 # ===============================================
