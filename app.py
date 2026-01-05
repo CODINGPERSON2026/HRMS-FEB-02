@@ -960,6 +960,28 @@ def leave_pending_alarm():
         cursor.close()
         conn.close()
 
+
+
+
+
+
+@app.route('/api/today_event_alarm')
+def today_event_alarm():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = """
+        SELECT id, event_name, venue
+        FROM daily_events
+        WHERE event_date = CURDATE()
+    """
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    return jsonify({"rows": rows})
+
+
+
 # ===============================================
 # PROJECTS
 # ===============================================

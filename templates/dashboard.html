@@ -318,7 +318,23 @@
     <div class="loader-text">Loading your dashboard...</div>
   </div>
 
-
+  <div class="modal fade" id="eventModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        
+        <div class="modal-header">
+          <h5 class="modal-title">📅 Today's Events</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+  
+        <div class="modal-body">
+          <ul id="eventList" class="list-group"></ul>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  
   {% set header = "15CORPS HRMS Dashboard" %}
   {% set subscript ='Welcome '~ role ~ ' ' ~ username %}
 
@@ -328,6 +344,7 @@
     
     <div style="margin-bottom: 10px;">
       {% include 'modals/alarm/alarm.html' %}
+      {% include 'modals/alarm/event_alarm.html' %}
     
   
       {% include 'modals/alarm/leave_alarm.html' %}
@@ -713,5 +730,36 @@ document.getElementById("show-btn").addEventListener("click", function() {
 
   </script>
   
-
+  <script>
+    async function loadTodayEvents() {
+        try {
+            const res = await fetch('/api/today_event_alarm');
+            const data = await res.json();
+    
+            const list = document.getElementById("eventList");
+            list.innerHTML = "";
+    
+            if (!data.rows || data.rows.length === 0) {
+                list.innerHTML = `
+                    <li class="list-group-item text-muted text-center">
+                        No events for today
+                    </li>`;
+                return;
+            }
+    
+            data.rows.forEach(event => {
+                list.innerHTML += `
+                    <li class="list-group-item">
+                        <strong>${event.event_name}</strong><br>
+                        <small class="text-muted">Location :  ${event.venue}</small>
+                    </li>
+                `;
+            });
+    
+        } catch (err) {
+            console.error("Error loading events:", err);
+        }
+    }
+    </script>
+    
   {% endblock %}
