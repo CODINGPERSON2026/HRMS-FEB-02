@@ -1,0 +1,99 @@
+<div class="modal fade" id="addProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Project
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="addProjectForm" class="row g-3">
+
+                    <!-- HEAD -->
+                    <div class="col-md-6">
+                        <label class="form-label">Head *</label>
+                        <select class="form-select" name="head" required>
+                            <option value="">Select Head</option>
+                            <option value="IT">IT</option>
+                            <option value="TAG">TAG</option>
+                            <option value="ENG">ENG</option>
+                        </select>
+                    </div>
+
+                    <!-- PROJECT NAME -->
+                    <div class="col-md-6">
+                        <label class="form-label">Project Name *</label>
+                        <input class="form-control" name="project_name" required>
+                    </div>
+
+                    <!-- STAGE -->
+                    <div class="col-md-6">
+                        <label class="form-label">Current Stage *</label>
+                        <select class="form-select" name="current_stage" required>
+                            <option value="">Select Stage</option>
+                            <option value="AON">AON</option>
+                            <option value="TOB">TOB & TEC</option>
+                            <option value="ATP">ATP</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+
+                    <!-- PROJECT COST -->
+                    <div class="col-md-6">
+                        <label class="form-label">Project Cost (₹) *</label>
+                        <input class="form-control" name="project_cost" type="number" required>
+                    </div>
+
+                    <!-- 🔹 PROJECT ITEMS (NEW) -->
+                    <div class="col-md-6">
+                        <label class="form-label">Project Items *</label>
+                        <input class="form-control" name="project_items" placeholder="e.g. Radios, Vehicles" required>
+                    </div>
+
+                    <!-- 🔹 QUANTITY (NEW) -->
+                    <div class="col-md-6">
+                        <label class="form-label">Quantity *</label>
+                        <input class="form-control" name="quantity" type="number" min="1" required>
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="project_description" rows="3"></textarea>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" onclick="addProject()">Save Project</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addProject() {
+    const form = document.getElementById("addProjectForm");
+
+    fetch("/add_project", {
+        method: "POST",
+        body: new FormData(form)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            location.reload();
+        } else {
+            alert("Failed to add project");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Server error");
+    });
+}
+</script>

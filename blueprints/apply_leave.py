@@ -378,7 +378,6 @@ def recommend_leave():
     print('current_user_role',current_user_role)
     if current_user_role == 'SEC NCO':
         sent_request_to = 'SEC JCO'
-        
         request_status  = 'Pending at SEC JCO'
     if current_user_role == 'SEC JCO':
         sent_request_to = 'OC'
@@ -399,8 +398,7 @@ def recommend_leave():
             WHERE id = %s
         """, (leave_id,))
         leave = cursor.fetchone()
-        request_status = ''
-        sent_request_to = ''
+        
     # check what the rank of the personnel 
         cursor.execute('select `rank` from personnel where army_number = %s',(leave['army_number'],))
         result_rank = cursor.fetchone()
