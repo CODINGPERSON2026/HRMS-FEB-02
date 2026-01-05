@@ -83,40 +83,164 @@ def get_leave_details():
 
 
 
+# @leave_bp.route("/search_personnel")
+# def search_personnel():
+#     print("in this route")
+#     query = request.args.get("query", "").strip()
+#     print('search ',query)
+#     if query == "":
+#         return jsonify([])
+#     try:
+
+#         conn = get_db_connection()
+#         cursor = conn.cursor(dictionary=True)
+#         existing_leave_query = '''select army_number,request_status,leave_type from leave_status_info where army_number = %s'''
+#         cursor.execute(existing_leave_query,(query,))
+#         existing = cursor.fetchone()
+        
+#         print(existing)
+#         if not existing:
+
+#         # Search by army number (exact or partial)
+#             cursor.execute("""
+#                 SELECT name, army_number,`rank`,trade,company
+#                 FROM personnel
+#                 WHERE army_number LIKE %s
+#                 LIMIT 1
+#             """, (f"%{query}%",))
+#             results = cursor.fetchall()
+#             cursor.close()
+#             conn.close()
+#             return jsonify(results)
+
+#         print("there is an existing leave request")
+#         return jsonify({'exists':'True','existing_leave':existing})
+        
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+
+# ########################################################### UPDATED CERTIFICATE DOWNLOAD FUNCTIONLAITY
+
+
 @leave_bp.route("/search_personnel")
 def search_personnel():
-    print("in this route")
     query = request.args.get("query", "").strip()
-    print('search ',query)
+
     if query == "":
         return jsonify([])
 
     try:
-
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        existing_leave_query = '''select army_number,request_status,leave_type from leave_status_info where army_number = %s'''
-        cursor.execute(existing_leave_query,(query,))
-        existing = cursor.fetchone()
-        print(existing)
-        if not existing:
 
-        # Search by army number (exact or partial)
-            cursor.execute("""
-                SELECT name, army_number,`rank`,trade,company
-                FROM personnel
-                WHERE army_number LIKE %s
-                LIMIT 1
-            """, (f"%{query}%",))
-            results = cursor.fetchall()
-            cursor.close()
-            conn.close()
-            return jsonify(results)
-        return jsonify({'exists':'True','existing_leave':existing})
+        cursor.execute("""
+            SELECT army_number, request_status, leave_type, from_date, to_date
+            FROM leave_status_info
+            WHERE army_number = %s
+        """, (query,))
         
+        existing = cursor.fetchone()
+
+        if existing:
+            status = existing["request_status"]
+
+            # 🔹 Normalize status using LIKE-style logic
+            if status.lower().startswith("pending"):
+                existing["request_status"] = "Pending"
+            elif status.lower().startswith("approved"):
+                existing["request_status"] = "Approved"
+            elif status.lower().startswith("rejected"):
+                existing["request_status"] = "Rejected"
+
+            return jsonify({
+                "exists": True,
+                "existing_leave": existing
+            })
+
+        # No existing leave → search personnel
+        cursor.execute("""
+            SELECT name, army_number, `rank`, trade, company
+            FROM personnel
+            WHERE army_number LIKE %s
+            LIMIT 1
+        """, (f"%{query}%",))
+        results = cursor.fetchall()
+
+        return jsonify(results)
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+# download route
+
+@leave_bp.route("/leave/download_certificate/<army_number>")
+def download_leave_certificate(army_number):
+    try:
+        # DB connection
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Fetch approved leave + personnel details
+        cursor.execute("""
+            SELECT 
+                p.name,
+                p.army_number,
+                p.rank,
+                p.company,
+                l.leave_type,
+                l.from_date,
+                l.to_date
+            FROM leave_status_info l
+            JOIN personnel p 
+                ON p.army_number = l.army_number
+            WHERE l.army_number = %s
+              AND l.request_status = 'Approved'
+        """, (army_number,))
+
+        data = cursor.fetchone()
+
+        if not data:
+            return "No approved leave certificate found", 404
+
+        # Issue date
+        issued_on = datetime.now()
+
+        # Render HTML template
+        html = render_template(
+            "leave_certificate.html",
+            data=data,
+            issued_on=issued_on
+        )
+
+        # Create PDF
+        pdf_buffer = BytesIO()
+        pisa_status = pisa.CreatePDF(html, dest=pdf_buffer)
+
+        if pisa_status.err:
+            return "Error generating PDF", 500
+
+        # Prepare response
+        response = make_response(pdf_buffer.getvalue())
+        response.headers["Content-Type"] = "application/pdf"
+        response.headers["Content-Disposition"] = (
+            f"attachment; filename=Leave_Certificate_{army_number}.pdf"
+        )
+
+        return response
+
+    except Exception as e:
+        return str(e), 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 @leave_bp.route("/submit_leave", methods=["POST"])

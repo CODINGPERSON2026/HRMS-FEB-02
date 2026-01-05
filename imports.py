@@ -9,6 +9,9 @@ from flask import (
     flash,
     make_response
 )
+
+from xhtml2pdf import pisa
+from io import BytesIO
 from middleware import require_login
 
 import mysql.connector
