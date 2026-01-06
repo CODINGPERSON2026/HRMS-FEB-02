@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debounce Example</title>
+</head>
+<body>
+
+<input type="text" id="search" placeholder="Search...">
+
+<script>
+    function searchApi() {
+        console.log("hello world");
+    }
+
+    function debounce(func, delay) {
+        var timer;
+
+        return function () {
+            clearTimeout(timer);
+
+            timer = setTimeout(function () {
+                func();
+            }, delay);
+        };
+    }
+
+    var debouncedSearch = debounce(searchApi, 500);
+
+    document
+        .getElementById("search")
+        .addEventListener("keyup", debouncedSearch);
+</script>
+
+function api(){
+
+}
+
+function debouceing(func,delay){
+    var clock;
+    return function (){
+        clearTimeout(clock)
+        timer = setTimeout(()=>{
+                func()
+        },delay)
+    }
+}
+
+
