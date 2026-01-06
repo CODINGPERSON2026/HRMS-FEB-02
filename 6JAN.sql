@@ -204,7 +204,7 @@ CREATE TABLE `daily_events` (
   `venue` varchar(255) DEFAULT NULL,
   `created_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -213,7 +213,7 @@ CREATE TABLE `daily_events` (
 
 LOCK TABLES `daily_events` WRITE;
 /*!40000 ALTER TABLE `daily_events` DISABLE KEYS */;
-INSERT INTO `daily_events` VALUES (1,'2025-12-01','XYZCSDVS','DSVDS','2025-12-01 06:04:19'),(2,'2025-12-03','abc','test','2025-12-01 06:33:03');
+INSERT INTO `daily_events` VALUES (1,'2025-12-01','XYZCSDVS','DSVDS','2025-12-01 06:04:19'),(2,'2025-12-03','abc','test','2025-12-01 06:33:03'),(3,'2026-01-07','CELEBRATION','PT','2026-01-05 09:57:01'),(4,'2026-01-05','DANCING','PT','2026-01-05 10:08:56'),(5,'2026-01-05','CELEBRATION','PT GROUND','2026-01-05 10:11:49'),(6,'2026-01-06','CELEBRATION','PT GROUND','2026-01-06 07:27:29');
 /*!40000 ALTER TABLE `daily_events` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -392,7 +392,7 @@ CREATE TABLE `leave_history` (
   `reject_reason` text,
   `company` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -401,7 +401,7 @@ CREATE TABLE `leave_history` (
 
 LOCK TABLES `leave_history` WRITE;
 /*!40000 ALTER TABLE `leave_history` DISABLE KEYS */;
-INSERT INTO `leave_history` VALUES (1,1,'1526WE','N/A','AL','2025-12-30','2026-01-13',15,'SEC NCO','Recommended by SEC NCO','i need leave','2025-12-30 09:29:53',NULL,NULL),(2,1,'1526WE','N/A','AL','2025-12-30','2026-01-13',15,'SEC JCO','Recommended by SEC NCO','i need leave','2025-12-30 09:30:14',NULL,NULL),(3,2,'775CESR','N/A','AL','2026-01-01','2026-01-02',2,'OC','Recommended by SEC NCO','i need leave ','2025-12-31 06:34:21',NULL,NULL),(4,2,'775CESR','ABC','AL','2026-01-01','2026-01-02',2,'2IC','Approved','i need leave ','2025-12-31 07:11:16',NULL,NULL);
+INSERT INTO `leave_history` VALUES (1,1,'1526WE','N/A','AL','2025-12-30','2026-01-13',15,'SEC NCO','Recommended by SEC NCO','i need leave','2025-12-30 09:29:53',NULL,NULL),(2,1,'1526WE','N/A','AL','2025-12-30','2026-01-13',15,'SEC JCO','Recommended by SEC NCO','i need leave','2025-12-30 09:30:14',NULL,NULL),(3,2,'775CESR','N/A','AL','2026-01-01','2026-01-02',2,'OC','Recommended by SEC NCO','i need leave ','2025-12-31 06:34:21',NULL,NULL),(4,2,'775CESR','ABC','AL','2026-01-01','2026-01-02',2,'2IC','Approved','i need leave ','2025-12-31 07:11:16',NULL,NULL),(5,3,'905CESR','Hardik','AL','2026-01-09','2026-01-31',25,'SEC NCO','','marriage','2026-01-05 06:23:55',NULL,NULL),(6,4,'778G','ABC','AL','2026-01-19','2026-02-04',17,'SEC NCO','Pending at SEC JCO','i need leave','2026-01-05 07:10:43',NULL,NULL);
 /*!40000 ALTER TABLE `leave_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -431,7 +431,7 @@ CREATE TABLE `leave_status_info` (
   `reject_reason` text,
   `company` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -440,7 +440,7 @@ CREATE TABLE `leave_status_info` (
 
 LOCK TABLES `leave_status_info` WRITE;
 /*!40000 ALTER TABLE `leave_status_info` DISABLE KEYS */;
-INSERT INTO `leave_status_info` VALUES (1,'1526WE','Vivek','AL',15,'2025-12-30','2026-01-13','OC','Pending at OC','2025-12-30 15:00:14',NULL,'AL for 15 day(s)','i need leave','2025-12-30 14:58:29','2025-12-30 15:00:14',NULL,'2 company'),(2,'775CESR','ABC','AL',2,'2026-01-01','2026-01-02','Approved','Approved','2025-12-31 12:41:16',NULL,'AL for 2 day(s)','i need leave ','2025-12-31 11:33:40','2025-12-31 12:41:16',NULL,'1 company');
+INSERT INTO `leave_status_info` VALUES (1,'1526WE','Vivek','AL',15,'2025-12-30','2026-01-13','OC','Pending at OC','2025-12-30 15:00:14',NULL,'AL for 15 day(s)','i need leave','2025-12-30 14:58:29','2025-12-30 15:00:14',NULL,'2 company'),(2,'775CESR','ABC','AL',2,'2026-01-01','2026-01-02','Approved','Approved','2025-12-31 12:41:16',NULL,'AL for 2 day(s)','i need leave ','2025-12-31 11:33:40','2025-12-31 12:41:16',NULL,'1 company'),(3,'905CESR','Hardik','AL',25,'2026-01-09','2026-01-31','','','2026-01-05 11:53:55',NULL,'AL for 25 day(s)','marriage','2026-01-05 11:52:13','2026-01-05 11:53:55',NULL,'2 company'),(4,'778G','ABC','AL',17,'2026-01-19','2026-02-04','SEC JCO','Pending at SEC JCO','2026-01-05 12:40:43',NULL,'AL for 17 day(s)','i need leave','2026-01-05 12:39:15','2026-01-05 12:40:43',NULL,'1 company');
 /*!40000 ALTER TABLE `leave_status_info` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -560,7 +560,7 @@ CREATE TABLE `monthly_medical_status` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_year_month_unit` (`year`,`month`,`unit`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -569,7 +569,7 @@ CREATE TABLE `monthly_medical_status` (
 
 LOCK TABLES `monthly_medical_status` WRITE;
 /*!40000 ALTER TABLE `monthly_medical_status` DISABLE KEYS */;
-INSERT INTO `monthly_medical_status` VALUES (1,2025,12,'All',5,'2025-11-11 23:19:39'),(2,2025,12,'1 Company',1,'2025-11-11 23:19:39'),(3,2025,12,'2 Company',2,'2025-11-11 23:19:39'),(4,2025,12,'3 Company',0,'2025-11-11 23:19:39'),(5,2025,12,'4 Company',2,'2025-12-15 23:19:39'),(6,2025,11,'All',6,'2025-11-09 23:00:00'),(7,2025,11,'1 Company',2,'2025-11-09 23:00:00'),(8,2025,11,'2 Company',1,'2025-11-09 23:00:00'),(9,2025,11,'3 Company',1,'2025-11-09 23:00:00'),(10,2025,11,'4 Company',2,'2025-11-09 23:00:00'),(11,2025,10,'All',8,'2025-10-11 23:30:00'),(12,2025,10,'1 Company',2,'2025-10-11 23:30:00'),(13,2025,10,'2 Company',2,'2025-10-11 23:30:00'),(14,2025,10,'3 Company',1,'2025-10-11 23:30:00'),(15,2025,10,'4 Company',3,'2025-10-11 23:30:00'),(16,2025,9,'All',7,'2025-09-15 00:40:00'),(17,2025,9,'1 Company',1,'2025-09-15 00:40:00'),(18,2025,9,'2 Company',2,'2025-09-15 00:40:00'),(19,2025,9,'3 Company',2,'2025-09-15 00:40:00'),(20,2025,9,'4 Company',2,'2025-09-15 00:40:00');
+INSERT INTO `monthly_medical_status` VALUES (1,2025,12,'All',5,'2025-11-11 23:19:39'),(2,2025,12,'1 Company',1,'2025-11-11 23:19:39'),(3,2025,12,'2 Company',2,'2025-11-11 23:19:39'),(4,2025,12,'3 Company',0,'2025-11-11 23:19:39'),(5,2025,12,'4 Company',2,'2025-12-15 23:19:39'),(6,2025,11,'All',6,'2025-11-09 23:00:00'),(7,2025,11,'1 Company',2,'2025-11-09 23:00:00'),(8,2025,11,'2 Company',1,'2025-11-09 23:00:00'),(9,2025,11,'3 Company',1,'2025-11-09 23:00:00'),(10,2025,11,'4 Company',2,'2025-11-09 23:00:00'),(11,2025,10,'All',8,'2025-10-11 23:30:00'),(12,2025,10,'1 Company',2,'2025-10-11 23:30:00'),(13,2025,10,'2 Company',2,'2025-10-11 23:30:00'),(14,2025,10,'3 Company',1,'2025-10-11 23:30:00'),(15,2025,10,'4 Company',3,'2025-10-11 23:30:00'),(16,2025,9,'All',7,'2025-09-15 00:40:00'),(17,2025,9,'1 Company',1,'2025-09-15 00:40:00'),(18,2025,9,'2 Company',2,'2025-09-15 00:40:00'),(19,2025,9,'3 Company',2,'2025-09-15 00:40:00'),(20,2025,9,'4 Company',2,'2025-09-15 00:40:00'),(21,2026,1,'All',5,'2025-12-31 19:03:45'),(22,2026,1,'1 Company',1,'2025-12-31 19:03:45'),(23,2026,1,'2 Company',2,'2025-12-31 19:03:45'),(24,2026,1,'3 Company',0,'2025-12-31 19:03:45'),(25,2026,1,'4 Company',2,'2025-12-31 19:03:45');
 /*!40000 ALTER TABLE `monthly_medical_status` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -773,6 +773,8 @@ CREATE TABLE `projects` (
   `quantity` int DEFAULT NULL,
   `project_description` text,
   `created_on` datetime DEFAULT CURRENT_TIMESTAMP,
+  `head` varchar(100) NOT NULL,
+  `company` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`project_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -783,7 +785,7 @@ CREATE TABLE `projects` (
 
 LOCK TABLES `projects` WRITE;
 /*!40000 ALTER TABLE `projects` DISABLE KEYS */;
-INSERT INTO `projects` VALUES (1,'TEMP','temp1',454544.00,'Laptops',495,'adsjfdj aklsjdf ljas djflsdjf asfkj fdkja f','2025-12-15 13:40:33');
+INSERT INTO `projects` VALUES (1,'COMPUTER LAB','AON',12112.00,'\"COMPUTER DEVICES\"',10,'COMPUTER DEVICES ARE COMMING','2026-01-06 14:40:46','IT','Admin');
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -859,7 +861,7 @@ CREATE TABLE `sensitive_marking` (
   `reason` text,
   `marked_on` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -868,7 +870,7 @@ CREATE TABLE `sensitive_marking` (
 
 LOCK TABLES `sensitive_marking` WRITE;
 /*!40000 ALTER TABLE `sensitive_marking` DISABLE KEYS */;
-INSERT INTO `sensitive_marking` VALUES (1,'1526WE','SMOKING','2025-12-01 11:37:23'),(2,'905CESR','abc','2025-12-01 14:33:35');
+INSERT INTO `sensitive_marking` VALUES (17,'1526WE','INDICPILINE','2026-01-05 15:21:09'),(18,'9926WE','This person is not hygienic','2026-01-06 12:56:06');
 /*!40000 ALTER TABLE `sensitive_marking` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1049,7 +1051,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'RAVI KUMAR','ravi@gmail.com','ravi@123','CO','2025-11-19 06:28:38','1 company'),(2,'RAHUL SINGH','rahul.oc@gmail.com','rahul@123','OC','2025-11-19 06:42:10','1 company'),(3,'SACHIN SHARMA','sachin.adj@gmail.com','sachin@123','ADJUTANT','2025-11-19 06:45:22','1 company'),(4,'MANOJ SINGH','manoj.jco@gmail.com','manoj@123','JCO','2025-11-18 04:52:55','1 company'),(5,'AKHILESH VERMA','akhil.jco@gmail.com','akhil@123','JCO','2025-11-18 06:15:33','1 company'),(6,'SUNIL KUMAR','sunil.or@gmail.com','sunil@123','OR','2025-11-17 03:48:20','1 company'),(7,'VIJAY KUMAR','vijay.or@gmail.com','vijay@123','OR','2025-11-17 09:10:11','1 company'),(8,'ARUN SHARMA','arun.clerk@gmail.com','arun@123','SEC NCO','2025-11-16 03:20:45','1 company'),(9,'ROHIT YADAV','rohit.clerk@gmail.com','rohit@123','SEC NCO','2025-11-16 05:42:30','2 Company'),(10,'ADMIN USER','admin@gmail.com','admin@123','ADJUTANT','2025-11-15 07:55:00','1 company'),(11,'col_singh','co@unit.army','@123','OC','2025-12-16 01:40:20','2 Company'),(12,'maj_khan','oc_alpha@unit.army','@123','ADJUTANT','2025-12-16 01:40:20','2 Company'),(13,'clerk_ram','clerk@unit.army','@123','CLERK','2025-12-16 01:40:20','3 Company'),(14,'subedar_yadav','subedar@unit.army','@123','SUBEDAR','2025-12-16 01:40:20','3 Company'),(15,'naib_subedar_ali','naib@unit.army','@123','NAIB_SUBEDAR','2025-12-16 01:40:20','4 Company'),(16,'MS DHONI','dhoni_sec_jco@1coy','123','SEC JCO','2025-12-30 06:46:54','2 company'),(17,'Yuvraj','yuvraj@2coy','123','SEC JCO','2025-12-30 06:47:20','2 company'),(18,'Kohli','kohli@1coy','123','SEC JCO','2025-12-30 06:47:41','1 company'),(19,'unit_2ic','2ic@123','123','2IC','2025-12-31 06:48:12','HQ');
+INSERT INTO `users` VALUES (1,'RAVI KUMAR','ravi@gmail.com','ravi@123','CO','2025-11-19 06:28:38','Admin'),(2,'RAHUL SINGH','rahul.oc@gmail.com','rahul@123','OC','2025-11-19 06:42:10','1 company'),(3,'SACHIN SHARMA','sachin.adj@gmail.com','sachin@123','ADJUTANT','2025-11-19 06:45:22','1 company'),(4,'MANOJ SINGH','manoj.jco@gmail.com','manoj@123','JCO','2025-11-18 04:52:55','1 company'),(5,'AKHILESH VERMA','akhil.jco@gmail.com','akhil@123','JCO','2025-11-18 06:15:33','1 company'),(6,'SUNIL KUMAR','sunil.or@gmail.com','sunil@123','OR','2025-11-17 03:48:20','1 company'),(7,'VIJAY KUMAR','vijay.or@gmail.com','vijay@123','OR','2025-11-17 09:10:11','1 company'),(8,'ARUN SHARMA','arun.clerk@gmail.com','arun@123','SEC NCO','2025-11-16 03:20:45','1 company'),(9,'ROHIT YADAV','rohit.clerk@gmail.com','rohit@123','SEC NCO','2025-11-16 05:42:30','2 Company'),(10,'ADMIN USER','admin@gmail.com','admin@123','ADJUTANT','2025-11-15 07:55:00','1 company'),(11,'col_singh','co@unit.army','@123','OC','2025-12-16 01:40:20','2 Company'),(12,'maj_khan','oc_alpha@unit.army','@123','ADJUTANT','2025-12-16 01:40:20','2 Company'),(13,'clerk_ram','clerk@unit.army','@123','CLERK','2025-12-16 01:40:20','3 Company'),(14,'subedar_yadav','subedar@unit.army','@123','SUBEDAR','2025-12-16 01:40:20','3 Company'),(15,'naib_subedar_ali','naib@unit.army','@123','NAIB_SUBEDAR','2025-12-16 01:40:20','4 Company'),(16,'MS DHONI','dhoni_sec_jco@1coy','123','SEC JCO','2025-12-30 06:46:54','2 company'),(17,'Yuvraj','yuvraj@2coy','123','SEC JCO','2025-12-30 06:47:20','2 company'),(18,'Kohli','kohli@1coy','123','SEC JCO','2025-12-30 06:47:41','1 company'),(19,'unit_2ic','2ic@123','123','2IC','2025-12-31 06:48:12','Admin');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1112,7 +1114,7 @@ CREATE TABLE `weight_info` (
 
 LOCK TABLES `weight_info` WRITE;
 /*!40000 ALTER TABLE `weight_info` DISABLE KEYS */;
-INSERT INTO `weight_info` VALUES (1,'john snow','AGNIVEER','12121',56,56,156,'1 Company','category','permanent','cannot run'),(2,'John Doe','Captain','JD12345',75.5,30,175,'2 Company','shape',NULL,NULL),(3,'Yawar','Havaldar','121132229',67,34,170,'3 Company','category','permanent','cannot drive'),(4,'Ubaid lone','JCO','0234032048',56,40,179,'2 Company','category','permanent','CANNOT WAIT PROPERLY'),(5,'G NARESH','JCO','023403204890',67,56,178,'4 Company','shape',NULL,NULL),(6,'GANESH','JCO','34809',67,56,167,'4 Company','category','permanent','THIS CANNOT READ'),(7,'tiku sharma','JCO','12',56,45,165,'2 Company','shape',NULL,NULL),(8,'zaheer','MAJOR','453343',67,56,170,'4 Company','shape',NULL,NULL),(9,'h r','JCO','15732589',173,32,176,'4 Company','shape',NULL,NULL),(10,'MANISH BAJPAI','JCO','48943948',67,45,180,'1 Company','shape',NULL,NULL),(11,'MURALI DHARAN','AGNIVEER','3438094830984',56,34,180,'4 Company','shape',NULL,NULL),(12,'STEVE SMITH','MAJOR','32943284',60,45,180,'1 Company','category','temporary','injury'),(13,'John Doe','Captain','123456',70.2,35,175.5,'1 Company','shape',NULL,'None');
+INSERT INTO `weight_info` VALUES (1,'john snow','AGNIVEER','12121',56,56,156,'3 Company','category','permanent','cannot run'),(2,'John Doe','Captain','JD12345',75.5,30,175,'2 Company','shape',NULL,NULL),(3,'Yawar','Havaldar','121132229',67,34,170,'3 Company','category','permanent','cannot drive'),(4,'Ubaid lone','JCO','0234032048',56,40,179,'2 Company','category','permanent','CANNOT WAIT PROPERLY'),(5,'G NARESH','JCO','023403204890',67,56,178,'4 Company','shape',NULL,NULL),(6,'GANESH','JCO','34809',67,56,167,'4 Company','category','permanent','THIS CANNOT READ'),(7,'tiku sharma','JCO','12',56,45,165,'2 Company','shape',NULL,NULL),(8,'zaheer','MAJOR','453343',67,56,170,'4 Company','shape',NULL,NULL),(9,'h r','JCO','15732589',173,32,176,'4 Company','shape',NULL,NULL),(10,'MANISH BAJPAI','JCO','48943948',67,45,180,'1 Company','shape',NULL,NULL),(11,'MURALI DHARAN','AGNIVEER','3438094830984',56,34,180,'4 Company','shape',NULL,NULL),(12,'STEVE SMITH','MAJOR','32943284',60,45,180,'1 Company','category','temporary','injury'),(13,'John Doe','Captain','123456',70.2,35,175.5,'1 Company','shape',NULL,'None');
 /*!40000 ALTER TABLE `weight_info` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -1125,4 +1127,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-31 14:10:56
+-- Dump completed on 2026-01-06 15:27:45
