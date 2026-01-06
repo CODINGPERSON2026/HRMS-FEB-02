@@ -1194,295 +1194,185 @@ def log_audit(parade_state_id, action_type, performed_by, ip_address=None,
 
 @app.route('/api/parade-state/save', methods=['POST'])
 def save_parade_state():
-    """Save or update parade state data"""
+    print("\n=== SAVE PARADE STATE ===")
+    
     try:
         data = request.get_json()
+        print(f"Received data for date: {data.get('date')}")
+        
+        if not data:
+            return jsonify({'success': False, 'error': 'No data received'}), 400
+            
         report_date = data.get('date')
         parade_data = data.get('data')
-        metadata = data.get('metadata', {})
-        user = request.headers.get('X-User', 'anonymous')
         
         if not report_date or not parade_data:
-            return jsonify({
-                'success': False, 
-                'error': 'Missing required data'
-            }), 400
+            return jsonify({'success': False, 'error': 'Missing date or data'}), 400
         
         conn = get_db_connection()
         if not conn:
-            return jsonify({
-                'success': False,
-                'error': 'Database connection failed'
-            }), 500
+            return jsonify({'success': False, 'error': 'Database connection failed'}), 500
         
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor()
         
         try:
-            # Calculate totals
-            total_auth = sum(parade_data.get('grandTotal', [0]))
-            total_present = parade_data.get('grandTotal', [0])[14] if len(parade_data.get('grandTotal', [])) > 14 else 0
+            # Calculate grand total for auth (first column) and present (15th column)
+            total_auth = 0
+            total_present = 0
             
-            # Check if record exists for this date
-            cursor.execute(
-                'SELECT id, status FROM parade_state_main WHERE report_date = %s',
-                (report_date,)
-            )
-            existing = cursor.fetchone()
-            
-            if existing:
-                # Update existing record
-                parade_state_id = existing['id']
-                old_status = existing['status']
-                
-                cursor.execute("""
-                    UPDATE parade_state_main 
-                    SET report_title = %s, location = %s, prepared_by = %s,
-                        approved_by = %s, status = %s, total_auth = %s,
-                        total_present = %s, updated_by = %s, updated_at = NOW()
-                    WHERE id = %s
-                """, (
-                    metadata.get('title'),
-                    metadata.get('location'),
-                    metadata.get('prepared_by'),
-                    metadata.get('approved_by'),
-                    metadata.get('status', 'draft'),
-                    total_auth,
-                    total_present,
-                    user,
-                    parade_state_id
-                ))
-                
-                # Get old data for audit
-                cursor.execute(
-                    'SELECT * FROM parade_state_details WHERE parade_state_id = %s',
-                    (parade_state_id,)
-                )
-                old_details = cursor.fetchall()
-                
-                # Delete old details
-                cursor.execute(
-                    'DELETE FROM parade_state_details WHERE parade_state_id = %s',
-                    (parade_state_id,)
-                )
-                
-                action_type = 'update'
-                changes = f"Updated parade state for {report_date}"
-                
-            else:
-                # Insert new record
-                cursor.execute("""
-                    INSERT INTO parade_state_main 
-                    (report_date, report_title, location, prepared_by, approved_by,
-                     status, total_auth, total_present, created_by, updated_by)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (
-                    report_date,
-                    metadata.get('title'),
-                    metadata.get('location'),
-                    metadata.get('prepared_by'),
-                    metadata.get('approved_by'),
-                    metadata.get('status', 'draft'),
-                    total_auth,
-                    total_present,
-                    user,
-                    user
-                ))
-                parade_state_id = cursor.lastrowid
-                action_type = 'create'
-                changes = f"Created new parade state for {report_date}"
-            
-            # Insert all category data
-            categories = [
+            # All categories from frontend
+            all_categories = [
                 'offr', 'jco', 'jcoEre', 'or', 'orEre',
-                'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr',
-                'firstTotal', 'secondTotal', 'grandTotal'
+                'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'
             ]
             
-            for category in categories:
-                if category in parade_data and isinstance(parade_data[category], list):
-                    values = parade_data[category]
-                    
-                    # Ensure we have exactly 18 values
-                    padded_values = values + [0] * (18 - len(values)) if len(values) < 18 else values[:18]
-                    
-                    cursor.execute("""
-                        INSERT INTO parade_state_details 
-                        (parade_state_id, category, auth, hs, posted_str, lve, course, det, mh,
-                         sick_lve, ex, td, att, awl_osl_jc, trout_det, unit, present, dues_in, dues_out, remarks)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """, (
-                        parade_state_id, category,
-                        padded_values[0], padded_values[1], padded_values[2], 
-                        padded_values[3], padded_values[4], padded_values[5],
-                        padded_values[6], padded_values[7], padded_values[8], 
-                        padded_values[9], padded_values[10], padded_values[11],
-                        padded_values[12], padded_values[13], padded_values[14],
-                        padded_values[15], padded_values[16], padded_values[17]
-                    ))
+            # Build SQL columns and values
+            columns = ['report_date']
+            values = [report_date]
             
-            # Update daily statistics
-            update_daily_statistics(report_date, parade_state_id, cursor)
+            # Process each category
+            for category in all_categories:
+                category_data = parade_data.get(category, [0]*17)
+                print(f"Processing {category}: {category_data}")
+                
+                # Add each of the 17 columns for this category
+                for i in range(17):
+                    column_name = f"{category}_{get_column_name(i)}"
+                    columns.append(column_name)
+                    
+                    value = category_data[i] if i < len(category_data) else 0
+                    values.append(value)
+                    
+                    # Calculate totals from first 5 main categories
+                    if i == 0 and category in ['offr', 'jco', 'jcoEre', 'or', 'orEre']:
+                        total_auth += value
+                    if i == 14 and category in ['offr', 'jco', 'jcoEre', 'or', 'orEre']:
+                        total_present += value
             
+            # Add total columns
+            columns.extend(['total_auth', 'total_present'])
+            values.extend([total_auth, total_present])
+            
+            print(f"Total columns to insert: {len(columns)}")
+            print(f"Total values: {len(values)}")
+            
+            # Build SQL query
+            placeholders = ['%s'] * len(values)
+            
+            sql = f"""
+                INSERT INTO parade_state_daily ({', '.join(columns)})
+                VALUES ({', '.join(placeholders)})
+                ON DUPLICATE KEY UPDATE
+                {', '.join([f"{col} = VALUES({col})" for col in columns if col != 'report_date'])}
+            """
+            
+            print(f"Executing SQL...")
+            cursor.execute(sql, values)
             conn.commit()
-            
-            # Log audit
-            ip_address = request.remote_addr
-            user_agent = request.headers.get('User-Agent')
-            log_audit(parade_state_id, action_type, user, ip_address, user_agent, 
-                     old_data if existing else None, parade_data, changes)
             
             return jsonify({
                 'success': True,
-                'message': 'Parade state saved successfully',
-                'id': parade_state_id,
-                'date': report_date
-            }), 200
+                'message': f'Parade state saved for {report_date}'
+            })
             
         except Exception as e:
             conn.rollback()
-            logger.error(f'Error saving parade state: {str(e)}')
-            return jsonify({
-                'success': False,
-                'error': str(e)
-            }), 500
+            print(f"ERROR: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(e)}), 500
             
         finally:
             cursor.close()
             conn.close()
             
     except Exception as e:
-        logger.error(f'Unexpected error in save_parade_state: {str(e)}')
-        return jsonify({
-            'success': False,
-            'error': 'Internal server error'
-        }), 500
+        print(f"General error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
-def update_daily_statistics(report_date, parade_state_id, cursor):
-    """Update daily statistics table"""
-    try:
-        # Get category-wise data
-        categories = ['offr', 'jco', 'or']
-        stats = {}
-        
-        for category in categories:
-            cursor.execute("""
-                SELECT auth, present FROM parade_state_details 
-                WHERE parade_state_id = %s AND category = %s
-            """, (parade_state_id, category))
-            result = cursor.fetchone()
-            if result:
-                stats[f'{category}_auth'] = result['auth'] or 0
-                stats[f'{category}_present'] = result['present'] or 0
-        
-        # Get grand total
-        cursor.execute("""
-            SELECT auth, present FROM parade_state_details 
-            WHERE parade_state_id = %s AND category = 'grandTotal'
-        """, (parade_state_id,))
-        grand_total = cursor.fetchone()
-        
-        if grand_total:
-            total_auth = grand_total['auth'] or 0
-            total_present = grand_total['present'] or 0
-            total_absent = total_auth - total_present if total_auth > total_present else 0
-            
-            cursor.execute("""
-                INSERT INTO daily_statistics 
-                (report_date, total_records, total_auth, total_present, total_absent,
-                 offr_auth, offr_present, jco_auth, jco_present, or_auth, or_present)
-                VALUES (%s, 1, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE
-                total_auth = VALUES(total_auth),
-                total_present = VALUES(total_present),
-                total_absent = VALUES(total_absent),
-                offr_auth = VALUES(offr_auth),
-                offr_present = VALUES(offr_present),
-                jco_auth = VALUES(jco_auth),
-                jco_present = VALUES(jco_present),
-                or_auth = VALUES(or_auth),
-                or_present = VALUES(or_present),
-                updated_at = NOW()
-            """, (
-                report_date, total_auth, total_present, total_absent,
-                stats.get('offr_auth', 0), stats.get('offr_present', 0),
-                stats.get('jco_auth', 0), stats.get('jco_present', 0),
-                stats.get('or_auth', 0), stats.get('or_present', 0)
-            ))
-            
-    except Exception as e:
-        logger.error(f'Error updating daily statistics: {str(e)}')
-
-
-@app.route('/api/parade-state/<date>', methods=['GET'])
+@app.route('/api/parade-state/get/<date>', methods=['GET'])
 def get_parade_state(date):
-    """Retrieve parade state by date"""
+    """Get parade state for a specific date"""
     conn = get_db_connection()
-    if not conn:
-        return jsonify({
-            'success': False,
-            'error': 'Database connection failed'
-        }), 500
-    
     cursor = conn.cursor(dictionary=True)
     
     try:
-        # Get main record
-        cursor.execute("""
-            SELECT * FROM parade_state_main 
-            WHERE report_date = %s
-        """, (date,))
-        main = cursor.fetchone()
+        cursor.execute("SELECT * FROM parade_state_daily WHERE report_date = %s", (date,))
+        row = cursor.fetchone()
         
-        if not main:
+        if not row:
             return jsonify({
                 'success': False,
                 'message': 'No data found for this date'
             }), 404
         
-        # Get all details
-        cursor.execute("""
-            SELECT * FROM parade_state_details 
-            WHERE parade_state_id = %s
-            ORDER BY FIELD(category, 
-                'offr', 'jco', 'jcoEre', 'or', 'orEre',
-                'firstTotal', 'oaOr', 'attSummary', 'attOffr', 
-                'attJco', 'attOr', 'secondTotal', 'grandTotal'
-            )
-        """, (main['id'],))
-        details = cursor.fetchall()
+        # Convert database row back to frontend format
+        result = {
+            'date': row['report_date'],
+            'data': {}
+        }
         
-        # Format data for frontend
-        formatted_data = {}
-        for detail in details:
-            formatted_data[detail['category']] = [
-                detail['auth'], detail['hs'], detail['posted_str'],
-                detail['lve'], detail['course'], detail['det'],
-                detail['mh'], detail['sick_lve'], detail['ex'],
-                detail['td'], detail['att'], detail['awl_osl_jc'],
-                detail['trout_det'], detail['unit'], detail['present'],
-                detail['dues_in'], detail['dues_out']
-            ]
+        # All categories we need to return
+        all_categories = [
+            'offr', 'jco', 'jcoEre', 'or', 'orEre',
+            'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'
+        ]
+        
+        for category in all_categories:
+            category_data = []
+            for i in range(17):
+                column_name = f"{category}_{get_column_name(i)}"
+                category_data.append(row.get(column_name, 0))
+            result['data'][category] = category_data
+        
+        # Add calculated totals for frontend
+        result['data']['firstTotal'] = []
+        result['data']['secondTotal'] = []
+        result['data']['grandTotal'] = []
+        
+        # Calculate totals (you can also store these in DB if needed)
+        for i in range(17):
+            # First total = sum of offr, jco, jcoEre, or, orEre
+            first_total = 0
+            for cat in ['offr', 'jco', 'jcoEre', 'or', 'orEre']:
+                if cat in result['data'] and i < len(result['data'][cat]):
+                    first_total += result['data'][cat][i]
+            result['data']['firstTotal'].append(first_total)
+            
+            # Second total = sum of oaOr, attSummary, attOffr, attJco, attOr
+            second_total = 0
+            for cat in ['oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr']:
+                if cat in result['data'] and i < len(result['data'][cat]):
+                    second_total += result['data'][cat][i]
+            result['data']['secondTotal'].append(second_total)
+            
+            # Grand total = firstTotal + secondTotal
+            result['data']['grandTotal'].append(first_total + second_total)
         
         return jsonify({
             'success': True,
-            'data': {
-                'main': main,
-                'details': formatted_data
-            }
-        }), 200
+            'data': result
+        })
         
     except Exception as e:
-        logger.error(f'Error retrieving parade state: {str(e)}')
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-        
+        print(f"Error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
     finally:
         cursor.close()
         conn.close()
 
+
+def get_column_name(index):
+    """Helper to map index to column names"""
+    columns = [
+        'auth', 'hs', 'posted_str', 'lve', 'course', 'det', 'mh',
+        'sick_lve', 'ex', 'td', 'att', 'awl_osl_jc', 'trout_det',
+        'present_det', 'present_unit', 'dues_in', 'dues_out'
+    ]
+    return columns[index] if index < len(columns) else f'col_{index}'
 
 @app.route('/api/parade-state/search', methods=['GET'])
 def search_parade_states():

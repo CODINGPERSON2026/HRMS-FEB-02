@@ -18,11 +18,7 @@
     min-height: 100vh;
   }
 
-  /* Hide original sidebar if present */
-  .sidebar,
-  .dashboard-content>.container {
-    margin-left: 0 !important;
-  }
+
 
   /* Dashboard Wrapper */
   .dashboard-content {
@@ -292,7 +288,7 @@
     
   }
   #show-btn {
-    
+
     border: none;
     padding: 2px 4px;
     font-size: 10px;
@@ -302,6 +298,17 @@
     align-items: center;
     gap: 6px;
     transition: background 0.2s ease;
+  }
+
+  /* Full screen modal with 10px gap */
+  .modal-fullscreen .modal-dialog {
+    margin: 10px;
+    max-width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+  }
+
+  .modal-fullscreen .modal-content {
+    height: 100%;
   }
   
   
@@ -343,6 +350,7 @@
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#countModal">
         View Count
       </button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">Parade State</button>
     </div>
 
 
@@ -434,6 +442,21 @@
   {% include 'modals/leaverequest/leave_request.html' %}
   {% include 'modals/interview_pending/modal.html' %}
   {% include 'modals/count_parade/modal.html' %}
+
+  <!-- Parade State Modal -->
+  <div class="modal fade modal-fullscreen" id="paradeStateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Parade State</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          {% include 'modals/parade_state/index.html' %}
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Interview Pending Modal -->
   
@@ -691,6 +714,8 @@ const mainPower= document.getElementById('mainPower')
   document.getElementById("openProjects").addEventListener("click", function() {
     window.location.href = "/projects";
 });
+
+
 
 document.getElementById("show-btn").addEventListener("click", function() {
 

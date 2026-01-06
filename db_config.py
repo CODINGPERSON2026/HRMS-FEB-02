@@ -4,8 +4,8 @@ from imports import *
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'qaz123QAZ!@#',
-    'database': 'hrms',
+    'password': 'password123',
+    'database': 'army_personnel_db',
     'autocommit': True
 }
 
