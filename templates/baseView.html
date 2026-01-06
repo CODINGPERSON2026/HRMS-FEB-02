@@ -134,7 +134,7 @@
 <body>
   <!-- Sidebar -->
   <div class="sidebar p-2">
-    <h4 class="mb-4">Unit Management</h4>
+    <h4 id="dynamicHeading" class="px-3"></h4>
     <nav class="nav flex-column">
       <a class="nav-link active" href="/">Dashboard</a>
       <a class="nav-link" href="/task_manager/"> Task Management</a>
@@ -189,5 +189,22 @@
   });
 </script>
 
+<script>
+  document.addEventListener('DOMContentLoaded', async function() {
+      const dynamicHeading = document.getElementById('dynamicHeading');
+  
+      try {
+          const response = await fetch('/api/dashboard_heading');
+          const data = await response.json();
+  
+          // Update the heading dynamically
+          dynamicHeading.textContent = data.heading;
+      } catch (error) {
+          console.error("Error fetching heading:", error);
+          dynamicHeading.textContent = "Unit Management"; // fallback
+      }
+  });
+  </script>
+  
 </body>
 </html>

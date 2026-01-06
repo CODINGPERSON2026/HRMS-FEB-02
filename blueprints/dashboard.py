@@ -4,9 +4,9 @@ dashboard_bp =  Blueprint('dasboard',__name__,url_prefix='/stats')
 
 @dashboard_bp.route('/get_detachment_details')
 def get_det_personnel():
-    
-    company = request.args.get('company')
-    print(company, 'this is company')
+    user = require_login()  # Get logged-in user
+    user_company = user['company']
+    print(user_company, 'Logged-in user company')
 
     try:
         conn = get_db_connection()
@@ -29,18 +29,16 @@ def get_det_personnel():
         WHERE p.detachment_status = 1
           AND ad.det_status = 1
         '''
-
         params = []
 
-        # Add filter before ORDER BY
-        if company:
-            print(company,"this is company")
-            query += ' AND p.company = %s'
-            params.append(company)
+        # Apply company-based filtering if not Admin
+        if user_company != "Admin":
+            query += " AND p.company = %s"
+            params.append(user_company)
 
-        query += " ORDER BY ad.assigned_on ASC"  # Move ORDER BY to end
-        print(query)
+        query += " ORDER BY ad.assigned_on ASC"
 
+        print("Final Query:", query)
         cursor.execute(query, params)
         result = cursor.fetchall()
 
@@ -52,6 +50,8 @@ def get_det_personnel():
 
     finally:
         if conn.is_connected():
+            cursor.close()
+            conn.close()
     
             conn.close()
 @dashboard_bp.route('/delete_personnel', methods=['POST'])

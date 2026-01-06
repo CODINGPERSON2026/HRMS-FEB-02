@@ -21,6 +21,7 @@
 <script>
     async function showAssignedAlarms() {
         try {
+            
             const res = await fetch('/api/assigned_alarm');
             if (!res.ok) throw new Error("Network error");
             const result = await res.json();

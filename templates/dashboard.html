@@ -336,7 +336,8 @@
   </div>
   
   {% set header = "15CORPS HRMS Dashboard" %}
-  {% set subscript ='Welcome '~ role ~ ' ' ~ username %}
+  {% set subscript = 'Welcome ' ~ role ~ ' ' ~ username %}
+
 
   {% include 'navbar/navbar.html' %}
   <!-- Main Content (initially hidden) -->
@@ -359,6 +360,9 @@
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">Add Event</button>
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#countModal">
         View Count
+      </button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_user_modal">
+        Add User 
       </button>
     </div>
 
@@ -401,7 +405,7 @@
 
   <div class="card p-3 text-center" style="cursor:pointer" id="openSensitive">
     <small class="text-muted">Sensitive Indl</small>
-    <h3>4</h3>
+    <h3 id = 'sensitive-count'>4</h3>
   </div>
 
 </div>
@@ -451,6 +455,7 @@
   {% include 'modals/leaverequest/leave_request.html' %}
   {% include 'modals/interview_pending/modal.html' %}
   {% include 'modals/count_parade/modal.html' %}
+  {% include 'modals/create_user/modal.html' %}
 
   <!-- Interview Pending Modal -->
   
@@ -596,9 +601,7 @@
   }
   
     
- </script>
-      
-  <script>
+
 
     function saveEvent() {
       let form = document.getElementById("eventForm");
@@ -622,74 +625,7 @@
     const contentLoader = document.getElementById("contentLoader");
     const mainContent = document.getElementById("mainContent");
 
-    // This function will be called when ALL async operations are done
-    function hideLoaderAndShowContent() {
-      contentLoader.classList.add("hidden");
-      mainContent.classList.add("loaded");
-    }
-
-    // Fetch detachment count
-    async function loadDashboardData() {
-      try {
-        const res = await fetch('/get_dets');
-        if (!res.ok) throw new Error("Failed to fetch detachments");
-        const data = await res.json();
-        document.getElementById('locationCount').innerText = data.count || '—';
-      } catch (err) {
-        console.error("Error loading detachments:", err);
-        document.getElementById('locationCount').innerText = '—';
-      } 
-    }
-const mainPower= document.getElementById('mainPower')
-    async function getManpower(){
-      try {
-          const res = await  fetch('/get_man_power')
-          const data = await res.json()
-          console.log(data,"this is incomming for man power")
-          mainPower.innerText = data.count 
-      }
-      catch(err){
-          console.log(err)
-      }
-    }
-
-    async function getInterviewCount() {
-      try {
-        const res = await fetch('/get_interview_pending_count');
-        if (!res.ok) throw new Error('Network error')
-        const data = await res.json()
-        console.log(data, "this is interview data")
-        document.getElementById('interview-Count').innerText = data.result.pending_count
-        document.getElementById('total-count').innerText = data.result.total_count
-        document.getElementById('interview%').innerText = data.percentage + '%'
-      }
-      catch (err) {
-        consoel.log('Error loading', err)
-
-      } 
-    }
-    async function loadProjects() {
-      try {
-        const res = await fetch('/get_projects_count');
-        if (!res.ok) throw new Error('Network error')
-        const data = await res.json()
-        console.log(data, "this is project count")
-        document.getElementById('get_projects_count').innerText = data.count
-        
-      }
-      catch (err) {
-        consoel.log('Error loading', err)
-
-      } 
-    }
-
-    // Start loading when page is ready
-    document.addEventListener('DOMContentLoaded', () => {
-      
-      Promise.all([loadDashboardData(),getInterviewCount(),getManpower(),loadProjects()]).finally(()=>{
-        hideLoaderAndShowContent()
-      })
-    });
+    
 
     // Leave Requests Button
     
@@ -761,5 +697,53 @@ document.getElementById("show-btn").addEventListener("click", function() {
         }
     }
     </script>
+    <script>
+      // References
+      
+    
+      // This function will be called when ALL async operations are done
+      function hideLoaderAndShowContent() {
+        contentLoader.classList.add("hidden");
+        mainContent.classList.add("loaded");
+      }
+    
+      // Load dashboard data from single API
+      async function loadDashboardDataSingleAPI() {
+        try {
+          const res = await fetch('/api/dashboard_summary'); // new backend endpoint
+          if (!res.ok) throw new Error("Failed to fetch dashboard data");
+    
+          const data = await res.json();
+          console.log(data)
+          // Update DOM with received data
+          document.getElementById('locationCount').innerText = data.detachments || '0';
+          document.getElementById('mainPower').innerText = data.manpower || '0';
+          document.getElementById('interview-Count').innerText = data.interview.pending_count || '0';
+          document.getElementById('total-count').innerText = data.interview.total_count || '0';
+          document.getElementById('interview%').innerText = data.interview.percentage + '%' || '0';
+          document.getElementById('get_projects_count').innerText = data.projects || '0';
+          document.getElementById('sensitive-count').innerText = data.sensitive_count || '0';
+    
+        } catch (err) {
+          console.error("Error loading dashboard data:", err);
+    
+          // Fallback values
+          document.getElementById('locationCount').innerText = '—';
+          document.getElementById('mainPower').innerText = '—';
+          document.getElementById('interview-Count').innerText = '—';
+          document.getElementById('total-count').innerText = '—';
+          document.getElementById('interview%').innerText = '—';
+          document.getElementById('get_projects_count').innerText = '—';
+        } finally {
+          hideLoaderAndShowContent();
+        }
+      }
+    
+      // Start loading when page is ready
+      document.addEventListener('DOMContentLoaded', () => {
+        loadDashboardDataSingleAPI();
+      });
+    </script>
+    
     
   {% endblock %}

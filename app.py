@@ -66,7 +66,35 @@ def dashboard():
     if not user:
         return redirect(url_for('admin_login'))
     username = user['username'].capitalize()
-    return render_template('dashboard.html', username = username,role = user['role'])
+    user_company = user['company']
+    return render_template('dashboard.html', username = username,role = user['role'],user_company=user_company)
+
+
+
+
+@app.route('/api/dashboard_heading')
+def dashboard_heading():
+    # Determine heading dynamically
+    # You can base this on user role, current tab, or any condition
+    user = require_login()
+    if user['role'] == 'CO':
+        company = 'CO 15CESR'
+    elif user['role'] == '2IC':
+        company = '2IC 15CESR'
+    else:
+        company = user['company']  # Example
+    print(company)
+    
+    
+    return jsonify({"heading": company})
+
+
+
+
+
+
+
+
 
 
 @app.route('/mt', methods=['GET', 'POST'])
@@ -136,7 +164,7 @@ def search_person():
     print("in this route")
 
     query = request.form.get('army_number')  # ✅ CORRECT
-    print(query)
+    
 
     if not query:
         return jsonify([])
@@ -212,25 +240,34 @@ def interview():
 def get_pending_interview_list():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
+    user = require_login()  # Get logged-in user
+    company = user['company']
     search = request.args.get("search", "").strip()
+
     try:
         query = """
-            SELECT name, army_number, home_state,company
+            SELECT name, army_number, home_state, company
             FROM personnel
             WHERE interview_status = 0
         """
         params = []
 
+        # Apply company filter if user is not Admin
+        if company != "Admin":
+            query += " AND company = %s"
+            params.append(company)
+
+        # Apply search filter
         if search:
             query += " AND army_number LIKE %s"
             params.append(f"%{search}%")
 
-        
         cursor.execute(query, params)
         data = cursor.fetchall()
         return jsonify({"status": "success", "data": data})
 
     except Exception as e:
+        print("Error fetching pending interview list:", str(e))
         return jsonify({"status": "error", "message": "Server error"}), 500
 
     finally:
@@ -760,6 +797,7 @@ def get_sensitive_list():
             ORDER BY s.marked_on DESC
         """)
         rows = cursor.fetchall()
+        print(rows)
 
         sensitive_list = []
         for r in rows:
@@ -771,7 +809,7 @@ def get_sensitive_list():
                 "rank": r[5],
                 "company": r[6] or "N/A"
             })
-        
+        print(sensitive_list,"this is sensitive list")
         return jsonify({"success": True, "data": sensitive_list})
     
     except Exception as e:
@@ -887,6 +925,10 @@ def assigned_alarm():
     conn = None
     cursor = None
     try:
+        user = require_login()  # Get logged-in user
+        user_company = user['company']
+        print("Logged-in user's company:", user_company)
+
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
@@ -906,16 +948,26 @@ def assigned_alarm():
         LEFT JOIN personnel p ON ad.army_number = p.army_number
         WHERE DATEDIFF(NOW(), ad.assigned_on) > 5
           AND ad.det_status = 1
-        ORDER BY ad.assigned_on ASC;
         '''
 
-        cursor.execute(query)
+        params = []
+
+        # Apply company filter if user is not Admin
+        if user_company != "Admin":
+            query += " AND p.company = %s"
+            params.append(user_company)
+
+        query += " ORDER BY ad.assigned_on ASC"
+
+        cursor.execute(query, params)
         rows = cursor.fetchall()
 
         return jsonify({"status": "success", "rows": rows})
 
     except Exception as e:
+        print("Error fetching assigned alarms:", e)
         return jsonify({"status": "error", "message": str(e)})
+
     finally:
         if cursor:
             cursor.close()
@@ -964,21 +1016,46 @@ def leave_pending_alarm():
 
 
 
-
 @app.route('/api/today_event_alarm')
 def today_event_alarm():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    user = require_login()  # Get logged-in user
+    user_company = user['company']
+    print("Logged-in user's company:", user_company)
 
-    query = """
-        SELECT id, event_name, venue
-        FROM daily_events
-        WHERE event_date = CURDATE()
-    """
-    cursor.execute(query)
-    rows = cursor.fetchall()
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
 
-    return jsonify({"rows": rows})
+        query = """
+            SELECT id, event_name, venue
+            FROM daily_events
+            WHERE event_date = CURDATE()
+        """
+
+        params = []
+
+        # Apply company filter if not Admin
+        if user_company != "Admin":
+            query += " AND company = %s"  # assuming there is a 'company' column
+            params.append(user_company)
+
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+
+        return jsonify({"status": "success", "rows": rows})
+
+    except Exception as e:
+        print("Error fetching today's events:", e)
+        return jsonify({"status": "error", "message": str(e)})
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 
 
@@ -990,13 +1067,33 @@ def today_event_alarm():
 def get_projects():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT project_id, head, project_name, current_stage, project_cost, project_items, quantity, project_description
-        FROM projects
-    """)
-    projects = cursor.fetchall()
-    conn.close()
-    return render_template("projects/projects.html", projects=projects)
+    user = require_login()
+    company = user['company']
+
+    try:
+        # Base query
+        query = """
+            SELECT project_id, head, project_name, current_stage, project_cost, project_items, quantity, project_description
+            FROM projects
+        """
+        params = []
+
+        # Apply company filter if not Admin
+        if company != "Admin":
+            query += " WHERE company = %s"  # or "WHERE company = %s" if you have a company column
+            params.append(company)
+
+        cursor.execute(query, params)
+        projects = cursor.fetchall()
+        return render_template("projects/projects.html", projects=projects)
+
+    except Exception as e:
+        print("Error fetching projects:", str(e))
+        return "Server Error", 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
@@ -1004,8 +1101,12 @@ def get_projects():
 @app.route("/add_project", methods=["POST"])
 def add_project():
     data = request.form
+    print(data)
     conn = get_db_connection()
     cur = conn.cursor()
+    user = require_login()
+    user_company = user['company']
+    project_items_json = json.dumps(data.get('project_items', {}))
 
     cur.execute("""
         INSERT INTO projects (
@@ -1015,17 +1116,19 @@ def add_project():
             project_cost,
             project_items,
             quantity,
-            project_description
+            project_description,
+            company
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s,%s)
     """, (
         data["project_name"],
         data["head"],              # ✅ NEW
         data["current_stage"],
         data["project_cost"],
-        data['project_items'],
+        project_items_json,
         data["quantity"],
-        data["project_description"]
+        data["project_description"],
+        user_company
     ))
 
     conn.commit()
@@ -1160,6 +1263,181 @@ def line_unfit_graph():
     """, (company,))
     result = cursor.fetchall()
     return jsonify(result)
+
+
+
+
+
+# single route for alll
+
+@app.route('/api/dashboard_summary', methods=['GET'])
+def dashboard_summary():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    company = user['company']
+    print("Logged-in user's company:", company)
+    
+    try:
+        # 1️⃣ Detachments Count
+        cursor.execute(
+            "SELECT COUNT(*) AS count FROM personnel WHERE detachment_status = 1" + 
+            (f" AND company = %s" if company != "Admin" else ""),
+            (company,) if company != "Admin" else ()
+        )
+        detachment_result = cursor.fetchone()
+        detachments = detachment_result['count'] if detachment_result else 0
+
+        # 2️⃣ Total Manpower
+        cursor.execute(
+            "SELECT COUNT(*) AS total_count FROM personnel" + 
+            (f" WHERE company = %s" if company != "Admin" else ""),
+            (company,) if company != "Admin" else ()
+        )
+        manpower_result = cursor.fetchone()
+        manpower = manpower_result['total_count'] if manpower_result else 0
+
+        # 3️⃣ Interview Pending
+        cursor.execute(
+            "SELECT SUM(interview_status = 0) AS pending_count, COUNT(*) AS total_count FROM personnel" + 
+            (f" WHERE company = %s" if company != "Admin" else ""),
+            (company,) if company != "Admin" else ()
+        )
+        interview_result = cursor.fetchone()
+        pending_count = interview_result['pending_count'] if interview_result else 0
+        total_interview_count = interview_result['total_count'] if interview_result else 0
+        interview_percentage = round((pending_count / total_interview_count) * 100, 2) if total_interview_count > 0 else 0
+
+        # 4️⃣ Projects Count
+        cursor.execute("SELECT COUNT(*) AS count FROM projects")
+        projects_result = cursor.fetchone()
+        projects = projects_result['count'] if projects_result else 0
+
+        # 5️⃣ Assigned Alarm (Assignments older than 5 days)
+        cursor.execute(
+            '''
+            SELECT 
+                ad.army_number, 
+                p.name,
+                p.rank,
+                p.company,
+                ad.det_id, 
+                d.det_name, 
+                ad.assigned_on,
+                ad.det_status,
+                DATEDIFF(NOW(), ad.assigned_on) AS days_on_det
+            FROM assigned_det ad
+            LEFT JOIN dets d ON ad.det_id = d.det_id
+            LEFT JOIN personnel p ON ad.army_number = p.army_number
+            WHERE DATEDIFF(NOW(), ad.assigned_on) > 5
+              AND ad.det_status = 1
+              ''' + (f" AND p.company = %s" if company != "Admin" else "") +
+            '''
+            ORDER BY ad.assigned_on ASC;
+            ''',
+            (company,) if company != "Admin" else ()
+        )
+        assigned_alarm_rows = cursor.fetchall()
+
+        # 6️⃣ Sensitive Personnel Count
+        cursor.execute(
+            '''
+            SELECT COUNT(*) AS count
+            FROM sensitive_marking sm
+            LEFT JOIN personnel p ON sm.army_number = p.army_number
+            ''' + (f" WHERE p.company = %s" if company != "Admin" else ""),
+            (company,) if company != "Admin" else ()
+        )
+        sensitive_result = cursor.fetchone()
+        sensitive_count = sensitive_result['count'] if sensitive_result else 0
+
+        # Return combined JSON
+        return jsonify({
+            "status": "success",
+            "detachments": detachments,
+            "manpower": manpower,
+            "interview": {
+                "pending_count": pending_count,
+                "total_count": total_interview_count,
+                "percentage": interview_percentage
+            },
+            "projects": projects,
+            "assigned_alarm": assigned_alarm_rows,
+            "sensitive_count": sensitive_count  # ⚡ New sensitive count
+        }), 200
+
+    except Exception as e:
+        print("Error fetching dashboard summary:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+
+
+
+
+
+from flask import request, jsonify
+from datetime import datetime
+
+@app.route('/add_user', methods=['POST'])
+def add_user():
+
+    # Allow only AJAX requests
+    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+        return jsonify({'status': 'error', 'message': 'Invalid request'}), 400
+
+    username = request.form.get('username', '').strip()
+    email    = request.form.get('email', '').strip()
+    password = request.form.get('password', '')
+    role     = request.form.get('role', '')
+
+    # Basic validation
+    if not username or not email or not password or not role:
+        return jsonify({'status': 'error', 'message': 'All fields are required'}), 400
+
+    # Assign company only if role is CO or 2IC
+    company = None
+    if role in ['CO', '2IC']:
+        company = 'DEFAULT_COMPANY'   # 🔁 change as needed
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Check duplicate email
+        cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
+        if cursor.fetchone():
+            return jsonify({'status': 'error', 'message': 'Email already exists'}), 409
+
+        # Insert user (NO HASH)
+        cursor.execute("""
+            INSERT INTO users (username, email, password, role, company, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (
+            username,
+            email,
+            password,
+            role,
+            company,
+            datetime.now()
+        ))
+
+        conn.commit()
+        return jsonify({'status': 'success', 'message': 'User added successfully'})
+
+    except Exception as e:
+        print("Add User Error:", e)
+        return jsonify({'status': 'error', 'message': 'Server error'}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 if __name__ == '__main__':
