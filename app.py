@@ -1438,16 +1438,7 @@ def dashboard_summary():
     finally:
         cursor.close()
         conn.close()
-
-
-
-
-
-
-
-
-
-
+        
 @app.route('/api/user-info', methods=['GET'])
 def get_user_info():
     """Get current user information"""
@@ -1481,6 +1472,270 @@ def get_column_name(index):
         'present_det', 'present_unit', 'dues_in', 'dues_out'
     ]
     return columns[index] if index < len(columns) else f'col_{index}'
+
+@app.route('/api/parade-state/save', methods=['POST'])
+def save_parade_state():
+    """Save parade state data with calculated columns"""
+    print("\n=== SAVE PARADE STATE ===")
+    
+    # Get current user
+    user = get_current_user()
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+    
+    company = user.get('company')
+    if not company:
+        return jsonify({'success': False, 'error': 'No company assigned'}), 400
+    
+    print(f"User: {user.get('username')}, Company: {company}")
+    
+    try:
+        data = request.get_json()
+        print(f"Received data for date: {data.get('date')}")
+        
+        if not data:
+            return jsonify({'success': False, 'error': 'No data received'}), 400
+            
+        report_date = data.get('date')
+        parade_data = data.get('data')
+        
+        if not report_date or not parade_data:
+            return jsonify({'success': False, 'error': 'Missing date or data'}), 400
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'success': False, 'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor()
+        
+        try:
+            # All input categories from your frontend
+            input_categories = [
+                'offr', 'jco', 'jcoEre', 'or', 'orEre',  # First section
+                'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'  # Second section
+            ]
+            
+            # Build SQL columns and values
+            columns = ['report_date', 'company']
+            values = [report_date, company]
+            
+            # Process each input category with calculations
+            for category in input_categories:
+                category_data = parade_data.get(category, [0]*17)
+                print(f"Processing {category}: raw data = {category_data}")
+                
+                # Ensure we have at least 13 values (minimum needed for calculations)
+                if len(category_data) < 13:
+                    # Pad with zeros if needed
+                    category_data = category_data + [0] * (13 - len(category_data))
+                
+                # Extract values for calculations
+                # Index mapping:
+                # 0: AUTH
+                # 1: H/S
+                # 2: POSTED/STR
+                # 3: LVE
+                # 4: COURSE
+                # 5: DET
+                # 6: MH
+                # 7: SICK/LVE
+                # 8: EX
+                # 9: TD
+                # 10: ATT
+                # 11: AWL/OSL/JUDICIAL CUSTODY
+                # 12: T/OUT (will be calculated)
+                # 13: PRESENT/STR DET (will be set from DET column)
+                # 14: PRESENT/STR UNIT (will be calculated)
+                # 15: DUES IN
+                # 16: DUES OUT
+                
+                posted_str = category_data[2] if len(category_data) > 2 else 0
+                lve = category_data[3] if len(category_data) > 3 else 0
+                course = category_data[4] if len(category_data) > 4 else 0
+                det_value = category_data[5] if len(category_data) > 5 else 0
+                mh = category_data[6] if len(category_data) > 6 else 0
+                sick_lve = category_data[7] if len(category_data) > 7 else 0
+                ex = category_data[8] if len(category_data) > 8 else 0
+                td = category_data[9] if len(category_data) > 9 else 0
+                att = category_data[10] if len(category_data) > 10 else 0
+                awl_osl_jc = category_data[11] if len(category_data) > 11 else 0
+                
+                # Calculate T/OUT = POSTED/STR - (LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC)
+                trout = posted_str - (lve + course + mh + sick_lve + ex + td + att + awl_osl_jc)
+                # Ensure non-negative
+                trout = max(0, trout)
+                
+                # PRESENT/STR DET = DET column value
+                present_det = det_value
+                
+                # PRESENT/STR UNIT = POSTED/STR - T/OUT
+                present_unit = posted_str - trout
+                # Ensure non-negative
+                present_unit = max(0, present_unit)
+                
+                # Create final array with calculated values
+                final_data = [
+                    category_data[0] if len(category_data) > 0 else 0,  # AUTH
+                    category_data[1] if len(category_data) > 1 else 0,  # H/S
+                    posted_str,  # POSTED/STR
+                    lve,         # LVE
+                    course,      # COURSE
+                    det_value,   # DET
+                    mh,          # MH
+                    sick_lve,    # SICK/LVE
+                    ex,          # EX
+                    td,          # TD
+                    att,         # ATT
+                    awl_osl_jc,  # AWL/OSL/JC
+                    trout,       # T/OUT (calculated)
+                    present_det, # PRESENT/STR DET (from DET column)
+                    present_unit, # PRESENT/STR UNIT (calculated)
+                    category_data[15] if len(category_data) > 15 else 0,  # DUES IN
+                    category_data[16] if len(category_data) > 16 else 0   # DUES OUT
+                ]
+                
+                print(f"{category} - Posted/STR: {posted_str}, T/OUT: {trout}, Present Det: {present_det}, Present Unit: {present_unit}")
+                
+                # Add each of the 17 columns for this category
+                for i in range(17):
+                    column_name = f"{category}_{get_column_name(i)}"
+                    columns.append(column_name)
+                    values.append(final_data[i])
+            
+            # Calculate FIRST TOTAL (sum of offr, jco, jcoEre, or, orEre)
+            first_total_values = [0] * 17
+            for cat in ['offr', 'jco', 'jcoEre', 'or', 'orEre']:
+                cat_data = parade_data.get(cat, [0]*17)
+                # Apply same calculations for totals
+                if len(cat_data) >= 13:
+                    posted_str = cat_data[2] if len(cat_data) > 2 else 0
+                    lve = cat_data[3] if len(cat_data) > 3 else 0
+                    course = cat_data[4] if len(cat_data) > 4 else 0
+                    mh = cat_data[6] if len(cat_data) > 6 else 0
+                    sick_lve = cat_data[7] if len(cat_data) > 7 else 0
+                    ex = cat_data[8] if len(cat_data) > 8 else 0
+                    td = cat_data[9] if len(cat_data) > 9 else 0
+                    att = cat_data[10] if len(cat_data) > 10 else 0
+                    awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
+                    
+                    trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
+                    trout = att + ex + mh + td
+                    trout = max(0, trout)                                               
+                    
+                    present_unit = posted_str - trout
+                    present_unit = max(0, present_unit)
+                    
+                    # Sum all columns
+                    for i in range(17):
+                        if i == 12:  # T/OUT
+                            first_total_values[i] += trout
+                        elif i == 14:  # PRESENT/STR UNIT
+                            first_total_values[i] += present_unit
+                        elif i < len(cat_data):
+                            first_total_values[i] += cat_data[i]
+                        else:
+                            first_total_values[i] += 0
+            
+            # Store first total in database
+            for i in range(17):
+                column_name = f"firstTotal_{get_column_name(i)}"
+                columns.append(column_name)
+                values.append(first_total_values[i])
+            
+            # Calculate SECOND TOTAL (sum of oaOr, attSummary, attOffr, attJco, attOr)
+            second_total_values = [0] * 17
+            for cat in ['oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr']:
+                cat_data = parade_data.get(cat, [0]*17)
+                if len(cat_data) >= 13:
+                    posted_str = cat_data[2] if len(cat_data) > 2 else 0
+                    lve = cat_data[3] if len(cat_data) > 3 else 0
+                    course = cat_data[4] if len(cat_data) > 4 else 0
+                    mh = cat_data[6] if len(cat_data) > 6 else 0
+                    sick_lve = cat_data[7] if len(cat_data) > 7 else 0
+                    ex = cat_data[8] if len(cat_data) > 8 else 0
+                    td = cat_data[9] if len(cat_data) > 9 else 0
+                    att = cat_data[10] if len(cat_data) > 10 else 0
+                    awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
+                    
+                    trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
+                    trout = max(0, trout)
+                    
+                    present_unit = posted_str - trout
+                    present_unit = max(0, present_unit)
+                    
+                    # Sum all columns
+                    for i in range(17):
+                        if i == 12:  # T/OUT
+                            second_total_values[i] += trout
+                        elif i == 14:  # PRESENT/STR UNIT
+                            second_total_values[i] += present_unit
+                        elif i < len(cat_data):
+                            second_total_values[i] += cat_data[i]
+                        else:
+                            second_total_values[i] += 0
+            
+            # Store second total in database
+            for i in range(17):
+                column_name = f"secondTotal_{get_column_name(i)}"
+                columns.append(column_name)
+                values.append(second_total_values[i])
+            
+            # Calculate GRAND TOTAL (firstTotal + secondTotal)
+            grand_total_values = [0] * 17
+            for i in range(17):
+                grand_total_values[i] = first_total_values[i] + second_total_values[i]
+            
+            # Store grand total in database
+            for i in range(17):
+                column_name = f"grandTotal_{get_column_name(i)}"
+                columns.append(column_name)
+                values.append(grand_total_values[i])
+            
+            print(f"Total columns: {len(columns)}")
+            print(f"Grand Total Auth: {grand_total_values[0]}, Present Unit: {grand_total_values[14]}")
+            
+            # Build SQL query
+            placeholders = ['%s'] * len(values)
+            
+            sql = f"""
+                INSERT INTO parade_state_daily ({', '.join(columns)})
+                VALUES ({', '.join(placeholders)})
+                ON DUPLICATE KEY UPDATE
+                {', '.join([f"{col} = VALUES({col})" for col in columns if col not in ['report_date', 'company']])},
+                updated_at = NOW()
+            """
+            
+            print(f"Executing SQL...")
+            cursor.execute(sql, values)
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Parade state saved for {report_date} ({company})',
+                'calculations': {
+                    't_out_calculation': 'LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC',
+                    'present_det': 'Same as DET column',
+                    'present_unit': 'POSTED/STR - T/OUT'
+                }
+            })
+            
+        except Exception as e:
+            conn.rollback()
+            print(f"ERROR: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(e)}), 500
+            
+        finally:
+            cursor.close()
+            conn.close()
+            
+    except Exception as e:
+        print(f"General error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
 @app.route('/api/parade-state/get/<date>', methods=['GET'])
 def get_parade_state(date):
     """Get parade state with calculated columns"""
@@ -1543,7 +1798,7 @@ def get_parade_state(date):
         
         # Add a note about calculations
         result['calculations'] = {
-            't_out_formula': 'POSTED/STR - (LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC)',
+            't_out_formula': 'LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC',
             'present_det': 'Same as DET column value',
             'present_unit': 'POSTED/STR - T/OUT'
         }
@@ -1559,10 +1814,6 @@ def get_parade_state(date):
     finally:
         cursor.close()
         conn.close()
-
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=1000)

@@ -729,33 +729,28 @@
             });
         }
 
-        // Calculate T/OUT for a single row
-        function calculateTOut(rowData) {
-            const postedStr = rowData[COL_INDICES.POSTED_STR] || 0;
-            const lve = rowData[COL_INDICES.LVE] || 0;
-            const course = rowData[COL_INDICES.COURSE] || 0;
-            const mh = rowData[COL_INDICES.MH] || 0;
-            const sickLve = rowData[COL_INDICES.SICK_LVE] || 0;
-            const ex = rowData[COL_INDICES.EX] || 0;
-            const td = rowData[COL_INDICES.TD] || 0;
-            const att = rowData[COL_INDICES.ATT] || 0;
-            const awlOslJc = rowData[COL_INDICES.AWL_OSL_JC] || 0;
-            
-            // T/OUT = POSTED/STR - (LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC)
-            const deductions = lve + course + mh + sickLve + ex + td + att + awlOslJc;
-            const tOut = postedStr - deductions;
-            return Math.max(0, tOut);
-        }
+       // Calculate T/OUT for a single row - CORRECTED FORMULA
+function calculateTOut(rowData) {
+    const lve = rowData[COL_INDICES.LVE] || 0;
+    const course = rowData[COL_INDICES.COURSE] || 0;
+    const mh = rowData[COL_INDICES.MH] || 0;
+    const sickLve = rowData[COL_INDICES.SICK_LVE] || 0;
+    const ex = rowData[COL_INDICES.EX] || 0;
+    const td = rowData[COL_INDICES.TD] || 0;
+    const att = rowData[COL_INDICES.ATT] || 0;
+    const awlOslJc = rowData[COL_INDICES.AWL_OSL_JC] || 0;
+    
+    const tOut = lve + course + mh + sickLve + ex + td + att + awlOslJc;
+    return Math.max(0, tOut);
+}
 
-        // Calculate Present Unit for a single row
-        function calculatePresentUnit(rowData) {
-            const postedStr = rowData[COL_INDICES.POSTED_STR] || 0;
-            const tOut = calculateTOut(rowData);
-            
-            // PRESENT/STR UNIT = POSTED/STR - T/OUT
-            const presentUnit = postedStr - tOut;
-            return Math.max(0, presentUnit);
-        }
+function calculatePresentUnit(rowData) {
+    const postedStr = rowData[COL_INDICES.POSTED_STR] || 0;
+    const tOut = calculateTOut(rowData);
+    
+    const presentUnit = postedStr - tOut;
+    return Math.max(0, presentUnit);
+}
 
         // Get Present Det (same as DET column)
         function getPresentDet(rowData) {
@@ -1153,7 +1148,7 @@
                             card.onclick = () => {
                                 currentDate = result.report_date;
                                 loadDataForDate(result.report_date);
-                                hideResults();
+                                hideResults()
                             };
                             resultsGrid.appendChild(card);
                         });
