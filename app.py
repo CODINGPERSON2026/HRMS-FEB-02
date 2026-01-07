@@ -1,8 +1,14 @@
 from imports import *
 import os
 from datetime import date
+from flask import Flask
+from flask_cors import CORS
+import csv
+from io import StringIO, BytesIO
+from flask import send_file
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 app.secret_key = os.urandom(24)
 
@@ -159,6 +165,7 @@ def update_personal():
 def view_personal():
     return render_template('personalInfoView.html', form_view='view')
 
+@app.route('/search_personnel', methods=['POST'])
 @app.route('/search_personnel', methods=['POST'])
 def search_person():
     print("in this route")
@@ -575,6 +582,20 @@ def add_member():
     return jsonify({"status": "success"})
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.route("/delete_member/<int:member_id>", methods=["DELETE"])
 def delete_member(member_id):
     conn = get_db_connection()
@@ -813,6 +834,8 @@ def get_sensitive_list():
         return jsonify({"success": True, "data": sensitive_list})
     
     except Exception as e:
+        print("Error fetching sensitive list:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
         print("Error fetching sensitive list:", e)
         return jsonify({"success": False, "error": str(e)}), 500
     finally:
@@ -1129,6 +1152,7 @@ def add_project():
     """, (
         data["project_name"],
         data["head"],              # ✅ NEW
+        data["head"],              # ✅ NEW
         data["current_stage"],
         data["project_cost"],
         project_items_json,
@@ -1136,6 +1160,7 @@ def add_project():
         data["project_description"],
         user_company
     ))
+
 
     conn.commit()
     conn.close()
@@ -1412,6 +1437,121 @@ def dashboard_summary():
 
 
 
+
+
+
+
+@app.route('/api/user-info', methods=['GET'])
+def get_user_info():
+    """Get current user information"""
+    user = get_current_user()
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+    
+    return jsonify({
+        'success': True,
+        'username': user.get('username'),
+        'company': user.get('company'),
+        'role': user.get('role')
+    })
+def get_current_user():
+    """Get current user from JWT token"""
+    token = request.cookies.get('token')
+    if not token:
+        return None
+    
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        return payload
+    except:
+        return None
+
+def get_column_name(index):
+    """Helper to map index to column names"""
+    columns = [
+        'auth', 'hs', 'posted_str', 'lve', 'course', 'det', 'mh',
+        'sick_lve', 'ex', 'td', 'att', 'awl_osl_jc', 'trout_det',
+        'present_det', 'present_unit', 'dues_in', 'dues_out'
+    ]
+    return columns[index] if index < len(columns) else f'col_{index}'
+@app.route('/api/parade-state/get/<date>', methods=['GET'])
+def get_parade_state(date):
+    """Get parade state with calculated columns"""
+    print(f"\n=== GET PARADE STATE for date: {date} ===")
+    
+    # Get current user
+    user = get_current_user()
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+    
+    company = user.get('company')
+    if not company:
+        return jsonify({'success': False, 'error': 'No company assigned'}), 400
+    
+    print(f"User: {user.get('username')}, Company: {company}")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        # Get data for specific date and company
+        cursor.execute("""
+            SELECT * FROM parade_state_daily 
+            WHERE report_date = %s AND company = %s
+        """, (date, company))
+        
+        row = cursor.fetchone()
+        
+        if not row:
+            print(f"No data found for date: {date}, company: {company}")
+            return jsonify({
+                'success': False,
+                'message': 'No data found for this date'
+            }), 404
+        
+        print(f"Data found for {date}")
+        
+        # Convert database row back to frontend format
+        result = {
+            'date': row['report_date'],
+            'company': row['company'],
+            'data': {}
+        }
+        
+        # All categories in the exact order they appear in frontend
+        all_categories = [
+            'offr', 'jco', 'jcoEre', 'or', 'orEre',
+            'firstTotal',  # This comes after OR (ERE)
+            'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr',
+            'secondTotal',  # This comes after ATT OR
+            'grandTotal'   # Grand total at the end
+        ]
+        
+        for category in all_categories:
+            category_data = []
+            for i in range(17):
+                column_name = f"{category}_{get_column_name(i)}"
+                category_data.append(row.get(column_name, 0))
+            result['data'][category] = category_data
+        
+        # Add a note about calculations
+        result['calculations'] = {
+            't_out_formula': 'POSTED/STR - (LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC)',
+            'present_det': 'Same as DET column value',
+            'present_unit': 'POSTED/STR - T/OUT'
+        }
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+        
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 
 

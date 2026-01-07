@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: localhost    Database: hrms
+-- Host: 127.0.0.1    Database: army_personnel_db
 -- ------------------------------------------------------
--- Server version	8.0.40
+-- Server version	8.1.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -569,8 +569,210 @@ CREATE TABLE `monthly_medical_status` (
 
 LOCK TABLES `monthly_medical_status` WRITE;
 /*!40000 ALTER TABLE `monthly_medical_status` DISABLE KEYS */;
+<<<<<<<< HEAD:6JAN.sql
 INSERT INTO `monthly_medical_status` VALUES (1,2025,12,'All',5,'2025-11-11 23:19:39'),(2,2025,12,'1 Company',1,'2025-11-11 23:19:39'),(3,2025,12,'2 Company',2,'2025-11-11 23:19:39'),(4,2025,12,'3 Company',0,'2025-11-11 23:19:39'),(5,2025,12,'4 Company',2,'2025-12-15 23:19:39'),(6,2025,11,'All',6,'2025-11-09 23:00:00'),(7,2025,11,'1 Company',2,'2025-11-09 23:00:00'),(8,2025,11,'2 Company',1,'2025-11-09 23:00:00'),(9,2025,11,'3 Company',1,'2025-11-09 23:00:00'),(10,2025,11,'4 Company',2,'2025-11-09 23:00:00'),(11,2025,10,'All',8,'2025-10-11 23:30:00'),(12,2025,10,'1 Company',2,'2025-10-11 23:30:00'),(13,2025,10,'2 Company',2,'2025-10-11 23:30:00'),(14,2025,10,'3 Company',1,'2025-10-11 23:30:00'),(15,2025,10,'4 Company',3,'2025-10-11 23:30:00'),(16,2025,9,'All',7,'2025-09-15 00:40:00'),(17,2025,9,'1 Company',1,'2025-09-15 00:40:00'),(18,2025,9,'2 Company',2,'2025-09-15 00:40:00'),(19,2025,9,'3 Company',2,'2025-09-15 00:40:00'),(20,2025,9,'4 Company',2,'2025-09-15 00:40:00'),(21,2026,1,'All',5,'2025-12-31 19:03:45'),(22,2026,1,'1 Company',1,'2025-12-31 19:03:45'),(23,2026,1,'2 Company',2,'2025-12-31 19:03:45'),(24,2026,1,'3 Company',0,'2025-12-31 19:03:45'),(25,2026,1,'4 Company',2,'2025-12-31 19:03:45');
+========
+INSERT INTO `monthly_medical_status` VALUES (1,2025,12,'All',5,'2025-11-11 23:19:39'),(2,2025,12,'1 Company',1,'2025-11-11 23:19:39'),(3,2025,12,'2 Company',2,'2025-11-11 23:19:39'),(4,2025,12,'3 Company',0,'2025-11-11 23:19:39'),(5,2025,12,'4 Company',2,'2025-12-15 23:19:39'),(6,2025,11,'All',6,'2025-11-09 23:00:00'),(7,2025,11,'1 Company',2,'2025-11-09 23:00:00'),(8,2025,11,'2 Company',1,'2025-11-09 23:00:00'),(9,2025,11,'3 Company',1,'2025-11-09 23:00:00'),(10,2025,11,'4 Company',2,'2025-11-09 23:00:00'),(11,2025,10,'All',8,'2025-10-11 23:30:00'),(12,2025,10,'1 Company',2,'2025-10-11 23:30:00'),(13,2025,10,'2 Company',2,'2025-10-11 23:30:00'),(14,2025,10,'3 Company',1,'2025-10-11 23:30:00'),(15,2025,10,'4 Company',3,'2025-10-11 23:30:00'),(16,2025,9,'All',7,'2025-09-15 00:40:00'),(17,2025,9,'1 Company',1,'2025-09-15 00:40:00'),(18,2025,9,'2 Company',2,'2025-09-15 00:40:00'),(19,2025,9,'3 Company',2,'2025-09-15 00:40:00'),(20,2025,9,'4 Company',2,'2025-09-15 00:40:00'),(21,2026,1,'All',5,'2026-01-06 17:46:15'),(22,2026,1,'1 Company',1,'2026-01-06 17:46:15'),(23,2026,1,'2 Company',2,'2026-01-06 17:46:15'),(24,2026,1,'3 Company',0,'2026-01-06 17:46:15'),(25,2026,1,'4 Company',2,'2026-01-06 17:46:15');
+>>>>>>>> origin/parade_state_ubaid:Dump20260107.sql
 /*!40000 ALTER TABLE `monthly_medical_status` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `parade_state_daily`
+--
+
+DROP TABLE IF EXISTS `parade_state_daily`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `parade_state_daily` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `report_date` date NOT NULL,
+  `offr_auth` int DEFAULT '0',
+  `offr_hs` int DEFAULT '0',
+  `offr_posted_str` int DEFAULT '0',
+  `offr_lve` int DEFAULT '0',
+  `offr_course` int DEFAULT '0',
+  `offr_det` int DEFAULT '0',
+  `offr_mh` int DEFAULT '0',
+  `offr_sick_lve` int DEFAULT '0',
+  `offr_ex` int DEFAULT '0',
+  `offr_td` int DEFAULT '0',
+  `offr_att` int DEFAULT '0',
+  `offr_awl_osl_jc` int DEFAULT '0',
+  `offr_trout_det` int DEFAULT '0',
+  `offr_present_det` int DEFAULT '0',
+  `offr_present_unit` int DEFAULT '0',
+  `offr_dues_in` int DEFAULT '0',
+  `offr_dues_out` int DEFAULT '0',
+  `jco_auth` int DEFAULT '0',
+  `jco_hs` int DEFAULT '0',
+  `jco_posted_str` int DEFAULT '0',
+  `jco_lve` int DEFAULT '0',
+  `jco_course` int DEFAULT '0',
+  `jco_det` int DEFAULT '0',
+  `jco_mh` int DEFAULT '0',
+  `jco_sick_lve` int DEFAULT '0',
+  `jco_ex` int DEFAULT '0',
+  `jco_td` int DEFAULT '0',
+  `jco_att` int DEFAULT '0',
+  `jco_awl_osl_jc` int DEFAULT '0',
+  `jco_trout_det` int DEFAULT '0',
+  `jco_present_det` int DEFAULT '0',
+  `jco_present_unit` int DEFAULT '0',
+  `jco_dues_in` int DEFAULT '0',
+  `jco_dues_out` int DEFAULT '0',
+  `jcoEre_auth` int DEFAULT '0',
+  `jcoEre_hs` int DEFAULT '0',
+  `jcoEre_posted_str` int DEFAULT '0',
+  `jcoEre_lve` int DEFAULT '0',
+  `jcoEre_course` int DEFAULT '0',
+  `jcoEre_det` int DEFAULT '0',
+  `jcoEre_mh` int DEFAULT '0',
+  `jcoEre_sick_lve` int DEFAULT '0',
+  `jcoEre_ex` int DEFAULT '0',
+  `jcoEre_td` int DEFAULT '0',
+  `jcoEre_att` int DEFAULT '0',
+  `jcoEre_awl_osl_jc` int DEFAULT '0',
+  `jcoEre_trout_det` int DEFAULT '0',
+  `jcoEre_present_det` int DEFAULT '0',
+  `jcoEre_present_unit` int DEFAULT '0',
+  `jcoEre_dues_in` int DEFAULT '0',
+  `jcoEre_dues_out` int DEFAULT '0',
+  `or_auth` int DEFAULT '0',
+  `or_hs` int DEFAULT '0',
+  `or_posted_str` int DEFAULT '0',
+  `or_lve` int DEFAULT '0',
+  `or_course` int DEFAULT '0',
+  `or_det` int DEFAULT '0',
+  `or_mh` int DEFAULT '0',
+  `or_sick_lve` int DEFAULT '0',
+  `or_ex` int DEFAULT '0',
+  `or_td` int DEFAULT '0',
+  `or_att` int DEFAULT '0',
+  `or_awl_osl_jc` int DEFAULT '0',
+  `or_trout_det` int DEFAULT '0',
+  `or_present_det` int DEFAULT '0',
+  `or_present_unit` int DEFAULT '0',
+  `or_dues_in` int DEFAULT '0',
+  `or_dues_out` int DEFAULT '0',
+  `orEre_auth` int DEFAULT '0',
+  `orEre_hs` int DEFAULT '0',
+  `orEre_posted_str` int DEFAULT '0',
+  `orEre_lve` int DEFAULT '0',
+  `orEre_course` int DEFAULT '0',
+  `orEre_det` int DEFAULT '0',
+  `orEre_mh` int DEFAULT '0',
+  `orEre_sick_lve` int DEFAULT '0',
+  `orEre_ex` int DEFAULT '0',
+  `orEre_td` int DEFAULT '0',
+  `orEre_att` int DEFAULT '0',
+  `orEre_awl_osl_jc` int DEFAULT '0',
+  `orEre_trout_det` int DEFAULT '0',
+  `orEre_present_det` int DEFAULT '0',
+  `orEre_present_unit` int DEFAULT '0',
+  `orEre_dues_in` int DEFAULT '0',
+  `orEre_dues_out` int DEFAULT '0',
+  `oaOr_auth` int DEFAULT '0',
+  `oaOr_hs` int DEFAULT '0',
+  `oaOr_posted_str` int DEFAULT '0',
+  `oaOr_lve` int DEFAULT '0',
+  `oaOr_course` int DEFAULT '0',
+  `oaOr_det` int DEFAULT '0',
+  `oaOr_mh` int DEFAULT '0',
+  `oaOr_sick_lve` int DEFAULT '0',
+  `oaOr_ex` int DEFAULT '0',
+  `oaOr_td` int DEFAULT '0',
+  `oaOr_att` int DEFAULT '0',
+  `oaOr_awl_osl_jc` int DEFAULT '0',
+  `oaOr_trout_det` int DEFAULT '0',
+  `oaOr_present_det` int DEFAULT '0',
+  `oaOr_present_unit` int DEFAULT '0',
+  `oaOr_dues_in` int DEFAULT '0',
+  `oaOr_dues_out` int DEFAULT '0',
+  `attSummary_auth` int DEFAULT '0',
+  `attSummary_hs` int DEFAULT '0',
+  `attSummary_posted_str` int DEFAULT '0',
+  `attSummary_lve` int DEFAULT '0',
+  `attSummary_course` int DEFAULT '0',
+  `attSummary_det` int DEFAULT '0',
+  `attSummary_mh` int DEFAULT '0',
+  `attSummary_sick_lve` int DEFAULT '0',
+  `attSummary_ex` int DEFAULT '0',
+  `attSummary_td` int DEFAULT '0',
+  `attSummary_att` int DEFAULT '0',
+  `attSummary_awl_osl_jc` int DEFAULT '0',
+  `attSummary_trout_det` int DEFAULT '0',
+  `attSummary_present_det` int DEFAULT '0',
+  `attSummary_present_unit` int DEFAULT '0',
+  `attSummary_dues_in` int DEFAULT '0',
+  `attSummary_dues_out` int DEFAULT '0',
+  `attOffr_auth` int DEFAULT '0',
+  `attOffr_hs` int DEFAULT '0',
+  `attOffr_posted_str` int DEFAULT '0',
+  `attOffr_lve` int DEFAULT '0',
+  `attOffr_course` int DEFAULT '0',
+  `attOffr_det` int DEFAULT '0',
+  `attOffr_mh` int DEFAULT '0',
+  `attOffr_sick_lve` int DEFAULT '0',
+  `attOffr_ex` int DEFAULT '0',
+  `attOffr_td` int DEFAULT '0',
+  `attOffr_att` int DEFAULT '0',
+  `attOffr_awl_osl_jc` int DEFAULT '0',
+  `attOffr_trout_det` int DEFAULT '0',
+  `attOffr_present_det` int DEFAULT '0',
+  `attOffr_present_unit` int DEFAULT '0',
+  `attOffr_dues_in` int DEFAULT '0',
+  `attOffr_dues_out` int DEFAULT '0',
+  `attJco_auth` int DEFAULT '0',
+  `attJco_hs` int DEFAULT '0',
+  `attJco_posted_str` int DEFAULT '0',
+  `attJco_lve` int DEFAULT '0',
+  `attJco_course` int DEFAULT '0',
+  `attJco_det` int DEFAULT '0',
+  `attJco_mh` int DEFAULT '0',
+  `attJco_sick_lve` int DEFAULT '0',
+  `attJco_ex` int DEFAULT '0',
+  `attJco_td` int DEFAULT '0',
+  `attJco_att` int DEFAULT '0',
+  `attJco_awl_osl_jc` int DEFAULT '0',
+  `attJco_trout_det` int DEFAULT '0',
+  `attJco_present_det` int DEFAULT '0',
+  `attJco_present_unit` int DEFAULT '0',
+  `attJco_dues_in` int DEFAULT '0',
+  `attJco_dues_out` int DEFAULT '0',
+  `attOr_auth` int DEFAULT '0',
+  `attOr_hs` int DEFAULT '0',
+  `attOr_posted_str` int DEFAULT '0',
+  `attOr_lve` int DEFAULT '0',
+  `attOr_course` int DEFAULT '0',
+  `attOr_det` int DEFAULT '0',
+  `attOr_mh` int DEFAULT '0',
+  `attOr_sick_lve` int DEFAULT '0',
+  `attOr_ex` int DEFAULT '0',
+  `attOr_td` int DEFAULT '0',
+  `attOr_att` int DEFAULT '0',
+  `attOr_awl_osl_jc` int DEFAULT '0',
+  `attOr_trout_det` int DEFAULT '0',
+  `attOr_present_det` int DEFAULT '0',
+  `attOr_present_unit` int DEFAULT '0',
+  `attOr_dues_in` int DEFAULT '0',
+  `attOr_dues_out` int DEFAULT '0',
+  `total_auth` int DEFAULT '0',
+  `total_present` int DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `report_date` (`report_date`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `parade_state_daily`
+--
+
+LOCK TABLES `parade_state_daily` WRITE;
+/*!40000 ALTER TABLE `parade_state_daily` DISABLE KEYS */;
+INSERT INTO `parade_state_daily` VALUES (1,'2026-01-06',23,1,1,1,1,1,1,1,1,1,1,1,1,1,4,2,1,55,2,2,2,1,1,1,1,1,1,1,1,1,1,3,2,2,41,2,3,1,1,1,1,1,1,1,1,1,3,2,4,3,1,29,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,43,2,1,1,1,1,2,2,2,2,1,1,1,2,4,2,1,51,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,2,20,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,9,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,28,1,1,1,2,2,1,1,1,1,1,1,1,1,2,1,1,112,2,2,3,2,2,1,4,3,2,2,2,1,3,19,3,1,191,16,'2026-01-06 18:56:28');
+/*!40000 ALTER TABLE `parade_state_daily` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1127,4 +1329,8 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+<<<<<<<< HEAD:6JAN.sql
 -- Dump completed on 2026-01-06 15:27:45
+========
+-- Dump completed on 2026-01-07  1:24:44
+>>>>>>>> origin/parade_state_ubaid:Dump20260107.sql
