@@ -24,6 +24,7 @@ import json
 import os
 import pandas as pd
 from datetime import datetime
+from decimal import Decimal
 
 from middleware import require_login, jwt, JWT_ALGO, JWT_SECRET
 
