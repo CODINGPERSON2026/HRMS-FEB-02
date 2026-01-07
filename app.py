@@ -1071,8 +1071,8 @@ def get_projects():
     company = user['company']
 
     try:
-        # Base query
-        query = """
+        # 1️⃣ Fetch projects
+        project_query = """
             SELECT project_id, head, project_name, current_stage, project_cost, project_items, quantity, project_description
             FROM projects
         """
@@ -1080,15 +1080,21 @@ def get_projects():
 
         # Apply company filter if not Admin
         if company != "Admin":
-            query += " WHERE company = %s"  # or "WHERE company = %s" if you have a company column
+            project_query += " WHERE company = %s"
             params.append(company)
 
-        cursor.execute(query, params)
+        cursor.execute(project_query, params)
         projects = cursor.fetchall()
-        return render_template("projects/projects.html", projects=projects)
+
+        # 2️⃣ Fetch all heads from project_heads table
+        cursor.execute("SELECT id, head_name, created_at FROM project_heads ORDER BY head_name ASC")
+        heads = cursor.fetchall()  # List of dicts: [{'id':1, 'head_name':'John', 'created_at':...}, ...]
+
+        # 3️⃣ Render template with both projects and heads
+        return render_template("projects/projects.html", projects=projects, heads=heads)
 
     except Exception as e:
-        print("Error fetching projects:", str(e))
+        print("Error fetching projects or heads:", str(e))
         return "Server Error", 500
 
     finally:
@@ -1173,6 +1179,27 @@ def update_project_stage():
         print("Error updating stage:", e)
         return jsonify({"status": "error", "message": "Database error"}), 500
 
+# Fetch heads for dropdown
+# @app.route('/project_dashboard')
+
+
+# Add new head
+@app.route('/add_head', methods=['POST'])
+def add_head():
+    data = request.get_json()
+    head_name = data.get("head_name").strip()
+    if not head_name:
+        return jsonify(status='error', message='Head name cannot be empty')
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO project_heads (head_name) VALUES (%s)", (head_name,))
+        conn.commit()
+        return jsonify(status='success')
+    except mysql.connector.IntegrityError:
+        return jsonify(status='error', message='Head already exists')
+    except Exception as e:
+        return jsonify(status='error', message=str(e))
 
 
 @app.route("/search_officer")
@@ -1350,6 +1377,11 @@ def dashboard_summary():
         )
         sensitive_result = cursor.fetchone()
         sensitive_count = sensitive_result['count'] if sensitive_result else 0
+        # 7️⃣ Boards Count
+        cursor.execute("SELECT COUNT(*) AS count FROM boards")
+        boards_result = cursor.fetchone()
+        boards_count = boards_result['count'] if boards_result else 0
+
 
         # Return combined JSON
         return jsonify({
@@ -1362,8 +1394,9 @@ def dashboard_summary():
                 "percentage": interview_percentage
             },
             "projects": projects,
+            "boards_count": boards_count, 
             "assigned_alarm": assigned_alarm_rows,
-            "sensitive_count": sensitive_count  # ⚡ New sensitive count
+            "sensitive_count": sensitive_count
         }), 200
 
     except Exception as e:
@@ -1382,62 +1415,6 @@ def dashboard_summary():
 
 
 
-from flask import request, jsonify
-from datetime import datetime
-
-@app.route('/add_user', methods=['POST'])
-def add_user():
-
-    # Allow only AJAX requests
-    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
-        return jsonify({'status': 'error', 'message': 'Invalid request'}), 400
-
-    username = request.form.get('username', '').strip()
-    email    = request.form.get('email', '').strip()
-    password = request.form.get('password', '')
-    role     = request.form.get('role', '')
-
-    # Basic validation
-    if not username or not email or not password or not role:
-        return jsonify({'status': 'error', 'message': 'All fields are required'}), 400
-
-    # Assign company only if role is CO or 2IC
-    company = None
-    if role in ['CO', '2IC']:
-        company = 'DEFAULT_COMPANY'   # 🔁 change as needed
-
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # Check duplicate email
-        cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
-        if cursor.fetchone():
-            return jsonify({'status': 'error', 'message': 'Email already exists'}), 409
-
-        # Insert user (NO HASH)
-        cursor.execute("""
-            INSERT INTO users (username, email, password, role, company, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (
-            username,
-            email,
-            password,
-            role,
-            company,
-            datetime.now()
-        ))
-
-        conn.commit()
-        return jsonify({'status': 'success', 'message': 'User added successfully'})
-
-    except Exception as e:
-        print("Add User Error:", e)
-        return jsonify({'status': 'error', 'message': 'Server error'}), 500
-
-    finally:
-        cursor.close()
-        conn.close()
 
 
 if __name__ == '__main__':

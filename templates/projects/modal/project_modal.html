@@ -1,3 +1,4 @@
+<!-- ADD PROJECT MODAL -->
 <div class="modal fade" id="addProjectModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -14,17 +15,11 @@
                     <!-- HEAD -->
                     <div class="col-md-6">
                         <label class="form-label">Head *</label>
-                        <select class="form-select" name="head" required>
+                        <select class="form-select" name="head" id="addProjectHeadSelect" required>
                             <option value="">Select Head</option>
-                            <option value="IT">IT</option>
-                            <option value="TAG">TAG</option>
-                            <option value="ACG">ACG</option>
-                            <option value="SWSG">SWSG</option>
-                            <option value="PPC">PPC</option>
-                            <option value="ATH">ATH</option>
-                            <option value="ETH">ETH</option>
-                            <option value="CLTS">CLTS</option>
-                            <option value="ENG">ENG</option>
+                            {% for head in heads %}
+                                <option value="{{ head.head_name }}">{{ head.head_name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
@@ -40,10 +35,9 @@
                         <select class="form-select" name="current_stage" required>
                             <option value="">Select Stage</option>
                             <option value="PPP">PPP</option>
-                            
                             <option value="AON">AON</option>
                             <option value="FBU">FBU</option>
-                            <option value="TOB">TOB & TEC</option>
+                            <option value="TOB & TEC">TOB & TEC</option>
                             <option value="B BD">B BD</option>
                             <option value="OCB RA">OCB RA</option>
                             <option value="Placement Of SO">Placement Of SO</option>
@@ -61,13 +55,13 @@
                         <input class="form-control" name="project_cost" type="number" required>
                     </div>
 
-                    <!-- 🔹 PROJECT ITEMS (NEW) -->
+                    <!-- PROJECT ITEMS -->
                     <div class="col-md-6">
                         <label class="form-label">Project Items *</label>
                         <input class="form-control" name="project_items" placeholder="e.g. Radios, Vehicles" required>
                     </div>
 
-                    <!-- 🔹 QUANTITY (NEW) -->
+                    <!-- QUANTITY -->
                     <div class="col-md-6">
                         <label class="form-label">Quantity *</label>
                         <input class="form-control" name="quantity" type="number" min="1" required>
@@ -90,7 +84,47 @@
     </div>
 </div>
 
+
 <script>
+    // Update Add Project Head dropdown when a new head is added
+document.getElementById("addHeadForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const headName = document.getElementById("headNameInput").value.trim();
+    if (!headName) return;
+
+    fetch('/add_head', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ head_name: headName })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const alertDiv = document.getElementById("headAlert");
+        if (data.status === 'success') {
+            // Update Head dropdown in main filter
+            const mainSelect = document.getElementById("headSelect");
+            const mainOption = document.createElement("option");
+            mainOption.value = headName;
+            mainOption.textContent = headName;
+            mainSelect.appendChild(mainOption);
+            mainSelect.value = headName;
+
+            // Update Head dropdown in Add Project modal
+            const projectSelect = document.getElementById("addProjectHeadSelect");
+            const projectOption = document.createElement("option");
+            projectOption.value = headName;
+            projectOption.textContent = headName;
+            projectSelect.appendChild(projectOption);
+
+            alertDiv.innerHTML = '<div class="alert alert-success py-1">Head added successfully!</div>';
+            document.getElementById("headNameInput").value = '';
+        } else {
+            alertDiv.innerHTML = `<div class="alert alert-danger py-1">${data.message}</div>`;
+        }
+    })
+    .catch(err => console.error(err));
+});
+
 function addProject() {
     const form = document.getElementById("addProjectForm");
 

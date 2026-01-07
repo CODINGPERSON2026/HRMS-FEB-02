@@ -398,7 +398,7 @@
   <!-- Second Row Cards -->
   <div class="card p-3 text-center" id="openBoardDetails">
     <small class="text-muted">BOO's</small>
-    <h3>98</h3>
+    <h3 id="board-count" >98</h3>
   </div>
 
   <div class="card p-3 text-center" style="cursor:pointer" id="openSensitive">
@@ -721,6 +721,7 @@ document.getElementById("show-btn").addEventListener("click", function() {
           document.getElementById('interview%').innerText = data.interview.percentage + '%' || '0';
           document.getElementById('get_projects_count').innerText = data.projects || '0';
           document.getElementById('sensitive-count').innerText = data.sensitive_count || '0';
+          document.getElementById('board-count').innerText = data.boards_count || '0';
     
         } catch (err) {
           console.error("Error loading dashboard data:", err);

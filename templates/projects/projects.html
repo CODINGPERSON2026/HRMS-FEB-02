@@ -14,80 +14,6 @@
             --sidebar-width: 240px;
             --border: #e2e8f0;
             --bg-light: #f8fafc;
-        }
-
-        .content-wrapper {
-            padding-left: var(--sidebar-width);
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding-top: 1px;
-            min-height: 100vh;
-        }
-
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .project-card {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            cursor: pointer;
-            display: none;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.4s ease;
-        }
-
-        .project-card.show {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .project-card:hover {
-            box-shadow: 0 6px 15px rgba(0,0,0,0.12);
-            transform: translateY(-3px);
-        }
-
-        .stage-text.flash {
-            animation: flashStage 0.8s ease;
-        }
-
-        @keyframes flashStage {
-            0% { background-color: #d1e7dd; }
-            50% { background-color: #0d6efd; color: white; }
-            100% { background-color: transparent; color: inherit; }
-        }
-
-        .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 1rem;
-        }
-
-        .floating-add-btn {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: #0d6efd;
-            color: white;
-            border: none;
-            font-size: 1.4rem;
-        }
-
-    </style>
-    <style>
-        :root {
-            --sidebar-width: 240px;
-            --border: #e2e8f0;
-            --bg-light: #f8fafc;
             --card-hover: #f0f4ff;
             --card-gradient-start: #fdfbfb;
             --card-gradient-end: #ebedee;
@@ -95,21 +21,21 @@
             --dropdown-hover: #0d6efd;
             --dropdown-hover-text: #fff;
         }
-    
+
         .content-wrapper {
             padding-left: var(--sidebar-width);
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             padding-top: 1px;
             min-height: 100vh;
         }
-    
+
         .projects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 1.5rem;
             margin-top: 1rem;
         }
-    
+
         .project-card {
             background: linear-gradient(145deg, var(--card-gradient-start), var(--card-gradient-end));
             border-radius: 12px;
@@ -121,46 +47,44 @@
             transform: translateY(10px);
             transition: all 0.5s ease, transform 0.4s ease;
         }
-    
+
         .project-card.show {
             display: block;
             opacity: 1;
             transform: translateY(0);
         }
-    
+
         .project-card:hover {
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             transform: translateY(-5px);
             background: linear-gradient(145deg, #e0f0ff, #d0e6ff);
         }
-    
+
         .project-card .p-3 {
             transition: color 0.3s ease, background 0.3s ease;
         }
-    
+
         .project-card:hover .p-3 {
             color: #0d6efd;
         }
-    
+
         .stage-text.flash {
             animation: flashStage 0.8s ease;
         }
-    
+
         @keyframes flashStage {
             0% { background-color: #d1e7dd; }
             50% { background-color: #0d6efd; color: white; }
             100% { background-color: transparent; color: inherit; }
         }
-    
-        /* Empty state styling */
+
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
             padding: 1rem;
             transition: all 0.4s ease;
         }
-    
-        /* Floating add button */
+
         .floating-add-btn {
             position: fixed;
             bottom: 2rem;
@@ -174,31 +98,28 @@
             font-size: 1.4rem;
             transition: transform 0.3s ease, background 0.3s ease;
         }
-    
+
         .floating-add-btn:hover {
             transform: scale(1.1);
             background: #2563eb;
         }
-    
-        /* Dropdown styling */
+
         .form-select {
             transition: all 0.3s ease;
             border: 1px solid var(--border);
             background-color: var(--dropdown-bg);
         }
-    
+
         .form-select:focus {
             border-color: #0d6efd;
             box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
         }
-    
+
         .form-select option:hover {
             background-color: var(--dropdown-hover);
             color: var(--dropdown-hover-text);
         }
-    
     </style>
-    
 </head>
 
 <body>
@@ -210,15 +131,20 @@
     {% set subscript = 'Add Project → View Projects → Update Projects' %}
     {% include 'navbar/navbar.html' %}
 
-    <!-- HEAD DROPDOWN -->
-    <div class="mb-3">
-        <label class="fw-bold small text-muted">Select Head to View Projects</label>
-        <select class="form-select w-auto" id="headSelect">
-            <option value="">-- Select Head --</option>
-            <option value="IT">IT</option>
-            <option value="TAG">TAG</option>
-            <option value="ENG">ENG</option>
-        </select>
+    <!-- HEAD DROPDOWN WITH ADD BUTTON -->
+    <div class="mb-3 d-flex align-items-center gap-2">
+        <div>
+            <label class="fw-bold small text-muted">Select Head to View Projects</label>
+            <select class="form-select" id="headSelect">
+                <option value="">-- Select Head --</option>
+                {% for head in heads %}
+                    <option value="{{ head.head_name }}">{{ head.head_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-sm btn-outline-primary mt-4" data-bs-toggle="modal" data-bs-target="#addHeadModal">
+            Add Head
+        </button>
     </div>
 
     <!-- STAGE DROPDOWN -->
@@ -242,9 +168,7 @@
     </div>
 
     <!-- EMPTY STATE / HEAD SUMMARY -->
-    <div class="empty-state" id="emptyState">
-        <!-- dynamically populated -->
-    </div>
+    <div class="empty-state" id="emptyState"></div>
 
     <!-- PROJECT GRID -->
     <div class="projects-grid" id="projectsGrid">
@@ -276,7 +200,29 @@
 
 {% include "projects/modal/project_modal.html" %}
 
-<!-- FULL DETAILS MODAL IN TABULAR FORM WITH STAGE DROPDOWN -->
+<!-- ADD HEAD MODAL -->
+<div class="modal fade" id="addHeadModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Add New Head</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addHeadForm">
+                    <div class="mb-3">
+                        <label class="form-label">Head Name</label>
+                        <input type="text" class="form-control" id="headNameInput" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Add Head</button>
+                </form>
+                <div id="headAlert" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PROJECT DETAILS MODAL -->
 <div class="modal fade" id="projectDetailModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -312,22 +258,20 @@
 
                 <div class="mt-3">
                     <label class="fw-bold">Update Stage:</label>
-                    <div id="stageButtons">
-                        <select class="form-select w-auto" id="modalStageSelect" onchange="updateStage(this.value)">
-                            <option value="PPP">PPP</option>
-                            <option value="AON">AON</option>
-                            <option value="FBU">FBU</option>
-                            <option value="TOB & TEC">TOB & TEC</option>
-                            <option value="B BD">B BD</option>
-                            <option value="OCB RA">OCB RA</option>
-                            <option value="Placement Of SO">Placement Of SO</option>
-                            <option value="Store/Items Delivery">Store / Items Delivery</option>
-                            <option value="ATP">ATP</option>
-                            <option value="PRAC & CRAC">PRAC & CRAC</option>
-                            <option value="Payment">Payment</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
+                    <select class="form-select w-auto" id="modalStageSelect" onchange="updateStage(this.value)">
+                        <option value="PPP">PPP</option>
+                        <option value="AON">AON</option>
+                        <option value="FBU">FBU</option>
+                        <option value="TOB & TEC">TOB & TEC</option>
+                        <option value="B BD">B BD</option>
+                        <option value="OCB RA">OCB RA</option>
+                        <option value="Placement Of SO">Placement Of SO</option>
+                        <option value="Store/Items Delivery">Store / Items Delivery</option>
+                        <option value="ATP">ATP</option>
+                        <option value="PRAC & CRAC">PRAC & CRAC</option>
+                        <option value="Payment">Payment</option>
+                        <option value="Completed">Completed</option>
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">
@@ -352,7 +296,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const emptyState = document.getElementById("emptyState");
 
     function applyFilters() {
-        // Show head summary if no head is selected
         if (!selectedHead) {
             const headCounts = {};
             cards.forEach(card => {
@@ -384,7 +327,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Show projects filtered by head and stage
         let visible = 0;
         cards.forEach(card => {
             const matchHead = card.dataset.head === selectedHead;
@@ -415,7 +357,6 @@ document.addEventListener("DOMContentLoaded", () => {
         applyFilters();
     });
 
-    // Initial load: show head summary
     applyFilters();
 });
 
@@ -463,6 +404,37 @@ function updateStage(stage) {
     })
     .catch(err => console.error(err));
 }
+
+// ADD HEAD FORM SUBMIT
+document.getElementById("addHeadForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const headName = document.getElementById("headNameInput").value.trim();
+    if (!headName) return;
+
+    fetch('/add_head', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ head_name: headName })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const alertDiv = document.getElementById("headAlert");
+        if (data.status === 'success') {
+            const select = document.getElementById("headSelect");
+            const option = document.createElement("option");
+            option.value = headName;
+            option.textContent = headName;
+            select.appendChild(option);
+            select.value = headName;
+
+            alertDiv.innerHTML = '<div class="alert alert-success py-1">Head added successfully!</div>';
+            document.getElementById("headNameInput").value = '';
+        } else {
+            alertDiv.innerHTML = `<div class="alert alert-danger py-1">${data.message}</div>`;
+        }
+    })
+    .catch(err => console.error(err));
+});
 </script>
 
 </body>
