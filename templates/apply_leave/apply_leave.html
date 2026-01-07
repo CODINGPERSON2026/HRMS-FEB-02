@@ -177,7 +177,7 @@ if (data.exists) {
   resultsTable.innerHTML = "";
 
   // 🚫 Disable Apply button
-  applyLeaveBtn.disabled = true;
+  applyLeaveBtn.disabled = false;
 
   if (leave.request_status === "Approved") {
     resultsTable.innerHTML = `
