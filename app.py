@@ -1131,12 +1131,30 @@ def get_projects():
 def add_project():
     data = request.form
     print(data)
-    conn = get_db_connection()
-    cur = conn.cursor()
     user = require_login()
     user_company = user['company']
-    project_items_json = json.dumps(data.get('project_items', {}))
 
+    project_items_json = json.dumps(data.get('project_items', ''))
+
+    project_cost = float(data.get("project_cost", 0))
+    quantity = int(data.get("quantity", 0))
+
+    values = (
+        data.get("project_name", ""),
+        data.get("head", ""),
+        data.get("current_stage", ""),
+        project_cost,
+        project_items_json,
+        quantity,
+        data.get("project_description", ""),
+        user_company
+    )
+
+    print("Inserting values:", values)
+    print("Values count:", len(values))  # Should print 8
+
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("""
         INSERT INTO projects (
             project_name,
@@ -1148,24 +1166,13 @@ def add_project():
             project_description,
             company
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s,%s)
-    """, (
-        data["project_name"],
-        data["head"],              # ✅ NEW
-        data["head"],              # ✅ NEW
-        data["current_stage"],
-        data["project_cost"],
-        project_items_json,
-        data["quantity"],
-        data["project_description"],
-        user_company
-    ))
-
-
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """, values)
     conn.commit()
     conn.close()
 
     return jsonify({"status": "success"})
+
 
 @app.route("/get_projects_count", methods=["GET"])
 def get_project_count():
