@@ -1,1134 +1,1286 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Daily Parade State Management System</title>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
+    <style>
+        /* Add box-sizing for better sizing control */
+        * {
+            box-sizing: border-box;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
 
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                background-color: #f5f5f5;
-                color: #333;
-                line-height: 1.6;
-                padding: 20px;
-            }
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
+            gap: 20px;
+            padding: 24px 32px;
+            background: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+        }
 
-            .container {
-                max-width: 100%;
-                margin: 0 auto;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-                overflow: hidden;
-            }
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-            /* Header Styles */
-            .header {
-                background: #fff;
-                padding: 24px 32px;
-                border-bottom: 1px solid #e0e0e0;
-            }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            line-height: 1;
+        }
 
-            .header-content {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 20px;
-            }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
 
-            .title-section h1 {
-                font-size: 24px;
-                font-weight: 600;
-                color: #333;
-                margin-bottom: 8px;
-            }
+        /* Search Section Styles */
+        .search-section {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
 
-            .title-section .subtitle {
-                color: #666;
-                font-size: 14px;
-            }
+        .search-input {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #fff;
+            color: #333;
+            min-width: 200px;
+            transition: border-color 0.2s;
+        }
 
+        .search-input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f5f5;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-outline:hover {
+            background: #f5f5f5;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Actions Bar */
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 32px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .actions-left, .actions-right {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Status Message */
+        .status-message {
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 48px;
+        }
+
+        .status-message.success {
+            background: #f0f9f0;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .status-message.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        .status-message.warning {
+            background: #fff3e0;
+            color: #f57c00;
+            border: 1px solid #ffcc80;
+        }
+
+        .status-message.info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+
+        /* Search Results */
+        .search-results {
+            display: none;
+            padding: 20px 32px;
+            background: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .results-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .result-card {
+            background: white;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .result-card:hover {
+            border-color: #666;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-date {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .result-meta {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .result-meta div {
+            margin-bottom: 2px;
+        }
+
+        /* Metadata Panel */
+        .metadata-panel {
+            padding: 20px 32px;
+            background: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        .metadata-panel.active {
+            display: block;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .metadata-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .metadata-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .metadata-value {
+            font-size: 14px;
+            color: #333;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* Table Styles - Updated for larger inputs */
+        .table-wrapper {
+            overflow-x: auto;
+            padding: 0;
+            max-height: 70vh; /* Limit height and add scroll */
+            overflow-y: auto; /* Add vertical scroll */
+            border-top: 1px solid #e0e0e0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            min-width: 1200px; /* Ensure minimum width for scrolling */
+        }
+
+        th {
+            background: #f8f8f8;
+            color: #333;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 16px 12px;
+            text-align: center;
+            border-bottom: 2px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px;
+            text-align: center;
+            font-size: 13px;
+            border-bottom: 1px solid #e0e0e0;
+            min-width: 80px; /* Increased minimum width for cells */
+        }
+
+        .category-cell {
+            font-weight: 600;
+            background-color: #f8f8f8;
+            text-align: left;
+            padding-left: 20px;
+            color: #333;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            min-width: 120px; /* Wider category column */
+        }
+
+        tr:hover td {
+            background-color: #f9f9f9;
+        }
+
+        .total-row td {
+            background-color: #f0f0f0;
+            font-weight: 600;
+        }
+
+        .total-row .category-cell {
+            background-color: #e8e8e8;
+        }
+
+        .grand-total-row td {
+            background-color: #333;
+            color: white;
+            font-weight: 700;
+        }
+
+        .grand-total-row .category-cell {
+            background-color: #333;
+            color: white;
+        }
+
+        /* Larger input fields */
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 12px 8px; /* Increased padding for larger fields */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px; /* Slightly larger font */
+            background: white;
+            color: #333;
+            transition: border-color 0.2s;
+            min-height: 42px; /* Minimum height for consistency */
+            font-weight: 500;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .calculated-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 42px; /* Match input height */
+        }
+
+        .grand-total-row .calculated-value {
+            color: white;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom scrollbar for table wrapper */
+        .table-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            th, td {
+                min-width: 70px;
+            }
+            
+            .category-cell {
+                min-width: 100px;
+            }
+        }
+
+        @media (max-width: 768px) {
             .search-section {
-                display: flex;
-                gap: 12px;
-                align-items: center;
-                flex-wrap: wrap;
+                width: 100%;
             }
 
             .search-input {
-                padding: 12px 16px;
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                font-size: 14px;
-                background: #fff;
-                color: #333;
-                min-width: 200px;
-                transition: border-color 0.2s;
+                flex: 1;
+                min-width: 0;
             }
 
-            .search-input:focus {
-                outline: none;
-                border-color: #666;
-            }
-
-            .btn {
-                padding: 12px 24px;
-                border: none;
-                border-radius: 6px;
-                font-weight: 500;
-                font-size: 14px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .btn-primary {
-                background: #3b82f6;
-                color: white;
-            }
-
-            .btn-primary:hover {
-                background: #2563eb;
-            }
-
-            .btn-secondary {
-                background: #fff;
-                color: #333;
-                border: 1px solid #ddd;
-            }
-
-            .btn-secondary:hover {
-                background: #f5f5f5;
-            }
-
-            .btn-outline {
-                background: transparent;
-                color: #333;
-                border: 1px solid #ddd;
-            }
-
-            .btn-outline:hover {
-                background: #f5f5f5;
-            }
-
-            .btn:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
-
-            /* Stats Bar */
             .stats-bar {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 20px;
-                padding: 24px 32px;
-                background: #f8f8f8;
-                border-bottom: 1px solid #e0e0e0;
+                grid-template-columns: 1fr;
             }
 
-            .stat-item {
-                background: white;
-                padding: 20px;
-                border-radius: 6px;
-                border: 1px solid #e0e0e0;
-            }
-
-            .stat-value {
-                font-size: 32px;
-                font-weight: 600;
-                color: #333;
-                margin-bottom: 4px;
-            }
-
-            .stat-label {
-                font-size: 12px;
-                color: #666;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                font-weight: 500;
-            }
-
-            /* Actions Bar */
             .actions-bar {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 20px 32px;
-                background: white;
-                border-bottom: 1px solid #e0e0e0;
-                flex-wrap: wrap;
-                gap: 16px;
+                flex-direction: column;
+                align-items: stretch;
             }
 
             .actions-left, .actions-right {
-                display: flex;
-                gap: 12px;
-                flex-wrap: wrap;
-            }
-
-            /* Status Message */
-            .status-message {
-                padding: 12px 20px;
-                border-radius: 6px;
-                font-size: 14px;
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                min-height: 48px;
-            }
-
-            .status-message.success {
-                background: #f0f9f0;
-                color: #2e7d32;
-                border: 1px solid #c8e6c9;
-            }
-
-            .status-message.error {
-                background: #ffebee;
-                color: #c62828;
-                border: 1px solid #ffcdd2;
-            }
-
-            .status-message.warning {
-                background: #fff3e0;
-                color: #f57c00;
-                border: 1px solid #ffcc80;
-            }
-
-            .status-message.info {
-                background: #e3f2fd;
-                color: #1565c0;
-                border: 1px solid #90caf9;
-            }
-
-            /* Search Results */
-            .search-results {
-                display: none;
-                padding: 20px 32px;
-                background: #f8f8f8;
-                border-bottom: 1px solid #e0e0e0;
-            }
-
-            .search-results.active {
-                display: block;
-            }
-
-            .results-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 16px;
-            }
-
-            .results-header h3 {
-                font-size: 16px;
-                font-weight: 600;
-                color: #333;
-            }
-
-            .results-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 16px;
-            }
-
-            .result-card {
-                background: white;
-                padding: 16px;
-                border-radius: 6px;
-                border: 1px solid #e0e0e0;
-                cursor: pointer;
-                transition: all 0.2s ease;
-            }
-
-            .result-card:hover {
-                border-color: #666;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            }
-
-            .result-date {
-                font-weight: 600;
-                color: #333;
-                margin-bottom: 4px;
-            }
-
-            .result-meta {
-                font-size: 12px;
-                color: #666;
-            }
-
-            .result-meta div {
-                margin-bottom: 2px;
-            }
-
-            /* Metadata Panel */
-            .metadata-panel {
-                padding: 20px 32px;
-                background: #f8f8f8;
-                border-bottom: 1px solid #e0e0e0;
-                display: none;
-            }
-
-            .metadata-panel.active {
-                display: block;
-            }
-
-            .metadata-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 16px;
-                margin-top: 16px;
-            }
-
-            .metadata-field {
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-            }
-
-            .metadata-label {
-                font-size: 12px;
-                color: #666;
-                font-weight: 500;
-            }
-
-            .metadata-value {
-                font-size: 14px;
-                color: #333;
-                padding: 8px 12px;
-                background: white;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-            }
-
-            /* Table Styles */
-            .table-wrapper {
-                overflow-x: auto;
-                padding: 0;
-            }
-
-            table {
                 width: 100%;
-                border-collapse: separate;
-                border-spacing: 0;
-                background: white;
+                justify-content: center;
             }
 
-            th {
-                background: #f8f8f8;
-                color: #333;
-                font-weight: 600;
-                font-size: 12px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                padding: 16px 12px;
-                text-align: center;
-                border-bottom: 2px solid #e0e0e0;
-                position: sticky;
-                top: 0;
-                z-index: 10;
-            }
-
-            td {
-                padding: 12px;
-                text-align: center;
-                font-size: 13px;
-                border-bottom: 1px solid #e0e0e0;
+            th, td {
+                padding: 8px 4px;
+                font-size: 11px;
+                min-width: 60px;
             }
 
             .category-cell {
-                font-weight: 600;
-                background-color: #f8f8f8;
-                text-align: left;
-                padding-left: 20px;
-                color: #333;
-                position: sticky;
-                left: 0;
-                z-index: 5;
+                padding-left: 12px;
+                min-width: 80px;
             }
-
-            tr:hover td {
-                background-color: #f9f9f9;
-            }
-
-            .total-row td {
-                background-color: #f0f0f0;
-                font-weight: 600;
-            }
-
-            .total-row .category-cell {
-                background-color: #e8e8e8;
-            }
-
-            .grand-total-row td {
-                background-color: #333;
-                color: white;
-                font-weight: 700;
-            }
-
-            .grand-total-row .category-cell {
-                background-color: #333;
-                color: white;
-            }
-
+            
             input[type="number"], input[type="text"] {
-                width: 100%;
-                padding: 8px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                text-align: center;
-                font-size: 13px;
-                background: white;
-                color: #333;
-                transition: border-color 0.2s;
+                padding: 8px 4px;
+                font-size: 12px;
+                min-height: 36px;
+            }
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
             }
 
-            input[type="number"]:focus, input[type="text"]:focus {
-                outline: none;
-                border-color: #666;
-                box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+            .table-wrapper {
+                overflow: visible;
+                max-height: none;
             }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading"></div>
+            <p style="margin-top: 16px;">Loading data...</p>
+        </div>
+    </div>
 
-            .calculated-value {
-                font-weight: 600;
-                color: #333;
-            }
-
-            .grand-total-row .calculated-value {
-                color: white;
-            }
-
-            /* Loading State */
-            .loading {
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                border: 2px solid #f3f3f3;
-                border-top: 2px solid #333;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-            }
-
-            .loading-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(255, 255, 255, 0.9);
-                display: none;
-                justify-content: center;
-                align-items: center;
-                z-index: 1000;
-            }
-
-            .loading-overlay.active {
-                display: flex;
-            }
-
-            .loading-content {
-                text-align: center;
-                padding: 40px;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            }
-
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-
-            /* Responsive Design */
-            @media (max-width: 768px) {
-                .header-content {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-
-                .search-section {
-                    width: 100%;
-                }
-
-                .search-input {
-                    flex: 1;
-                    min-width: 0;
-                }
-
-                .stats-bar {
-                    grid-template-columns: 1fr;
-                }
-
-                .actions-bar {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-
-                .actions-left, .actions-right {
-                    width: 100%;
-                    justify-content: center;
-                }
-
-                th, td {
-                    padding: 8px 4px;
-                    font-size: 11px;
-                }
-
-                .category-cell {
-                    padding-left: 12px;
-                }
-            }
-
-            @media print {
-                .no-print {
-                    display: none !important;
-                }
-
-                .table-wrapper {
-                    overflow: visible;
-                }
-
-                table {
-                    break-inside: avoid;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="loading-overlay" id="loadingOverlay">
-            <div class="loading-content">
-                <div class="loading"></div>
-                <p style="margin-top: 16px;">Loading data...</p>
+    <div class="container">
+        <!-- Stats Bar - Now with 4 columns including Total Out -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="totalAuth">0</div>
+                <div class="stat-label">Total Authorized Strength</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="presentUnit">0</div>
+                <div class="stat-label">Present Unit Strength</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalOut">0</div>
+                <div class="stat-label">Total Out</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="reportDateDisplay">-</div>
+                <div class="stat-label">Report Date</div>
             </div>
         </div>
-
-        <div class="container">
-            <!-- Header -->
-            <div class="header">
-                <div class="header-content">
-                    <div class="title-section">
-                        <h1>📊 Daily Parade State Management</h1>
-                        <div class="subtitle">Military Personnel Tracking System</div>
-                    </div>
-                    
-                    <div class="search-section">
-                        <input type="date" class="search-input" id="currentDate" value="">
-                        <button class="btn btn-outline" onclick="loadDataForCurrentDate()" id="loadDateBtn">
-                            🔍 Load Date
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats Bar -->
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <div class="stat-value" id="totalAuth">0</div>
-                    <div class="stat-label">Total Authorized Strength</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="presentUnit">0</div>
-                    <div class="stat-label">Present Unit Strength</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="reportDateDisplay">-</div>
-                    <div class="stat-label">Report Date</div>
-                </div>
-            </div>
-            <!-- Search Section -->
-            <div class="search-section no-print" style="padding: 20px 32px; background: #f8f8f8; border-bottom: 1px solid #e0e0e0;">
-                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <input type="date" class="search-input" id="searchDate" placeholder="Search by date">
-                    <button class="btn btn-secondary" onclick="searchByDate()" id="searchBtn">
-                        🔍 Search Parade State
-                    </button>
-                    <button class="btn btn-outline" onclick="showAllRecords()" id="showAllBtn">
-                        📋 Show All Records
-                    </button>
-                </div>
-            </div>
-
-            <!-- Search Results -->
-            <div class="search-results" id="searchResults">
-                <div class="results-header">
-                    <h3>Search Results</h3>
-                    <button class="btn btn-outline btn-sm" onclick="hideResults()">✕ Close</button>
-                </div>
-                <div class="results-grid" id="resultsGrid">
-                    <!-- Results will be populated here -->
-                </div>
-            </div>
-
-            <!-- Actions Bar -->
-            <div class="actions-bar no-print">
-                <div class="actions-left">
-                    <div id="statusMessage" style="display: none;"></div>
-                </div>
-                <div class="actions-right">
-                    <button class="btn btn-secondary" onclick="exportToCSV()" id="exportBtn">
-                        📥 Export CSV
-                    </button>
-                    <button class="btn btn-secondary" onclick="window.print()">
-                        🖨️ Print
-                    </button>
-                    <button class="btn btn-primary" onclick="saveData()" id="saveBtn">
-                        💾 Save Data
-                    </button>
-                </div>
-            </div>
-
-            <!-- Main Table -->
-            <div class="table-wrapper">
-                <table id="paradeTable">
-                    <thead>
-                        <tr>
-                            <th rowspan="2">CAT</th>
-                            <th rowspan="2">AUTH</th>
-                            <th rowspan="2">H/S</th>
-                            <th rowspan="2">POSTED/<br>STR</th>
-                            <th rowspan="2">LVE</th>
-                            <th rowspan="2">COURSE</th>
-                            <th rowspan="2">DET</th>
-                            <th rowspan="2">MH</th>
-                            <th rowspan="2">SICK/<br>LVE</th>
-                            <th rowspan="2">EX</th>
-                            <th rowspan="2">TD</th>
-                            <th rowspan="2">ATT</th>
-                            <th rowspan="2">AWL/OSL/<br>JUDICIAL<br>CUSTODY</th>
-                            <th rowspan="2">T/OUT</th>
-                            <th colspan="2">PRESENT/STR</th>
-                            <th rowspan="2">DUES IN</th>
-                            <th rowspan="2">DUES OUT</th>
-                        </tr>
-                        <tr>
-                            <th>DET</th>
-                            <th>UNIT</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <!-- Generated by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <script>
-            // API Configuration
-            const API_BASE_URL = 'http://localhost:1000'; // Change this to your backend URL
-            const DEFAULT_DATE = new Date().toISOString().split('T')[0]; // Today's date
-
-            const categories = [
-                { name: 'OFFR', key: 'offr', isTotal: false },
-                { name: 'JCO', key: 'jco', isTotal: false },
-                { name: 'JCO(ERE)', key: 'jcoEre', isTotal: false },
-                { name: 'OR', key: 'or', isTotal: false },
-                { name: 'OR (ERE)', key: 'orEre', isTotal: false },
-                { name: 'TOTAL', key: 'firstTotal', isTotal: true, isFirstTotal: true },
-                { name: 'O&A OR', key: 'oaOr', isTotal: false },
-                { name: 'ATT SUMMIARY', key: 'attSummary', isTotal: false },
-                { name: 'ATT OFFR', key: 'attOffr', isTotal: false },
-                { name: 'ATT JCO', key: 'attJco', isTotal: false },
-                { name: 'ATT OR', key: 'attOr', isTotal: false },
-                { name: 'TOTAL', key: 'secondTotal', isTotal: true, isSecondTotal: true },
-                { name: 'G/TOTAL', key: 'grandTotal', isTotal: true, isGrandTotal: true }
-            ];
-
-            const columnCount = 17;
-            let data = {};
-            let currentDate = DEFAULT_DATE;
-            let currentParadeStateId = null;
-            let isDataModified = false;
-            let metadata = {
-                title: '',
-                location: '',
-                prepared_by: '',
-                approved_by: '',
-                status: 'draft'
-            };
-
-            // API Helper Functions
-            async function apiRequest(endpoint, method = 'GET', body = null) {
-                const url = `${API_BASE_URL}${endpoint}`;
-                const options = {
-                    method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                };
-
-                if (body) {
-                    options.body = JSON.stringify(body);
-                }
-
-                try {
-                    const response = await fetch(url, options);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    return await response.json();
-                } catch (error) {
-                    console.error('API Request Error:', error);
-                    throw error;
-                }
-            }
-
-            function showLoading(show) {
-                document.getElementById('loadingOverlay').classList.toggle('active', show);
-            }
-
-            function showStatus(message, type = 'info') {
-                const statusEl = document.getElementById('statusMessage');
-                statusEl.textContent = message;
-                statusEl.className = `status-message ${type}`;
-                statusEl.style.display = 'flex';
-                
-                // Auto-hide success/info messages after 3 seconds
-                if (type === 'success' || type === 'info') {
-                    setTimeout(() => {
-                        statusEl.style.display = 'none';
-                    }, 3000);
-                }
-            }
-
-            function updateDateDisplay() {
-                const date = new Date(currentDate);
-                const formatted = date.toLocaleDateString('en-US', { 
-                    day: 'numeric', 
-                    month: 'short', 
-                    year: 'numeric' 
-                });
-                document.getElementById('reportDateDisplay').textContent = formatted;
-                document.getElementById('currentDate').value = currentDate;
-            }
-
-            function initData() {
-                categories.forEach(cat => {
-                    if (!cat.isTotal) {
-                        data[cat.key] = Array(columnCount).fill(0);
-                    }
-                });
-            }
-
-            function calculateFirstTotal(index) {
-                if (!data.offr || !data.jco || !data.jcoEre || !data.or || !data.orEre) return 0;
-                return data.offr[index] + data.jco[index] + data.jcoEre[index] + 
-                    data.or[index] + data.orEre[index];
-            }
-
-            function calculateSecondTotal(index) {
-                if (!data.oaOr || !data.attSummary || !data.attOffr || !data.attJco || !data.attOr) return 0;
-                return data.oaOr[index] + data.attSummary[index] + data.attOffr[index] + 
-                    data.attJco[index] + data.attOr[index];
-            }
-
-            function calculateGrandTotal(index) {
-                return calculateFirstTotal(index) + calculateSecondTotal(index);
-            }
-
-            function createTable() {
-                const tbody = document.getElementById('tableBody');
-                tbody.innerHTML = '';
-
-                categories.forEach(cat => {
-                    const tr = document.createElement('tr');
-                    
-                    if (cat.isTotal) {
-                        if (cat.isGrandTotal) {
-                            tr.className = 'grand-total-row';
-                        } else {
-                            tr.className = 'total-row';
-                        }
-                    }
-
-                    // Category cell
-                    const tdCat = document.createElement('td');
-                    tdCat.className = 'category-cell';
-                    tdCat.textContent = cat.name;
-                    tr.appendChild(tdCat);
-
-                    // Data cells
-                    for (let i = 0; i < columnCount; i++) {
-                        const td = document.createElement('td');
-                        
-                        if (cat.isTotal) {
-                            const span = document.createElement('span');
-                            span.className = 'calculated-value';
-                            span.id = `${cat.key}_${i}`;
-                            
-                            if (cat.isFirstTotal) {
-                                span.textContent = calculateFirstTotal(i);
-                            } else if (cat.isSecondTotal) {
-                                span.textContent = calculateSecondTotal(i);
-                            } else if (cat.isGrandTotal) {
-                                span.textContent = calculateGrandTotal(i);
-                            }
-                            
-                            td.appendChild(span);
-                        } else {
-                            const input = document.createElement('input');
-                            input.type = 'number';
-                            input.min = '0';
-                            input.step = '1';
-                            input.value = data[cat.key] ? (data[cat.key][i] || 0) : 0;
-                            input.addEventListener('input', (e) => {
-                                const value = parseFloat(e.target.value);
-                                data[cat.key][i] = isNaN(value) ? 0 : value;
-                                updateTotals();
-                                updateStats();
-                                isDataModified = true;
-                            });
-                            td.appendChild(input);
-                        }
-                        
-                        tr.appendChild(td);
-                    }
-
-                    tbody.appendChild(tr);
-                });
-            }
-
-            function updateTotals() {
-                for (let i = 0; i < columnCount; i++) {
-                    const firstTotalEl = document.getElementById(`firstTotal_${i}`);
-                    if (firstTotalEl) {
-                        firstTotalEl.textContent = calculateFirstTotal(i);
-                    }
-
-                    const secondTotalEl = document.getElementById(`secondTotal_${i}`);
-                    if (secondTotalEl) {
-                        secondTotalEl.textContent = calculateSecondTotal(i);
-                    }
-
-                    const grandTotalEl = document.getElementById(`grandTotal_${i}`);
-                    if (grandTotalEl) {
-                        grandTotalEl.textContent = calculateGrandTotal(i);
-                    }
-                }
-            }
-
-            function updateStats() {
-                document.getElementById('totalAuth').textContent = calculateGrandTotal(0);
-                document.getElementById('presentUnit').textContent = calculateGrandTotal(14);
-            }
-
-            function updateMetadataPanel(metadata) {
-                document.getElementById('reportTitle').value = metadata.title || '';
-                document.getElementById('location').value = metadata.location || '';
-                document.getElementById('preparedBy').value = metadata.prepared_by || '';
-                document.getElementById('approvedBy').value = metadata.approved_by || '';
-                document.getElementById('reportStatus').value = metadata.status || 'draft';
-            }
-
-            function getMetadataFromPanel() {
-                return {
-                    title: '',
-                    location: '',
-                    prepared_by: '',
-                    approved_by: '',
-                    status: 'draft'
-                };
-            }
-
-            function toggleMetadataPanel() {
-                document.getElementById('metadataPanel').classList.toggle('active');
-            }
-
-            async function loadDataForDate(date) {
-                try {
-                    showLoading(true);
-                    showStatus('Loading parade state data...', 'info');
-                    
-                    const response = await apiRequest(`/api/parade-state/${date}`);
-                    
-                    if (response.success) {
-                        const { main, details } = response.data;
-                        
-                        // Store main data
-                        currentParadeStateId = main.id;
-                        currentDate = main.report_date;
-                        metadata = {
-                            title: main.report_title || '',
-                            location: main.location || '',
-                            prepared_by: main.prepared_by || '',
-                            approved_by: main.approved_by || '',
-                            status: main.status || 'draft'
-                        };
-                        
-                        // Update metadata panel
-                        updateMetadataPanel(metadata);
-                        
-                        // Parse details data
-                        initData();
-                        for (const [category, values] of Object.entries(details)) {
-                            if (data.hasOwnProperty(category)) {
-                                data[category] = values.slice(0, columnCount);
-                            }
-                        }
-                        
-                        // Update UI
-                        updateDateDisplay();
-                        createTable();
-                        updateTotals();
-                        updateStats();
-                        isDataModified = false;
-                        
-                        showStatus(`Loaded parade state for ${currentDate}`, 'success');
-                    } else {
-                        // No data found for this date, initialize empty data
-                        initData();
-                        currentParadeStateId = null;
-                        metadata = {
-                            title: '',
-                            location: '',
-                            prepared_by: '',
-                            approved_by: '',
-                            status: 'draft'
-                        };
-                        updateMetadataPanel(metadata);
-                        createTable();
-                        updateStats();
-                        isDataModified = false;
-                        
-                        showStatus(`No existing data for ${date}. You can enter new data.`, 'warning');
-                    }
-                    
-                } catch (error) {
-                    console.error('Error loading data:', error);
-                    showStatus(`Failed to load data: ${error.message}`, 'error');
-                } finally {
-                    showLoading(false);
-                }
-            }
-
-            function loadDataForCurrentDate() {
-                const date = document.getElementById('currentDate').value;
-                if (!date) {
-                    showStatus('Please select a date first', 'error');
-                    return;
-                }
-                loadDataForDate(date);
-            }
-
-            async function searchByDate() {
-                const searchDate = document.getElementById('searchDate').value;
-                if (!searchDate) {
-                    showStatus('Please select a date to search', 'error');
-                    return;
-                }
-
-                try {
-                    showLoading(true);
-                    const response = await apiRequest(`/api/parade-state/${searchDate}`);
-                    
-                    if (response.success) {
-                        // Load the data directly
-                        currentDate = searchDate;
-                        loadDataForDate(searchDate);
-                    } else {
-                        showStatus(`No data found for ${searchDate}`, 'warning');
-                    }
-                } catch (error) {
-                    console.error('Error searching:', error);
-                    showStatus(`Search failed: ${error.message}`, 'error');
-                } finally {
-                    showLoading(false);
-                }
-            }
-
-            async function showAllRecords() {
-                try {
-                    showLoading(true);
-                    showStatus('Loading all records...', 'info');
-                    
-                    const response = await apiRequest('/api/parade-state/list?limit=50');
-                    
-                    if (response.success) {
-                        const results = response.data;
-                        const resultsGrid = document.getElementById('resultsGrid');
-                        const searchResults = document.getElementById('searchResults');
-                        
-                        resultsGrid.innerHTML = '';
-                        
-                        if (results.length === 0) {
-                            resultsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #666;">No records found</div>';
-                        } else {
-                            results.forEach(result => {
-                                const card = document.createElement('div');
-                                card.className = 'result-card';
-                                card.innerHTML = `
-                                    <div class="result-date">${result.report_date}</div>
-                                    <div class="result-meta">
-                                        <div><strong>Title:</strong> ${result.report_title || 'Untitled'}</div>
-                                        <div><strong>Location:</strong> ${result.location || 'Not specified'}</div>
-                                        <div><strong>Status:</strong> <span style="text-transform: capitalize;">${result.status}</span></div>
-                                        <div><strong>Auth:</strong> ${result.total_auth || 0}</div>
-                                        <div><strong>Present:</strong> ${result.total_present || 0}</div>
-                                        <div><strong>Created:</strong> ${new Date(result.created_at).toLocaleDateString()}</div>
-                                    </div>
-                                `;
-                                card.onclick = () => {
-                                    currentDate = result.report_date;
-                                    loadDataForDate(result.report_date);
-                                    hideResults();
-                                };
-                                resultsGrid.appendChild(card);
-                            });
-                        }
-                        
-                        searchResults.classList.add('active');
-                        showStatus(`Loaded ${results.length} records`, 'success');
-                    }
-                    
-                } catch (error) {
-                    console.error('Error loading records:', error);
-                    showStatus(`Failed to load records: ${error.message}`, 'error');
-                } finally {
-                    showLoading(false);
-                }
-            }
-
-            function hideResults() {
-                document.getElementById('searchResults').classList.remove('active');
-            }
-
-            async function saveData() {
-    try {
-        showLoading(true);
-        showStatus('Saving data...', 'info');
         
-        // Prepare payload with ALL categories
-        const payload = {
-            date: currentDate,
-            data: {
-                // Input categories
-                offr: data.offr,
-                jco: data.jco,
-                jcoEre: data.jcoEre,
-                or: data.or,
-                orEre: data.orEre,
-                oaOr: data.oaOr,
-                attSummary: data.attSummary,
-                attOffr: data.attOffr,
-                attJco: data.attJco,
-                attOr: data.attOr,
-                // Calculated totals (optional - can be calculated on backend)
-                firstTotal: Array.from({length: columnCount}, (_, i) => calculateFirstTotal(i)),
-                secondTotal: Array.from({length: columnCount}, (_, i) => calculateSecondTotal(i)),
-                grandTotal: Array.from({length: columnCount}, (_, i) => calculateGrandTotal(i))
-            }
+        <!-- Search Section -->
+        <div class="search-section no-print" style="padding: 20px 32px; background: #f8f8f8; border-bottom: 1px solid #e0e0e0;">
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <input type="date" class="search-input" id="searchDate" placeholder="Search by date">
+                <button class="btn btn-secondary" onclick="searchByDate()" id="searchBtn">
+                    🔍 Search Parade State
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div class="search-results" id="searchResults">
+            <div class="results-header">
+                <h3>Search Results</h3>
+                <button class="btn btn-outline btn-sm" onclick="hideResults()">✕ Close</button>
+            </div>
+            <div class="results-grid" id="resultsGrid">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+
+        <!-- Actions Bar -->
+        <div class="actions-bar no-print">
+            <div class="actions-left">
+                <div id="statusMessage" style="display: none;"></div>
+            </div>
+            <div class="actions-right">
+                <button class="btn btn-secondary" onclick="exportToCSV()" id="exportBtn">
+                    📥 Export CSV
+                </button>
+                <button class="btn btn-primary" onclick="saveData()" id="saveBtn">
+                    💾 Save Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Table -->
+        <div class="table-wrapper">
+            <table id="paradeTable">
+                <thead>
+                    <tr>
+                        <th rowspan="2">CAT</th>
+                        <th rowspan="2">AUTH</th>
+                        <th rowspan="2">H/S</th>
+                        <th rowspan="2">POSTED/<br>STR</th>
+                        <th rowspan="2">LVE</th>
+                        <th rowspan="2">COURSE</th>
+                        <th rowspan="2">DET</th>
+                        <th rowspan="2">MH</th>
+                        <th rowspan="2">SICK/<br>LVE</th>
+                        <th rowspan="2">EX</th>
+                        <th rowspan="2">TD</th>
+                        <th rowspan="2">ATT</th>
+                        <th rowspan="2">AWL/OSL/<br>JUDICIAL<br>CUSTODY</th>
+                        <th rowspan="2">T/OUT</th>
+                        <th colspan="2">PRESENT/STR</th>
+                        <th rowspan="2">DUES IN</th>
+                        <th rowspan="2">DUES OUT</th>
+                    </tr>
+                    <tr>
+                        <th>DET</th>
+                        <th>UNIT</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Generated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration - USE RELATIVE URL
+        const API_BASE_URL = '';  // Same origin - no CORS issues
+        const DEFAULT_DATE = new Date().toISOString().split('T')[0]; // Today's date
+
+        const categories = [
+            { name: 'OFFR', key: 'offr', isTotal: false, isFirstSection: true },
+            { name: 'JCO', key: 'jco', isTotal: false, isFirstSection: true },
+            { name: 'JCO(ERE)', key: 'jcoEre', isTotal: false, isFirstSection: true },
+            { name: 'OR', key: 'or', isTotal: false, isFirstSection: true },
+            { name: 'OR (ERE)', key: 'orEre', isTotal: false, isFirstSection: true },
+            { name: 'TOTAL', key: 'firstTotal', isTotal: true, isFirstTotal: true },
+            { name: 'O&A OR', key: 'oaOr', isTotal: false, isSecondSection: true },
+            { name: 'ATT SUMMIARY', key: 'attSummary', isTotal: false, isSecondSection: true },
+            { name: 'ATT OFFR', key: 'attOffr', isTotal: false, isSecondSection: true },
+            { name: 'ATT JCO', key: 'attJco', isTotal: false, isSecondSection: true },
+            { name: 'ATT OR', key: 'attOr', isTotal: false, isSecondSection: true },
+            { name: 'TOTAL', key: 'secondTotal', isTotal: true, isSecondTotal: true },
+            { name: 'G/TOTAL', key: 'grandTotal', isTotal: true, isGrandTotal: true }
+        ];
+
+        const columnCount = 17;
+        let data = {};
+        let currentDate = DEFAULT_DATE;
+        let isDataModified = false;
+        let userCompany = '';
+
+        // Column indices for calculations
+        const COL_INDICES = {
+            AUTH: 0,
+            HS: 1,
+            POSTED_STR: 2,
+            LVE: 3,
+            COURSE: 4,
+            DET: 5,
+            MH: 6,
+            SICK_LVE: 7,
+            EX: 8,
+            TD: 9,
+            ATT: 10,
+            AWL_OSL_JC: 11,
+            T_OUT: 12,
+            PRESENT_DET: 13,
+            PRESENT_UNIT: 14,
+            DUES_IN: 15,
+            DUES_OUT: 16
         };
 
-        // Send to simplified API endpoint
-        const response = await apiRequest('/api/parade-state/save', 'POST', payload);
-        
-        if (response.success) {
-            isDataModified = false;
-            showStatus(`Data saved successfully for the ${currentDate}`, 'success');
-        } else {
-            showStatus(`Save failed: ${response.error}`, 'error');
-        }
-        
-    } catch (error) {
-        console.error('Error saving data:', error);
-        showStatus(`Save failed: ${error.message}`, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-            async function exportToCSV() {
-                if (!currentParadeStateId) {
-                    showStatus('Please load or save data before exporting', 'error');
-                    return;
+        // API Helper Functions
+        async function apiRequest(endpoint, method = 'GET', body = null) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
+            };
 
-                try {
-                    showStatus('Preparing CSV export...', 'info');
-                    
-                    // Create CSV content
-                    const headers = ['Category', 'AUTH', 'H/S', 'POSTED/STR', 'LVE', 'COURSE', 'DET', 'MH',
-                                'SICK/LVE', 'EX', 'TD', 'ATT', 'AWL/OSL/JC', 'T/OUT', 'PRESENT DET',
-                                'PRESENT UNIT', 'DUES IN', 'DUES OUT'];
-                    
-                    let csvContent = headers.join(',') + '\n';
-                    
-                    categories.forEach(cat => {
-                        const row = [cat.name];
-                        
-                        for (let i = 0; i < columnCount; i++) {
-                            let value = 0;
-                            if (cat.isTotal) {
-                                if (cat.isFirstTotal) {
-                                    value = calculateFirstTotal(i);
-                                } else if (cat.isSecondTotal) {
-                                    value = calculateSecondTotal(i);
-                                } else if (cat.isGrandTotal) {
-                                    value = calculateGrandTotal(i);
-                                }
-                            } else {
-                                value = data[cat.key] ? (data[cat.key][i] || 0) : 0;
-                            }
-                            row.push(value);
-                        }
-                        
-                        csvContent += row.join(',') + '\n';
-                    });
-                    
-                    // Create download link
-                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.setAttribute('href', url);
-                    link.setAttribute('download', `parade_state_${currentDate}.csv`);
-                    link.style.visibility = 'hidden';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    showStatus('CSV exported successfully', 'success');
-                    
-                } catch (error) {
-                    console.error('Error exporting CSV:', error);
-                    showStatus(`Export failed: ${error.message}`, 'error');
-                }
+            if (body) {
+                options.body = JSON.stringify(body);
             }
 
-            // Initialize on load
-            window.addEventListener('DOMContentLoaded', () => {
-                // Set today's date as default
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('currentDate').value = today;
-                document.getElementById('searchDate').value = today;
-                currentDate = today;
-                
-                // Initialize data
-                initData();
-                createTable();
-                updateDateDisplay();
-                updateStats();
-                
-                // Load today's data if available
-                loadDataForDate(today);
-                
-                // Warn user before leaving if data is modified
-                window.addEventListener('beforeunload', (e) => {
-                    if (isDataModified) {
-                        e.preventDefault();
-                        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-                    }
-                });
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API Request Error:', error);
+                throw error;
+            }
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            statusEl.style.display = 'flex';
+            
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function updateDateDisplay() {
+            const date = new Date(currentDate);
+            const formatted = date.toLocaleDateString('en-US', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric' 
             });
-        </script>
-    </body>
-    </html>
+            document.getElementById('reportDateDisplay').textContent = formatted;
+            // Note: We removed the currentDate input from the DOM, so we don't need to update it
+        }
+
+        function initData() {
+            categories.forEach(cat => {
+                if (!cat.isTotal) {
+                    data[cat.key] = Array(columnCount).fill(0);
+                }
+            });
+        }
+
+        // Calculate T/OUT for a single row
+        function calculateTOut(rowData) {
+            const postedStr = rowData[COL_INDICES.POSTED_STR] || 0;
+            const lve = rowData[COL_INDICES.LVE] || 0;
+            const course = rowData[COL_INDICES.COURSE] || 0;
+            const mh = rowData[COL_INDICES.MH] || 0;
+            const sickLve = rowData[COL_INDICES.SICK_LVE] || 0;
+            const ex = rowData[COL_INDICES.EX] || 0;
+            const td = rowData[COL_INDICES.TD] || 0;
+            const att = rowData[COL_INDICES.ATT] || 0;
+            const awlOslJc = rowData[COL_INDICES.AWL_OSL_JC] || 0;
+            
+            // T/OUT = POSTED/STR - (LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC)
+            const deductions = lve + course + mh + sickLve + ex + td + att + awlOslJc;
+            const tOut = postedStr - deductions;
+            return Math.max(0, tOut);
+        }
+
+        // Calculate Present Unit for a single row
+        function calculatePresentUnit(rowData) {
+            const postedStr = rowData[COL_INDICES.POSTED_STR] || 0;
+            const tOut = calculateTOut(rowData);
+            
+            // PRESENT/STR UNIT = POSTED/STR - T/OUT
+            const presentUnit = postedStr - tOut;
+            return Math.max(0, presentUnit);
+        }
+
+        // Get Present Det (same as DET column)
+        function getPresentDet(rowData) {
+            return rowData[COL_INDICES.DET] || 0;
+        }
+
+        // Calculate all values for a row
+        function getCalculatedRowValues(rowData) {
+            const tOut = calculateTOut(rowData);
+            const presentDet = getPresentDet(rowData);
+            const presentUnit = calculatePresentUnit(rowData);
+            
+            // Return just the calculated values for columns 12, 13, 14
+            return {
+                tOut: tOut,
+                presentDet: presentDet,
+                presentUnit: presentUnit
+            };
+        }
+
+        // Calculate totals by summing columns from individual rows
+        function calculateFirstTotal(columnIndex) {
+            let total = 0;
+            const firstSectionCategories = categories.filter(cat => cat.isFirstSection && !cat.isTotal);
+            
+            firstSectionCategories.forEach(cat => {
+                if (data[cat.key] && data[cat.key].length > columnIndex) {
+                    if (columnIndex === COL_INDICES.T_OUT) {
+                        total += calculateTOut(data[cat.key]);
+                    } else if (columnIndex === COL_INDICES.PRESENT_DET) {
+                        total += getPresentDet(data[cat.key]);
+                    } else if (columnIndex === COL_INDICES.PRESENT_UNIT) {
+                        total += calculatePresentUnit(data[cat.key]);
+                    } else {
+                        total += data[cat.key][columnIndex] || 0;
+                    }
+                }
+            });
+            
+            return total;
+        }
+
+        function calculateSecondTotal(columnIndex) {
+            let total = 0;
+            const secondSectionCategories = categories.filter(cat => cat.isSecondSection && !cat.isTotal);
+            
+            secondSectionCategories.forEach(cat => {
+                if (data[cat.key] && data[cat.key].length > columnIndex) {
+                    if (columnIndex === COL_INDICES.T_OUT) {
+                        total += calculateTOut(data[cat.key]);
+                    } else if (columnIndex === COL_INDICES.PRESENT_DET) {
+                        total += getPresentDet(data[cat.key]);
+                    } else if (columnIndex === COL_INDICES.PRESENT_UNIT) {
+                        total += calculatePresentUnit(data[cat.key]);
+                    } else {
+                        total += data[cat.key][columnIndex] || 0;
+                    }
+                }
+            });
+            
+            return total;
+        }
+
+        function calculateGrandTotal(columnIndex) {
+            // Grand total is sum of firstTotal and secondTotal
+            return calculateFirstTotal(columnIndex) + calculateSecondTotal(columnIndex);
+        }
+
+        // Create input cell with larger size
+        function createInputCell(categoryKey, columnIndex) {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '0';
+            input.step = '1';
+            input.value = data[categoryKey] ? (data[categoryKey][columnIndex] || 0) : 0;
+            input.dataset.category = categoryKey;
+            input.dataset.column = columnIndex;
+            input.style.fontSize = '14px';
+            input.style.height = '42px';
+            input.style.padding = '12px 8px';
+            
+            input.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                const category = e.target.dataset.category;
+                const column = parseInt(e.target.dataset.column);
+                
+                data[category][column] = isNaN(value) ? 0 : value;
+                
+                // Update calculated columns if relevant input changed
+                if (column === COL_INDICES.POSTED_STR || 
+                    column === COL_INDICES.LVE || 
+                    column === COL_INDICES.COURSE || 
+                    column === COL_INDICES.DET || 
+                    column === COL_INDICES.MH || 
+                    column === COL_INDICES.SICK_LVE || 
+                    column === COL_INDICES.EX || 
+                    column === COL_INDICES.TD || 
+                    column === COL_INDICES.ATT || 
+                    column === COL_INDICES.AWL_OSL_JC) {
+                    
+                    // Update calculated values display for this row
+                    updateCalculatedValuesForRow(category);
+                }
+                
+                // Update all totals
+                updateAllTotals();
+                updateStats();
+                isDataModified = true;
+            });
+            
+            return input;
+        }
+
+        // Create calculated value cell (for T/OUT, PRESENT DET, PRESENT UNIT)
+        function createCalculatedCell(categoryKey, columnIndex) {
+            const span = document.createElement('span');
+            span.className = 'calculated-value';
+            span.id = `${categoryKey}_${columnIndex}`;
+            span.style.display = 'flex';
+            span.style.alignItems = 'center';
+            span.style.justifyContent = 'center';
+            span.style.height = '42px';
+            span.style.fontWeight = '600';
+            span.style.fontSize = '14px';
+            
+            // Set color based on column
+            if (columnIndex === COL_INDICES.T_OUT) {
+                span.style.color = '#2c5282'; // Blue for T/OUT
+                span.title = "Calculated: POSTED/STR - (LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC)";
+            } else if (columnIndex === COL_INDICES.PRESENT_DET) {
+                span.style.color = '#2d3748'; // Dark gray for PRESENT DET
+                span.title = "Same as DET column value";
+            } else if (columnIndex === COL_INDICES.PRESENT_UNIT) {
+                span.style.color = '#22543d'; // Green for PRESENT UNIT
+                span.title = "Calculated: POSTED/STR - T/OUT";
+            }
+            
+            return span;
+        }
+
+        // Update calculated values for a specific row
+        function updateCalculatedValuesForRow(categoryKey) {
+            const rowData = data[categoryKey] || Array(columnCount).fill(0);
+            const calculated = getCalculatedRowValues(rowData);
+            
+            // Update T/OUT display
+            const tOutElement = document.getElementById(`${categoryKey}_${COL_INDICES.T_OUT}`);
+            if (tOutElement) {
+                tOutElement.textContent = calculated.tOut;
+            }
+            
+            // Update PRESENT DET display
+            const presentDetElement = document.getElementById(`${categoryKey}_${COL_INDICES.PRESENT_DET}`);
+            if (presentDetElement) {
+                presentDetElement.textContent = calculated.presentDet;
+            }
+            
+            // Update PRESENT UNIT display
+            const presentUnitElement = document.getElementById(`${categoryKey}_${COL_INDICES.PRESENT_UNIT}`);
+            if (presentUnitElement) {
+                presentUnitElement.textContent = calculated.presentUnit;
+            }
+        }
+
+        // Update all total rows
+        function updateAllTotals() {
+            // Update first total
+            for (let i = 0; i < columnCount; i++) {
+                const firstTotalElement = document.getElementById(`firstTotal_${i}`);
+                if (firstTotalElement) {
+                    firstTotalElement.textContent = calculateFirstTotal(i);
+                }
+            }
+            
+            // Update second total
+            for (let i = 0; i < columnCount; i++) {
+                const secondTotalElement = document.getElementById(`secondTotal_${i}`);
+                if (secondTotalElement) {
+                    secondTotalElement.textContent = calculateSecondTotal(i);
+                }
+            }
+            
+            // Update grand total
+            for (let i = 0; i < columnCount; i++) {
+                const grandTotalElement = document.getElementById(`grandTotal_${i}`);
+                if (grandTotalElement) {
+                    grandTotalElement.textContent = calculateGrandTotal(i);
+                }
+            }
+        }
+
+        function createTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            categories.forEach(cat => {
+                const tr = document.createElement('tr');
+                
+                // Apply row styling
+                if (cat.isTotal) {
+                    if (cat.isGrandTotal) {
+                        tr.className = 'grand-total-row';
+                    } else {
+                        tr.className = 'total-row';
+                    }
+                }
+
+                // Category cell
+                const tdCat = document.createElement('td');
+                tdCat.className = 'category-cell';
+                tdCat.textContent = cat.name;
+                tr.appendChild(tdCat);
+
+                // Data cells for each column
+                for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                    const td = document.createElement('td');
+                    
+                    if (cat.isTotal) {
+                        // For total rows (firstTotal, secondTotal, grandTotal)
+                        const span = document.createElement('span');
+                        span.className = 'calculated-value';
+                        span.id = `${cat.key}_${columnIndex}`;
+                        span.style.height = '42px';
+                        span.style.display = 'flex';
+                        span.style.alignItems = 'center';
+                        span.style.justifyContent = 'center';
+                        
+                        if (cat.isFirstTotal) {
+                            span.textContent = calculateFirstTotal(columnIndex);
+                        } else if (cat.isSecondTotal) {
+                            span.textContent = calculateSecondTotal(columnIndex);
+                        } else if (cat.isGrandTotal) {
+                            span.textContent = calculateGrandTotal(columnIndex);
+                        }
+                        
+                        td.appendChild(span);
+                    } else {
+                        // For regular input rows
+                        if (columnIndex === COL_INDICES.T_OUT || 
+                            columnIndex === COL_INDICES.PRESENT_DET || 
+                            columnIndex === COL_INDICES.PRESENT_UNIT) {
+                            
+                            // These are calculated columns - show as calculated values
+                            const calculatedCell = createCalculatedCell(cat.key, columnIndex);
+                            td.appendChild(calculatedCell);
+                        } else {
+                            // These are input columns
+                            const inputCell = createInputCell(cat.key, columnIndex);
+                            td.appendChild(inputCell);
+                        }
+                    }
+                    
+                    tr.appendChild(td);
+                }
+
+                tbody.appendChild(tr);
+            });
+            
+            // Initialize calculated values for all rows
+            categories.forEach(cat => {
+                if (!cat.isTotal) {
+                    updateCalculatedValuesForRow(cat.key);
+                }
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalAuth').textContent = calculateGrandTotal(COL_INDICES.AUTH);
+            document.getElementById('presentUnit').textContent = calculateGrandTotal(COL_INDICES.PRESENT_UNIT);
+            // Add Total Out to stats
+            document.getElementById('totalOut').textContent = calculateGrandTotal(COL_INDICES.T_OUT);
+        }
+
+        // Get user info
+        async function getUserInfo() {
+            try {
+                const response = await apiRequest('/api/user-info');
+                if (response.success) {
+                    userCompany = response.company || '';
+                    console.log("User company:", userCompany);
+                }
+            } catch (error) {
+                console.log("Could not get user info");
+            }
+        }
+
+        async function loadDataForDate(date) {
+            try {
+                showLoading(true);
+                showStatus('Loading parade state data...', 'info');
+                
+                const response = await apiRequest(`/api/parade-state/get/${date}`);
+                
+                if (response.success && response.data) {
+                    const loadedData = response.data.data;
+                    currentDate = loadedData.date || date;
+                    userCompany = response.data.company || '';
+                    
+                    // Parse loaded data
+                    initData();
+                    for (const [category, values] of Object.entries(loadedData)) {
+                        if (data.hasOwnProperty(category)) {
+                            data[category] = values.slice(0, columnCount);
+                        }
+                    }
+                    
+                    // Update UI
+                    updateDateDisplay();
+                    createTable();
+                    updateStats();
+                    isDataModified = false;
+                    
+                    showStatus(`Loaded parade state for ${currentDate}`, 'success');
+                } else {
+                    // No data found - initialize fresh
+                    initData();
+                    createTable();
+                    updateStats();
+                    isDataModified = false;
+                    
+                    showStatus(`No existing data for ${date}. You can enter new data.`, 'warning');
+                }
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showStatus(`Failed to load data: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function loadDataForCurrentDate() {
+            // Since we removed the currentDate input, we'll use today's date or searchDate
+            const dateInput = document.getElementById('searchDate');
+            if (dateInput && dateInput.value) {
+                loadDataForDate(dateInput.value);
+            } else {
+                loadDataForDate(currentDate);
+            }
+        }
+
+        async function searchByDate() {
+            const searchDate = document.getElementById('searchDate').value;
+            if (!searchDate) {
+                showStatus('Please select a date to search', 'error');
+                return;
+            }
+
+            try {
+                showLoading(true);
+                const response = await apiRequest(`/api/parade-state/get/${searchDate}`);
+                
+                if (response.success) {
+                    currentDate = searchDate;
+                    loadDataForDate(searchDate);
+                } else {
+                    showStatus(`No data found for ${searchDate}`, 'warning');
+                }
+            } catch (error) {
+                console.error('Error searching:', error);
+                showStatus(`Search failed: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function showAllRecords() {
+            try {
+                showLoading(true);
+                showStatus('Loading all records...', 'info');
+                
+                const response = await apiRequest('/api/parade-state/list?limit=50');
+                
+                if (response.success) {
+                    const results = response.data;
+                    const resultsGrid = document.getElementById('resultsGrid');
+                    const searchResults = document.getElementById('searchResults');
+                    
+                    resultsGrid.innerHTML = '';
+                    
+                    if (results.length === 0) {
+                        resultsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #666;">No records found</div>';
+                    } else {
+                        results.forEach(result => {
+                            const card = document.createElement('div');
+                            card.className = 'result-card';
+                            card.innerHTML = `
+                                <div class="result-date">${result.report_date}</div>
+                                <div class="result-meta">
+                                    <div><strong>Auth:</strong> ${result.total_auth || 0}</div>
+                                    <div><strong>Present:</strong> ${result.total_present || 0}</div>
+                                    <div><strong>Created:</strong> ${new Date(result.created_at).toLocaleDateString()}</div>
+                                </div>
+                            `;
+                            card.onclick = () => {
+                                currentDate = result.report_date;
+                                loadDataForDate(result.report_date);
+                                hideResults();
+                            };
+                            resultsGrid.appendChild(card);
+                        });
+                    }
+                    
+                    searchResults.classList.add('active');
+                    showStatus(`Loaded ${results.length} records`, 'success');
+                }
+                
+            } catch (error) {
+                console.error('Error loading records:', error);
+                showStatus(`Failed to load records: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function hideResults() {
+            document.getElementById('searchResults').classList.remove('active');
+        }
+
+        async function saveData() {
+            try {
+                showLoading(true);
+                showStatus('Saving data...', 'info');
+                
+                // Prepare data to send (only user-input columns)
+                const payloadData = {};
+                const inputCategories = ['offr', 'jco', 'jcoEre', 'or', 'orEre', 'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'];
+                
+                inputCategories.forEach(category => {
+                    const rowData = data[category] || Array(columnCount).fill(0);
+                    
+                    // Send the data as is - backend will calculate T/OUT, PRESENT DET, PRESENT UNIT
+                    // We include all columns, but columns 12, 13, 14 will be overwritten by backend calculations
+                    payloadData[category] = rowData;
+                });
+                
+                const payload = {
+                    date: currentDate,
+                    data: payloadData
+                };
+
+                console.log("Sending data to backend:", payload);
+                
+                const response = await apiRequest('/api/parade-state/save', 'POST', payload);
+                
+                if (response.success) {
+                    isDataModified = false;
+                    showStatus(`Data saved successfully for ${currentDate}`, 'success');
+                    
+                    // Reload to get calculated values from backend
+                    setTimeout(() => {
+                        loadDataForDate(currentDate);
+                    }, 500);
+                } else {
+                    showStatus(`Save failed: ${response.error}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showStatus(`Save failed: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function exportToCSV() {
+            try {
+                showStatus('Preparing CSV export...', 'info');
+                
+                // Create a temporary link for download
+                const downloadLink = document.createElement('a');
+                downloadLink.href = `/api/parade-state/export-csv/${currentDate}`;
+                downloadLink.download = `parade_state_${currentDate}.csv`;
+                downloadLink.style.display = 'none';
+                
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                showStatus('CSV exported successfully', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting CSV:', error);
+                showStatus(`Export failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('searchDate').value = today;
+            currentDate = today;
+            
+            // Get user info (optional)
+            await getUserInfo();
+            
+            // Initialize data
+            initData();
+            createTable();
+            updateDateDisplay();
+            updateStats();
+            
+            // Load today's data if available
+            loadDataForDate(today);
+            
+            // Warn user before leaving if data is modified
+            window.addEventListener('beforeunload', (e) => {
+                if (isDataModified) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                }
+            });
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Ctrl+S to save
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    saveData();
+                }
+                // Escape to hide search results
+                if (e.key === 'Escape') {
+                    hideResults();
+                }
+            });
+        });
+    </script>
