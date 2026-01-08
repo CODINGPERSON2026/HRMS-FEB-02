@@ -36,6 +36,8 @@ def admin_login():
     if not user:
         return jsonify({"success": False, "error": "Invalid email or password"}), 401
     username  =  user['username']
+    role = user['role']
+    print(role,"this is role")
     
     cursor.close()
     conn.close()
@@ -53,7 +55,7 @@ def admin_login():
     token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
     # set JWT in cookie
-    resp = jsonify({"success": True,"username":username})
+    resp = jsonify({"success": True,"username":username,'role' : role})
     resp.set_cookie("token", token, httponly=True, samesite="Lax")
 
     return resp
@@ -63,6 +65,20 @@ def logout():
     resp = redirect(url_for("admin_login"))
     resp.set_cookie("token", "", expires=0)
     return resp
+
+
+
+@app.context_processor
+def inject_user():
+    user = require_login()
+    return {
+        "current_user": user,
+        "role": user['role'] if user else None
+    }
+
+
+
+
 
 
 @app.route('/')
@@ -165,7 +181,7 @@ def update_personal():
 def view_personal():
     return render_template('personalInfoView.html', form_view='view')
 
-@app.route('/search_personnel', methods=['POST'])
+
 @app.route('/search_personnel', methods=['POST'])
 def search_person():
     print("in this route")
@@ -297,30 +313,34 @@ def assign_personnel():
     cursor = conn.cursor(dictionary=True)
 
     try:
+        # STATUS CHECK
         for pid in personnel_ids:
             cursor.execute("""
-    SELECT detachment_status, posting_status, td_status
-    FROM personnel
-    WHERE army_number=%s
-""", (pid,))
-        status = cursor.fetchone()
-        if not status:
-            return jsonify({"error": f"{pid} not found"}), 404
+                SELECT detachment_status, posting_status, td_status, company
+                FROM personnel
+                WHERE army_number=%s
+            """, (pid,))
+            status = cursor.fetchone()
 
-        det_flag = int(status['detachment_status']) if status['detachment_status'] else 0
-        post_flag = int(status['posting_status']) if status['posting_status'] else 0
-        td_flag = int(status['td_status']) if status['td_status'] else 0
+            if not status:
+                return jsonify({"error": f"{pid} not found"}), 404
 
-        if action_type == "det" and det_flag == 1:
-            return jsonify({"error": f"{pid} is already in Detachment"}), 400
+            if action_type == "det" and status['detachment_status'] == 1:
+                return jsonify({"error": f"{pid} is already in Detachment"}), 400
 
-        if action_type == "posting" and post_flag == 1:
-            return jsonify({"error": f"{pid} is already Posted"}), 400
+            if action_type == "posting" and status['posting_status'] == 1:
+                return jsonify({"error": f"{pid} is already Posted"}), 400
 
-        if action_type == "td" and td_flag == 1:
-            return jsonify({"error": f"{pid} is already on TD"}), 400
+            if action_type == "td" and status['td_status'] == 1:
+                return jsonify({"error": f"{pid} is already on TD"}), 400
 
+        # ASSIGN
         for pid in personnel_ids:
+            cursor.execute("""
+                SELECT company FROM personnel WHERE army_number=%s
+            """, (pid,))
+            row = cursor.fetchone()
+            company = row['company'] if row else None
 
             if action_type == "det":
                 cursor.execute("""
@@ -328,23 +348,58 @@ def assign_personnel():
                     VALUES (%s, %s)
                 """, (pid, remarks))
 
-                cursor.execute("UPDATE personnel SET detachment_status=1 WHERE army_number=%s", (pid,))
+                cursor.execute("""
+                    UPDATE personnel SET detachment_status=1
+                    WHERE army_number=%s
+                """, (pid,))
 
             elif action_type == "posting":
                 cursor.execute("""
-                    INSERT INTO posting_details_table (army_number, action_type, posting_date)
+                    INSERT INTO posting_details_table
+                    (army_number, action_type, posting_date)
                     VALUES (%s, %s, NOW())
                 """, (pid, remarks))
 
-                cursor.execute("UPDATE personnel SET posting_status=1 WHERE army_number=%s", (pid,))
+                cursor.execute("""
+                    UPDATE personnel SET posting_status=1
+                    WHERE army_number=%s
+                """, (pid,))
 
             elif action_type == "td":
-                cursor.execute("""
-                    INSERT INTO td_table (army_number, remarks)
-                    VALUES (%s, %s)
-                """, (pid, remarks))
+                # 🔹 Parse Location & Authority
+                td_location = ""
+                td_authority = ""
 
-                cursor.execute("UPDATE personnel SET td_status=1 WHERE army_number=%s", (pid,))
+                if "Location:" in remarks and "Authority:" in remarks:
+                    parts = remarks.split(",")
+                    td_location = parts[0].replace("Location:", "").strip()
+                    td_authority = parts[1].replace("Authority:", "").strip()
+
+                cursor.execute("""
+                    INSERT INTO td_table
+                    (
+                        army_number,
+                        remarks,
+                        td_date,
+                        lcoation,
+                        authority,
+                        company,
+                        last_interview_sm_status,
+                        last_interview_OC_status
+                    )
+                    VALUES (%s, %s, NOW(), %s, %s, %s, 0, 0)
+                """, (
+                    pid,
+                    remarks,
+                    td_location,
+                    td_authority,
+                    company
+                ))
+
+                cursor.execute("""
+                    UPDATE personnel SET td_status=1
+                    WHERE army_number=%s
+                """, (pid,))
 
         conn.commit()
         return jsonify({"message": f"{action_type.upper()} Assigned Successfully"}), 200
@@ -984,7 +1039,7 @@ def assigned_alarm():
 
         cursor.execute(query, params)
         rows = cursor.fetchall()
-
+        print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
         return jsonify({"status": "success", "rows": rows})
 
     except Exception as e:
@@ -1005,6 +1060,7 @@ def leave_pending_alarm():
     cursor = conn.cursor(dictionary=True)
     user = require_login()
     role = user['role']
+    
 
     try:
         query = """
@@ -1019,6 +1075,9 @@ def leave_pending_alarm():
         if role != 'CO':
             result['pending_count'] = 0
             print(result,"THIS IS RESULT FOR ALARM")
+            print("this api is gtttin called  dsfklds fkljlfj dslfjdlf jalfdsj;lfj ads;fjdsf dsklf")
+            print(result['pending_count'])
+
 
         return jsonify({
             "pending": result["pending_count"]
@@ -1414,6 +1473,16 @@ def dashboard_summary():
         boards_result = cursor.fetchone()
         boards_count = boards_result['count'] if boards_result else 0
 
+        # 🔹 TD Attachments Count (td_status = 1)
+        cursor.execute(
+            "SELECT COUNT(*) AS count FROM personnel WHERE td_status = 1" +
+            (f" AND company = %s" if company != "Admin" else ""),
+            (company,) if company != "Admin" else ()
+        )
+        td_result = cursor.fetchone()
+        td_attachments = td_result['count'] if td_result else 0
+
+
 
         # Return combined JSON
         return jsonify({
@@ -1428,7 +1497,8 @@ def dashboard_summary():
             "projects": projects,
             "boards_count": boards_count, 
             "assigned_alarm": assigned_alarm_rows,
-            "sensitive_count": sensitive_count
+            "sensitive_count": sensitive_count,
+            'attachment_count':td_attachments
         }), 200
 
     except Exception as e:
