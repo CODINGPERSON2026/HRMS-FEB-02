@@ -1619,7 +1619,6 @@ def save_parade_state():
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
                     trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
-                    trout = att + ex + mh + td
                     trout = max(0, trout)                                               
                     
                     present_unit = posted_str - trout
