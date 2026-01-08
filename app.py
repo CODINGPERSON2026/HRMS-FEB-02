@@ -1,6 +1,6 @@
 from imports import *
 import os
-from datetime import date
+from datetime import date, datetime, timedelta
 from flask import Flask
 from flask_cors import CORS
 import csv
@@ -836,8 +836,6 @@ def get_sensitive_list():
     except Exception as e:
         print("Error fetching sensitive list:", e)
         return jsonify({"success": False, "error": str(e)}), 500
-        print("Error fetching sensitive list:", e)
-        return jsonify({"success": False, "error": str(e)}), 500
     finally:
         cursor.close()
         conn.close()
@@ -927,7 +925,7 @@ def add_event():
     return jsonify({"status": "success"})
 
 @app.route("/daily_event")
-def index():
+def daily_event():
     today = date.today()
 
     conn = get_db_connection()
@@ -1211,9 +1209,6 @@ def update_project_stage():
         print("Error updating stage:", e)
         return jsonify({"status": "error", "message": "Database error"}), 500
 
-# Fetch heads for dropdown
-# @app.route('/project_dashboard')
-
 
 # Add new head
 @app.route('/add_head', methods=['POST'])
@@ -1327,7 +1322,7 @@ def line_unfit_graph():
 
 
 
-# single route for alll
+# single route for all dashboard
 
 @app.route('/api/dashboard_summary', methods=['GET'])
 def dashboard_summary():
@@ -1452,6 +1447,7 @@ def get_user_info():
         'company': user.get('company'),
         'role': user.get('role')
     })
+
 def get_current_user():
     """Get current user from JWT token"""
     token = request.cookies.get('token')
@@ -1472,6 +1468,122 @@ def get_column_name(index):
         'present_det', 'present_unit', 'dues_in', 'dues_out'
     ]
     return columns[index] if index < len(columns) else f'col_{index}'
+
+@app.route('/api/parade-state/get/<date_str>', methods=['GET'])
+def get_parade_state(date_str):
+    """Get parade state with calculated columns"""
+    print(f"\n=== GET PARADE STATE for date: {date_str} ===")
+    
+    # Get current user
+    user = get_current_user()
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+    
+    company = user.get('company')
+    if not company:
+        return jsonify({'success': False, 'error': 'No company assigned'}), 400
+    
+    print(f"User: {user.get('username')}, Company: {company}")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        # FIX: Use datetime.strptime and date.today() correctly
+        requested_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        today_date = date.today()
+        
+        # If user is trying to access future date, return error
+        if requested_date > today_date:
+            return jsonify({
+                'success': False,
+                'error': 'Cannot access data for future dates',
+                'is_future': True
+            }), 400
+        
+        # Get data for specific date and company
+        cursor.execute("""
+            SELECT * FROM parade_state_daily 
+            WHERE report_date = %s AND company = %s
+        """, (date_str, company))
+        
+        row = cursor.fetchone()
+        
+        # If no data found for today, try to get previous day's data
+        if not row and requested_date == today_date:
+            print(f"No data found for today ({date_str}), trying previous day...")
+            
+            # Get previous day's date
+            previous_date = today_date - timedelta(days=1)
+            cursor.execute("""
+                SELECT * FROM parade_state_daily 
+                WHERE report_date = %s AND company = %s
+            """, (previous_date.strftime('%Y-%m-%d'), company))
+            
+            row = cursor.fetchone()
+            
+            if row:
+                print(f"Using previous day's data ({previous_date}) as template")
+                row['is_previous_day_template'] = True
+                row['original_date'] = row['report_date']
+                row['report_date'] = date_str
+                
+        elif not row:
+            print(f"No data found for date: {date_str}, company: {company}")
+            return jsonify({
+                'success': False,
+                'message': 'No data found for this date'
+            }), 404
+        
+        print(f"Data found for {date_str}")
+        
+        # Convert database row back to frontend format
+        result = {
+            'date': row['report_date'],
+            'company': row['company'],
+            'data': {}
+        }
+        
+        # Add flags if using previous day's data
+        if 'is_previous_day_template' in row:
+            result['is_previous_day_template'] = True
+            result['original_date'] = row['original_date']
+        
+        # All categories in the exact order they appear in frontend
+        all_categories = [
+            'offr', 'jco', 'jcoEre', 'or', 'orEre',
+            'firstTotal',
+            'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr',
+            'secondTotal',
+            'grandTotal'
+        ]
+        
+        for category in all_categories:
+            category_data = []
+            for i in range(17):
+                column_name = f"{category}_{get_column_name(i)}"
+                category_data.append(row.get(column_name, 0))
+            result['data'][category] = category_data
+        
+        result['calculations'] = {
+            't_out_formula': 'LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC',
+            'present_det': 'Same as DET column value',
+            'present_unit': 'POSTED/STR - T/OUT'
+        }
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+        
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route('/api/parade-state/save', methods=['POST'])
 def save_parade_state():
@@ -1496,11 +1608,22 @@ def save_parade_state():
         if not data:
             return jsonify({'success': False, 'error': 'No data received'}), 400
             
-        report_date = data.get('date')
+        report_date_str = data.get('date')
         parade_data = data.get('data')
         
-        if not report_date or not parade_data:
+        if not report_date_str or not parade_data:
             return jsonify({'success': False, 'error': 'Missing date or data'}), 400
+        
+        # Check if user is trying to save data for future date
+        requested_date = datetime.strptime(report_date_str, '%Y-%m-%d').date()
+        today_date = date.today()
+        
+        if requested_date > today_date:
+            return jsonify({
+                'success': False,
+                'error': 'Cannot save data for future dates',
+                'is_future': True
+            }), 400
         
         conn = get_db_connection()
         if not conn:
@@ -1517,7 +1640,7 @@ def save_parade_state():
             
             # Build SQL columns and values
             columns = ['report_date', 'company']
-            values = [report_date, company]
+            values = [report_date_str, company]
             
             # Process each input category with calculations
             for category in input_categories:
@@ -1530,25 +1653,6 @@ def save_parade_state():
                     category_data = category_data + [0] * (13 - len(category_data))
                 
                 # Extract values for calculations
-                # Index mapping:
-                # 0: AUTH
-                # 1: H/S
-                # 2: POSTED/STR
-                # 3: LVE
-                # 4: COURSE
-                # 5: DET
-                # 6: MH
-                # 7: SICK/LVE
-                # 8: EX
-                # 9: TD
-                # 10: ATT
-                # 11: AWL/OSL/JUDICIAL CUSTODY
-                # 12: T/OUT (will be calculated)
-                # 13: PRESENT/STR DET (will be set from DET column)
-                # 14: PRESENT/STR UNIT (will be calculated)
-                # 15: DUES IN
-                # 16: DUES OUT
-                
                 posted_str = category_data[2] if len(category_data) > 2 else 0
                 lve = category_data[3] if len(category_data) > 3 else 0
                 course = category_data[4] if len(category_data) > 4 else 0
@@ -1560,8 +1664,8 @@ def save_parade_state():
                 att = category_data[10] if len(category_data) > 10 else 0
                 awl_osl_jc = category_data[11] if len(category_data) > 11 else 0
                 
-                # Calculate T/OUT = POSTED/STR - (LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC)
-                trout = posted_str - (lve + course + mh + sick_lve + ex + td + att + awl_osl_jc)
+                # CORRECTED: Calculate T/OUT = LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC
+                trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
                 # Ensure non-negative
                 trout = max(0, trout)
                 
@@ -1618,6 +1722,7 @@ def save_parade_state():
                     att = cat_data[10] if len(cat_data) > 10 else 0
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
+                    # CORRECTED: T/OUT = sum of deductions
                     trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
                     trout = max(0, trout)                                               
                     
@@ -1656,6 +1761,7 @@ def save_parade_state():
                     att = cat_data[10] if len(cat_data) > 10 else 0
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
+                    # CORRECTED: T/OUT = sum of deductions
                     trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
                     trout = max(0, trout)
                     
@@ -1710,7 +1816,7 @@ def save_parade_state():
             
             return jsonify({
                 'success': True,
-                'message': f'Parade state saved for {report_date} ({company})',
+                'message': f'Parade state saved for {report_date_str} ({company})',
                 'calculations': {
                     't_out_calculation': 'LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC',
                     'present_det': 'Same as DET column',
@@ -1735,84 +1841,187 @@ def save_parade_state():
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
     
-@app.route('/api/parade-state/get/<date>', methods=['GET'])
-def get_parade_state(date):
-    """Get parade state with calculated columns"""
-    print(f"\n=== GET PARADE STATE for date: {date} ===")
+
+# co dashboard view
+# Add these routes to your Flask app (app.py)
+
+@app.route('/api/co-dashboard/all-data/<date_str>', methods=['GET'])
+def get_co_all_dashboard_data(date_str):
+    """Get all CO dashboard data in a single request for a specific date"""
+    user = require_login()
     
-    # Get current user
-    user = get_current_user()
-    if not user:
-        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
-    
-    company = user.get('company')
-    if not company:
-        return jsonify({'success': False, 'error': 'No company assigned'}), 400
-    
-    print(f"User: {user.get('username')}, Company: {company}")
+    if user['role'] != 'CO':
+        return jsonify({'success': False, 'error': 'Unauthorized - CO access only'}), 403
     
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
     try:
-        # Get data for specific date and company
         cursor.execute("""
-            SELECT * FROM parade_state_daily 
-            WHERE report_date = %s AND company = %s
-        """, (date, company))
+            SELECT 
+                SUM(grandTotal_auth) as total_auth,
+                SUM(grandTotal_present_unit) as present_unit,
+                SUM(grandTotal_trout_det) as total_out,
+                COUNT(DISTINCT company) as company_count
+            FROM parade_state_daily
+            WHERE report_date = %s
+        """, (date_str,))
+        parade_summary = cursor.fetchone()
         
-        row = cursor.fetchone()
+        cursor.execute("""
+            SELECT 
+                company,
+                grandTotal_lve as on_leave,
+                grandTotal_auth as total_strength,
+                ROUND((grandTotal_lve / NULLIF(grandTotal_auth, 0) * 100), 2) as leave_percentage
+            FROM parade_state_daily
+            WHERE report_date = %s
+            ORDER BY company
+        """, (date_str,))
+        leave_data = cursor.fetchall()
         
-        if not row:
-            print(f"No data found for date: {date}, company: {company}")
+        cursor.execute("""
+            SELECT 
+                company,
+                (offr_auth + attOffr_auth) as officers,
+                (jco_auth + jcoEre_auth + attJco_auth) as jcos,
+                (or_auth + orEre_auth + oaOr_auth + attOr_auth) as other_ranks
+            FROM parade_state_daily
+            WHERE report_date = %s
+            ORDER BY company
+        """, (date_str,))
+        manpower_data = cursor.fetchall()
+        
+        if not parade_summary or parade_summary['company_count'] == 0:
             return jsonify({
                 'success': False,
                 'message': 'No data found for this date'
             }), 404
         
-        print(f"Data found for {date}")
+        total_on_leave = sum(row['on_leave'] or 0 for row in leave_data)
+        total_strength = sum(row['total_strength'] or 0 for row in leave_data)
+        total_leave_percentage = round((total_on_leave / total_strength * 100), 2) if total_strength > 0 else 0
         
-        # Convert database row back to frontend format
-        result = {
-            'date': row['report_date'],
-            'company': row['company'],
-            'data': {}
-        }
+        for row in manpower_data:
+            row['total'] = (row['officers'] or 0) + (row['jcos'] or 0) + (row['other_ranks'] or 0)
         
-        # All categories in the exact order they appear in frontend
-        all_categories = [
-            'offr', 'jco', 'jcoEre', 'or', 'orEre',
-            'firstTotal',  # This comes after OR (ERE)
-            'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr',
-            'secondTotal',  # This comes after ATT OR
-            'grandTotal'   # Grand total at the end
-        ]
-        
-        for category in all_categories:
-            category_data = []
-            for i in range(17):
-                column_name = f"{category}_{get_column_name(i)}"
-                category_data.append(row.get(column_name, 0))
-            result['data'][category] = category_data
-        
-        # Add a note about calculations
-        result['calculations'] = {
-            't_out_formula': 'LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC',
-            'present_det': 'Same as DET column value',
-            'present_unit': 'POSTED/STR - T/OUT'
-        }
+        total_officers = sum(row['officers'] or 0 for row in manpower_data)
+        total_jcos = sum(row['jcos'] or 0 for row in manpower_data)
+        total_other_ranks = sum(row['other_ranks'] or 0 for row in manpower_data)
+        total_manpower = total_officers + total_jcos + total_other_ranks
         
         return jsonify({
             'success': True,
-            'data': result
+            'data': {
+                'parade_summary': {
+                    'total_auth': parade_summary['total_auth'] or 0,
+                    'present_unit': parade_summary['present_unit'] or 0,
+                    'total_out': parade_summary['total_out'] or 0,
+                    'company_count': parade_summary['company_count'] or 0,
+                    'report_date': date_str
+                },
+                'leave_status': {
+                    'by_company': leave_data,
+                    'total': {
+                        'on_leave': total_on_leave,
+                        'total_strength': total_strength,
+                        'leave_percentage': total_leave_percentage
+                    }
+                },
+                'manpower': {
+                    'by_company': manpower_data,
+                    'total': {
+                        'officers': total_officers,
+                        'jcos': total_jcos,
+                        'other_ranks': total_other_ranks,
+                        'total': total_manpower
+                    }
+                }
+            }
         })
         
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error fetching CO dashboard data: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
     finally:
         cursor.close()
         conn.close()
+        
+# Add this new route to your Flask app (app.py)
+# Place it near your other CO dashboard endpoints
 
+@app.route('/api/co-dashboard/parade-table/<date_str>', methods=['GET'])
+def get_co_aggregated_parade_table(date_str):
+    """Get aggregated parade state data from all companies for CO view"""
+    user = require_login()
+    
+    if user['role'] != 'CO':
+        return jsonify({'success': False, 'error': 'Unauthorized - CO access only'}), 403
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        # Get all companies' data for the specified date
+        cursor.execute("""
+            SELECT * FROM parade_state_daily
+            WHERE report_date = %s
+        """, (date_str,))
+        
+        companies_data = cursor.fetchall()
+        
+        if not companies_data:
+            return jsonify({
+                'success': False,
+                'message': 'No data found for this date'
+            }), 404
+        
+        # Initialize aggregated data structure
+        aggregated = {
+            'date': date_str,
+            'company': 'ALL COMPANIES (CO VIEW)',
+            'data': {}
+        }
+        
+        # All categories to aggregate
+        all_categories = [
+            'offr', 'jco', 'jcoEre', 'or', 'orEre',
+            'firstTotal',
+            'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr',
+            'secondTotal',
+            'grandTotal'
+        ]
+        column_names = [
+            'auth', 'hs', 'posted_str', 'lve', 'course', 'det', 'mh',
+            'sick_lve', 'ex', 'td', 'att', 'awl_osl_jc', 'trout_det',
+            'present_det', 'present_unit', 'dues_in', 'dues_out'
+        ]
+        for category in all_categories:
+            aggregated['data'][category] = [0] * 17
+        
+        for company_row in companies_data:
+            for category in all_categories:
+                for i, col_name in enumerate(column_names):
+                    db_column = f"{category}_{col_name}"
+                    if db_column in company_row:
+                        aggregated['data'][category][i] += (company_row[db_column] or 0)
+        
+        return jsonify({
+            'success': True,
+            'data': aggregated,
+            'companies_count': len(companies_data)
+        })
+        
+    except Exception as e:
+        print(f"Error fetching CO aggregated parade table: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+    
 if __name__ == '__main__':
     app.run(debug=True, port=1000)
