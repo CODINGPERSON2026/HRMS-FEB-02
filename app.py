@@ -1037,7 +1037,6 @@ def assigned_alarm():
 
         cursor.execute(query, params)
         rows = cursor.fetchall()
-        print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
         return jsonify({"status": "success", "rows": rows})
 
     except Exception as e:
@@ -1072,9 +1071,6 @@ def leave_pending_alarm():
         result = cursor.fetchone()
         if role != 'CO':
             result['pending_count'] = 0
-            print(result,"THIS IS RESULT FOR ALARM")
-            print("this api is gtttin called  dsfklds fkljlfj dslfjdlf jalfdsj;lfj ads;fjdsf dsklf")
-            print(result['pending_count'])
 
 
         return jsonify({
@@ -1245,7 +1241,6 @@ def get_project_count():
 
 @app.route('/update_project_stage', methods=['POST'])
 def update_project_stage():
-    print('update api called')
     data = request.get_json()
     project_id = data.get('project_id')
     new_stage = data.get('new_stage')
