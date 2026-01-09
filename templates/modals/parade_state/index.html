@@ -85,6 +85,33 @@
             border-bottom: 1px solid #e0e0e0;
         }
 
+        .expand-view-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            margin: 20px auto;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .expand-view-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .expand-view-btn:active {
+            transform: translateY(0);
+        }
+
         .co-table-container {
             max-height: 300px;
             overflow-y: auto;
@@ -127,33 +154,76 @@
             font-weight: bold;
         }
 
-        /* Percentage color coding */
-        .percentage-high {
-            background-color: #ffdddd;
-            color: #b30000;
-            font-weight: 600;
-        }
-        .percentage-medium {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .percentage-low {
-            background-color: #d4edda;
-            color: #155724;
+        /* Full Page View */
+        .full-page-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
         }
 
-        /* CO View Badge */
-        .co-view-badge {
-            display: inline-block;
+        .full-page-view.active {
+            display: block;
+        }
+
+        .full-page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 24px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .back-btn {
             background: #3b82f6;
             color: white;
-            padding: 8px 16px;
+            border: none;
             border-radius: 6px;
-            font-size: 12px;
+            padding: 12px 24px;
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #2563eb;
+        }
+
+        .full-page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .full-page-content {
+            padding: 0 24px;
+        }
+
+        .search-section-full {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 8px;
         }
 
         /* Search Section */
@@ -295,6 +365,11 @@
             max-height: 70vh;
             overflow-y: auto;
             border-top: 1px solid #e0e0e0;
+            display: none; /* Hidden in main view */
+        }
+
+        .table-wrapper.full-page {
+            display: block;
         }
 
         table {
@@ -568,6 +643,74 @@
         </div>
     </div>
 
+    <!-- Full Page View for Company Wise Manpower -->
+    <div class="full-page-view" id="fullPageView">
+        <div class="full-page-header">
+            <button class="back-btn" onclick="closeFullPageView()">
+                ← Back to Dashboard
+            </button>
+            <h2 class="full-page-title">👥 Company Wise Manpower - Detailed View</h2>
+            <div style="width: 120px;"></div> <!-- Spacer for alignment -->
+        </div>
+
+        <div class="full-page-content">
+            <div class="search-section-full">
+                <input type="date" class="search-input" id="fullPageDate" placeholder="Search by date" max="">
+                <button class="btn btn-secondary" onclick="searchFullPageByDate()" id="fullPageSearchBtn">
+                    🔍 Search Parade State
+                </button>
+            </div>
+
+            <div class="actions-bar no-print" id="fullPageActionsBar">
+                <div class="actions-left">
+                    <div id="fullPageStatusMessage" style="display: none;"></div>
+                </div>
+                <div class="actions-right">
+                    <button class="btn btn-secondary" onclick="exportFullPageToCSV()" id="fullPageExportBtn">
+                        📥 Export CSV
+                    </button>
+                    <button class="btn btn-primary" onclick="saveFullPageData()" id="fullPageSaveBtn">
+                        💾 Save Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrapper full-page" id="fullPageTableWrapper">
+                <table id="fullPageTable">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">CAT</th>
+                            <th rowspan="2">AUTH</th>
+                            <th rowspan="2">H/S</th>
+                            <th rowspan="2">POSTED/<br>STR</th>
+                            <th rowspan="2">LVE</th>
+                            <th rowspan="2">COURSE</th>
+                            <th rowspan="2">DET</th>
+                            <th rowspan="2">MH</th>
+                            <th rowspan="2">SICK/<br>LVE</th>
+                            <th rowspan="2">EX</th>
+                            <th rowspan="2">TD</th>
+                            <th rowspan="2">ATT</th>
+                            <th rowspan="2">AWL/OSL/<br>JUDICIAL<br>CUSTODY</th>
+                            <th rowspan="2">T/OUT</th>
+                            <th colspan="2">PRESENT/STR</th>
+                            <th rowspan="2">DUES IN</th>
+                            <th rowspan="2">DUES OUT</th>
+                        </tr>
+                        <tr>
+                            <th>DET</th>
+                            <th>UNIT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fullPageTableBody">
+                        <!-- Generated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
     <div class="container">
         <!-- Stats Bar -->
         <div class="stats-bar">
@@ -593,9 +736,14 @@
         <div class="co-dashboard no-print" id="coDashboard">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h3 style="margin: 0; font-size: 16px; color: #333; font-weight: 600;">📋 CO Dashboard - All Companies Overview</h3>
-                <span style="font-size: 12px; color: #666; background: #e8f4fd; padding: 4px 8px; border-radius: 4px;">
-                    CO View Only
-                </span>
+                <div class="search-section no-print" style="padding: 20px 32px; background: #f8f8f8; border-bottom: 1px solid #e0e0e0;" id="searchSection">
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <input type="date" class="search-input" id="searchDate" placeholder="Search by date" max="">
+                <button class="btn btn-secondary" onclick="searchByDate()" id="searchBtn">
+                    🔍 Search Parade State
+                </button>
+            </div>
+        </div>
             </div>
             <div class="co-cards-container">
                 <!-- Leave Percentage Card -->
@@ -647,19 +795,17 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Expand View Button - Moved below the cards -->
+            <button class="expand-view-btn" onclick="openFullPageView()">
+                📈 Expand View to See Full Parade State Table
+            </button>
         </div>
         
         <!-- Search Section -->
-        <div class="search-section no-print" style="padding: 20px 32px; background: #f8f8f8; border-bottom: 1px solid #e0e0e0;" id="searchSection">
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <input type="date" class="search-input" id="searchDate" placeholder="Search by date" max="">
-                <button class="btn btn-secondary" onclick="searchByDate()" id="searchBtn">
-                    🔍 Search Parade State
-                </button>
-            </div>
-        </div>
+        
 
-        <!-- Actions Bar -->
+        <!-- Actions Bar - Hidden in main view for CO -->
         <div class="actions-bar no-print" id="actionsBar">
             <div class="actions-left">
                 <div id="statusMessage" style="display: none;"></div>
@@ -674,7 +820,7 @@
             </div>
         </div>
 
-        <!-- Main Table -->
+        <!-- Main Table - Hidden in main view -->
         <div class="table-wrapper" id="tableWrapper">
             <table id="paradeTable">
                 <thead>
@@ -710,813 +856,1179 @@
     </div>
 
     <script>
-       const API_BASE_URL = '';
-const DEFAULT_DATE = new Date().toISOString().split('T')[0];
-const TODAY = DEFAULT_DATE;
+        const API_BASE_URL = '';
+        const DEFAULT_DATE = new Date().toISOString().split('T')[0];
+        const TODAY = DEFAULT_DATE;
 
-const categories = [
-    { name: 'OFFR', key: 'offr', isTotal: false, isFirstSection: true },
-    { name: 'JCO', key: 'jco', isTotal: false, isFirstSection: true },
-    { name: 'JCO(ERE)', key: 'jcoEre', isTotal: false, isFirstSection: true },
-    { name: 'OR', key: 'or', isTotal: false, isFirstSection: true },
-    { name: 'OR (ERE)', key: 'orEre', isTotal: false, isFirstSection: true },
-    { name: 'TOTAL', key: 'firstTotal', isTotal: true, isFirstTotal: true },
-    { name: 'O&A OR', key: 'oaOr', isTotal: false, isSecondSection: true },
-    { name: 'ATT SUMMIARY', key: 'attSummary', isTotal: false, isSecondSection: true },
-    { name: 'ATT OFFR', key: 'attOffr', isTotal: false, isSecondSection: true },
-    { name: 'ATT JCO', key: 'attJco', isTotal: false, isSecondSection: true },
-    { name: 'ATT OR', key: 'attOr', isTotal: false, isSecondSection: true },
-    { name: 'TOTAL', key: 'secondTotal', isTotal: true, isSecondTotal: true },
-    { name: 'G/TOTAL', key: 'grandTotal', isTotal: true, isGrandTotal: true }
-];
+        const categories = [
+            { name: 'OFFR', key: 'offr', isTotal: false, isFirstSection: true },
+            { name: 'JCO', key: 'jco', isTotal: false, isFirstSection: true },
+            { name: 'JCO(ERE)', key: 'jcoEre', isTotal: false, isFirstSection: true },
+            { name: 'OR', key: 'or', isTotal: false, isFirstSection: true },
+            { name: 'OR (ERE)', key: 'orEre', isTotal: false, isFirstSection: true },
+            { name: 'TOTAL', key: 'firstTotal', isTotal: true, isFirstTotal: true },
+            { name: 'O&A OR', key: 'oaOr', isTotal: false, isSecondSection: true },
+            { name: 'ATT SUMMIARY', key: 'attSummary', isTotal: false, isSecondSection: true },
+            { name: 'ATT OFFR', key: 'attOffr', isTotal: false, isSecondSection: true },
+            { name: 'ATT JCO', key: 'attJco', isTotal: false, isSecondSection: true },
+            { name: 'ATT OR', key: 'attOr', isTotal: false, isSecondSection: true },
+            { name: 'TOTAL', key: 'secondTotal', isTotal: true, isSecondTotal: true },
+            { name: 'G/TOTAL', key: 'grandTotal', isTotal: true, isGrandTotal: true }
+        ];
 
-const columnCount = 17;
-let data = {};
-let currentDate = DEFAULT_DATE;
-let isDataModified = false;
-let userCompany = '';
-let userRole = '';
-let isUsingTemplate = false;
-let templateOriginalDate = '';
+        const columnCount = 17;
+        let data = {};
+        let currentDate = DEFAULT_DATE;
+        let isDataModified = false;
+        let userCompany = '';
+        let userRole = '';
+        let isUsingTemplate = false;
+        let templateOriginalDate = '';
 
-const COL_INDICES = {
-    AUTH: 0,
-    HS: 1,
-    POSTED_STR: 2,
-    LVE: 3,
-    COURSE: 4,
-    DET: 5,
-    MH: 6,
-    SICK_LVE: 7,
-    EX: 8,
-    TD: 9,
-    ATT: 10,
-    AWL_OSL_JC: 11,
-    T_OUT: 12,
-    PRESENT_DET: 13,
-    PRESENT_UNIT: 14,
-    DUES_IN: 15,
-    DUES_OUT: 16
-};
+        const COL_INDICES = {
+            AUTH: 0,
+            HS: 1,
+            POSTED_STR: 2,
+            LVE: 3,
+            COURSE: 4,
+            DET: 5,
+            MH: 6,
+            SICK_LVE: 7,
+            EX: 8,
+            TD: 9,
+            ATT: 10,
+            AWL_OSL_JC: 11,
+            T_OUT: 12,
+            PRESENT_DET: 13,
+            PRESENT_UNIT: 14,
+            DUES_IN: 15,
+            DUES_OUT: 16
+        };
 
-// API Helper Functions
-async function apiRequest(endpoint, method = 'GET', body = null) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const options = {
-        method,
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-    };
-
-    if (body) {
-        options.body = JSON.stringify(body);
-    }
-
-    try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('API Request Error:', error);
-        throw error;
-    }
-}
-
-function showLoading(show) {
-    document.getElementById('loadingOverlay').classList.toggle('active', show);
-}
-
-function showStatus(message, type = 'info') {
-    const statusEl = document.getElementById('statusMessage');
-    statusEl.textContent = message;
-    statusEl.className = `status-message ${type}`;
-    statusEl.style.display = 'flex';
-    
-    if (type === 'success' || type === 'info') {
-        setTimeout(() => {
-            statusEl.style.display = 'none';
-        }, 3000);
-    }
-}
-
-function updateDateDisplay() {
-    const date = new Date(currentDate);
-    const formatted = date.toLocaleDateString('en-US', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
-    });
-    document.getElementById('reportDateDisplay').textContent = formatted;
-    
-    if (isUsingTemplate && templateOriginalDate) {
-        const templateDate = new Date(templateOriginalDate);
-        const templateFormatted = templateDate.toLocaleDateString('en-US', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
-        document.getElementById('templateMessage').textContent = 
-            `Using ${templateFormatted}'s data as template. You can edit and save for today (${formatted}).`;
-        document.getElementById('templateNotice').classList.remove('hidden');
-    } else {
-        document.getElementById('templateNotice').classList.add('hidden');
-    }
-}
-
-function initData() {
-    categories.forEach(cat => {
-        if (!cat.isTotal) {
-            data[cat.key] = Array(columnCount).fill(0);
-        }
-    });
-}
-
-function calculateTOut(rowData) {
-    const lve = rowData[COL_INDICES.LVE] || 0;
-    const course = rowData[COL_INDICES.COURSE] || 0;
-    const mh = rowData[COL_INDICES.MH] || 0;
-    const sickLve = rowData[COL_INDICES.SICK_LVE] || 0;
-    const ex = rowData[COL_INDICES.EX] || 0;
-    const td = rowData[COL_INDICES.TD] || 0;
-    const att = rowData[COL_INDICES.ATT] || 0;
-    const awlOslJc = rowData[COL_INDICES.AWL_OSL_JC] || 0;
-    
-    return lve + course + mh + sickLve + ex + td + att + awlOslJc;
-}
-
-function calculatePresentUnit(rowData) {
-    const postedStr = rowData[COL_INDICES.POSTED_STR] || 0;
-    const tOut = calculateTOut(rowData);
-    return Math.max(0, postedStr - tOut);
-}
-
-function getPresentDet(rowData) {
-    return rowData[COL_INDICES.DET] || 0;
-}
-
-function getCalculatedRowValues(rowData) {
-    return {
-        tOut: calculateTOut(rowData),
-        presentDet: getPresentDet(rowData),
-        presentUnit: calculatePresentUnit(rowData)
-    };
-}
-
-function calculateFirstTotal(columnIndex) {
-    let total = 0;
-    const firstSectionCategories = categories.filter(cat => cat.isFirstSection && !cat.isTotal);
-    
-    firstSectionCategories.forEach(cat => {
-        if (data[cat.key] && data[cat.key].length > columnIndex) {
-            if (columnIndex === COL_INDICES.T_OUT) {
-                total += calculateTOut(data[cat.key]);
-            } else if (columnIndex === COL_INDICES.PRESENT_DET) {
-                total += getPresentDet(data[cat.key]);
-            } else if (columnIndex === COL_INDICES.PRESENT_UNIT) {
-                total += calculatePresentUnit(data[cat.key]);
-            } else {
-                total += data[cat.key][columnIndex] || 0;
-            }
-        }
-    });
-    
-    return total;
-}
-
-function calculateSecondTotal(columnIndex) {
-    let total = 0;
-    const secondSectionCategories = categories.filter(cat => cat.isSecondSection && !cat.isTotal);
-    
-    secondSectionCategories.forEach(cat => {
-        if (data[cat.key] && data[cat.key].length > columnIndex) {
-            if (columnIndex === COL_INDICES.T_OUT) {
-                total += calculateTOut(data[cat.key]);
-            } else if (columnIndex === COL_INDICES.PRESENT_DET) {
-                total += getPresentDet(data[cat.key]);
-            } else if (columnIndex === COL_INDICES.PRESENT_UNIT) {
-                total += calculatePresentUnit(data[cat.key]);
-            } else {
-                total += data[cat.key][columnIndex] || 0;
-            }
-        }
-    });
-    
-    return total;
-}
-
-function calculateGrandTotal(columnIndex) {
-    return calculateFirstTotal(columnIndex) + calculateSecondTotal(columnIndex);
-}
-
-function createInputCell(categoryKey, columnIndex) {
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.min = '0';
-    input.step = '1';
-    input.value = data[categoryKey] ? (data[categoryKey][columnIndex] || 0) : 0;
-    input.dataset.category = categoryKey;
-    input.dataset.column = columnIndex;
-    input.style.fontSize = '14px';
-    input.style.height = '42px';
-    input.style.padding = '12px 8px';
-    
-    const isFutureDate = new Date(currentDate) > new Date(TODAY);
-    if (isFutureDate) {
-        input.disabled = true;
-        input.title = "Cannot edit data for future dates";
-    }
-    
-    input.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        const category = e.target.dataset.category;
-        const column = parseInt(e.target.dataset.column);
-        
-        data[category][column] = isNaN(value) ? 0 : value;
-        
-        if (column === COL_INDICES.POSTED_STR || 
-            column === COL_INDICES.LVE || 
-            column === COL_INDICES.COURSE || 
-            column === COL_INDICES.DET || 
-            column === COL_INDICES.MH || 
-            column === COL_INDICES.SICK_LVE || 
-            column === COL_INDICES.EX || 
-            column === COL_INDICES.TD || 
-            column === COL_INDICES.ATT || 
-            column === COL_INDICES.AWL_OSL_JC) {
-            
-            updateCalculatedValuesForRow(category);
-        }
-        
-        updateAllTotals();
-        updateStats();
-        isDataModified = true;
-    });
-    
-    return input;
-}
-
-// NEW: Create read-only cell for CO view
-function createReadOnlyCell(categoryKey, columnIndex) {
-    const span = document.createElement('span');
-    span.className = 'readonly-value';
-    span.textContent = data[categoryKey] ? (data[categoryKey][columnIndex] || 0) : 0;
-    span.title = "Read-only: CO View - Aggregated from all companies";
-    span.style.display = 'flex';
-    span.style.alignItems = 'center';
-    span.style.justifyContent = 'center';
-    span.style.height = '42px';
-    span.style.fontWeight = '500';
-    span.style.fontSize = '14px';
-    span.style.background = '#f9fafb';
-    span.style.borderRadius = '4px';
-    span.style.padding = '12px 8px';
-    return span;
-}
-
-function createCalculatedCell(categoryKey, columnIndex) {
-    const span = document.createElement('span');
-    span.className = 'calculated-value';
-    span.id = `${categoryKey}_${columnIndex}`;
-    span.style.display = 'flex';
-    span.style.alignItems = 'center';
-    span.style.justifyContent = 'center';
-    span.style.height = '42px';
-    span.style.fontWeight = '600';
-    span.style.fontSize = '14px';
-    
-    if (columnIndex === COL_INDICES.T_OUT) {
-        span.style.color = '#2c5282';
-        span.title = "Calculated: LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC";
-    } else if (columnIndex === COL_INDICES.PRESENT_DET) {
-        span.style.color = '#2d3748';
-        span.title = "Same as DET column value";
-    } else if (columnIndex === COL_INDICES.PRESENT_UNIT) {
-        span.style.color = '#22543d';
-        span.title = "Calculated: POSTED/STR - T/OUT";
-    }
-    
-    return span;
-}
-
-function updateCalculatedValuesForRow(categoryKey) {
-    const rowData = data[categoryKey] || Array(columnCount).fill(0);
-    const calculated = getCalculatedRowValues(rowData);
-    
-    const tOutElement = document.getElementById(`${categoryKey}_${COL_INDICES.T_OUT}`);
-    if (tOutElement) tOutElement.textContent = calculated.tOut;
-    
-    const presentDetElement = document.getElementById(`${categoryKey}_${COL_INDICES.PRESENT_DET}`);
-    if (presentDetElement) presentDetElement.textContent = calculated.presentDet;
-    
-    const presentUnitElement = document.getElementById(`${categoryKey}_${COL_INDICES.PRESENT_UNIT}`);
-    if (presentUnitElement) presentUnitElement.textContent = calculated.presentUnit;
-}
-
-function updateAllTotals() {
-    for (let i = 0; i < columnCount; i++) {
-        const firstTotalElement = document.getElementById(`firstTotal_${i}`);
-        if (firstTotalElement) {
-            firstTotalElement.textContent = calculateFirstTotal(i);
-        }
-    }
-    
-    for (let i = 0; i < columnCount; i++) {
-        const secondTotalElement = document.getElementById(`secondTotal_${i}`);
-        if (secondTotalElement) {
-            secondTotalElement.textContent = calculateSecondTotal(i);
-        }
-    }
-    
-    for (let i = 0; i < columnCount; i++) {
-        const grandTotalElement = document.getElementById(`grandTotal_${i}`);
-        if (grandTotalElement) {
-            grandTotalElement.textContent = calculateGrandTotal(i);
-        }
-    }
-}
-
-// MODIFIED: Update createTable to support read-only mode for CO
-function createTable(isReadOnly = false) {
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
-
-    categories.forEach(cat => {
-        const tr = document.createElement('tr');
-        
-        if (cat.isTotal) {
-            if (cat.isGrandTotal) {
-                tr.className = 'grand-total-row';
-            } else {
-                tr.className = 'total-row';
-            }
-        }
-
-        const tdCat = document.createElement('td');
-        tdCat.className = 'category-cell';
-        tdCat.textContent = cat.name;
-        tr.appendChild(tdCat);
-
-        for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-            const td = document.createElement('td');
-            
-            if (cat.isTotal) {
-                const span = document.createElement('span');
-                span.className = 'calculated-value';
-                span.id = `${cat.key}_${columnIndex}`;
-                span.style.height = '42px';
-                span.style.display = 'flex';
-                span.style.alignItems = 'center';
-                span.style.justifyContent = 'center';
-                
-                if (cat.isFirstTotal) {
-                    span.textContent = calculateFirstTotal(columnIndex);
-                } else if (cat.isSecondTotal) {
-                    span.textContent = calculateSecondTotal(columnIndex);
-                } else if (cat.isGrandTotal) {
-                    span.textContent = calculateGrandTotal(columnIndex);
+        // API Helper Functions
+        async function apiRequest(endpoint, method = 'GET', body = null) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
-                
-                td.appendChild(span);
-            } else {
-                if (columnIndex === COL_INDICES.T_OUT || 
-                    columnIndex === COL_INDICES.PRESENT_DET || 
-                    columnIndex === COL_INDICES.PRESENT_UNIT) {
-                    
-                    const calculatedCell = createCalculatedCell(cat.key, columnIndex);
-                    td.appendChild(calculatedCell);
-                } else {
-                    // NEW: Use read-only cells for CO, editable inputs for others
-                    if (isReadOnly) {
-                        const readOnlyCell = createReadOnlyCell(cat.key, columnIndex);
-                        td.appendChild(readOnlyCell);
-                    } else {
-                        const inputCell = createInputCell(cat.key, columnIndex);
-                        td.appendChild(inputCell);
-                    }
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
-            }
-            
-            tr.appendChild(td);
-        }
-
-        tbody.appendChild(tr);
-    });
-    
-    categories.forEach(cat => {
-        if (!cat.isTotal) {
-            updateCalculatedValuesForRow(cat.key);
-        }
-    });
-}
-
-function updateStats() {
-    document.getElementById('totalAuth').textContent = calculateGrandTotal(COL_INDICES.AUTH);
-    document.getElementById('presentUnit').textContent = calculateGrandTotal(COL_INDICES.PRESENT_UNIT);
-    document.getElementById('totalOut').textContent = calculateGrandTotal(COL_INDICES.T_OUT);
-}
-
-// MODIFIED: Load CO Dashboard Data with aggregated parade table
-async function loadCODashboardData(selectedDate) {
-    if (userRole !== 'CO') return;
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/co-dashboard/all-data/${selectedDate}`);
-        const result = await response.json();
-        
-        if (!response.ok || !result.success) {
-            console.error('Failed to load CO dashboard data:', result.message);
-            
-            // Show placeholder message in tables
-            document.querySelector('#coLeaveTable tbody').innerHTML = `
-                <tr>
-                    <td colspan="4" style="text-align: center; padding: 20px; color: #e53e3e;">
-                        ${result.message || 'No data found'}
-                    </td>
-                </tr>
-            `;
-            document.querySelector('#coManpowerTable tbody').innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 20px; color: #e53e3e;">
-                        ${result.message || 'No data found'}
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        const coData = result.data;
-        
-        // Update Leave Table
-        const leaveTbody = document.querySelector('#coLeaveTable tbody');
-        leaveTbody.innerHTML = '';
-        
-        coData.leave_status.by_company.forEach(row => {
-            let percentClass = "";
-            const percentage = row.leave_percentage || 0;
-            if (percentage >= 40) {
-                percentClass = "percentage-high";
-            } else if (percentage >= 20) {
-                percentClass = "percentage-medium";
-            } else {
-                percentClass = "percentage-low";
-            }
-            
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${row.company.toUpperCase()}</strong></td>
-                <td class="${percentClass}">${percentage}%</td>
-                <td>${row.on_leave || 0}</td>
-                <td>${row.total_strength || 0}</td>
-            `;
-            leaveTbody.appendChild(tr);
-        });
-        
-        // Add total row for leave
-        const totalLeavePercentClass = coData.leave_status.total.leave_percentage >= 40 ? 'percentage-high' :
-                                       coData.leave_status.total.leave_percentage >= 20 ? 'percentage-medium' : 'percentage-low';
-        const totalLeaveTr = document.createElement('tr');
-        totalLeaveTr.className = 'total-row';
-        totalLeaveTr.innerHTML = `
-            <td><strong>TOTAL</strong></td>
-            <td class="${totalLeavePercentClass}">${coData.leave_status.total.leave_percentage}%</td>
-            <td>${coData.leave_status.total.on_leave}</td>
-            <td>${coData.leave_status.total.total_strength}</td>
-        `;
-        leaveTbody.appendChild(totalLeaveTr);
-        
-        // Update Manpower Table
-        const manpowerTbody = document.querySelector('#coManpowerTable tbody');
-        manpowerTbody.innerHTML = '';
-        
-        coData.manpower.by_company.forEach(row => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${row.company.toUpperCase()}</strong></td>
-                <td>${row.officers || 0}</td>
-                <td>${row.jcos || 0}</td>
-                <td>${row.other_ranks || 0}</td>
-                <td><strong>${row.total || 0}</strong></td>
-            `;
-            manpowerTbody.appendChild(tr);
-        });
-        
-        // Add total row for manpower
-        const totalManpowerTr = document.createElement('tr');
-        totalManpowerTr.className = 'total-row';
-        totalManpowerTr.innerHTML = `
-            <td><strong>TOTAL</strong></td>
-            <td>${coData.manpower.total.officers}</td>
-            <td>${coData.manpower.total.jcos}</td>
-            <td>${coData.manpower.total.other_ranks}</td>
-            <td><strong>${coData.manpower.total.total}</strong></td>
-        `;
-        manpowerTbody.appendChild(totalManpowerTr);
-        
-        // NEW: Load aggregated parade table for CO
-        await loadCOAggregatedParadeTable(selectedDate);
-        
-    } catch (error) {
-        console.error('Error loading CO dashboard data:', error);
-    }
-}
-
-// NEW: Load aggregated parade table data for CO
-async function loadCOAggregatedParadeTable(selectedDate) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/co-dashboard/parade-table/${selectedDate}`);
-        const result = await response.json();
-        
-        if (!response.ok || !result.success) {
-            console.error('Failed to load CO parade table:', result.message);
-            showStatus(result.message || 'No parade data found for this date', 'warning');
-            return;
-        }
-        
-        const aggregatedData = result.data.data;
-        
-        // Initialize data structure with aggregated values
-        initData();
-        for (const [category, values] of Object.entries(aggregatedData)) {
-            if (data.hasOwnProperty(category)) {
-                data[category] = values.slice(0, columnCount);
+                return await response.json();
+            } catch (error) {
+                console.error('API Request Error:', error);
+                throw error;
             }
         }
-        
-        // Create table with read-only mode (true = CO read-only mode)
-        createTable(true);
-        updateStats();
-        
-        showStatus(`Loaded aggregated data from ${result.companies_count} companies (Read-only)`, 'success');
-        
-    } catch (error) {
-        console.error('Error loading CO aggregated parade table:', error);
-        showStatus('Failed to load aggregated parade table', 'error');
-    }
-}
 
-async function getUserInfo() {
-    try {
-        const response = await apiRequest('/api/user-info');
-        if (response.success) {
-            userCompany = response.company || '';
-            userRole = response.role || '';
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            statusEl.style.display = 'flex';
             
-            // Show CO dashboard if user is CO
-            if (userRole === 'CO') {
-                document.getElementById('coDashboard').classList.add('active');
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 3000);
             }
         }
-    } catch (error) {
-        console.log("Could not get user info");
-    }
-}
 
-// MODIFIED: Update loadDataForDate to handle CO differently
-async function loadDataForDate(date) {
-    try {
-        showLoading(true);
-        showStatus('Loading parade state data...', 'info');
-        
-        // For CO: Load aggregated data from all companies
-        if (userRole === 'CO') {
-            const response = await fetch(`${API_BASE_URL}/api/co-dashboard/all-data/${date}`);
-            const result = await response.json();
+        function showFullPageStatus(message, type = 'info') {
+            const statusEl = document.getElementById('fullPageStatusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            statusEl.style.display = 'flex';
             
-            if (response.ok && result.success) {
-                const coData = result.data;
-                
-                // Update stats bar with aggregated totals
-                document.getElementById('totalAuth').textContent = coData.parade_summary.total_auth;
-                document.getElementById('presentUnit').textContent = coData.parade_summary.present_unit;
-                document.getElementById('totalOut').textContent = coData.parade_summary.total_out;
-                
-                // Format date
-                const dateObj = new Date(date);
-                const formattedDate = dateObj.toLocaleDateString('en-US', {
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function updateDateDisplay() {
+            const date = new Date(currentDate);
+            const formatted = date.toLocaleDateString('en-US', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric' 
+            });
+            document.getElementById('reportDateDisplay').textContent = formatted;
+            
+            if (isUsingTemplate && templateOriginalDate) {
+                const templateDate = new Date(templateOriginalDate);
+                const templateFormatted = templateDate.toLocaleDateString('en-US', {
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric'
                 });
-                document.getElementById('reportDateDisplay').textContent = formattedDate;
-                currentDate = date;
-                
-                // Update CO dashboard tables AND parade table
-                await loadCODashboardData(date);
-                
-                // Show the main parade table for CO (read-only mode)
-                document.getElementById('tableWrapper').style.display = 'block';
-                
-                // Hide save/edit actions for CO
-                document.getElementById('actionsBar').style.display = 'none';
-                
-                showStatus(`CO Dashboard loaded for ${formattedDate} (Read-only view)`, 'success');
+                document.getElementById('templateMessage').textContent = 
+                    `Using ${templateFormatted}'s data as template. You can edit and save for today (${formatted}).`;
+                document.getElementById('templateNotice').classList.remove('hidden');
             } else {
-                throw new Error(result.message || 'No data found for this date');
+                document.getElementById('templateNotice').classList.add('hidden');
             }
-        } else {
-            // For non-CO users: Load individual company data (existing logic)
-            const response = await apiRequest(`/api/parade-state/get/${date}`);
+        }
+
+        function initData() {
+            categories.forEach(cat => {
+                if (!cat.isTotal) {
+                    data[cat.key] = Array(columnCount).fill(0);
+                }
+            });
+        }
+
+        function calculateTOut(rowData) {
+            const lve = rowData[COL_INDICES.LVE] || 0;
+            const course = rowData[COL_INDICES.COURSE] || 0;
+            const mh = rowData[COL_INDICES.MH] || 0;
+            const sickLve = rowData[COL_INDICES.SICK_LVE] || 0;
+            const ex = rowData[COL_INDICES.EX] || 0;
+            const td = rowData[COL_INDICES.TD] || 0;
+            const att = rowData[COL_INDICES.ATT] || 0;
+            const awlOslJc = rowData[COL_INDICES.AWL_OSL_JC] || 0;
             
-            if (response.success && response.data) {
-                const loadedData = response.data.data;
-                currentDate = loadedData.date || date;
+            return lve + course + mh + sickLve + ex + td + att + awlOslJc;
+        }
+
+        function calculatePresentUnit(rowData) {
+            const postedStr = rowData[COL_INDICES.POSTED_STR] || 0;
+            const tOut = calculateTOut(rowData);
+            return Math.max(0, postedStr - tOut);
+        }
+
+        function getPresentDet(rowData) {
+            return rowData[COL_INDICES.DET] || 0;
+        }
+
+        function getCalculatedRowValues(rowData) {
+            return {
+                tOut: calculateTOut(rowData),
+                presentDet: getPresentDet(rowData),
+                presentUnit: calculatePresentUnit(rowData)
+            };
+        }
+
+        function calculateFirstTotal(columnIndex) {
+            let total = 0;
+            const firstSectionCategories = categories.filter(cat => cat.isFirstSection && !cat.isTotal);
+            
+            firstSectionCategories.forEach(cat => {
+                if (data[cat.key] && data[cat.key].length > columnIndex) {
+                    if (columnIndex === COL_INDICES.T_OUT) {
+                        total += calculateTOut(data[cat.key]);
+                    } else if (columnIndex === COL_INDICES.PRESENT_DET) {
+                        total += getPresentDet(data[cat.key]);
+                    } else if (columnIndex === COL_INDICES.PRESENT_UNIT) {
+                        total += calculatePresentUnit(data[cat.key]);
+                    } else {
+                        total += data[cat.key][columnIndex] || 0;
+                    }
+                }
+            });
+            
+            return total;
+        }
+
+        function calculateSecondTotal(columnIndex) {
+            let total = 0;
+            const secondSectionCategories = categories.filter(cat => cat.isSecondSection && !cat.isTotal);
+            
+            secondSectionCategories.forEach(cat => {
+                if (data[cat.key] && data[cat.key].length > columnIndex) {
+                    if (columnIndex === COL_INDICES.T_OUT) {
+                        total += calculateTOut(data[cat.key]);
+                    } else if (columnIndex === COL_INDICES.PRESENT_DET) {
+                        total += getPresentDet(data[cat.key]);
+                    } else if (columnIndex === COL_INDICES.PRESENT_UNIT) {
+                        total += calculatePresentUnit(data[cat.key]);
+                    } else {
+                        total += data[cat.key][columnIndex] || 0;
+                    }
+                }
+            });
+            
+            return total;
+        }
+
+        function calculateGrandTotal(columnIndex) {
+            return calculateFirstTotal(columnIndex) + calculateSecondTotal(columnIndex);
+        }
+
+        // Full Page View Functions
+        function openFullPageView() {
+            // Store current state
+            const fullPageDateInput = document.getElementById('fullPageDate');
+            fullPageDateInput.value = currentDate;
+            fullPageDateInput.max = TODAY;
+            
+            // Show full page view
+            document.getElementById('fullPageView').classList.add('active');
+            
+            // Hide main container
+            document.querySelector('.container').style.display = 'none';
+            
+            // Load data for full page view
+            loadFullPageData(currentDate);
+        }
+
+        function closeFullPageView() {
+            // Hide full page view
+            document.getElementById('fullPageView').classList.remove('active');
+            
+            // Show main container
+            document.querySelector('.container').style.display = 'block';
+            
+            // Refresh main dashboard data
+            loadDataForDate(currentDate);
+        }
+
+        async function searchFullPageByDate() {
+            const searchDate = document.getElementById('fullPageDate').value;
+            if (!searchDate) {
+                showFullPageStatus('Please select a date', 'error');
+                return;
+            }
+
+            const searchInput = document.getElementById('fullPageDate');
+            searchInput.classList.remove('future-date');
+
+            loadFullPageData(searchDate);
+        }
+
+        function createFullPageInputCell(categoryKey, columnIndex) {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '0';
+            input.step = '1';
+            input.value = data[categoryKey] ? (data[categoryKey][columnIndex] || 0) : 0;
+            input.dataset.category = categoryKey;
+            input.dataset.column = columnIndex;
+            input.style.fontSize = '14px';
+            input.style.height = '42px';
+            input.style.padding = '12px 8px';
+            
+            const isFutureDate = new Date(currentDate) > new Date(TODAY);
+            if (isFutureDate) {
+                input.disabled = true;
+                input.title = "Cannot edit data for future dates";
+            }
+            
+            input.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                const category = e.target.dataset.category;
+                const column = parseInt(e.target.dataset.column);
                 
-                // Check if using template
-                isUsingTemplate = loadedData.is_previous_day_template || false;
-                templateOriginalDate = loadedData.original_date || '';
+                data[category][column] = isNaN(value) ? 0 : value;
                 
-                userCompany = loadedData.company || '';
+                if (column === COL_INDICES.POSTED_STR || 
+                    column === COL_INDICES.LVE || 
+                    column === COL_INDICES.COURSE || 
+                    column === COL_INDICES.DET || 
+                    column === COL_INDICES.MH || 
+                    column === COL_INDICES.SICK_LVE || 
+                    column === COL_INDICES.EX || 
+                    column === COL_INDICES.TD || 
+                    column === COL_INDICES.ATT || 
+                    column === COL_INDICES.AWL_OSL_JC) {
+                    
+                    updateFullPageCalculatedValuesForRow(category);
+                }
                 
-                // Parse loaded data
-                initData();
-                for (const [category, values] of Object.entries(loadedData)) {
-                    if (data.hasOwnProperty(category)) {
-                        data[category] = values.slice(0, columnCount);
+                updateFullPageAllTotals();
+                isDataModified = true;
+                document.getElementById('fullPageSaveBtn').disabled = false;
+            });
+            
+            return input;
+        }
+
+        function createFullPageCalculatedCell(categoryKey, columnIndex) {
+            const span = document.createElement('span');
+            span.className = 'calculated-value';
+            span.id = `full_${categoryKey}_${columnIndex}`;
+            span.style.display = 'flex';
+            span.style.alignItems = 'center';
+            span.style.justifyContent = 'center';
+            span.style.height = '42px';
+            span.style.fontWeight = '600';
+            span.style.fontSize = '14px';
+            
+            if (columnIndex === COL_INDICES.T_OUT) {
+                span.style.color = '#2c5282';
+                span.title = "Calculated: LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC";
+            } else if (columnIndex === COL_INDICES.PRESENT_DET) {
+                span.style.color = '#2d3748';
+                span.title = "Same as DET column value";
+            } else if (columnIndex === COL_INDICES.PRESENT_UNIT) {
+                span.style.color = '#22543d';
+                span.title = "Calculated: POSTED/STR - T/OUT";
+            }
+            
+            return span;
+        }
+
+        function updateFullPageCalculatedValuesForRow(categoryKey) {
+            const rowData = data[categoryKey] || Array(columnCount).fill(0);
+            const calculated = getCalculatedRowValues(rowData);
+            
+            const tOutElement = document.getElementById(`full_${categoryKey}_${COL_INDICES.T_OUT}`);
+            if (tOutElement) tOutElement.textContent = calculated.tOut;
+            
+            const presentDetElement = document.getElementById(`full_${categoryKey}_${COL_INDICES.PRESENT_DET}`);
+            if (presentDetElement) presentDetElement.textContent = calculated.presentDet;
+            
+            const presentUnitElement = document.getElementById(`full_${categoryKey}_${COL_INDICES.PRESENT_UNIT}`);
+            if (presentUnitElement) presentUnitElement.textContent = calculated.presentUnit;
+        }
+
+        function updateFullPageAllTotals() {
+            for (let i = 0; i < columnCount; i++) {
+                const firstTotalElement = document.getElementById(`full_firstTotal_${i}`);
+                if (firstTotalElement) {
+                    firstTotalElement.textContent = calculateFirstTotal(i);
+                }
+            }
+            
+            for (let i = 0; i < columnCount; i++) {
+                const secondTotalElement = document.getElementById(`full_secondTotal_${i}`);
+                if (secondTotalElement) {
+                    secondTotalElement.textContent = calculateSecondTotal(i);
+                }
+            }
+            
+            for (let i = 0; i < columnCount; i++) {
+                const grandTotalElement = document.getElementById(`full_grandTotal_${i}`);
+                if (grandTotalElement) {
+                    grandTotalElement.textContent = calculateGrandTotal(i);
+                }
+            }
+        }
+
+        function createFullPageTable(isReadOnly = false) {
+            const tbody = document.getElementById('fullPageTableBody');
+            tbody.innerHTML = '';
+
+            categories.forEach(cat => {
+                const tr = document.createElement('tr');
+                
+                if (cat.isTotal) {
+                    if (cat.isGrandTotal) {
+                        tr.className = 'grand-total-row';
+                    } else {
+                        tr.className = 'total-row';
+                    }
+                }
+
+                const tdCat = document.createElement('td');
+                tdCat.className = 'category-cell';
+                tdCat.textContent = cat.name;
+                tr.appendChild(tdCat);
+
+                for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                    const td = document.createElement('td');
+                    
+                    if (cat.isTotal) {
+                        const span = document.createElement('span');
+                        span.className = 'calculated-value';
+                        span.id = `full_${cat.key}_${columnIndex}`;
+                        span.style.height = '42px';
+                        span.style.display = 'flex';
+                        span.style.alignItems = 'center';
+                        span.style.justifyContent = 'center';
+                        
+                        if (cat.isFirstTotal) {
+                            span.textContent = calculateFirstTotal(columnIndex);
+                        } else if (cat.isSecondTotal) {
+                            span.textContent = calculateSecondTotal(columnIndex);
+                        } else if (cat.isGrandTotal) {
+                            span.textContent = calculateGrandTotal(columnIndex);
+                        }
+                        
+                        td.appendChild(span);
+                    } else {
+                        if (columnIndex === COL_INDICES.T_OUT || 
+                            columnIndex === COL_INDICES.PRESENT_DET || 
+                            columnIndex === COL_INDICES.PRESENT_UNIT) {
+                            
+                            const calculatedCell = createFullPageCalculatedCell(cat.key, columnIndex);
+                            td.appendChild(calculatedCell);
+                        } else {
+                            if (isReadOnly) {
+                                const readOnlyCell = document.createElement('span');
+                                readOnlyCell.className = 'readonly-value';
+                                readOnlyCell.textContent = data[cat.key] ? (data[cat.key][columnIndex] || 0) : 0;
+                                readOnlyCell.title = "Read-only: CO View - Aggregated from all companies";
+                                td.appendChild(readOnlyCell);
+                            } else {
+                                const inputCell = createFullPageInputCell(cat.key, columnIndex);
+                                td.appendChild(inputCell);
+                            }
+                        }
+                    }
+                    
+                    tr.appendChild(td);
+                }
+
+                tbody.appendChild(tr);
+            });
+            
+            categories.forEach(cat => {
+                if (!cat.isTotal) {
+                    updateFullPageCalculatedValuesForRow(cat.key);
+                }
+            });
+        }
+
+        async function loadFullPageData(date) {
+            try {
+                showLoading(true);
+                showFullPageStatus('Loading parade state data...', 'info');
+                
+                // For CO: Load aggregated data from all companies
+                if (userRole === 'CO') {
+                    const response = await fetch(`${API_BASE_URL}/api/co-dashboard/parade-table/${date}`);
+                    const result = await response.json();
+                    
+                    if (!response.ok || !result.success) {
+                        console.error('Failed to load CO parade table:', result.message);
+                        showFullPageStatus(result.message || 'No parade data found for this date', 'error');
+                        return;
+                    }
+                    
+                    const aggregatedData = result.data.data;
+                    
+                    // Initialize data structure with aggregated values
+                    initData();
+                    for (const [category, values] of Object.entries(aggregatedData)) {
+                        if (data.hasOwnProperty(category)) {
+                            data[category] = values.slice(0, columnCount);
+                        }
+                    }
+                    
+                    // Create table with read-only mode
+                    createFullPageTable(true);
+                    
+                    // Hide save button for CO
+                    document.getElementById('fullPageSaveBtn').style.display = 'none';
+                    document.getElementById('fullPageExportBtn').style.display = 'inline-flex';
+                    
+                    showFullPageStatus(`Loaded aggregated data from ${result.companies_count} companies (Read-only)`, 'success');
+                    
+                } else {
+                    // For non-CO users: Load individual company data
+                    const response = await apiRequest(`/api/parade-state/get/${date}`);
+                    
+                    if (response.success && response.data) {
+                        const loadedData = response.data.data;
+                        currentDate = loadedData.date || date;
+                        
+                        // Check if using template
+                        isUsingTemplate = loadedData.is_previous_day_template || false;
+                        templateOriginalDate = loadedData.original_date || '';
+                        
+                        userCompany = loadedData.company || '';
+                        
+                        // Parse loaded data
+                        initData();
+                        for (const [category, values] of Object.entries(loadedData)) {
+                            if (data.hasOwnProperty(category)) {
+                                data[category] = values.slice(0, columnCount);
+                            }
+                        }
+                        
+                        // Create table in editable mode
+                        createFullPageTable(false);
+                        
+                        // Show save button for non-CO
+                        document.getElementById('fullPageSaveBtn').style.display = 'inline-flex';
+                        document.getElementById('fullPageExportBtn').style.display = 'inline-flex';
+                        
+                        // Disable save button for future dates
+                        const isFutureDate = new Date(currentDate) > new Date(TODAY);
+                        document.getElementById('fullPageSaveBtn').disabled = isFutureDate;
+                        
+                        if (isUsingTemplate) {
+                            showFullPageStatus(`Using ${templateOriginalDate}'s data as template for ${currentDate}. Edit and save.`, 'warning');
+                        } else {
+                            showFullPageStatus(`Loaded parade state for ${currentDate}`, 'success');
+                        }
+                        
+                    } else if (response.error === 'Cannot access data for future dates') {
+                        showFullPageStatus('Cannot access data for future dates', 'error');
+                        initData();
+                        createFullPageTable(false);
+                        
+                        const searchInput = document.getElementById('fullPageDate');
+                        searchInput.classList.add('future-date');
+                        document.getElementById('fullPageSaveBtn').disabled = true;
+                        isDataModified = false;
+                    } else {
+                        initData();
+                        createFullPageTable(false);
+                        isDataModified = false;
+                        showFullPageStatus(`No existing data for ${date}. You can enter new data.`, 'warning');
                     }
                 }
                 
-                // Update UI
-                updateDateDisplay();
-                createTable(false); // false = editable mode
-                updateStats();
-                isDataModified = false;
-                
-                // Show actions bar for non-CO
-                document.getElementById('actionsBar').style.display = 'flex';
-                document.getElementById('tableWrapper').style.display = 'block';
-                
-                // Disable save button for future dates
-                const isFutureDate = new Date(currentDate) > new Date(TODAY);
-                document.getElementById('saveBtn').disabled = isFutureDate;
-                
-                if (isUsingTemplate) {
-                    showStatus(`Using ${templateOriginalDate}'s data as template for ${currentDate}. Edit and save.`, 'warning');
-                } else {
-                    showStatus(`Loaded parade state for ${currentDate}`, 'success');
-                }
-            } else if (response.error === 'Cannot access data for future dates') {
-                showStatus('Cannot access data for future dates', 'error');
-                initData();
-                createTable(false);
-                updateStats();
-                
-                const searchInput = document.getElementById('searchDate');
-                searchInput.classList.add('future-date');
-                document.getElementById('saveBtn').disabled = true;
-                isDataModified = false;
-            } else {
-                initData();
-                createTable(false);
-                updateStats();
-                isDataModified = false;
-                showStatus(`No existing data for ${date}. You can enter new data.`, 'warning');
+            } catch (error) {
+                console.error('Error loading full page data:', error);
+                showFullPageStatus(`Failed to load data: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
             }
         }
-        
-    } catch (error) {
-        console.error('Error loading data:', error);
-        showStatus(`Failed to load data: ${error.message}`, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
 
-async function searchByDate() {
-    const searchDate = document.getElementById('searchDate').value;
-    if (!searchDate) {
-        showStatus('Please select a date to search', 'error');
-        return;
-    }
+        async function saveFullPageData() {
+            // CO cannot save data
+            if (userRole === 'CO') {
+                showFullPageStatus('CO cannot modify parade state data', 'error');
+                return;
+            }
 
-    // Reset template notice
-    isUsingTemplate = false;
-    templateOriginalDate = '';
-    const templateNotice = document.getElementById('templateNotice');
-    if (templateNotice) {
-        templateNotice.classList.add('hidden');
-    }
-    
-    // Reset input styling
-    const searchInput = document.getElementById('searchDate');
-    searchInput.classList.remove('future-date');
+            const isFutureDate = new Date(currentDate) > new Date(TODAY);
+            if (isFutureDate) {
+                showFullPageStatus('Cannot save data for future dates', 'error');
+                return;
+            }
 
-    loadDataForDate(searchDate);
-}
+            try {
+                showLoading(true);
+                showFullPageStatus('Saving data...', 'info');
+                
+                const payloadData = {};
+                const inputCategories = ['offr', 'jco', 'jcoEre', 'or', 'orEre', 'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'];
+                
+                inputCategories.forEach(category => {
+                    const rowData = data[category] || Array(columnCount).fill(0);
+                    payloadData[category] = rowData;
+                });
+                
+                const payload = {
+                    date: currentDate,
+                    data: payloadData
+                };
 
-async function saveData() {
-    // CO cannot save data
-    if (userRole === 'CO') {
-        showStatus('CO cannot modify parade state data', 'error');
-        return;
-    }
+                console.log("Sending data to backend:", payload);
+                
+                const response = await apiRequest('/api/parade-state/save', 'POST', payload);
+                
+                if (response.success) {
+                    isDataModified = false;
+                    isUsingTemplate = false;
+                    templateOriginalDate = '';
+                    
+                    showFullPageStatus(`Data saved successfully for ${currentDate}`, 'success');
+                    document.getElementById('fullPageSaveBtn').disabled = true;
+                    
+                    setTimeout(() => {
+                        loadFullPageData(currentDate);
+                    }, 500);
+                } else if (response.error === 'Cannot save data for future dates') {
+                    showFullPageStatus('Cannot save data for future dates', 'error');
+                } else {
+                    showFullPageStatus(`Save failed: ${response.error}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showFullPageStatus(`Save failed: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
 
-    const isFutureDate = new Date(currentDate) > new Date(TODAY);
-    if (isFutureDate) {
-        showStatus('Cannot save data for future dates', 'error');
-        return;
-    }
+        async function exportFullPageToCSV() {
+            try {
+                showFullPageStatus('Preparing CSV export...', 'info');
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = `${API_BASE_URL}/api/parade-state/export-csv/${currentDate}`;
+                downloadLink.download = `parade_state_${currentDate}.csv`;
+                downloadLink.style.display = 'none';
+                
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                showFullPageStatus('CSV exported successfully', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting CSV:', error);
+                showFullPageStatus(`Export failed: ${error.message}`, 'error');
+            }
+        }
 
-    try {
-        showLoading(true);
-        showStatus('Saving data...', 'info');
-        
-        const payloadData = {};
-        const inputCategories = ['offr', 'jco', 'jcoEre', 'or', 'orEre', 'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'];
-        
-        inputCategories.forEach(category => {
-            const rowData = data[category] || Array(columnCount).fill(0);
-            payloadData[category] = rowData;
-        });
-        
-        const payload = {
-            date: currentDate,
-            data: payloadData
-        };
+        // Original functions for main dashboard
+        function createInputCell(categoryKey, columnIndex) {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '0';
+            input.step = '1';
+            input.value = data[categoryKey] ? (data[categoryKey][columnIndex] || 0) : 0;
+            input.dataset.category = categoryKey;
+            input.dataset.column = columnIndex;
+            input.style.fontSize = '14px';
+            input.style.height = '42px';
+            input.style.padding = '12px 8px';
+            
+            const isFutureDate = new Date(currentDate) > new Date(TODAY);
+            if (isFutureDate) {
+                input.disabled = true;
+                input.title = "Cannot edit data for future dates";
+            }
+            
+            input.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                const category = e.target.dataset.category;
+                const column = parseInt(e.target.dataset.column);
+                
+                data[category][column] = isNaN(value) ? 0 : value;
+                
+                if (column === COL_INDICES.POSTED_STR || 
+                    column === COL_INDICES.LVE || 
+                    column === COL_INDICES.COURSE || 
+                    column === COL_INDICES.DET || 
+                    column === COL_INDICES.MH || 
+                    column === COL_INDICES.SICK_LVE || 
+                    column === COL_INDICES.EX || 
+                    column === COL_INDICES.TD || 
+                    column === COL_INDICES.ATT || 
+                    column === COL_INDICES.AWL_OSL_JC) {
+                    
+                    updateCalculatedValuesForRow(category);
+                }
+                
+                updateAllTotals();
+                updateStats();
+                isDataModified = true;
+            });
+            
+            return input;
+        }
 
-        console.log("Sending data to backend:", payload);
-        
-        const response = await apiRequest('/api/parade-state/save', 'POST', payload);
-        
-        if (response.success) {
-            isDataModified = false;
+        function createReadOnlyCell(categoryKey, columnIndex) {
+            const span = document.createElement('span');
+            span.className = 'readonly-value';
+            span.textContent = data[categoryKey] ? (data[categoryKey][columnIndex] || 0) : 0;
+            span.title = "Read-only: CO View - Aggregated from all companies";
+            span.style.display = 'flex';
+            span.style.alignItems = 'center';
+            span.style.justifyContent = 'center';
+            span.style.height = '42px';
+            span.style.fontWeight = '500';
+            span.style.fontSize = '14px';
+            span.style.background = '#f9fafb';
+            span.style.borderRadius = '4px';
+            span.style.padding = '12px 8px';
+            return span;
+        }
+
+        function createCalculatedCell(categoryKey, columnIndex) {
+            const span = document.createElement('span');
+            span.className = 'calculated-value';
+            span.id = `${categoryKey}_${columnIndex}`;
+            span.style.display = 'flex';
+            span.style.alignItems = 'center';
+            span.style.justifyContent = 'center';
+            span.style.height = '42px';
+            span.style.fontWeight = '600';
+            span.style.fontSize = '14px';
+            
+            if (columnIndex === COL_INDICES.T_OUT) {
+                span.style.color = '#2c5282';
+                span.title = "Calculated: LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC";
+            } else if (columnIndex === COL_INDICES.PRESENT_DET) {
+                span.style.color = '#2d3748';
+                span.title = "Same as DET column value";
+            } else if (columnIndex === COL_INDICES.PRESENT_UNIT) {
+                span.style.color = '#22543d';
+                span.title = "Calculated: POSTED/STR - T/OUT";
+            }
+            
+            return span;
+        }
+
+        function updateCalculatedValuesForRow(categoryKey) {
+            const rowData = data[categoryKey] || Array(columnCount).fill(0);
+            const calculated = getCalculatedRowValues(rowData);
+            
+            const tOutElement = document.getElementById(`${categoryKey}_${COL_INDICES.T_OUT}`);
+            if (tOutElement) tOutElement.textContent = calculated.tOut;
+            
+            const presentDetElement = document.getElementById(`${categoryKey}_${COL_INDICES.PRESENT_DET}`);
+            if (presentDetElement) presentDetElement.textContent = calculated.presentDet;
+            
+            const presentUnitElement = document.getElementById(`${categoryKey}_${COL_INDICES.PRESENT_UNIT}`);
+            if (presentUnitElement) presentUnitElement.textContent = calculated.presentUnit;
+        }
+
+        function updateAllTotals() {
+            for (let i = 0; i < columnCount; i++) {
+                const firstTotalElement = document.getElementById(`firstTotal_${i}`);
+                if (firstTotalElement) {
+                    firstTotalElement.textContent = calculateFirstTotal(i);
+                }
+            }
+            
+            for (let i = 0; i < columnCount; i++) {
+                const secondTotalElement = document.getElementById(`secondTotal_${i}`);
+                if (secondTotalElement) {
+                    secondTotalElement.textContent = calculateSecondTotal(i);
+                }
+            }
+            
+            for (let i = 0; i < columnCount; i++) {
+                const grandTotalElement = document.getElementById(`grandTotal_${i}`);
+                if (grandTotalElement) {
+                    grandTotalElement.textContent = calculateGrandTotal(i);
+                }
+            }
+        }
+
+        function createTable(isReadOnly = false) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            categories.forEach(cat => {
+                const tr = document.createElement('tr');
+                
+                if (cat.isTotal) {
+                    if (cat.isGrandTotal) {
+                        tr.className = 'grand-total-row';
+                    } else {
+                        tr.className = 'total-row';
+                    }
+                }
+
+                const tdCat = document.createElement('td');
+                tdCat.className = 'category-cell';
+                tdCat.textContent = cat.name;
+                tr.appendChild(tdCat);
+
+                for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                    const td = document.createElement('td');
+                    
+                    if (cat.isTotal) {
+                        const span = document.createElement('span');
+                        span.className = 'calculated-value';
+                        span.id = `${cat.key}_${columnIndex}`;
+                        span.style.height = '42px';
+                        span.style.display = 'flex';
+                        span.style.alignItems = 'center';
+                        span.style.justifyContent = 'center';
+                        
+                        if (cat.isFirstTotal) {
+                            span.textContent = calculateFirstTotal(columnIndex);
+                        } else if (cat.isSecondTotal) {
+                            span.textContent = calculateSecondTotal(columnIndex);
+                        } else if (cat.isGrandTotal) {
+                            span.textContent = calculateGrandTotal(columnIndex);
+                        }
+                        
+                        td.appendChild(span);
+                    } else {
+                        if (columnIndex === COL_INDICES.T_OUT || 
+                            columnIndex === COL_INDICES.PRESENT_DET || 
+                            columnIndex === COL_INDICES.PRESENT_UNIT) {
+                            
+                            const calculatedCell = createCalculatedCell(cat.key, columnIndex);
+                            td.appendChild(calculatedCell);
+                        } else {
+                            if (isReadOnly) {
+                                const readOnlyCell = createReadOnlyCell(cat.key, columnIndex);
+                                td.appendChild(readOnlyCell);
+                            } else {
+                                const inputCell = createInputCell(cat.key, columnIndex);
+                                td.appendChild(inputCell);
+                            }
+                        }
+                    }
+                    
+                    tr.appendChild(td);
+                }
+
+                tbody.appendChild(tr);
+            });
+            
+            categories.forEach(cat => {
+                if (!cat.isTotal) {
+                    updateCalculatedValuesForRow(cat.key);
+                }
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalAuth').textContent = calculateGrandTotal(COL_INDICES.AUTH);
+            document.getElementById('presentUnit').textContent = calculateGrandTotal(COL_INDICES.PRESENT_UNIT);
+            document.getElementById('totalOut').textContent = calculateGrandTotal(COL_INDICES.T_OUT);
+        }
+
+        async function loadCODashboardData(selectedDate) {
+            if (userRole !== 'CO') return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/co-dashboard/all-data/${selectedDate}`);
+                const result = await response.json();
+                
+                if (!response.ok || !result.success) {
+                    console.error('Failed to load CO dashboard data:', result.message);
+                    
+                    document.querySelector('#coLeaveTable tbody').innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 20px; color: #e53e3e;">
+                                ${result.message || 'No data found'}
+                            </td>
+                        </tr>
+                    `;
+                    document.querySelector('#coManpowerTable tbody').innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #e53e3e;">
+                                ${result.message || 'No data found'}
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                const coData = result.data;
+                
+                // Update Leave Table
+                const leaveTbody = document.querySelector('#coLeaveTable tbody');
+                leaveTbody.innerHTML = '';
+                
+                coData.leave_status.by_company.forEach(row => {
+                    let percentClass = "";
+                    const percentage = row.leave_percentage || 0;
+                    if (percentage >= 40) {
+                        percentClass = "percentage-high";
+                    } else if (percentage >= 20) {
+                        percentClass = "percentage-medium";
+                    } else {
+                        percentClass = "percentage-low";
+                    }
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${row.company.toUpperCase()}</strong></td>
+                        <td class="${percentClass}">${percentage}%</td>
+                        <td>${row.on_leave || 0}</td>
+                        <td>${row.total_strength || 0}</td>
+                    `;
+                    leaveTbody.appendChild(tr);
+                });
+                
+                // Add total row for leave
+                const totalLeavePercentClass = coData.leave_status.total.leave_percentage >= 40 ? 'percentage-high' :
+                                               coData.leave_status.total.leave_percentage >= 20 ? 'percentage-medium' : 'percentage-low';
+                const totalLeaveTr = document.createElement('tr');
+                totalLeaveTr.className = 'total-row';
+                totalLeaveTr.innerHTML = `
+                    <td><strong>TOTAL</strong></td>
+                    <td class="${totalLeavePercentClass}">${coData.leave_status.total.leave_percentage}%</td>
+                    <td>${coData.leave_status.total.on_leave}</td>
+                    <td>${coData.leave_status.total.total_strength}</td>
+                `;
+                leaveTbody.appendChild(totalLeaveTr);
+                
+                // Update Manpower Table
+                const manpowerTbody = document.querySelector('#coManpowerTable tbody');
+                manpowerTbody.innerHTML = '';
+                
+                coData.manpower.by_company.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${row.company.toUpperCase()}</strong></td>
+                        <td>${row.officers || 0}</td>
+                        <td>${row.jcos || 0}</td>
+                        <td>${row.other_ranks || 0}</td>
+                        <td><strong>${row.total || 0}</strong></td>
+                    `;
+                    manpowerTbody.appendChild(tr);
+                });
+                
+                // Add total row for manpower
+                const totalManpowerTr = document.createElement('tr');
+                totalManpowerTr.className = 'total-row';
+                totalManpowerTr.innerHTML = `
+                    <td><strong>TOTAL</strong></td>
+                    <td>${coData.manpower.total.officers}</td>
+                    <td>${coData.manpower.total.jcos}</td>
+                    <td>${coData.manpower.total.other_ranks}</td>
+                    <td><strong>${coData.manpower.total.total}</strong></td>
+                `;
+                manpowerTbody.appendChild(totalManpowerTr);
+                
+            } catch (error) {
+                console.error('Error loading CO dashboard data:', error);
+            }
+        }
+
+        async function getUserInfo() {
+            try {
+                const response = await apiRequest('/api/user-info');
+                if (response.success) {
+                    userCompany = response.company || '';
+                    userRole = response.role || '';
+                    
+                    // Show CO dashboard if user is CO
+                    if (userRole === 'CO') {
+                        document.getElementById('coDashboard').classList.add('active');
+                    }
+                }
+            } catch (error) {
+                console.log("Could not get user info");
+            }
+        }
+
+        async function loadDataForDate(date) {
+            try {
+                showLoading(true);
+                showStatus('Loading parade state data...', 'info');
+                
+                // For CO: Load aggregated data from all companies
+                if (userRole === 'CO') {
+                    const response = await fetch(`${API_BASE_URL}/api/co-dashboard/all-data/${date}`);
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        const coData = result.data;
+                        
+                        // Update stats bar with aggregated totals
+                        document.getElementById('totalAuth').textContent = coData.parade_summary.total_auth;
+                        document.getElementById('presentUnit').textContent = coData.parade_summary.present_unit;
+                        document.getElementById('totalOut').textContent = coData.parade_summary.total_out;
+                        
+                        // Format date
+                        const dateObj = new Date(date);
+                        const formattedDate = dateObj.toLocaleDateString('en-US', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                        });
+                        document.getElementById('reportDateDisplay').textContent = formattedDate;
+                        currentDate = date;
+                        
+                        // Update CO dashboard tables
+                        await loadCODashboardData(date);
+                        
+                        // Hide table wrapper for CO in main view
+                        document.getElementById('tableWrapper').style.display = 'none';
+                        
+                        // Hide save/edit actions for CO in main view
+                        document.getElementById('actionsBar').style.display = 'none';
+                        
+                        showStatus(`CO Dashboard loaded for ${formattedDate}`, 'success');
+                    } else {
+                        throw new Error(result.message || 'No data found for this date');
+                    }
+                } else {
+                    // For non-CO users: Load individual company data
+                    const response = await apiRequest(`/api/parade-state/get/${date}`);
+                    
+                    if (response.success && response.data) {
+                        const loadedData = response.data.data;
+                        currentDate = loadedData.date || date;
+                        
+                        // Check if using template
+                        isUsingTemplate = loadedData.is_previous_day_template || false;
+                        templateOriginalDate = loadedData.original_date || '';
+                        
+                        userCompany = loadedData.company || '';
+                        
+                        // Parse loaded data
+                        initData();
+                        for (const [category, values] of Object.entries(loadedData)) {
+                            if (data.hasOwnProperty(category)) {
+                                data[category] = values.slice(0, columnCount);
+                            }
+                        }
+                        
+                        // Update UI
+                        updateDateDisplay();
+                        updateStats();
+                        isDataModified = false;
+                        
+                        // Hide table wrapper in main view
+                        document.getElementById('tableWrapper').style.display = 'none';
+                        
+                        // Hide actions bar in main view
+                        document.getElementById('actionsBar').style.display = 'none';
+                        
+                        if (isUsingTemplate) {
+                            showStatus(`Using ${templateOriginalDate}'s data as template for ${currentDate}. Use "Expand View" to edit and save.`, 'warning');
+                        } else {
+                            showStatus(`Loaded parade state for ${currentDate}`, 'success');
+                        }
+                    } else if (response.error === 'Cannot access data for future dates') {
+                        showStatus('Cannot access data for future dates', 'error');
+                        initData();
+                        
+                        const searchInput = document.getElementById('searchDate');
+                        searchInput.classList.add('future-date');
+                        isDataModified = false;
+                    } else {
+                        initData();
+                        isDataModified = false;
+                        showStatus(`No existing data for ${date}. Use "Expand View" to enter new data.`, 'warning');
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showStatus(`Failed to load data: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function searchByDate() {
+            const searchDate = document.getElementById('searchDate').value;
+            if (!searchDate) {
+                showStatus('Please select a date to search', 'error');
+                return;
+            }
+
+            // Reset template notice
             isUsingTemplate = false;
             templateOriginalDate = '';
+            const templateNotice = document.getElementById('templateNotice');
+            if (templateNotice) {
+                templateNotice.classList.add('hidden');
+            }
             
-            showStatus(`Data saved successfully for ${currentDate}`, 'success');
+            // Reset input styling
+            const searchInput = document.getElementById('searchDate');
+            searchInput.classList.remove('future-date');
+
+            loadDataForDate(searchDate);
+        }
+
+        async function saveData() {
+            // CO cannot save data
+            if (userRole === 'CO') {
+                showStatus('CO cannot modify parade state data', 'error');
+                return;
+            }
+
+            const isFutureDate = new Date(currentDate) > new Date(TODAY);
+            if (isFutureDate) {
+                showStatus('Cannot save data for future dates', 'error');
+                return;
+            }
+
+            try {
+                showLoading(true);
+                showStatus('Saving data...', 'info');
+                
+                const payloadData = {};
+                const inputCategories = ['offr', 'jco', 'jcoEre', 'or', 'orEre', 'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'];
+                
+                inputCategories.forEach(category => {
+                    const rowData = data[category] || Array(columnCount).fill(0);
+                    payloadData[category] = rowData;
+                });
+                
+                const payload = {
+                    date: currentDate,
+                    data: payloadData
+                };
+
+                console.log("Sending data to backend:", payload);
+                
+                const response = await apiRequest('/api/parade-state/save', 'POST', payload);
+                
+                if (response.success) {
+                    isDataModified = false;
+                    isUsingTemplate = false;
+                    templateOriginalDate = '';
+                    
+                    showStatus(`Data saved successfully for ${currentDate}`, 'success');
+                    
+                    setTimeout(() => {
+                        loadDataForDate(currentDate);
+                    }, 500);
+                } else if (response.error === 'Cannot save data for future dates') {
+                    showStatus('Cannot save data for future dates', 'error');
+                } else {
+                    showStatus(`Save failed: ${response.error}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showStatus(`Save failed: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function exportToCSV() {
+            try {
+                showStatus('Preparing CSV export...', 'info');
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = `${API_BASE_URL}/api/parade-state/export-csv/${currentDate}`;
+                downloadLink.download = `parade_state_${currentDate}.csv`;
+                downloadLink.style.display = 'none';
+                
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                showStatus('CSV exported successfully', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting CSV:', error);
+                showStatus(`Export failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const today = new Date().toISOString().split('T')[0];
+            const searchInput = document.getElementById('searchDate');
+            searchInput.value = today;
+            searchInput.max = today;
+            currentDate = today;
             
-            setTimeout(() => {
-                loadDataForDate(currentDate);
-            }, 500);
-        } else if (response.error === 'Cannot save data for future dates') {
-            showStatus('Cannot save data for future dates', 'error');
-        } else {
-            showStatus(`Save failed: ${response.error}`, 'error');
-        }
-        
-    } catch (error) {
-        console.error('Error saving data:', error);
-        showStatus(`Save failed: ${error.message}`, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-async function exportToCSV() {
-    try {
-        showStatus('Preparing CSV export...', 'info');
-        
-        const downloadLink = document.createElement('a');
-        downloadLink.href = `${API_BASE_URL}/api/parade-state/export-csv/${currentDate}`;
-        downloadLink.download = `parade_state_${currentDate}.csv`;
-        downloadLink.style.display = 'none';
-        
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        
-        showStatus('CSV exported successfully', 'success');
-        
-    } catch (error) {
-        console.error('Error exporting CSV:', error);
-        showStatus(`Export failed: ${error.message}`, 'error');
-    }
-}
-
-// Initialize on load
-window.addEventListener('DOMContentLoaded', async () => {
-    const today = new Date().toISOString().split('T')[0];
-    const searchInput = document.getElementById('searchDate');
-    searchInput.value = today;
-    searchInput.max = today;
-    currentDate = today;
-    
-    await getUserInfo();
-    initData();
-    createTable();
-    updateDateDisplay();
-    updateStats();
-    
-    // Load today's data
-    loadDataForDate(today);
-    
-    // Warn user before leaving if data is modified
-    window.addEventListener('beforeunload', (e) => {
-        if (isDataModified && userRole !== 'CO') {
-            e.preventDefault();
-            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-        }
-    });
-    
-    // Add keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 's' && userRole !== 'CO') {
-            e.preventDefault();
-            saveData();
-        }
-    });
-});
+            await getUserInfo();
+            initData();
+            updateDateDisplay();
+            updateStats();
+            
+            // Load today's data
+            loadDataForDate(today);
+            
+            // Warn user before leaving if data is modified
+            window.addEventListener('beforeunload', (e) => {
+                if (isDataModified && userRole !== 'CO') {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                }
+            });
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's' && userRole !== 'CO') {
+                    e.preventDefault();
+                    saveData();
+                }
+            });
+        });
     </script>

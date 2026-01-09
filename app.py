@@ -1978,14 +1978,11 @@ def get_co_aggregated_parade_table(date_str):
                 'message': 'No data found for this date'
             }), 404
         
-        # Initialize aggregated data structure
         aggregated = {
             'date': date_str,
             'company': 'ALL COMPANIES (CO VIEW)',
             'data': {}
         }
-        
-        # All categories to aggregate
         all_categories = [
             'offr', 'jco', 'jcoEre', 'or', 'orEre',
             'firstTotal',
