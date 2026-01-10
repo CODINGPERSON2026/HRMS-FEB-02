@@ -282,18 +282,18 @@ body::before {
     </div>
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">RELIGION</h3>
+        <h3 class="chart-title">STATE WISE DISTRIBUTION</h3>
         <span class="chart-badge">Live</span>
       </div>
       <div class="chart-container"><canvas id="religionChart"></canvas></div>
     </div>
-    <div class="chart-card">
+    <!-- <div class="chart-card">
       <div class="chart-header">
         <h3 class="chart-title">EMPLOYMENT TYPE</h3>
         <span class="chart-badge">Live</span>
       </div>
       <div class="chart-container"><canvas id="employmentChart"></canvas></div>
-    </div>
+    </div> -->
     <div class="chart-card">
       <div class="chart-header">
         <h3 class="chart-title">SPORT DISTRIBUTION</h3>
@@ -419,8 +419,8 @@ async function initializeCharts() {
     religionChart = new Chart(document.getElementById('religionChart'), {
       type: 'doughnut',
       data: {
-        labels: religionData.data?.map(i => i.religion) || [],
-        datasets: [{ data: religionData.data?.map(i => i.religion_count) || [], backgroundColor: chartColors, borderColor: borderColors, borderWidth: 2 }]
+        labels: religionData.data?.map(i => i.home_state) || [],
+        datasets: [{ data: religionData.data?.map(i => i.home_state_count) || [], backgroundColor: chartColors, borderColor: borderColors, borderWidth: 2 }]
       },
       options: {
         responsive: true,
@@ -429,7 +429,7 @@ async function initializeCharts() {
       }
     });
 
-    employmentChart = new Chart(document.getElementById('employmentChart'), {
+    /*employmentChart = new Chart(document.getElementById('employmentChart'), {
       type: 'pie',
       data: {
         labels: employmentData.employment_distribution?.map(i => i.type) || [],
@@ -441,6 +441,7 @@ async function initializeCharts() {
         plugins: { legend: { position: 'right', labels: { color: textColor, font: { size: 11 } } } }
       }
     });
+    */
 
     serviceChart = new Chart(document.getElementById('serviceChart'), {
       type: 'bar',

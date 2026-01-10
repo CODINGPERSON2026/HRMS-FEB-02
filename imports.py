@@ -35,3 +35,5 @@ from blueprints.dashboard import dashboard_bp
 from blueprints.task_manager import task_bp
 from blueprints.account_management import accounts_bp
 from blueprints.weight_ms import compute_authorization
+from blueprints.loan import loan_bp
+from blueprints.roll_call import roll_call_bp
