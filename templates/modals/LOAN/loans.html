@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loan Management</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        input, textarea {
+            width: 300px;
+            padding: 6px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+        th {
+            background: #f3f3f3;
+        }
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Loan Entry</h2>
+
+<form id="loanForm">
+    <input id="personnel_id" placeholder="Personnel ID"><br><br>
+    <input id="army_number" placeholder="Army Number"><br><br>
+    <input id="sr_no" placeholder="SR No"><br><br>
+    <input id="loan_type" placeholder="Loan Type"><br><br>
+    <input id="total_amount" type="number" placeholder="Total Amount"><br><br>
+    <input id="bank_details" placeholder="Bank Details"><br><br>
+    <input id="emi_per_month" type="number" placeholder="EMI Per Month"><br><br>
+    <input id="pending" type="number" placeholder="Pending Amount"><br><br>
+    <textarea id="remarks" placeholder="Remarks"></textarea><br><br>
+
+    <button type="submit">Save Loan</button>
+</form>
+
+<hr>
+
+<h2>Loan List</h2>
+
+<table>
+<thead>
+<tr>
+    <th>ID</th>
+    <th>Personnel</th>
+    <th>Army No</th>
+    <th>SR No</th>
+    <th>Loan</th>
+    <th>Total</th>
+    <th>Bank</th>
+    <th>EMI</th>
+    <th>Pending</th>
+    <th>Remarks</th>
+</tr>
+</thead>
+<tbody id="loanBody"></tbody>
+</table>
+
+<script>
+document.getElementById("loanForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    saveLoan();
+});
+
+function saveLoan() {
+    fetch("/stats/api/loans", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            personnel_id: personnel_id.value,
+            army_number: army_number.value,
+            sr_no: sr_no.value,
+            loan_type: loan_type.value,
+            total_amount: total_amount.value,
+            bank_details: bank_details.value,
+            emi_per_month: emi_per_month.value,
+            pending: pending.value,
+            remarks: remarks.value
+        })
+    })
+    .then(res => res.json())
+    .then(() => {
+        loanForm.reset();
+        loadLoans();
+    });
+}
+
+function loadLoans() {
+    fetch("/stats/api/loans")
+        .then(res => res.json())
+        .then(data => {
+            loanBody.innerHTML = "";
+            data.forEach(l => {
+                loanBody.innerHTML += `
+                <tr>
+                    <td>${l.id}</td>
+                    <td>${l.personnel_id}</td>
+                    <td>${l.army_number}</td>
+                    <td>${l.sr_no}</td>
+                    <td>${l.loan_type}</td>
+                    <td>${l.total_amount}</td>
+                    <td>${l.bank_details}</td>
+                    <td>${l.emi_per_month}</td>
+                    <td>${l.pending}</td>
+                    <td>${l.remarks || ""}</td>
+                </tr>`;
+            });
+        });
+}
+
+loadLoans();
+</script>
+
+</body>
+</html>

@@ -216,17 +216,27 @@ body::before {
   {% set header = "Personnel Management" %}
   {% set subscript = "Add Personnel → Update Personnel → View Personnel" %}
   {% include 'navbar/navbar.html' %}
+</br>
+  {% if role in ['JCO'] %}
   <div class="page-header">
     
+ 
     <div class="header-right " >
       <a href="/personnel_information" class="header-link">Dashboard</a>
+    </div>
+      {% endif %}
+    {% if role in ['JCO', 'SEC NCO'] %}
+      <div class="header-right " >
+      
       <a href="/personnel_information/add-personnel" class="header-link">Add Personnel</a>
       <a href="/personnel_information/update-personnel" class="header-link">Update Personnel</a>
       
     </div>
+    {% endif %}
+ 
   </div>
 </div>
-
+</br>
 <div class="dashboard-container">
 
   
@@ -249,7 +259,7 @@ body::before {
     </div>
     <div class="stat-card">
       <div class="stat-icon"><i class="fas fa-medkit"></i></div>
-      <div class="stat-label">Medical Cases</div>
+      <div class="stat-label">LOW MEDICAL</div>
       <div class="stat-value" id="medical_count">Loading...</div>
       <button class="view-btn" onclick="window.location.href='/personnel_information/personnel'">View Details</button>
     </div>
@@ -258,35 +268,35 @@ body::before {
   <div class="charts-grid">
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">Age Distribution</h3>
+        <h3 class="chart-title">AGE DISTRIBUTION</h3>
         <span class="chart-badge">Live</span>
       </div>
       <div class="chart-container"><canvas id="ageDonutChart"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">Rank Distribution</h3>
+        <h3 class="chart-title">RANK DISTRIBUTION</h3>
         <span class="chart-badge">Updated</span>
       </div>
       <div class="chart-container"><canvas id="rankChart"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">Religion Chart</h3>
+        <h3 class="chart-title">RELIGION</h3>
         <span class="chart-badge">Live</span>
       </div>
       <div class="chart-container"><canvas id="religionChart"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">Employment Type</h3>
+        <h3 class="chart-title">EMPLOYMENT TYPE</h3>
         <span class="chart-badge">Live</span>
       </div>
       <div class="chart-container"><canvas id="employmentChart"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-header">
-        <h3 class="chart-title">Sports Distribution</h3>
+        <h3 class="chart-title">SPORT DISTRIBUTION</h3>
         <span class="chart-badge">Live</span>
       </div>
       <div class="chart-container"><canvas id="sportsChart"></canvas></div>

@@ -166,8 +166,8 @@
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 25px;
-    margin-bottom: 5px;
+    gap: 2px;
+    margin-bottom: 10px;
     transition:
       opacity 0.3s ease,
       transform 0.3s ease,
@@ -367,22 +367,22 @@
       {% if role in ['SEC NCO','SEC JCO'] %}
 
       <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
-        Assign Personnel
+        ASSIGN PERSONNAL
       </button>
 
       {% endif %}
       <button id="leaveRequestsBtn" class="btn btn-primary">
-        Leave Requests
+        LEAVE REQUESTS
       </button>
       {% if role in ['CO','2IC','ADJUTANT','OC'] %}
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">Add Event</button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">ADD EVENT</button>
 
 
 
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#countModal">
-        View Count
+        VIEW COUNT
       </button>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">Parade State</button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">PARADE STATE</button>
     </div>
     {% endif %}
 
@@ -397,12 +397,12 @@
 
       <!-- First Row Cards -->
       <div class="card p-3 text-center" style="cursor:pointer" id="overAllParadeState">
-        <small class="text-muted">Man Power</small>
+        <small class="text-muted">PARADE STATE</small>
         <h3 id="mainPower"></h3>
       </div>
 
       <div class="card p-3 text-center" style="cursor:pointer" id="interview-card">
-        <small class="text-muted">Interview Pending</small>
+        <small class="text-muted">KUNBA INTERVIEW</small>
         <h3>
           <span id="interview-Count"></span>/<span id="total-count"></span>
         </h3>
@@ -417,7 +417,7 @@
       </div>
       {% endif %}
       <div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
-        <small class="text-muted">Detachments</small>
+        <small class="text-muted">DETTACHMENT</small>
         <h3 id="locationCount">—</h3>
       </div>
 
@@ -428,14 +428,27 @@
       </div>
 
       <div class="card p-3 text-center" style="cursor:pointer" id="openSensitive">
-        <small class="text-muted">Sensitive Indl</small>
+        <small class="text-muted">SENSITIVE INDL</small>
         <h3 id='sensitive-count'>4</h3>
       </div>
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#attachmentModal">
 
 
-        <small class="text-muted">Attachment Indl</small>
+        <small class="text-muted">TD/ATTACHMENT</small>
         <h3 id='attachment-count'>4</h3>
+      </div>
+
+      <div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
+        <small class="text-muted">LOAN</small>
+        <h3 id="locationCount">—</h3>
+      </div>
+      <div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
+        <small class="text-muted">COURSE</small>
+        <h3 id="locationCount">—</h3>
+      </div>
+      <div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
+        <small class="text-muted">CENTRE ROLL CALL</small>
+        <h3 id="locationCount">—</h3>
       </div>
 
     </div>
