@@ -388,7 +388,12 @@
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">Parade State</button>
     </div>
     {% endif %}
-
+{% if role == 'O SEC NCO' %}
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeDataModal">
+  <i class="fas fa-clipboard-list me-1"></i>
+  Parade Data Entry
+</button>
+{% endif %}
 
     <button id="show-btn">
       <i class="fas fa-chevron-down"></i>
@@ -490,7 +495,7 @@
     {% include 'modals/interview_pending/modal.html' %}
     {% include 'modals/count_parade/modal.html' %}
     {% include 'modals/attachment-modal/modal.html' %}
-
+    {% include 'modals/parade_data/index.html' %}
     <!-- Parade State Modal -->
     <div class="modal fade modal-fullscreen" id="paradeStateModal" tabindex="-1">
       <div class="modal-dialog modal-lg">
