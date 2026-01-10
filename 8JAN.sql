@@ -79,7 +79,7 @@ CREATE TABLE `board_members` (
   `member_name` varchar(255) DEFAULT NULL,
   `army_number` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -88,6 +88,7 @@ CREATE TABLE `board_members` (
 
 LOCK TABLES `board_members` WRITE;
 /*!40000 ALTER TABLE `board_members` DISABLE KEYS */;
+INSERT INTO `board_members` VALUES (1,'73837','Pankaj','12111');
 /*!40000 ALTER TABLE `board_members` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -108,7 +109,7 @@ CREATE TABLE `boards` (
   `completion_date` date DEFAULT NULL,
   `remarks` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -117,7 +118,7 @@ CREATE TABLE `boards` (
 
 LOCK TABLES `boards` WRITE;
 /*!40000 ALTER TABLE `boards` DISABLE KEYS */;
-INSERT INTO `boards` VALUES (1,'zxc1234','2025-12-03','UNIOT','DFGDG','YAWAR','2025-12-10','ASDA');
+INSERT INTO `boards` VALUES (2,'73837','2026-01-09','TEMP','TEMP2','VIVEK','2026-01-22','JADSF LASJDF JASDF ASDFJSDFJ ASDFJDL ');
 /*!40000 ALTER TABLE `boards` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -204,7 +205,7 @@ CREATE TABLE `daily_events` (
   `venue` varchar(255) DEFAULT NULL,
   `created_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -213,8 +214,71 @@ CREATE TABLE `daily_events` (
 
 LOCK TABLES `daily_events` WRITE;
 /*!40000 ALTER TABLE `daily_events` DISABLE KEYS */;
-INSERT INTO `daily_events` VALUES (1,'2025-12-01','XYZCSDVS','DSVDS','2025-12-01 06:04:19'),(2,'2025-12-03','abc','test','2025-12-01 06:33:03');
+INSERT INTO `daily_events` VALUES (1,'2025-12-01','XYZCSDVS','DSVDS','2025-12-01 06:04:19'),(2,'2025-12-03','abc','test','2025-12-01 06:33:03'),(3,'2026-01-07','CELEBRATION','PT','2026-01-05 09:57:01'),(4,'2026-01-05','DANCING','PT','2026-01-05 10:08:56'),(5,'2026-01-05','CELEBRATION','PT GROUND','2026-01-05 10:11:49'),(6,'2026-01-06','CELEBRATION','PT GROUND','2026-01-06 07:27:29'),(7,'2026-01-08','SUNDAY','PT GROUND','2026-01-08 06:42:20');
 /*!40000 ALTER TABLE `daily_events` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `department_accounts`
+--
+
+DROP TABLE IF EXISTS `department_accounts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `department_accounts` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `account_holder` varchar(100) NOT NULL,
+  `current_balance` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `status` enum('ACTIVE','INACTIVE') DEFAULT 'ACTIVE',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `account_holder` (`account_holder`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `department_accounts`
+--
+
+LOCK TABLES `department_accounts` WRITE;
+/*!40000 ALTER TABLE `department_accounts` DISABLE KEYS */;
+INSERT INTO `department_accounts` VALUES (6,'IT',5000.00,'ACTIVE','2026-01-07 07:20:45','2026-01-07 07:27:45'),(7,'SWSG',10100.00,'ACTIVE','2026-01-07 07:21:16','2026-01-07 07:26:16'),(8,'ATG',10.00,'ACTIVE','2026-01-07 09:12:43','2026-01-07 09:13:37'),(9,'IT HW',80000.00,'ACTIVE','2026-01-07 09:41:39','2026-01-07 09:44:45');
+/*!40000 ALTER TABLE `department_accounts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `department_transactions`
+--
+
+DROP TABLE IF EXISTS `department_transactions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `department_transactions` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `department_account_id` int NOT NULL,
+  `transaction_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `old_balance` decimal(15,2) NOT NULL,
+  `credit_amount` decimal(15,2) DEFAULT '0.00',
+  `debit_amount` decimal(15,2) DEFAULT '0.00',
+  `new_balance` decimal(15,2) NOT NULL,
+  `transaction_type` enum('CREDIT','DEBIT') NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `department_account_id` (`department_account_id`),
+  CONSTRAINT `department_transactions_ibfk_1` FOREIGN KEY (`department_account_id`) REFERENCES `department_accounts` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `department_transactions`
+--
+
+LOCK TABLES `department_transactions` WRITE;
+/*!40000 ALTER TABLE `department_transactions` DISABLE KEYS */;
+INSERT INTO `department_transactions` VALUES (1,6,'2026-01-07 12:51:50',2000.00,2000.00,0.00,4000.00,'CREDIT','Payment','2026-01-07 07:21:50'),(2,7,'2026-01-07 12:56:16',0.00,10100.00,0.00,10100.00,'CREDIT','','2026-01-07 07:26:16'),(3,6,'2026-01-07 12:57:21',4000.00,4000.00,0.00,8000.00,'CREDIT','Payment','2026-01-07 07:27:21'),(4,6,'2026-01-07 12:57:45',8000.00,0.00,3000.00,5000.00,'CREDIT','','2026-01-07 07:27:45'),(5,8,'2026-01-07 14:43:11',0.00,90.00,0.00,90.00,'CREDIT','payment ','2026-01-07 09:13:11'),(6,8,'2026-01-07 14:43:37',90.00,0.00,80.00,10.00,'CREDIT','','2026-01-07 09:13:37'),(7,9,'2026-01-07 15:12:36',50000.00,50000.00,0.00,100000.00,'CREDIT','','2026-01-07 09:42:36'),(8,9,'2026-01-07 15:14:45',100000.00,0.00,20000.00,80000.00,'CREDIT','to purchase laptop','2026-01-07 09:44:45');
+/*!40000 ALTER TABLE `department_transactions` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -392,7 +456,7 @@ CREATE TABLE `leave_history` (
   `reject_reason` text,
   `company` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -401,7 +465,7 @@ CREATE TABLE `leave_history` (
 
 LOCK TABLES `leave_history` WRITE;
 /*!40000 ALTER TABLE `leave_history` DISABLE KEYS */;
-INSERT INTO `leave_history` VALUES (1,1,'1526WE','N/A','AL','2025-12-30','2026-01-13',15,'SEC NCO','Recommended by SEC NCO','i need leave','2025-12-30 09:29:53',NULL,NULL),(2,1,'1526WE','N/A','AL','2025-12-30','2026-01-13',15,'SEC JCO','Recommended by SEC NCO','i need leave','2025-12-30 09:30:14',NULL,NULL),(3,2,'775CESR','N/A','AL','2026-01-01','2026-01-02',2,'OC','Recommended by SEC NCO','i need leave ','2025-12-31 06:34:21',NULL,NULL),(4,2,'775CESR','ABC','AL','2026-01-01','2026-01-02',2,'2IC','Approved','i need leave ','2025-12-31 07:11:16',NULL,NULL);
+INSERT INTO `leave_history` VALUES (1,1,'1526WE','N/A','AL','2025-12-30','2026-01-13',15,'SEC NCO','Recommended by SEC NCO','i need leave','2025-12-30 09:29:53',NULL,NULL),(2,1,'1526WE','N/A','AL','2025-12-30','2026-01-13',15,'SEC JCO','Recommended by SEC NCO','i need leave','2025-12-30 09:30:14',NULL,NULL),(3,2,'775CESR','N/A','AL','2026-01-01','2026-01-02',2,'OC','Recommended by SEC NCO','i need leave ','2025-12-31 06:34:21',NULL,NULL),(4,2,'775CESR','ABC','AL','2026-01-01','2026-01-02',2,'2IC','Approved','i need leave ','2025-12-31 07:11:16',NULL,NULL),(5,3,'905CESR','Hardik','AL','2026-01-09','2026-01-31',25,'SEC NCO','','marriage','2026-01-05 06:23:55',NULL,NULL),(6,4,'778G','ABC','AL','2026-01-19','2026-02-04',17,'SEC NCO','Pending at SEC JCO','i need leave','2026-01-05 07:10:43',NULL,NULL),(7,5,'965CESR','Rahul','AL','2026-01-09','2026-01-22',14,'SEC NCO','Pending at SEC JCO','CELEBRATION','2026-01-07 10:02:36',NULL,NULL),(8,6,'9085CESR','Kurnal','AL','2026-01-16','2026-01-24',11,'SEC NCO','Pending at SEC JCO','atnmn','2026-01-07 15:30:47',NULL,NULL),(9,6,'9085CESR','Kurnal','AL','2026-01-16','2026-01-24',11,'Yuvraj','Rejected at SEC JCO','Leave rejected','2026-01-07 15:33:32','xyz','2 company');
 /*!40000 ALTER TABLE `leave_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -431,7 +495,7 @@ CREATE TABLE `leave_status_info` (
   `reject_reason` text,
   `company` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -440,7 +504,7 @@ CREATE TABLE `leave_status_info` (
 
 LOCK TABLES `leave_status_info` WRITE;
 /*!40000 ALTER TABLE `leave_status_info` DISABLE KEYS */;
-INSERT INTO `leave_status_info` VALUES (1,'1526WE','Vivek','AL',15,'2025-12-30','2026-01-13','OC','Pending at OC','2025-12-30 15:00:14',NULL,'AL for 15 day(s)','i need leave','2025-12-30 14:58:29','2025-12-30 15:00:14',NULL,'2 company'),(2,'775CESR','ABC','AL',2,'2026-01-01','2026-01-02','Approved','Approved','2025-12-31 12:41:16',NULL,'AL for 2 day(s)','i need leave ','2025-12-31 11:33:40','2025-12-31 12:41:16',NULL,'1 company');
+INSERT INTO `leave_status_info` VALUES (1,'1526WE','Vivek','AL',15,'2025-12-30','2026-01-13','OC','Pending at OC','2025-12-30 15:00:14',NULL,'AL for 15 day(s)','i need leave','2025-12-30 14:58:29','2025-12-30 15:00:14',NULL,'2 company'),(2,'775CESR','ABC','AL',2,'2026-01-01','2026-01-02','Approved','Approved','2025-12-31 12:41:16',NULL,'AL for 2 day(s)','i need leave ','2025-12-31 11:33:40','2025-12-31 12:41:16',NULL,'1 company'),(3,'905CESR','Hardik','AL',25,'2026-01-09','2026-01-31','','','2026-01-05 11:53:55',NULL,'AL for 25 day(s)','marriage','2026-01-05 11:52:13','2026-01-05 11:53:55',NULL,'2 company'),(4,'778G','ABC','AL',17,'2026-01-19','2026-02-04','SEC JCO','Pending at SEC JCO','2026-01-05 12:40:43',NULL,'AL for 17 day(s)','i need leave','2026-01-05 12:39:15','2026-01-05 12:40:43',NULL,'1 company'),(5,'965CESR','Rahul','AL',14,'2026-01-09','2026-01-22','SEC JCO','Pending at SEC JCO','2026-01-07 15:32:36',NULL,'AL for 14 day(s)','CELEBRATION','2026-01-07 15:30:21','2026-01-07 15:32:36',NULL,'2 company'),(6,'9085CESR','Kurnal','AL',11,'2026-01-16','2026-01-24','SEC JCO','Rejected at SEC JCO','2026-01-07 21:00:47','2026-01-07 21:03:32','AL for 11 day(s)','atnmn','2026-01-07 18:58:51','2026-01-07 21:03:32','xyz','2 company');
 /*!40000 ALTER TABLE `leave_status_info` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -560,7 +624,7 @@ CREATE TABLE `monthly_medical_status` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_year_month_unit` (`year`,`month`,`unit`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -569,8 +633,260 @@ CREATE TABLE `monthly_medical_status` (
 
 LOCK TABLES `monthly_medical_status` WRITE;
 /*!40000 ALTER TABLE `monthly_medical_status` DISABLE KEYS */;
-INSERT INTO `monthly_medical_status` VALUES (1,2025,12,'All',5,'2025-11-11 23:19:39'),(2,2025,12,'1 Company',1,'2025-11-11 23:19:39'),(3,2025,12,'2 Company',2,'2025-11-11 23:19:39'),(4,2025,12,'3 Company',0,'2025-11-11 23:19:39'),(5,2025,12,'4 Company',2,'2025-12-15 23:19:39'),(6,2025,11,'All',6,'2025-11-09 23:00:00'),(7,2025,11,'1 Company',2,'2025-11-09 23:00:00'),(8,2025,11,'2 Company',1,'2025-11-09 23:00:00'),(9,2025,11,'3 Company',1,'2025-11-09 23:00:00'),(10,2025,11,'4 Company',2,'2025-11-09 23:00:00'),(11,2025,10,'All',8,'2025-10-11 23:30:00'),(12,2025,10,'1 Company',2,'2025-10-11 23:30:00'),(13,2025,10,'2 Company',2,'2025-10-11 23:30:00'),(14,2025,10,'3 Company',1,'2025-10-11 23:30:00'),(15,2025,10,'4 Company',3,'2025-10-11 23:30:00'),(16,2025,9,'All',7,'2025-09-15 00:40:00'),(17,2025,9,'1 Company',1,'2025-09-15 00:40:00'),(18,2025,9,'2 Company',2,'2025-09-15 00:40:00'),(19,2025,9,'3 Company',2,'2025-09-15 00:40:00'),(20,2025,9,'4 Company',2,'2025-09-15 00:40:00');
+INSERT INTO `monthly_medical_status` VALUES (1,2025,12,'All',5,'2025-11-11 23:19:39'),(2,2025,12,'1 Company',1,'2025-11-11 23:19:39'),(3,2025,12,'2 Company',2,'2025-11-11 23:19:39'),(4,2025,12,'3 Company',0,'2025-11-11 23:19:39'),(5,2025,12,'4 Company',2,'2025-12-15 23:19:39'),(6,2025,11,'All',6,'2025-11-09 23:00:00'),(7,2025,11,'1 Company',2,'2025-11-09 23:00:00'),(8,2025,11,'2 Company',1,'2025-11-09 23:00:00'),(9,2025,11,'3 Company',1,'2025-11-09 23:00:00'),(10,2025,11,'4 Company',2,'2025-11-09 23:00:00'),(11,2025,10,'All',8,'2025-10-11 23:30:00'),(12,2025,10,'1 Company',2,'2025-10-11 23:30:00'),(13,2025,10,'2 Company',2,'2025-10-11 23:30:00'),(14,2025,10,'3 Company',1,'2025-10-11 23:30:00'),(15,2025,10,'4 Company',3,'2025-10-11 23:30:00'),(16,2025,9,'All',7,'2025-09-15 00:40:00'),(17,2025,9,'1 Company',1,'2025-09-15 00:40:00'),(18,2025,9,'2 Company',2,'2025-09-15 00:40:00'),(19,2025,9,'3 Company',2,'2025-09-15 00:40:00'),(20,2025,9,'4 Company',2,'2025-09-15 00:40:00'),(21,2026,1,'All',5,'2025-12-31 19:03:45'),(22,2026,1,'1 Company',1,'2025-12-31 19:03:45'),(23,2026,1,'2 Company',2,'2025-12-31 19:03:45'),(24,2026,1,'3 Company',0,'2025-12-31 19:03:45'),(25,2026,1,'4 Company',2,'2025-12-31 19:03:45');
 /*!40000 ALTER TABLE `monthly_medical_status` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `parade_state_daily`
+--
+
+DROP TABLE IF EXISTS `parade_state_daily`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `parade_state_daily` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `report_date` date NOT NULL,
+  `company` varchar(100) NOT NULL,
+  `offr_auth` int DEFAULT '0',
+  `offr_hs` int DEFAULT '0',
+  `offr_posted_str` int DEFAULT '0',
+  `offr_lve` int DEFAULT '0',
+  `offr_course` int DEFAULT '0',
+  `offr_det` int DEFAULT '0',
+  `offr_mh` int DEFAULT '0',
+  `offr_sick_lve` int DEFAULT '0',
+  `offr_ex` int DEFAULT '0',
+  `offr_td` int DEFAULT '0',
+  `offr_att` int DEFAULT '0',
+  `offr_awl_osl_jc` int DEFAULT '0',
+  `offr_trout_det` int DEFAULT '0',
+  `offr_present_det` int DEFAULT '0',
+  `offr_present_unit` int DEFAULT '0',
+  `offr_dues_in` int DEFAULT '0',
+  `offr_dues_out` int DEFAULT '0',
+  `jco_auth` int DEFAULT '0',
+  `jco_hs` int DEFAULT '0',
+  `jco_posted_str` int DEFAULT '0',
+  `jco_lve` int DEFAULT '0',
+  `jco_course` int DEFAULT '0',
+  `jco_det` int DEFAULT '0',
+  `jco_mh` int DEFAULT '0',
+  `jco_sick_lve` int DEFAULT '0',
+  `jco_ex` int DEFAULT '0',
+  `jco_td` int DEFAULT '0',
+  `jco_att` int DEFAULT '0',
+  `jco_awl_osl_jc` int DEFAULT '0',
+  `jco_trout_det` int DEFAULT '0',
+  `jco_present_det` int DEFAULT '0',
+  `jco_present_unit` int DEFAULT '0',
+  `jco_dues_in` int DEFAULT '0',
+  `jco_dues_out` int DEFAULT '0',
+  `jcoEre_auth` int DEFAULT '0',
+  `jcoEre_hs` int DEFAULT '0',
+  `jcoEre_posted_str` int DEFAULT '0',
+  `jcoEre_lve` int DEFAULT '0',
+  `jcoEre_course` int DEFAULT '0',
+  `jcoEre_det` int DEFAULT '0',
+  `jcoEre_mh` int DEFAULT '0',
+  `jcoEre_sick_lve` int DEFAULT '0',
+  `jcoEre_ex` int DEFAULT '0',
+  `jcoEre_td` int DEFAULT '0',
+  `jcoEre_att` int DEFAULT '0',
+  `jcoEre_awl_osl_jc` int DEFAULT '0',
+  `jcoEre_trout_det` int DEFAULT '0',
+  `jcoEre_present_det` int DEFAULT '0',
+  `jcoEre_present_unit` int DEFAULT '0',
+  `jcoEre_dues_in` int DEFAULT '0',
+  `jcoEre_dues_out` int DEFAULT '0',
+  `or_auth` int DEFAULT '0',
+  `or_hs` int DEFAULT '0',
+  `or_posted_str` int DEFAULT '0',
+  `or_lve` int DEFAULT '0',
+  `or_course` int DEFAULT '0',
+  `or_det` int DEFAULT '0',
+  `or_mh` int DEFAULT '0',
+  `or_sick_lve` int DEFAULT '0',
+  `or_ex` int DEFAULT '0',
+  `or_td` int DEFAULT '0',
+  `or_att` int DEFAULT '0',
+  `or_awl_osl_jc` int DEFAULT '0',
+  `or_trout_det` int DEFAULT '0',
+  `or_present_det` int DEFAULT '0',
+  `or_present_unit` int DEFAULT '0',
+  `or_dues_in` int DEFAULT '0',
+  `or_dues_out` int DEFAULT '0',
+  `orEre_auth` int DEFAULT '0',
+  `orEre_hs` int DEFAULT '0',
+  `orEre_posted_str` int DEFAULT '0',
+  `orEre_lve` int DEFAULT '0',
+  `orEre_course` int DEFAULT '0',
+  `orEre_det` int DEFAULT '0',
+  `orEre_mh` int DEFAULT '0',
+  `orEre_sick_lve` int DEFAULT '0',
+  `orEre_ex` int DEFAULT '0',
+  `orEre_td` int DEFAULT '0',
+  `orEre_att` int DEFAULT '0',
+  `orEre_awl_osl_jc` int DEFAULT '0',
+  `orEre_trout_det` int DEFAULT '0',
+  `orEre_present_det` int DEFAULT '0',
+  `orEre_present_unit` int DEFAULT '0',
+  `orEre_dues_in` int DEFAULT '0',
+  `orEre_dues_out` int DEFAULT '0',
+  `firstTotal_auth` int DEFAULT '0',
+  `firstTotal_hs` int DEFAULT '0',
+  `firstTotal_posted_str` int DEFAULT '0',
+  `firstTotal_lve` int DEFAULT '0',
+  `firstTotal_course` int DEFAULT '0',
+  `firstTotal_det` int DEFAULT '0',
+  `firstTotal_mh` int DEFAULT '0',
+  `firstTotal_sick_lve` int DEFAULT '0',
+  `firstTotal_ex` int DEFAULT '0',
+  `firstTotal_td` int DEFAULT '0',
+  `firstTotal_att` int DEFAULT '0',
+  `firstTotal_awl_osl_jc` int DEFAULT '0',
+  `firstTotal_trout_det` int DEFAULT '0',
+  `firstTotal_present_det` int DEFAULT '0',
+  `firstTotal_present_unit` int DEFAULT '0',
+  `firstTotal_dues_in` int DEFAULT '0',
+  `firstTotal_dues_out` int DEFAULT '0',
+  `oaOr_auth` int DEFAULT '0',
+  `oaOr_hs` int DEFAULT '0',
+  `oaOr_posted_str` int DEFAULT '0',
+  `oaOr_lve` int DEFAULT '0',
+  `oaOr_course` int DEFAULT '0',
+  `oaOr_det` int DEFAULT '0',
+  `oaOr_mh` int DEFAULT '0',
+  `oaOr_sick_lve` int DEFAULT '0',
+  `oaOr_ex` int DEFAULT '0',
+  `oaOr_td` int DEFAULT '0',
+  `oaOr_att` int DEFAULT '0',
+  `oaOr_awl_osl_jc` int DEFAULT '0',
+  `oaOr_trout_det` int DEFAULT '0',
+  `oaOr_present_det` int DEFAULT '0',
+  `oaOr_present_unit` int DEFAULT '0',
+  `oaOr_dues_in` int DEFAULT '0',
+  `oaOr_dues_out` int DEFAULT '0',
+  `attSummary_auth` int DEFAULT '0',
+  `attSummary_hs` int DEFAULT '0',
+  `attSummary_posted_str` int DEFAULT '0',
+  `attSummary_lve` int DEFAULT '0',
+  `attSummary_course` int DEFAULT '0',
+  `attSummary_det` int DEFAULT '0',
+  `attSummary_mh` int DEFAULT '0',
+  `attSummary_sick_lve` int DEFAULT '0',
+  `attSummary_ex` int DEFAULT '0',
+  `attSummary_td` int DEFAULT '0',
+  `attSummary_att` int DEFAULT '0',
+  `attSummary_awl_osl_jc` int DEFAULT '0',
+  `attSummary_trout_det` int DEFAULT '0',
+  `attSummary_present_det` int DEFAULT '0',
+  `attSummary_present_unit` int DEFAULT '0',
+  `attSummary_dues_in` int DEFAULT '0',
+  `attSummary_dues_out` int DEFAULT '0',
+  `attOffr_auth` int DEFAULT '0',
+  `attOffr_hs` int DEFAULT '0',
+  `attOffr_posted_str` int DEFAULT '0',
+  `attOffr_lve` int DEFAULT '0',
+  `attOffr_course` int DEFAULT '0',
+  `attOffr_det` int DEFAULT '0',
+  `attOffr_mh` int DEFAULT '0',
+  `attOffr_sick_lve` int DEFAULT '0',
+  `attOffr_ex` int DEFAULT '0',
+  `attOffr_td` int DEFAULT '0',
+  `attOffr_att` int DEFAULT '0',
+  `attOffr_awl_osl_jc` int DEFAULT '0',
+  `attOffr_trout_det` int DEFAULT '0',
+  `attOffr_present_det` int DEFAULT '0',
+  `attOffr_present_unit` int DEFAULT '0',
+  `attOffr_dues_in` int DEFAULT '0',
+  `attOffr_dues_out` int DEFAULT '0',
+  `attJco_auth` int DEFAULT '0',
+  `attJco_hs` int DEFAULT '0',
+  `attJco_posted_str` int DEFAULT '0',
+  `attJco_lve` int DEFAULT '0',
+  `attJco_course` int DEFAULT '0',
+  `attJco_det` int DEFAULT '0',
+  `attJco_mh` int DEFAULT '0',
+  `attJco_sick_lve` int DEFAULT '0',
+  `attJco_ex` int DEFAULT '0',
+  `attJco_td` int DEFAULT '0',
+  `attJco_att` int DEFAULT '0',
+  `attJco_awl_osl_jc` int DEFAULT '0',
+  `attJco_trout_det` int DEFAULT '0',
+  `attJco_present_det` int DEFAULT '0',
+  `attJco_present_unit` int DEFAULT '0',
+  `attJco_dues_in` int DEFAULT '0',
+  `attJco_dues_out` int DEFAULT '0',
+  `attOr_auth` int DEFAULT '0',
+  `attOr_hs` int DEFAULT '0',
+  `attOr_posted_str` int DEFAULT '0',
+  `attOr_lve` int DEFAULT '0',
+  `attOr_course` int DEFAULT '0',
+  `attOr_det` int DEFAULT '0',
+  `attOr_mh` int DEFAULT '0',
+  `attOr_sick_lve` int DEFAULT '0',
+  `attOr_ex` int DEFAULT '0',
+  `attOr_td` int DEFAULT '0',
+  `attOr_att` int DEFAULT '0',
+  `attOr_awl_osl_jc` int DEFAULT '0',
+  `attOr_trout_det` int DEFAULT '0',
+  `attOr_present_det` int DEFAULT '0',
+  `attOr_present_unit` int DEFAULT '0',
+  `attOr_dues_in` int DEFAULT '0',
+  `attOr_dues_out` int DEFAULT '0',
+  `secondTotal_auth` int DEFAULT '0',
+  `secondTotal_hs` int DEFAULT '0',
+  `secondTotal_posted_str` int DEFAULT '0',
+  `secondTotal_lve` int DEFAULT '0',
+  `secondTotal_course` int DEFAULT '0',
+  `secondTotal_det` int DEFAULT '0',
+  `secondTotal_mh` int DEFAULT '0',
+  `secondTotal_sick_lve` int DEFAULT '0',
+  `secondTotal_ex` int DEFAULT '0',
+  `secondTotal_td` int DEFAULT '0',
+  `secondTotal_att` int DEFAULT '0',
+  `secondTotal_awl_osl_jc` int DEFAULT '0',
+  `secondTotal_trout_det` int DEFAULT '0',
+  `secondTotal_present_det` int DEFAULT '0',
+  `secondTotal_present_unit` int DEFAULT '0',
+  `secondTotal_dues_in` int DEFAULT '0',
+  `secondTotal_dues_out` int DEFAULT '0',
+  `grandTotal_auth` int DEFAULT '0',
+  `grandTotal_hs` int DEFAULT '0',
+  `grandTotal_posted_str` int DEFAULT '0',
+  `grandTotal_lve` int DEFAULT '0',
+  `grandTotal_course` int DEFAULT '0',
+  `grandTotal_det` int DEFAULT '0',
+  `grandTotal_mh` int DEFAULT '0',
+  `grandTotal_sick_lve` int DEFAULT '0',
+  `grandTotal_ex` int DEFAULT '0',
+  `grandTotal_td` int DEFAULT '0',
+  `grandTotal_att` int DEFAULT '0',
+  `grandTotal_awl_osl_jc` int DEFAULT '0',
+  `grandTotal_trout_det` int DEFAULT '0',
+  `grandTotal_present_det` int DEFAULT '0',
+  `grandTotal_present_unit` int DEFAULT '0',
+  `grandTotal_dues_in` int DEFAULT '0',
+  `grandTotal_dues_out` int DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_company_date` (`company`,`report_date`),
+  KEY `idx_company` (`company`),
+  KEY `idx_date` (`report_date`),
+  KEY `idx_company_date` (`company`,`report_date`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `parade_state_daily`
+--
+
+LOCK TABLES `parade_state_daily` WRITE;
+/*!40000 ALTER TABLE `parade_state_daily` DISABLE KEYS */;
+INSERT INTO `parade_state_daily` VALUES (1,'2026-01-05','1 company',166,5,27,3,2,2,2,1,1,1,1,1,1,1,1,1,4,51,1,39,1,3,2,2,2,4,1,3,4,2,1,4,4,7,39,3,17,2,2,1,1,1,1,1,2,1,2,2,11,4,7,36,7,22,3,1,1,1,1,1,1,1,5,4,1,2,2,8,40,3,21,1,1,1,1,2,3,1,1,4,3,1,1,1,5,332,19,126,10,9,7,7,7,10,5,8,15,12,6,19,12,31,62,7,25,1,1,1,1,1,1,1,1,1,4,1,8,1,1,89,5,23,1,2,2,2,2,2,2,1,2,4,2,8,2,2,49,2,13,1,1,1,1,1,1,1,1,1,1,2,3,2,3,50,2,20,1,1,1,1,1,1,2,1,1,6,1,1,5,10,56,2,33,2,1,1,1,2,3,1,1,1,1,1,1,4,7,306,18,114,6,6,6,6,7,8,7,5,6,16,7,21,14,23,638,37,240,16,15,13,13,14,18,12,13,21,28,13,40,26,54,'2026-01-07 06:43:40','2026-01-07 07:55:36'),(6,'2026-01-06','1 company',64,13,57,3,2,8,2,2,2,1,1,1,43,8,14,3,2,41,15,21,2,1,1,1,1,3,2,1,2,8,1,13,4,4,13,4,11,1,1,2,1,1,1,1,1,1,3,2,8,4,1,84,21,30,1,1,2,2,3,4,3,2,1,13,2,17,4,7,73,2,92,4,2,1,5,4,2,2,5,2,66,1,26,6,7,275,55,211,11,7,14,11,11,12,9,10,7,133,14,78,21,21,77,12,61,4,2,7,5,1,1,1,1,3,43,7,18,11,12,97,8,53,4,2,6,1,1,3,2,1,1,38,6,15,4,4,123,11,53,1,4,6,3,2,2,3,1,1,36,6,17,11,10,140,1,79,4,1,8,1,11,2,1,3,1,55,8,24,11,2,142,31,71,10,1,10,6,3,1,1,1,6,42,10,29,14,25,579,63,317,23,10,37,16,18,9,8,7,12,214,37,103,51,53,854,118,528,34,17,51,27,29,21,17,17,19,347,51,181,72,74,'2026-01-07 07:49:14','2026-01-07 08:47:47'),(10,'2026-01-07','1 company',116,7,35,1,1,4,2,2,1,3,1,1,23,4,12,1,4,70,1,48,4,2,1,1,4,4,2,1,3,27,1,21,6,6,94,2,70,2,1,1,1,1,1,1,4,3,56,1,14,4,5,141,18,64,5,4,1,5,1,1,1,3,2,42,1,22,13,13,192,29,79,3,5,2,2,2,2,5,4,8,48,2,31,16,25,613,57,296,15,13,9,11,10,9,12,13,17,196,9,100,40,53,63,9,24,3,1,2,3,1,1,1,3,3,8,2,16,5,4,11,3,35,1,1,1,1,1,1,1,1,1,27,1,8,9,13,51,8,20,2,2,1,1,1,4,3,1,2,4,1,16,6,5,87,13,38,4,1,1,1,3,1,1,1,1,25,1,13,3,2,150,13,99,4,2,1,13,11,10,6,7,8,38,1,61,8,13,362,46,216,14,7,6,19,17,17,12,13,15,102,6,114,31,37,975,103,512,29,20,15,30,27,26,24,26,32,298,15,214,71,90,'2026-01-07 08:52:48','2026-01-07 09:14:17');
+/*!40000 ALTER TABLE `parade_state_daily` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -697,7 +1013,7 @@ CREATE TABLE `personnel` (
 
 LOCK TABLES `personnel` WRITE;
 /*!40000 ALTER TABLE `personnel` DISABLE KEYS */;
-INSERT INTO `personnel` VALUES (1,'ABC','778G','JCO','Infantry','2010-05-15','1985-03-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-23 07:27:16','2025-11-25 22:33:24','1 Company',0,0,0,NULL,NULL,NULL,0),(2,'Srivastav','156WE','Agniveer','Infantry','2010-05-15','2002-03-20','2015-01-10','2020-06-01','O+','Muslim','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 05:56:59','2025-11-25 01:47:34','1 Company',0,0,0,NULL,NULL,NULL,0),(3,'Vivek','1526WE','JCO','Infantry','2010-05-15','2001-03-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 05:57:55','2025-12-30 08:05:29','2 Company',1,0,0,NULL,NULL,NULL,0),(4,'Gugar','9926WE','JCO','Infantry','2010-05-15','1994-03-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 05:58:25','2025-12-03 09:18:22','4 Company',0,0,1,'det','5',1,0),(5,'Abishek','99226WE','JCO','Infantry','2010-05-15','1960-03-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:00:05','2025-12-16 01:26:47','3 Company',0,0,1,NULL,NULL,NULL,0),(6,'Raju','966WE','JCO','Infantry','2010-05-15','1986-09-20','2015-01-10','2020-06-01','O+','Muslim','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:03:59','2025-12-02 07:51:50','3 Company',0,0,1,NULL,NULL,NULL,0),(7,'Rohit','87CESR','Signal Man','Infantry','2010-05-15','1989-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:04:31','2025-11-25 01:47:34','3 Company',0,0,0,NULL,NULL,NULL,0),(8,'Prateeq','997CESR','JCO','Infantry','2010-05-15','1967-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:05:21','2025-12-16 01:26:52','3 Company',0,0,0,NULL,NULL,NULL,0),(10,'Rahul','965CESR','Signal Man','Infantry','2010-05-15','1987-09-20','2015-01-10','2020-06-01','O+','Hindu','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:06:06','2025-12-16 01:27:00','2 Company',0,0,0,NULL,NULL,NULL,0),(12,'Hardik','905CESR','Signal Man','Infantry','2010-05-15','1997-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:06:35','2025-12-30 08:43:16','2 Company',1,0,1,NULL,NULL,1,0),(13,'Kurnal','9085CESR','Signal Man','Infantry','2010-05-15','1989-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:07:05','2025-12-16 01:27:37','2 Company',0,1,0,NULL,NULL,NULL,0),(14,'Gill','25CESR','OC','Infantry','2010-05-15','1987-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:07:40','2025-11-25 01:47:34','2 Company',0,0,0,NULL,NULL,NULL,0),(15,'Raju','165CESR','OC','Infantry','2010-05-15','1987-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:08:03','2025-11-25 01:47:34','1 Company',0,0,0,NULL,NULL,NULL,0),(16,'ABC','775CESR','Subedar','Infantry','2010-05-15','1999-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:18:15','2025-12-16 01:27:04','1 Company',0,0,1,NULL,NULL,NULL,0),(17,'ABC','984CESR','Subedar','Infantry','2010-05-15','1979-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:18:42','2025-12-16 01:30:10','1 Company',0,1,0,NULL,NULL,NULL,0),(18,'Aijaz','994CESR','JCO','Infantry','2010-05-15','1990-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:19:13','2025-12-16 01:31:08','1 Company',0,0,1,NULL,NULL,NULL,0),(19,'Aijaz','99999CESR','Subedar','Infantry','2010-05-15','1990-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 09:44:27','2025-11-25 01:47:34','4 Company',0,0,0,NULL,NULL,NULL,0),(20,'John Doe','AN10001','JCO','Infantry','2010-06-15','1985-03-12','2010-06-15','2015-06-15','O+','Christian','Non-Veg','No','MBA','Medal of Honor','None','Yes','IC1001','2010-07-01','HQ Alpha','A','B','2011-06-01','Yes','PAN12345','PartII1','AADHAR12345','PartIIA1','AC123','Bank A','IFSC001','12','Village A','1234567890','To City','PO1','PS1','Teh1','NRS1','NMH1','District1','State1','No',25.50,180.50,75.00,95.00,'Scar on right hand','None','No',10,'Football','City1','Yes','2012-05-01','Yes','Unit A','A','2018-06-01','HQ Bravo','2023-06-01','None','None','Advanced','Intermediate','Jane Doe','Spouse','2010-08-15','AC987','Bank B','IFSC002','PartIIB1','MH123','Honda Civic','2015-01-20','Yes','DL12345','2015-01-01','2025-01-01','No','No','None','2015-06-10','Officer X','Yes','None','None','None','Excellent','Leadership','Time management','Yes','2025-12-02 07:47:16','2025-12-02 07:51:50','1 Company',0,0,0,'Active','Fit for service',0,0),(21,'Alice Smith','AN10002','Lieutenant','Signals','2012-04-10','1988-07-23','2012-04-10','2017-04-10','A+','Hindu','Veg','No','B.Tech','Service Medal','None','Yes','IC1002','2012-05-01','HQ Beta','B','A','2013-04-10','No','PAN12346','PartII2','AADHAR12346','PartIIA2','AC124','Bank B','IFSC002','34','Village B','0987654321','To Town','PO2','PS2','Teh2','NRS2','NMH2','District2','State2','Yes',15.00,165.00,60.00,88.00,'Mole on left cheek','None','No',8,'Cricket','City2','No','2013-05-01','No','Unit B','B','2019-07-01','HQ Gamma','2024-07-01','Asthma','No running','Intermediate','Basic','Bob Smith','Father','1980-02-12','AC988','Bank C','IFSC003','PartIIB2','MH124','Toyota Corolla','2016-02-15','No','DL12346','2016-02-01','2026-02-01','No','No','Counselling done','2016-04-10','Officer Y','No','None','Special request','None','Good','Problem solving','Patience','Yes','2025-12-02 07:47:16','2025-12-02 07:47:16','2 Company',0,0,0,'Active','Fit for service',0,0),(22,'Robert Johnson','AN10003','Major','Artillery','2008-01-20','1980-11-02','2008-01-20','2013-01-20','B+','Muslim','Non-Veg','Yes','PhD','Gallantry Medal','None','Yes','IC1003','2008-02-10','HQ Charlie','A','B','2009-01-20','Yes','PAN12347','PartII3','AADHAR12347','PartIIA3','AC125','Bank C','IFSC003','56','Village C','1122334455','To City','PO3','PS3','Teh3','NRS3','NMH3','District3','State3','No',30.00,170.00,68.00,92.00,'Tattoo on arm','None','Yes',12,'Basketball','City3','Yes','2010-01-15','Yes','Unit C','B','2017-03-01','HQ Delta','2023-03-01','None','None','Advanced','Advanced','Alice Johnson','Mother','1982-09-20','AC989','Bank D','IFSC004','PartIIB3','MH125','Ford Fiesta','2014-05-10','Yes','DL12347','2014-05-01','2024-05-01','No','No','None','2014-06-20','Officer Z','Yes','None','None','None','Excellent','Strategic thinking','Delegation','No','2025-12-02 07:47:16','2025-12-16 01:31:53','3 Company',0,0,1,'Active','Fit for service',0,0),(23,'Emma Williams','AN10004','Captain','Signals','2011-09-12','1987-05-14','2011-09-12','2016-09-12','O-','Hindu','Veg','No','MCA','Service Medal','None','Yes','IC1004','2011-10-01','HQ Delta','B','C','2012-09-12','Yes','PAN12348','PartII4','AADHAR12348','PartIIA4','AC126','Bank D','IFSC004','78','Village D','2233445566','To City','PO4','PS4','Teh4','NRS4','NMH4','District4','State4','No',20.00,172.00,70.00,90.00,'Scar on forehead','None','No',9,'Tennis','City4','No','2012-08-01','Yes','Unit D','A','2018-05-01','HQ Echo','2023-05-01','None','No heavy lifting','Intermediate','Intermediate','William Williams','Father','1985-03-10','AC990','Bank E','IFSC005','PartIIB4','MH126','Hyundai Elantra','2017-07-20','Yes','DL12348','2017-07-01','2027-07-01','No','No','None','2017-08-10','Officer A','Yes','None','None','None','Good','Communication','Teamwork','Yes','2025-12-02 07:47:16','2025-12-02 07:47:16','4 Company',0,0,0,'Active','Fit for service',0,0),(24,'Michael Brown','AN10005','Lieutenant','Infantry','2013-03-11','1990-12-20','2013-03-11','2018-03-11','AB+','Sikh','Non-Veg','No','B.Sc','Medal of Valor','None','Yes','IC1005','2013-04-01','HQ Echo','C','A','2014-03-11','No','PAN12349','PartII5','AADHAR12349','PartIIA5','AC127','Bank E','IFSC005','90','Village E','3344556677','To Town','PO5','PS5','Teh5','NRS5','NMH5','District5','State5','Yes',18.50,168.00,65.00,89.00,'Birthmark on arm','None','No',7,'Volleyball','City5','Yes','2015-02-01','No','Unit E','B','2020-04-01','HQ Foxtrot','2024-04-01','Diabetes','No sugar diet','Basic','Basic','Sarah Brown','Spouse','2012-06-15','AC991','Bank F','IFSC006','PartIIB5','MH127','Kia Sportage','2018-03-10','No','DL12349','2018-03-01','2028-03-01','No','No','None','2018-05-10','Officer B','No','None','None','None','Good','Planning','Problem solving','No','2025-12-02 07:47:16','2025-12-02 07:47:16','1 Company',0,0,0,'Active','Fit for service',0,0),(25,'John Doe','123456','Captain','Infantry','2015-06-01','1990-05-15','2016-01-01','2020-12-31','O+','Christianity','Vegetarian','No','Bachelor in Science','Medal of Honor','Advanced Tactics','Yes','IC123456','2016-06-01','Admin Office','A','B','2023-01-01','CC123','PAN123456','P2','AADHAR1234','AP2','JA123456','State Bank','SBIN0001234','12B','VillageName','0123456789','LocalTO','PO123','PS123','TehsilName','NRS123','NMH123','DistrictName','StateName','None',10.50,175.50,70.20,95.00,'Mole on right cheek','None','Loan',5,'Sports and Volunteering','CityName','Station ABC','2019-12-01','Yes','2 years','A','2022-06-01','Unit HQ','2025-06-01','None','None','Basic','Intermediate','Jane Doe','Spouse','2014-05-01','KA123456','State Bank','SBIN0005678','KP2','ABC1234','Toyota Corolla','2018-05-01','Yes','DL123456','2015-06-01','2025-06-01','None','None','Completed','2023-01-01','Admin Officer','Yes','None','None','None','Leadership, Teamwork','Discipline, Planning','Impatience','Advanced Combat Training','2025-12-11 09:32:16','2025-12-11 09:32:16','1 Company',0,0,0,NULL,NULL,0,0);
+INSERT INTO `personnel` VALUES (1,'ABC','778G','JCO','Infantry','2010-05-15','1985-03-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-23 07:27:16','2025-11-25 22:33:24','1 Company',0,0,0,NULL,NULL,NULL,0),(2,'Srivastav','156WE','Agniveer','Infantry','2010-05-15','2002-03-20','2015-01-10','2020-06-01','O+','Muslim','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 05:56:59','2025-11-25 01:47:34','1 Company',0,0,0,NULL,NULL,NULL,0),(3,'Vivek','1526WE','JCO','Infantry','2010-05-15','2001-03-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 05:57:55','2025-12-30 08:05:29','2 Company',1,0,0,NULL,NULL,NULL,0),(4,'Gugar','9926WE','JCO','Infantry','2010-05-15','1994-03-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 05:58:25','2026-01-08 08:54:52','4 Company',0,0,1,'det','5',0,0),(5,'Abishek','99226WE','JCO','Infantry','2010-05-15','1960-03-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:00:05','2025-12-16 01:26:47','3 Company',0,0,1,NULL,NULL,NULL,0),(6,'Raju','966WE','JCO','Infantry','2010-05-15','1986-09-20','2015-01-10','2020-06-01','O+','Muslim','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:03:59','2025-12-02 07:51:50','3 Company',0,0,1,NULL,NULL,NULL,0),(7,'Rohit','87CESR','Signal Man','Infantry','2010-05-15','1989-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:04:31','2025-11-25 01:47:34','3 Company',0,0,0,NULL,NULL,NULL,0),(8,'Prateeq','997CESR','JCO','Infantry','2010-05-15','1967-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:05:21','2025-12-16 01:26:52','3 Company',0,0,0,NULL,NULL,NULL,0),(10,'Rahul','965CESR','Signal Man','Infantry','2010-05-15','1987-09-20','2015-01-10','2020-06-01','O+','Hindu','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:06:06','2025-12-16 01:27:00','2 Company',0,0,0,NULL,NULL,NULL,0),(12,'Hardik','905CESR','Signal Man','Infantry','2010-05-15','1997-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:06:35','2026-01-08 08:54:52','2 Company',1,0,1,NULL,NULL,0,0),(13,'Kurnal','9085CESR','Signal Man','Infantry','2010-05-15','1989-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:07:05','2025-12-16 01:27:37','2 Company',0,1,0,NULL,NULL,NULL,0),(14,'Gill','25CESR','OC','Infantry','2010-05-15','1987-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:07:40','2025-11-25 01:47:34','2 Company',0,0,0,NULL,NULL,NULL,0),(15,'Raju','165CESR','OC','Infantry','2010-05-15','1987-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:08:03','2025-11-25 01:47:34','1 Company',0,0,0,NULL,NULL,NULL,0),(16,'ABC','775CESR','Subedar','Infantry','2010-05-15','1999-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:18:15','2025-12-16 01:27:04','1 Company',0,0,1,NULL,NULL,NULL,0),(17,'ABC','984CESR','Subedar','Infantry','2010-05-15','1979-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:18:42','2025-12-16 01:30:10','1 Company',0,1,0,NULL,NULL,NULL,0),(18,'Aijaz','994CESR','JCO','Infantry','2010-05-15','1990-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 06:19:13','2025-12-16 01:31:08','1 Company',0,0,1,NULL,NULL,NULL,0),(19,'Aijaz','99999CESR','Subedar','Infantry','2010-05-15','1990-09-20','2015-01-10','2020-06-01','O+','Christian','Non-Vegetarian','No','BSc Computer Science','Gallantry Award 2018','Advanced Leadership Course','Yes','IC-45678','2020-01-01','Unit HQ','A','B+','2025-09-01','Yes','ABCDE1234F','P-II/2020/001','123456789012','P-II/2021/002','1234567890','State Bank of India','SBIN0001234','House 5, Lane 2','Greenville','+91-9876543210','Central Tehsil','Greenville PO','Greenville PS','Green Tehsil','NRS-001','NMH-002','Green District','Greenland','Yes',5.50,175.50,75.00,85.00,'Scar on left arm','None','Yes',30,'Sports and Drama','Delhi','Yes','2024-01-01','No','N/A','Yes','2024-06-15','Military Hospital','2026-06-15','Mild Asthma','No heavy lifting','Excellent','Good','Jane Doe','Spouse','2012-07-20','0987654321','HDFC Bank','HDFC0005678','P-II/2012/003','DL01AB1234','Toyota Innova','2020-03-10','Yes','DL-56789','2020-01-01','2030-01-01','No','No','Attended in 2023','2025-10-01','Sgt. Smith','Yes','None','Transfer to hometown','None','Improve mess facilities, gym upgrade, family quarters','Leadership, teamwork, discipline','Public speaking','No','2025-10-27 09:44:27','2025-11-25 01:47:34','4 Company',0,0,0,NULL,NULL,NULL,0),(20,'John Doe','AN10001','JCO','Infantry','2010-06-15','1985-03-12','2010-06-15','2015-06-15','O+','Christian','Non-Veg','No','MBA','Medal of Honor','None','Yes','IC1001','2010-07-01','HQ Alpha','A','B','2011-06-01','Yes','PAN12345','PartII1','AADHAR12345','PartIIA1','AC123','Bank A','IFSC001','12','Village A','1234567890','To City','PO1','PS1','Teh1','NRS1','NMH1','District1','State1','No',25.50,180.50,75.00,95.00,'Scar on right hand','None','No',10,'Football','City1','Yes','2012-05-01','Yes','Unit A','A','2018-06-01','HQ Bravo','2023-06-01','None','None','Advanced','Intermediate','Jane Doe','Spouse','2010-08-15','AC987','Bank B','IFSC002','PartIIB1','MH123','Honda Civic','2015-01-20','Yes','DL12345','2015-01-01','2025-01-01','No','No','None','2015-06-10','Officer X','Yes','None','None','None','Excellent','Leadership','Time management','Yes','2025-12-02 07:47:16','2026-01-08 08:54:52','1 Company',0,0,0,'Active','Fit for service',0,0),(21,'Alice Smith','AN10002','Lieutenant','Signals','2012-04-10','1988-07-23','2012-04-10','2017-04-10','A+','Hindu','Veg','No','B.Tech','Service Medal','None','Yes','IC1002','2012-05-01','HQ Beta','B','A','2013-04-10','No','PAN12346','PartII2','AADHAR12346','PartIIA2','AC124','Bank B','IFSC002','34','Village B','0987654321','To Town','PO2','PS2','Teh2','NRS2','NMH2','District2','State2','Yes',15.00,165.00,60.00,88.00,'Mole on left cheek','None','No',8,'Cricket','City2','No','2013-05-01','No','Unit B','B','2019-07-01','HQ Gamma','2024-07-01','Asthma','No running','Intermediate','Basic','Bob Smith','Father','1980-02-12','AC988','Bank C','IFSC003','PartIIB2','MH124','Toyota Corolla','2016-02-15','No','DL12346','2016-02-01','2026-02-01','No','No','Counselling done','2016-04-10','Officer Y','No','None','Special request','None','Good','Problem solving','Patience','Yes','2025-12-02 07:47:16','2026-01-08 08:54:52','2 Company',0,0,0,'Active','Fit for service',0,0),(22,'Robert Johnson','AN10003','Major','Artillery','2008-01-20','1980-11-02','2008-01-20','2013-01-20','B+','Muslim','Non-Veg','Yes','PhD','Gallantry Medal','None','Yes','IC1003','2008-02-10','HQ Charlie','A','B','2009-01-20','Yes','PAN12347','PartII3','AADHAR12347','PartIIA3','AC125','Bank C','IFSC003','56','Village C','1122334455','To City','PO3','PS3','Teh3','NRS3','NMH3','District3','State3','No',30.00,170.00,68.00,92.00,'Tattoo on arm','None','Yes',12,'Basketball','City3','Yes','2010-01-15','Yes','Unit C','B','2017-03-01','HQ Delta','2023-03-01','None','None','Advanced','Advanced','Alice Johnson','Mother','1982-09-20','AC989','Bank D','IFSC004','PartIIB3','MH125','Ford Fiesta','2014-05-10','Yes','DL12347','2014-05-01','2024-05-01','No','No','None','2014-06-20','Officer Z','Yes','None','None','None','Excellent','Strategic thinking','Delegation','No','2025-12-02 07:47:16','2025-12-16 01:31:53','3 Company',0,0,1,'Active','Fit for service',0,0),(23,'Emma Williams','AN10004','Captain','Signals','2011-09-12','1987-05-14','2011-09-12','2016-09-12','O-','Hindu','Veg','No','MCA','Service Medal','None','Yes','IC1004','2011-10-01','HQ Delta','B','C','2012-09-12','Yes','PAN12348','PartII4','AADHAR12348','PartIIA4','AC126','Bank D','IFSC004','78','Village D','2233445566','To City','PO4','PS4','Teh4','NRS4','NMH4','District4','State4','No',20.00,172.00,70.00,90.00,'Scar on forehead','None','No',9,'Tennis','City4','No','2012-08-01','Yes','Unit D','A','2018-05-01','HQ Echo','2023-05-01','None','No heavy lifting','Intermediate','Intermediate','William Williams','Father','1985-03-10','AC990','Bank E','IFSC005','PartIIB4','MH126','Hyundai Elantra','2017-07-20','Yes','DL12348','2017-07-01','2027-07-01','No','No','None','2017-08-10','Officer A','Yes','None','None','None','Good','Communication','Teamwork','Yes','2025-12-02 07:47:16','2025-12-02 07:47:16','4 Company',0,0,0,'Active','Fit for service',0,0),(24,'Michael Brown','AN10005','Lieutenant','Infantry','2013-03-11','1990-12-20','2013-03-11','2018-03-11','AB+','Sikh','Non-Veg','No','B.Sc','Medal of Valor','None','Yes','IC1005','2013-04-01','HQ Echo','C','A','2014-03-11','No','PAN12349','PartII5','AADHAR12349','PartIIA5','AC127','Bank E','IFSC005','90','Village E','3344556677','To Town','PO5','PS5','Teh5','NRS5','NMH5','District5','State5','Yes',18.50,168.00,65.00,89.00,'Birthmark on arm','None','No',7,'Volleyball','City5','Yes','2015-02-01','No','Unit E','B','2020-04-01','HQ Foxtrot','2024-04-01','Diabetes','No sugar diet','Basic','Basic','Sarah Brown','Spouse','2012-06-15','AC991','Bank F','IFSC006','PartIIB5','MH127','Kia Sportage','2018-03-10','No','DL12349','2018-03-01','2028-03-01','No','No','None','2018-05-10','Officer B','No','None','None','None','Good','Planning','Problem solving','No','2025-12-02 07:47:16','2026-01-08 09:23:08','1 Company',0,0,0,'Active','Fit for service',0,0),(25,'John Doe','123456','Captain','Infantry','2015-06-01','1990-05-15','2016-01-01','2020-12-31','O+','Christianity','Vegetarian','No','Bachelor in Science','Medal of Honor','Advanced Tactics','Yes','IC123456','2016-06-01','Admin Office','A','B','2023-01-01','CC123','PAN123456','P2','AADHAR1234','AP2','JA123456','State Bank','SBIN0001234','12B','VillageName','0123456789','LocalTO','PO123','PS123','TehsilName','NRS123','NMH123','DistrictName','StateName','None',10.50,175.50,70.20,95.00,'Mole on right cheek','None','Loan',5,'Sports and Volunteering','CityName','Station ABC','2019-12-01','Yes','2 years','A','2022-06-01','Unit HQ','2025-06-01','None','None','Basic','Intermediate','Jane Doe','Spouse','2014-05-01','KA123456','State Bank','SBIN0005678','KP2','ABC1234','Toyota Corolla','2018-05-01','Yes','DL123456','2015-06-01','2025-06-01','None','None','Completed','2023-01-01','Admin Officer','Yes','None','None','None','Leadership, Teamwork','Discipline, Planning','Impatience','Advanced Combat Training','2025-12-11 09:32:16','2025-12-11 09:32:16','1 Company',0,0,0,NULL,NULL,0,0);
 /*!40000 ALTER TABLE `personnel` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -758,6 +1074,32 @@ INSERT INTO `posting_details_table` VALUES (1,'966WE','P2','2025-11-26 03:12:21'
 UNLOCK TABLES;
 
 --
+-- Table structure for table `project_heads`
+--
+
+DROP TABLE IF EXISTS `project_heads`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `project_heads` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `head_name` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `head_name` (`head_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_heads`
+--
+
+LOCK TABLES `project_heads` WRITE;
+/*!40000 ALTER TABLE `project_heads` DISABLE KEYS */;
+INSERT INTO `project_heads` VALUES (1,'PTPT','2026-01-07 07:46:01'),(3,'IT','2026-01-07 07:50:40'),(4,'TT&IE','2026-01-07 10:43:58'),(5,'ATG','2026-01-07 12:08:43');
+/*!40000 ALTER TABLE `project_heads` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `projects`
 --
 
@@ -773,8 +1115,10 @@ CREATE TABLE `projects` (
   `quantity` int DEFAULT NULL,
   `project_description` text,
   `created_on` datetime DEFAULT CURRENT_TIMESTAMP,
+  `head` varchar(100) NOT NULL,
+  `company` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`project_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -783,7 +1127,7 @@ CREATE TABLE `projects` (
 
 LOCK TABLES `projects` WRITE;
 /*!40000 ALTER TABLE `projects` DISABLE KEYS */;
-INSERT INTO `projects` VALUES (1,'TEMP','temp1',454544.00,'Laptops',495,'adsjfdj aklsjdf ljas djflsdjf asfkj fdkja f','2025-12-15 13:40:33');
+INSERT INTO `projects` VALUES (1,'COMPUTER LAB','Completed',8900.00,'\"Laptops\"',767,'WE ARE RECIEVED ','2026-01-07 13:23:09','IT','Admin'),(2,'TEMP','AON',454544.00,'\"Laptops\"',495,'','2026-01-07 16:24:59','IT','Admin'),(3,'telcom','TOB & TEC',454544.00,'\"telephone\"',12,'','2026-01-07 16:26:44','TT&IE','Admin'),(4,'lab','TOB & TEC',1000000.00,'\"trg lab\"',1,'','2026-01-07 17:39:45','TT&IE','Admin');
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -859,7 +1203,7 @@ CREATE TABLE `sensitive_marking` (
   `reason` text,
   `marked_on` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -868,7 +1212,7 @@ CREATE TABLE `sensitive_marking` (
 
 LOCK TABLES `sensitive_marking` WRITE;
 /*!40000 ALTER TABLE `sensitive_marking` DISABLE KEYS */;
-INSERT INTO `sensitive_marking` VALUES (1,'1526WE','SMOKING','2025-12-01 11:37:23'),(2,'905CESR','abc','2025-12-01 14:33:35');
+INSERT INTO `sensitive_marking` VALUES (17,'1526WE','INDICPILINE','2026-01-05 15:21:09'),(18,'9926WE','This person is not hygienic','2026-01-06 12:56:06'),(19,'778G','online gamming','2026-01-07 14:53:03');
 /*!40000 ALTER TABLE `sensitive_marking` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -976,8 +1320,15 @@ CREATE TABLE `td_table` (
   `army_number` varchar(50) NOT NULL,
   `remarks` text,
   `td_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_interview_sm` date DEFAULT NULL,
+  `last_interview_sm_status` tinyint(1) DEFAULT '0',
+  `last_interview_OC_status` tinyint(1) DEFAULT '0',
+  `last_interview_oc` date DEFAULT NULL,
+  `lcoation` varchar(100) DEFAULT NULL,
+  `authority` varchar(100) DEFAULT NULL,
+  `company` varchar(45) DEFAULT '1 company',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -986,7 +1337,6 @@ CREATE TABLE `td_table` (
 
 LOCK TABLES `td_table` WRITE;
 /*!40000 ALTER TABLE `td_table` DISABLE KEYS */;
-INSERT INTO `td_table` VALUES (7,'905CESR','temporary detached for 10 days','2025-12-01 08:56:16'),(8,'9926WE','temporary detached for 10 days','2025-12-01 08:56:47');
 /*!40000 ALTER TABLE `td_table` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1049,7 +1399,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'RAVI KUMAR','ravi@gmail.com','ravi@123','CO','2025-11-19 06:28:38','1 company'),(2,'RAHUL SINGH','rahul.oc@gmail.com','rahul@123','OC','2025-11-19 06:42:10','1 company'),(3,'SACHIN SHARMA','sachin.adj@gmail.com','sachin@123','ADJUTANT','2025-11-19 06:45:22','1 company'),(4,'MANOJ SINGH','manoj.jco@gmail.com','manoj@123','JCO','2025-11-18 04:52:55','1 company'),(5,'AKHILESH VERMA','akhil.jco@gmail.com','akhil@123','JCO','2025-11-18 06:15:33','1 company'),(6,'SUNIL KUMAR','sunil.or@gmail.com','sunil@123','OR','2025-11-17 03:48:20','1 company'),(7,'VIJAY KUMAR','vijay.or@gmail.com','vijay@123','OR','2025-11-17 09:10:11','1 company'),(8,'ARUN SHARMA','arun.clerk@gmail.com','arun@123','SEC NCO','2025-11-16 03:20:45','1 company'),(9,'ROHIT YADAV','rohit.clerk@gmail.com','rohit@123','SEC NCO','2025-11-16 05:42:30','2 Company'),(10,'ADMIN USER','admin@gmail.com','admin@123','ADJUTANT','2025-11-15 07:55:00','1 company'),(11,'col_singh','co@unit.army','@123','OC','2025-12-16 01:40:20','2 Company'),(12,'maj_khan','oc_alpha@unit.army','@123','ADJUTANT','2025-12-16 01:40:20','2 Company'),(13,'clerk_ram','clerk@unit.army','@123','CLERK','2025-12-16 01:40:20','3 Company'),(14,'subedar_yadav','subedar@unit.army','@123','SUBEDAR','2025-12-16 01:40:20','3 Company'),(15,'naib_subedar_ali','naib@unit.army','@123','NAIB_SUBEDAR','2025-12-16 01:40:20','4 Company'),(16,'MS DHONI','dhoni_sec_jco@1coy','123','SEC JCO','2025-12-30 06:46:54','2 company'),(17,'Yuvraj','yuvraj@2coy','123','SEC JCO','2025-12-30 06:47:20','2 company'),(18,'Kohli','kohli@1coy','123','SEC JCO','2025-12-30 06:47:41','1 company'),(19,'unit_2ic','2ic@123','123','2IC','2025-12-31 06:48:12','HQ');
+INSERT INTO `users` VALUES (1,'RAVI KUMAR','ravi@gmail.com','ravi@123','CO','2025-11-19 06:28:38','Admin'),(2,'RAHUL SINGH','rahul.oc@gmail.com','rahul@123','OC','2025-11-19 06:42:10','1 company'),(3,'SACHIN SHARMA','sachin.adj@gmail.com','sachin@123','ADJUTANT','2025-11-19 06:45:22','1 company'),(4,'MANOJ SINGH','manoj.jco@gmail.com','manoj@123','JCO','2025-11-18 04:52:55','1 company'),(5,'AKHILESH VERMA','akhil.jco@gmail.com','akhil@123','JCO','2025-11-18 06:15:33','1 company'),(6,'SUNIL KUMAR','sunil.or@gmail.com','sunil@123','OR','2025-11-17 03:48:20','1 company'),(7,'VIJAY KUMAR','vijay.or@gmail.com','vijay@123','OR','2025-11-17 09:10:11','1 company'),(8,'ARUN SHARMA','arun.clerk@gmail.com','arun@123','SEC NCO','2025-11-16 03:20:45','1 company'),(9,'ROHIT YADAV','rohit.clerk@gmail.com','rohit@123','SEC NCO','2025-11-16 05:42:30','2 Company'),(10,'ADMIN USER','admin@gmail.com','admin@123','ADJUTANT','2025-11-15 07:55:00','1 company'),(11,'col_singh','co@unit.army','@123','OC','2025-12-16 01:40:20','2 Company'),(12,'maj_khan','oc_alpha@unit.army','@123','ADJUTANT','2025-12-16 01:40:20','2 Company'),(13,'clerk_ram','clerk@unit.army','@123','CLERK','2025-12-16 01:40:20','3 Company'),(14,'subedar_yadav','subedar@unit.army','@123','SUBEDAR','2025-12-16 01:40:20','3 Company'),(15,'naib_subedar_ali','naib@unit.army','@123','NAIB_SUBEDAR','2025-12-16 01:40:20','4 Company'),(16,'MS DHONI','dhoni_sec_jco@1coy','123','SEC JCO','2025-12-30 06:46:54','2 company'),(17,'Yuvraj','yuvraj@2coy','123','SEC JCO','2025-12-30 06:47:20','2 company'),(18,'Kohli','kohli@1coy','123','SEC JCO','2025-12-30 06:47:41','1 company'),(19,'unit_2ic','2ic@123','123','2IC','2025-12-31 06:48:12','Admin');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1112,7 +1462,7 @@ CREATE TABLE `weight_info` (
 
 LOCK TABLES `weight_info` WRITE;
 /*!40000 ALTER TABLE `weight_info` DISABLE KEYS */;
-INSERT INTO `weight_info` VALUES (1,'john snow','AGNIVEER','12121',56,56,156,'1 Company','category','permanent','cannot run'),(2,'John Doe','Captain','JD12345',75.5,30,175,'2 Company','shape',NULL,NULL),(3,'Yawar','Havaldar','121132229',67,34,170,'3 Company','category','permanent','cannot drive'),(4,'Ubaid lone','JCO','0234032048',56,40,179,'2 Company','category','permanent','CANNOT WAIT PROPERLY'),(5,'G NARESH','JCO','023403204890',67,56,178,'4 Company','shape',NULL,NULL),(6,'GANESH','JCO','34809',67,56,167,'4 Company','category','permanent','THIS CANNOT READ'),(7,'tiku sharma','JCO','12',56,45,165,'2 Company','shape',NULL,NULL),(8,'zaheer','MAJOR','453343',67,56,170,'4 Company','shape',NULL,NULL),(9,'h r','JCO','15732589',173,32,176,'4 Company','shape',NULL,NULL),(10,'MANISH BAJPAI','JCO','48943948',67,45,180,'1 Company','shape',NULL,NULL),(11,'MURALI DHARAN','AGNIVEER','3438094830984',56,34,180,'4 Company','shape',NULL,NULL),(12,'STEVE SMITH','MAJOR','32943284',60,45,180,'1 Company','category','temporary','injury'),(13,'John Doe','Captain','123456',70.2,35,175.5,'1 Company','shape',NULL,'None');
+INSERT INTO `weight_info` VALUES (1,'john snow','AGNIVEER','12121',56,56,156,'3 Company','category','permanent','cannot run'),(2,'John Doe','Captain','JD12345',75.5,30,175,'2 Company','shape',NULL,NULL),(3,'Yawar','Havaldar','121132229',67,34,170,'3 Company','category','permanent','cannot drive'),(4,'Ubaid lone','JCO','0234032048',56,40,179,'2 Company','category','permanent','CANNOT WAIT PROPERLY'),(5,'G NARESH','JCO','023403204890',67,56,178,'4 Company','shape',NULL,NULL),(6,'GANESH','JCO','34809',67,56,167,'4 Company','category','permanent','THIS CANNOT READ'),(7,'tiku sharma','JCO','12',56,45,165,'2 Company','shape',NULL,NULL),(8,'zaheer','MAJOR','453343',67,56,170,'4 Company','shape',NULL,NULL),(9,'h r','JCO','15732589',173,32,176,'4 Company','shape',NULL,NULL),(10,'MANISH BAJPAI','JCO','48943948',67,45,180,'1 Company','shape',NULL,NULL),(11,'MURALI DHARAN','AGNIVEER','3438094830984',56,34,180,'4 Company','shape',NULL,NULL),(12,'STEVE SMITH','MAJOR','32943284',60,45,180,'1 Company','category','temporary','injury'),(13,'John Doe','Captain','123456',70.2,35,175.5,'1 Company','shape',NULL,'None');
 /*!40000 ALTER TABLE `weight_info` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -1125,4 +1475,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-31 14:10:56
+-- Dump completed on 2026-01-08 15:51:39

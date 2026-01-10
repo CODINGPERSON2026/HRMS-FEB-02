@@ -9,6 +9,9 @@ from flask import (
     flash,
     make_response
 )
+
+from xhtml2pdf import pisa
+from io import BytesIO
 from middleware import require_login
 
 import mysql.connector
@@ -21,6 +24,7 @@ import json
 import os
 import pandas as pd
 from datetime import datetime
+from decimal import Decimal
 
 from middleware import require_login, jwt, JWT_ALGO, JWT_SECRET
 
@@ -31,3 +35,5 @@ from blueprints.dashboard import dashboard_bp
 from blueprints.task_manager import task_bp
 from blueprints.account_management import accounts_bp
 from blueprints.weight_ms import compute_authorization
+from blueprints.loan import loan_bp
+from blueprints.roll_call import roll_call_bp

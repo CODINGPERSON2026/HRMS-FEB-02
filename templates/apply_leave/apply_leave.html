@@ -170,22 +170,75 @@ searchBtn.onclick = async () => {
   const data = await res.json();
   console.log(data);
 
-  // ✅ CASE 1: Existing leave already present
-  if (data.exists) {
-    resultsSection.style.display = "block";
+ // ✅ CASE: Existing leave present
+if (data.exists) {
+  const leave = data.existing_leave;
+  resultsSection.style.display = "block";
+  resultsTable.innerHTML = "";
+
+  // 🚫 Disable Apply button
+  applyLeaveBtn.disabled = false;
+
+  if (leave.request_status === "Approved") {
     resultsTable.innerHTML = `
       <tr>
-        <td colspan="6" style="text-align:center; color:red; font-weight:bold;">
-          An existing <b>${data.existing_leave.leave_type}</b> leave request for Army No
-          <b>${data.existing_leave.army_number}</b> is already
-          <b>${data.existing_leave.request_status}</b>.
-          <br>Please wait until the current leave is processed.
+        <td colspan="6" style="text-align:center; color:green; font-weight:bold;">
+          ✅ Your <b>${leave.leave_type}</b> leave has been
+          <b>APPROVED</b> for Army No <b>${leave.army_number}</b>.
+          <br><br>
+          <button class="btn btn-success"
+            onclick="downloadCertificate('${leave.army_number}')">
+            Download Leave Certificate
+          </button>
         </td>
       </tr>
     `;
-    hideLoading();
-    return; // ⛔ stop further execution
   }
+  else if (leave.request_status === "Pending") {
+    resultsTable.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center; color:orange; font-weight:bold;">
+          ⏳ Your <b>${leave.leave_type}</b> leave request for Army No
+          <b>${leave.army_number}</b> is currently
+          <b>PENDING</b>.
+          <br>Please wait until it is processed.
+        </td>
+      </tr>
+    `;
+  }
+  else if (leave.request_status === "Rejected") {
+    resultsTable.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center; color:red; font-weight:bold;">
+          ❌ Your <b>${leave.leave_type}</b> leave request for Army No
+          <b>${leave.army_number}</b> has been
+          <b>REJECTED</b>.
+          <br>Please contact admin for details.
+        </td>
+      </tr>
+    `;
+
+    // ✅ Allow re-apply if rejected
+    applyLeaveBtn.disabled = false;
+  }
+  else {
+    resultsTable.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center; color:red; font-weight:bold;">
+          Leave status:
+          <b>${leave.request_status}</b>
+        </td>
+      </tr>
+    `;
+  }
+
+  hideLoading();
+  return;
+}
+
+
+
+
 
   // ✅ CASE 2: No existing leave → show personnel list
   resultsTable.innerHTML = "";
@@ -214,7 +267,9 @@ searchBtn.onclick = async () => {
   hideLoading();
 };
 
-
+function downloadCertificate(armyNumber) {
+  window.location.href = `/apply_leave/leave/download_certificate/${armyNumber}`;
+}
 /* FETCH LEAVE DETAILS */
 async function getLeaveDetails(id,name) {
   showLoading();

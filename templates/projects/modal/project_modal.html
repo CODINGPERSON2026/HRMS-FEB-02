@@ -1,0 +1,148 @@
+<!-- ADD PROJECT MODAL -->
+<div class="modal fade" id="addProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Project
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="addProjectForm" class="row g-3">
+
+                    <!-- HEAD -->
+                    <div class="col-md-6">
+                        <label class="form-label">Head *</label>
+                        <select class="form-select" name="head" id="addProjectHeadSelect" required>
+                            <option value="">Select Head</option>
+                            {% for head in heads %}
+                                <option value="{{ head.head_name }}">{{ head.head_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- PROJECT NAME -->
+                    <div class="col-md-6">
+                        <label class="form-label">Project Name *</label>
+                        <input class="form-control" name="project_name" required>
+                    </div>
+
+                    <!-- STAGE -->
+                    <div class="col-md-6">
+                        <label class="form-label">Current Stage *</label>
+                        <select class="form-select" name="current_stage" required>
+                            <option value="">Select Stage</option>
+                            <option value="PPP">PPP</option>
+                            <option value="AON">AON</option>
+                            <option value="FBU">FBU</option>
+                            <option value="TOB & TEC">TOB & TEC</option>
+                            <option value="B BD">B BD</option>
+                            <option value="OCB RA">OCB RA</option>
+                            <option value="Placement Of SO">Placement Of SO</option>
+                            <option value="Store/Items Delivery">Store/Items Delivery</option>
+                            <option value="ATP">ATP</option>
+                            <option value="PRAC & CRAC">PRAC & CRAC</option>
+                            <option value="Payment">Payment</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+
+                    <!-- PROJECT COST -->
+                    <div class="col-md-6">
+                        <label class="form-label">Project Cost (₹) *</label>
+                        <input class="form-control" name="project_cost" type="number" required>
+                    </div>
+
+                    <!-- PROJECT ITEMS -->
+                    <div class="col-md-6">
+                        <label class="form-label">Project Items *</label>
+                        <input class="form-control" name="project_items" placeholder="e.g. Radios, Vehicles" required>
+                    </div>
+
+                    <!-- QUANTITY -->
+                    <div class="col-md-6">
+                        <label class="form-label">Quantity *</label>
+                        <input class="form-control" name="quantity" type="number" min="1" required>
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="project_description" rows="3"></textarea>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" onclick="addProject()">Save Project</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Update Add Project Head dropdown when a new head is added
+document.getElementById("addHeadForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const headName = document.getElementById("headNameInput").value.trim();
+    if (!headName) return;
+
+    fetch('/add_head', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ head_name: headName })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const alertDiv = document.getElementById("headAlert");
+        if (data.status === 'success') {
+            // Update Head dropdown in main filter
+            const mainSelect = document.getElementById("headSelect");
+            const mainOption = document.createElement("option");
+            mainOption.value = headName;
+            mainOption.textContent = headName;
+            mainSelect.appendChild(mainOption);
+            mainSelect.value = headName;
+
+            // Update Head dropdown in Add Project modal
+            const projectSelect = document.getElementById("addProjectHeadSelect");
+            const projectOption = document.createElement("option");
+            projectOption.value = headName;
+            projectOption.textContent = headName;
+            projectSelect.appendChild(projectOption);
+
+            alertDiv.innerHTML = '<div class="alert alert-success py-1">Head added successfully!</div>';
+            document.getElementById("headNameInput").value = '';
+        } else {
+            alertDiv.innerHTML = `<div class="alert alert-danger py-1">${data.message}</div>`;
+        }
+    })
+    .catch(err => console.error(err));
+});
+
+function addProject() {
+    const form = document.getElementById("addProjectForm");
+
+    fetch("/add_project", {
+        method: "POST",
+        body: new FormData(form)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            location.reload();
+        } else {
+            alert("Failed to add project");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Server error");
+    });
+}
+</script>

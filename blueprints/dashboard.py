@@ -2,58 +2,71 @@ from imports import *
 from db_config  import get_db_connection
 dashboard_bp =  Blueprint('dasboard',__name__,url_prefix='/stats')
 
+
+
+
+
+@dashboard_bp.route("/get_all_dets", methods=["GET"])
+def get_all_dets():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT det_id, det_name FROM dets ORDER BY det_name")
+        dets = cursor.fetchall()
+        return jsonify({"status": "success", "data": dets})
+    except Exception as e:
+        print("Error fetching detachments:", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+
+
 @dashboard_bp.route('/get_detachment_details')
-def get_det_personnel():
-    
-    company = request.args.get('company')
-    print(company, 'this is company')
+def get_detachment_details():
+    det_id = request.args.get("det_id")  # optional
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    print("in this route")
 
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        query = '''
-        SELECT
-            p.name,
-            p.army_number,
-            p.rank,
-            p.company,
-            ad.det_id,
-            ad.det_status,
-            d.det_name,
-            ad.assigned_on,
-            DATEDIFF(NOW(), ad.assigned_on) AS days_on_det
-        FROM personnel p
-        LEFT JOIN assigned_det ad ON p.army_number = ad.army_number
-        LEFT JOIN dets d ON ad.det_id = d.det_id
-        WHERE p.detachment_status = 1
-          AND ad.det_status = 1
-        '''
-
+        # Base query: only active det assignments (det_status=1)
+        query = """
+            SELECT 
+                p.name, 
+                p.army_number, 
+                p.rank, 
+                p.company, 
+                d.det_name,
+                DATEDIFF(CURDATE(), a.assigned_on) AS days_on_det
+            FROM assigned_det a
+            JOIN personnel p ON p.army_number = a.army_number
+            JOIN dets d ON d.det_id = a.det_id
+            WHERE a.det_status = 1
+        """
         params = []
 
-        # Add filter before ORDER BY
-        if company:
-            print(company,"this is company")
-            query += ' AND p.company = %s'
-            params.append(company)
-
-        query += " ORDER BY ad.assigned_on ASC"  # Move ORDER BY to end
-        print(query)
+        # Apply filter if det_id is provided
+        if det_id:
+            query += " AND a.det_id = %s"
+            params.append(det_id)
 
         cursor.execute(query, params)
-        result = cursor.fetchall()
+        data = cursor.fetchall()
 
-        return jsonify({"status": "success", "data": result})
+        return jsonify({"status": "success", "data": data})
 
     except Exception as e:
-        print("Error:", e)
-        return jsonify({"status": "error", "message": "Database error"})
+        print("Error fetching detachment details:", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
 
     finally:
-        if conn.is_connected():
-    
-            conn.close()
+        cursor.close()
+        conn.close()
 @dashboard_bp.route('/delete_personnel', methods=['POST'])
 def delete_personnel():
     data = request.get_json()
@@ -99,4 +112,167 @@ def delete_personnel():
         return jsonify({"status": "error", "message": "Database error"}), 500
 
 
+
+
+
+
+
+
+@dashboard_bp.route("/attachment-details", methods=["GET"])
+def attachment_details():
+    user = require_login()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    # role = user.get("role")
+    company = user.get("company")
+    print(company)
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        if company == "Admin":
+            cursor.execute("""
+                SELECT
+                    t.id,
+                    t.company,
+                    t.army_number,
+                    p.rank,
+                    p.name,
+                    t.lcoation,
+                    t.authority,
+                    t.td_date
+                FROM td_table t
+                LEFT JOIN personnel p
+                    ON p.army_number = t.army_number
+                ORDER BY t.td_date DESC
+            """)
+        else:
+            cursor.execute("""
+                SELECT
+                    t.id,
+                    t.company,
+                    t.army_number,
+                    p.rank,
+                    p.name,
+                    t.lcoation,
+                    t.authority,
+                    t.td_date
+                FROM td_table t
+                LEFT JOIN personnel p
+                    ON p.army_number = t.army_number
+                WHERE t.company = %s
+                ORDER BY t.td_date DESC
+            """, (company,))
+
+        rows = cursor.fetchall()
+
+        # ✅ FORCE JSON SAFE DATE
+        for r in rows:
+            td = r.get("td_date")
+            r["td_date"] = td.strftime("%d-%m-%Y %H:%M") if td else ""
+
+        return jsonify(rows), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+
+
+
+
+@dashboard_bp.route("/assigned_attachment_alarm", methods=["GET"])
+def assigned_attachment_alarm():
+    user = require_login()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    print('IN THIS ROUTE')
+
+    # company = user["company"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                id,
+                army_number,
+                remarks,
+                td_date,
+                last_interview_sm,
+                last_interview_sm_status,
+                last_interview_OC_status,
+                last_interview_oc,
+                lcoation AS location,
+                authority
+            FROM td_table WHERE td_date <= NOW() - INTERVAL 5 SECOND
+        """)
+
+        rows = cursor.fetchall()
+        print('rows',rows)
+
+        return jsonify({
+            "count": len(rows),
+            "rows": rows
+        })
+
+    except Exception as e:
+        print("Attachment alarm error:", e)
+        return jsonify({"error": "Server error"}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+@dashboard_bp.route("/delete-attachment/<army_number>", methods=["DELETE"])
+def delete_attachment(army_number):
+    user = require_login()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    company = user["company"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Soft delete in personnel
+        cursor.execute("""
+            UPDATE personnel
+            SET td_status = 0
+            WHERE army_number = %s 
+        """, (army_number, ))
+
+        if cursor.rowcount == 0:
+            conn.rollback()
+            return jsonify({"error": "Personnel record not found"}), 404
+
+        # Delete from td_table
+        cursor.execute("""
+            DELETE FROM td_table
+            WHERE army_number = %s
+        """, (army_number,))
+
+        # Commit only if both queries succeed
+        conn.commit()
+        return jsonify({"message": "Attachment marked inactive and TD record deleted successfully"})
+
+    except Exception as e:
+        conn.rollback()  # Rollback both queries if any fails
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
