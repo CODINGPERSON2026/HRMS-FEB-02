@@ -385,7 +385,7 @@
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#countModal">
         View Count
       </button>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">Parade State</button>
+      <!-- <button class="btn btn-primary"  >Parade State</button> -->
     </div>
     {% endif %}
 
@@ -399,7 +399,7 @@
     <div id="stats-card-grid" class="stats-grid show">
 
       <!-- First Row Cards -->
-      <div class="card p-3 text-center" style="cursor:pointer" id="overAllParadeState">
+      <div class="card p-3 text-center" style="cursor:pointer" data-bs-target="#paradeStateModal" data-bs-toggle="modal">
         <small class="text-muted">Man Power</small>
         <h3 id="mainPower"></h3>
       </div>
