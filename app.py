@@ -2508,7 +2508,7 @@ def export_parade_csv(date_str, company):
                 ('orEre', 'OR (ERE)'),
                 ('firstTotal', 'TOTAL (I)'),
                 ('oaOr', 'OA/OR'),
-                ('attSummary', 'ATT (SUMMARY)'),
+                ('attSummary', 'SUPERNUMARARY'),
                 ('attOffr', 'ATT (OFFR)'),
                 ('attJco', 'ATT (JCO)'),
                 ('attOr', 'ATT (OR)'),
@@ -2567,7 +2567,7 @@ def export_parade_csv(date_str, company):
                 ('orEre', 'OR (ERE)'),
                 ('firstTotal', 'TOTAL (I)'),
                 ('oaOr', 'OA/OR'),
-                ('attSummary', 'ATT (SUMMARY)'),
+                ('SUPERNUMARARY', 'SUPERNUMARARY'),
                 ('attOffr', 'ATT (OFFR)'),
                 ('attJco', 'ATT (JCO)'),
                 ('attOr', 'ATT (OR)'),
@@ -2587,7 +2587,7 @@ def export_parade_csv(date_str, company):
                     row_data.append(row.get(f"{cat_key}_{col}", 0))
                 writer.writerow(row_data)
             
-            filename = f"parade_state_{company.replace(' ', '_')}_{date_str}.csv"
+            filename = f"parade_state_{company.replace(' ', '_')}_{date_str}_v2.csv"
         
         # Prepare response
         output.seek(0)
