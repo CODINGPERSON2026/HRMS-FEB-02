@@ -7,6 +7,7 @@ from flask_cors import CORS
 import csv
 from io import StringIO, BytesIO
 from flask import send_file
+from functools import wraps
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -1858,7 +1859,7 @@ def get_co_aggregated_parade_table(date_str):
 
 @app.route('/api/parade-data/get/<date_str>/<company>', methods=['GET'])
 def get_parade_data_by_company(date_str, company):
-    """Get parade data for specific date and company - O SEC NCO ONLY"""
+    """Get parade data for specific date and company - O SEC NCO & ONCO only"""
     print(f"\n=== GET PARADE DATA BY COMPANY ===")
     print(f"Date: {date_str}, Company: {company}")
     
@@ -1873,14 +1874,31 @@ def get_parade_data_by_company(date_str, company):
             'error': 'Not authenticated. Please login again.'
         }), 401
     
-    print(f"DEBUG: User authenticated - Username: {user.get('username')}, Role: {user.get('role')}, Company: {user.get('company')}")
+    user_role = user.get('role', '').strip()
+    user_company = user.get('company', '').strip()
     
-    # Check authorization - STRICT: Only O SEC NCO
-    if not check_role(user, 'O SEC NCO'):
-        print(f"DEBUG: Access denied - User role is '{user.get('role')}', not 'O SEC NCO'")
+    print(f"DEBUG: User: {user.get('username')}, Role: '{user_role}', Company: '{user_company}'")
+    
+    # Check authorization based on role
+    if user_role == 'O SEC NCO':
+        # O SEC NCO can access all companies
+        print("DEBUG: O SEC NCO access granted")
+        pass
+    elif user_role == 'ONCO':
+        # ONCO can only access their own company
+        if company != user_company:
+            print(f"DEBUG: ONCO access denied - trying to access {company} but belongs to {user_company}")
+            return jsonify({
+                'success': False, 
+                'error': f'Access denied - ONCO can only access data for {user_company}'
+            }), 403
+        print("DEBUG: ONCO access granted for own company")
+    else:
+        # Other roles cannot access
+        print(f"DEBUG: Access denied for role: {user_role}")
         return jsonify({
             'success': False, 
-            'error': f'Access denied - O SEC NCO only. Your role: {user.get("role")}'
+            'error': f'Access denied - Only O SEC NCO and ONCO can access parade data'
         }), 403
     
     conn = None
@@ -1959,7 +1977,9 @@ def get_parade_data_by_company(date_str, company):
         print(f"DEBUG: Returning data for {company} on {date_str}")
         return jsonify({
             'success': True,
-            'data': result
+            'data': result,
+            'user_role': user_role,
+            'user_company': user_company
         }), 200
         
     except Exception as e:
@@ -1976,6 +1996,27 @@ def get_parade_data_by_company(date_str, company):
             cursor.close()
         if conn:
             conn.close()
+            
+            
+def require_role(*allowed_roles):
+    """Decorator to check if user has required role"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            user = get_current_user()
+            if not user:
+                return jsonify({'success': False, 'error': 'Authentication required'}), 401
+            
+            user_role = user.get('role', '').strip()
+            if user_role not in allowed_roles:
+                return jsonify({
+                    'success': False, 
+                    'error': f'Access denied. Required roles: {", ".join(allowed_roles)}'
+                }), 403
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 
 # ===============================================
@@ -1983,24 +2024,11 @@ def get_parade_data_by_company(date_str, company):
 # ===============================================
 
 @app.route('/api/parade-data/view-all/<date_str>', methods=['GET'])
+@require_role('O SEC NCO')  # Only O SEC NCO can view all companies
 def get_all_companies_parade_data(date_str):
     """Get aggregated parade data for all companies - O SEC NCO ONLY"""
     print(f"\n=== GET ALL COMPANIES PARADE DATA ===")
     print(f"Date: {date_str}")
-    
-    user = get_current_user()
-    
-    if not user:
-        return jsonify({
-            'success': False, 
-            'error': 'Not authenticated. Please login again.'
-        }), 401
-    
-    if not check_role(user, 'O SEC NCO'):
-        return jsonify({
-            'success': False, 
-            'error': 'Access denied - O SEC NCO only'
-        }), 403
     
     conn = None
     cursor = None
@@ -2095,7 +2123,34 @@ def get_all_companies_parade_data(date_str):
             cursor.close()
         if conn:
             conn.close()
-
+            
+@app.route('/api/parade-data/user-info', methods=['GET'])
+def get_parade_user_info():
+    """Get parade-specific user information"""
+    user = get_current_user()
+    
+    if not user:
+        return jsonify({
+            'success': False, 
+            'error': 'Not authenticated'
+        }), 401
+    
+    user_role = user.get('role', '').strip()
+    user_company = user.get('company', '').strip()
+    
+    # Only allow O SEC NCO and ONCO
+    if user_role not in ['O SEC NCO', 'ONCO']:
+        return jsonify({
+            'success': False,
+            'error': 'Access denied'
+        }), 403
+    
+    return jsonify({
+        'success': True,
+        'role': user_role,
+        'company': user_company,
+        'username': user.get('username')
+    })
 
 # ===============================================
 # DEBUG ENDPOINT - ADD THIS
@@ -2120,27 +2175,21 @@ def debug_user_info():
 
 @app.route('/api/parade-data/save', methods=['POST'])
 def save_parade_data():
-    """Save parade data for a specific company and date - O SEC NCO ONLY with calculations"""
+    """Save parade data - O SEC NCO can save for any company, ONCO only for own"""
     
-    # Get current user
     user = get_current_user()
     
-    # Check authentication
     if not user:
         return jsonify({
             'success': False, 
             'error': 'Not authenticated. Please login again.'
         }), 401
     
-    # Check authorization - STRICT: Only O SEC NCO
-    if not check_role(user, 'O SEC NCO'):
-        return jsonify({
-            'success': False, 
-            'error': 'Access denied - Only O SEC NCO can save data'
-        }), 403
+    user_role = user.get('role', '').strip()
+    user_company = user.get('company', '').strip()
     
-    print(f"\n=== SAVE PARADE DATA (O SEC NCO) ===")
-    print(f"User: {user.get('username')}, Role: {user.get('role')}")
+    print(f"\n=== SAVE PARADE DATA ===")
+    print(f"User: {user.get('username')}, Role: '{user_role}', Company: '{user_company}'")
     
     try:
         data = request.get_json()
@@ -2152,7 +2201,7 @@ def save_parade_data():
             }), 400
         
         report_date_str = data.get('date')
-        selected_company = data.get('company')  # From dropdown selection
+        selected_company = data.get('company')  # From dropdown (for O SEC NCO) or user's company (for ONCO)
         parade_data = data.get('data')
         
         if not report_date_str or not selected_company or not parade_data:
@@ -2161,26 +2210,58 @@ def save_parade_data():
                 'error': 'Missing required fields: date, company, or data'
             }), 400
         
-        # Validate that date is today (for O SEC NCO)
+        # Validate user role
+        if user_role not in ['O SEC NCO', 'ONCO']:
+            return jsonify({
+                'success': False, 
+                'error': 'Access denied - Only O SEC NCO and ONCO can save parade data'
+            }), 403
+        
+        # Determine which company to save to
+        if user_role == 'O SEC NCO':
+            # O SEC NCO saves to the company they selected from dropdown
+            final_company = selected_company
+            print(f"DEBUG: O SEC NCO saving to selected company: {final_company}")
+            
+            # Validate that O SEC NCO doesn't try to save for "All"
+            if final_company == 'All':
+                return jsonify({
+                    'success': False,
+                    'error': 'Cannot save data for "All Companies". Please select a specific company.'
+                }), 400
+                
+        elif user_role == 'ONCO':
+            # ONCO ALWAYS saves to their own company, regardless of what frontend sends
+            final_company = user_company  # Use logged-in user's company
+            print(f"DEBUG: ONCO detected. Overriding frontend company '{selected_company}' with user's company: '{final_company}'")
+            
+            # Optional: Warn if frontend is sending wrong company (for debugging)
+            if selected_company != user_company:
+                print(f"WARNING: ONCO frontend sent company '{selected_company}' but saving to '{final_company}'")
+        
+        # Validate date restriction for ONCO
+        if user_role == 'ONCO':
+            requested_date = datetime.strptime(report_date_str, '%Y-%m-%d').date()
+            today_date = date.today()
+            
+            if requested_date != today_date:
+                return jsonify({
+                    'success': False,
+                    'error': 'ONCO can only save data for today'
+                }), 400
+        
+        # Validate date is not in future for any user
         requested_date = datetime.strptime(report_date_str, '%Y-%m-%d').date()
         today_date = date.today()
-        
         if requested_date > today_date:
             return jsonify({
                 'success': False,
-                'error': 'Cannot save data for future dates',
-                'is_future': True
+                'error': 'Cannot save data for future dates'
             }), 400
         
-        # Additional validation: Cannot save for "All" companies in edit mode
-        if selected_company == 'All':
-            return jsonify({
-                'success': False,
-                'error': 'Cannot save data for "All Companies". Please select a specific company.'
-            }), 400
+        print(f"DEBUG: Saving data for date: {report_date_str}, company: {final_company}, user role: {user_role}")
         
-        print(f"Received data for date: {report_date_str}, company: {selected_company}")
-        
+        # Continue with save logic...
         conn = get_db_connection()
         if not conn:
             return jsonify({'success': False, 'error': 'Database connection failed'}), 500
@@ -2194,18 +2275,9 @@ def save_parade_data():
                 'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'  # Second section
             ]
             
-            # All categories including totals
-            all_categories = [
-                'offr', 'jco', 'jcoEre', 'or', 'orEre',
-                'firstTotal',
-                'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr',
-                'secondTotal',
-                'grandTotal'
-            ]
-            
-            # Build SQL columns and values - Use SELECTED company from dropdown
+            # Build SQL columns and values - Use final_company (determined above)
             columns = ['report_date', 'company']
-            values = [report_date_str, selected_company]
+            values = [report_date_str, final_company]
             
             # Helper function to get column name from index
             def get_column_name_for_db(index):
@@ -2219,7 +2291,6 @@ def save_parade_data():
             # Process each input category with calculations
             for category in input_categories:
                 category_data = parade_data.get(category, [0]*17)
-                print(f"Processing {category}: raw data = {category_data}")
                 
                 # Ensure we have at least 13 values (minimum needed for calculations)
                 if len(category_data) < 13:
@@ -2238,18 +2309,16 @@ def save_parade_data():
                 att = category_data[10] if len(category_data) > 10 else 0
                 awl_osl_jc = category_data[11] if len(category_data) > 11 else 0
                 
-                # CORRECTED: Calculate T/OUT = LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC
+                # Calculate T/OUT = LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC
                 trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
-                # Ensure non-negative
-                trout = max(0, trout)
+                trout = max(0, trout)  # Ensure non-negative
                 
                 # PRESENT/STR DET = DET column value
                 present_det = det_value
                 
                 # PRESENT/STR UNIT = POSTED/STR - T/OUT
                 present_unit = posted_str - trout
-                # Ensure non-negative
-                present_unit = max(0, present_unit)
+                present_unit = max(0, present_unit)  # Ensure non-negative
                 
                 # Create final array with calculated values
                 final_data = [
@@ -2272,8 +2341,6 @@ def save_parade_data():
                     category_data[16] if len(category_data) > 16 else 0   # DUES OUT
                 ]
                 
-                print(f"{category} - Posted/STR: {posted_str}, T/OUT: {trout}, Present Det: {present_det}, Present Unit: {present_unit}")
-                
                 # Add each of the 17 columns for this category
                 for i in range(17):
                     column_name = f"{category}_{get_column_name_for_db(i)}"
@@ -2284,7 +2351,6 @@ def save_parade_data():
             first_total_values = [0] * 17
             for cat in ['offr', 'jco', 'jcoEre', 'or', 'orEre']:
                 cat_data = parade_data.get(cat, [0]*17)
-                # Apply same calculations for totals
                 if len(cat_data) >= 13:
                     posted_str = cat_data[2] if len(cat_data) > 2 else 0
                     lve = cat_data[3] if len(cat_data) > 3 else 0
@@ -2296,7 +2362,6 @@ def save_parade_data():
                     att = cat_data[10] if len(cat_data) > 10 else 0
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
-                    # CORRECTED: T/OUT = sum of deductions
                     trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
                     trout = max(0, trout)                                               
                     
@@ -2335,7 +2400,6 @@ def save_parade_data():
                     att = cat_data[10] if len(cat_data) > 10 else 0
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
-                    # CORRECTED: T/OUT = sum of deductions
                     trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
                     trout = max(0, trout)
                     
@@ -2370,9 +2434,6 @@ def save_parade_data():
                 columns.append(column_name)
                 values.append(grand_total_values[i])
             
-            print(f"Total columns: {len(columns)}")
-            print(f"Grand Total Auth: {grand_total_values[0]}, Present Unit: {grand_total_values[14]}")
-            
             # Build SQL query
             placeholders = ['%s'] * len(values)
             
@@ -2384,33 +2445,18 @@ def save_parade_data():
                 updated_at = NOW()
             """
             
-            print(f"Executing SQL...")
+            print(f"Executing SQL for company: {final_company}")
             cursor.execute(sql, values)
             conn.commit()
             
             return jsonify({
                 'success': True,
-                'message': f'Parade data saved successfully for {selected_company} on {report_date_str}',
-                'calculations': {
-                    't_out_calculation': 'LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC',
-                    'present_det': 'Same as DET column',
-                    'present_unit': 'POSTED/STR - T/OUT'
-                },
+                'message': f'Parade data saved successfully for {final_company} on {report_date_str}',
                 'details': {
-                    'company': selected_company,
+                    'company': final_company,
                     'date': report_date_str,
-                    'first_total': {
-                        'auth': first_total_values[0],
-                        'posted_str': first_total_values[2],
-                        't_out': first_total_values[12],
-                        'present_unit': first_total_values[14]
-                    },
-                    'second_total': {
-                        'auth': second_total_values[0],
-                        'posted_str': second_total_values[2],
-                        't_out': second_total_values[12],
-                        'present_unit': second_total_values[14]
-                    },
+                    'entered_by': user.get('username'),
+                    'user_role': user_role,
                     'grand_total': {
                         'auth': grand_total_values[0],
                         'posted_str': grand_total_values[2],
@@ -2446,7 +2492,7 @@ def save_parade_data():
 
 @app.route('/api/parade-data/export-csv/<date_str>/<company>', methods=['GET'])
 def export_parade_csv(date_str, company):
-    """Export parade data to CSV - O SEC NCO ONLY"""
+    """Export parade data to CSV"""
     
     # Get current user
     user = get_current_user()
@@ -2458,11 +2504,25 @@ def export_parade_csv(date_str, company):
             'error': 'Not authenticated. Please login again.'
         }), 401
     
-    # Check authorization
-    if not check_role(user, 'O SEC NCO'):
+    user_role = user.get('role', '').strip()
+    user_company = user.get('company', '').strip()
+    
+    # Check authorization based on role
+    if user_role == 'O SEC NCO':
+        # O SEC NCO can export any company
+        pass
+    elif user_role == 'ONCO':
+        # ONCO can only export their own company
+        if company != user_company:
+            return jsonify({
+                'success': False, 
+                'error': f'Access denied - ONCO can only export data for {user_company}'
+            }), 403
+    else:
+        # Other roles cannot export
         return jsonify({
             'success': False, 
-            'error': 'Access denied - O SEC NCO only'
+            'error': 'Access denied - Only O SEC NCO and ONCO can export parade data'
         }), 403
     
     conn = None
@@ -2473,6 +2533,13 @@ def export_parade_csv(date_str, company):
         cursor = conn.cursor(dictionary=True)
         
         if company == 'All':
+            # Only O SEC NCO can export all companies
+            if user_role != 'O SEC NCO':
+                return jsonify({
+                    'success': False, 
+                    'error': 'Only O SEC NCO can export data for all companies'
+                }), 403
+                
             # Get all companies data
             cursor.execute("""
                 SELECT * FROM parade_state_daily
@@ -2496,6 +2563,7 @@ def export_parade_csv(date_str, company):
                       'PRES/DET', 'PRES/UNIT', 'DUES IN', 'DUES OUT']
             writer.writerow(['AGGREGATED PARADE STATE - ALL COMPANIES'])
             writer.writerow([f'Date: {date_str}'])
+            writer.writerow([f'Exported by: {user.get("username")} ({user_role})'])
             writer.writerow([])
             writer.writerow(headers)
             
@@ -2556,6 +2624,7 @@ def export_parade_csv(date_str, company):
                       'PRES/DET', 'PRES/UNIT', 'DUES IN', 'DUES OUT']
             writer.writerow([f'PARADE STATE - {company}'])
             writer.writerow([f'Date: {date_str}'])
+            writer.writerow([f'Exported by: {user.get("username")} ({user_role})'])
             writer.writerow([])
             writer.writerow(headers)
             
@@ -2567,7 +2636,7 @@ def export_parade_csv(date_str, company):
                 ('orEre', 'OR (ERE)'),
                 ('firstTotal', 'TOTAL (I)'),
                 ('oaOr', 'OA/OR'),
-                ('SUPERNUMARARY', 'SUPERNUMARARY'),
+                ('attSummary', 'SUPERNUMARARY'),
                 ('attOffr', 'ATT (OFFR)'),
                 ('attJco', 'ATT (JCO)'),
                 ('attOr', 'ATT (OR)'),
@@ -2587,7 +2656,7 @@ def export_parade_csv(date_str, company):
                     row_data.append(row.get(f"{cat_key}_{col}", 0))
                 writer.writerow(row_data)
             
-            filename = f"parade_state_{company.replace(' ', '_')}_{date_str}_v2.csv"
+            filename = f"parade_state_{company.replace(' ', '_')}_{date_str}.csv"
         
         # Prepare response
         output.seek(0)

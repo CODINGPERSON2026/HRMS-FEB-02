@@ -59,6 +59,26 @@
     font-size: 0.9rem;
     padding: 6px 12px;
   }
+
+  .role-badge {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .company-display {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-weight: 500;
+  }
+
+  .date-restricted {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+  }
 </style>
 
 <div class="modal fade" id="paradeDataModal" tabindex="-1">
@@ -87,8 +107,8 @@
                 <input type="date" class="form-control" id="paradeDate" />
               </div>
 
-              <!-- Company Selection -->
-              <div class="col-md-3">
+              <!-- Company Selection for O SEC NCO -->
+              <div class="col-md-3" id="companySelectionContainer">
                 <label class="form-label fw-bold mb-1">
                   <i class="fas fa-building text-success me-1"></i> Select Company
                 </label>
@@ -100,6 +120,16 @@
                   <option value="4 company">4 Company</option>
                   <option value="All">All Companies</option>
                 </select>
+              </div>
+
+              <!-- Company Display for ONCO -->
+              <div class="col-md-3 d-none" id="companyDisplayContainer">
+                <label class="form-label fw-bold mb-1">
+                  <i class="fas fa-building text-success me-1"></i> Your Company
+                </label>
+                <div class="company-display" id="userCompanyDisplay">
+                  Loading...
+                </div>
               </div>
 
               <!-- Action Buttons -->
@@ -123,6 +153,7 @@
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <span class="badge mode-badge bg-primary me-2" id="modeDisplay">-</span>
+              <span class="badge role-badge bg-secondary" id="roleDisplay">-</span>
               <strong>Company:</strong> <span id="companyDisplay">-</span> | 
               <strong>Date:</strong> <span id="dateDisplay">-</span>
             </div>
@@ -179,7 +210,6 @@
             </button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -207,9 +237,6 @@ window.addEventListener('DOMContentLoaded', function() {
             console.log('Parade Data Manager initialized');
         }
     });
-
-    // Dashboard loading function
-    loadDashboardIfNeeded();
 });
 
 function initializeParadeDataManager() {
@@ -219,6 +246,8 @@ function initializeParadeDataManager() {
         currentMode: null,
         currentDate: null,
         currentCompany: null,
+        userRole: null,
+        userCompany: null,
         paradeData: {},
 
         categories: [
@@ -237,19 +266,87 @@ function initializeParadeDataManager() {
             { key: 'grandTotal', label: 'GRAND TOTAL', editable: false }
         ],
 
-        init() {
-            console.log('Setting up event listeners');
+        async init() {
+            console.log('Setting up parade data manager');
+            
+            // Get user info first
+            await this.getUserInfo();
+            
+            // Setup UI based on role
+            this.setupUIForRole();
+            
+            // Setup event listeners
+            this.setupEventListeners();
+            
+            console.log(`Parade Data Manager initialized for ${this.userRole} - ${this.userCompany}`);
+        },
+
+        async getUserInfo() {
+            try {
+                const response = await fetch('/api/parade-data/user-info');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.success) {
+                    this.userRole = data.role;
+                    this.userCompany = data.company;
+                    console.log(`User Role: ${this.userRole}, Company: ${this.userCompany}`);
+                } else {
+                    console.error('Failed to get user info:', data.error);
+                    this.showAlert('Failed to get user information', 'error');
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+                this.showAlert('Error loading user information', 'error');
+            }
+        },
+
+        setupUIForRole() {
+            const dateInput = document.getElementById('paradeDate');
+            const companySelection = document.getElementById('companySelectionContainer');
+            const companyDisplay = document.getElementById('companyDisplayContainer');
+            const userCompanyDisplay = document.getElementById('userCompanyDisplay');
+            const modalTitle = document.querySelector('#paradeDataModal .modal-title');
             
             // Set today's date
             const today = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('paradeDate');
             if (dateInput) {
                 dateInput.value = today;
-                dateInput.max = today;
+                
+                if (this.userRole === 'ONCO') {
+                    // ONCO can only select today's date
+                    dateInput.min = today;
+                    dateInput.max = today;
+                    dateInput.classList.add('date-restricted');
+                    dateInput.title = 'ONCO can only enter data for today';
+                } else {
+                    dateInput.max = today;
+                }
             }
-
-            // Setup event listeners
-            this.setupEventListeners();
+            
+            // Setup UI based on role
+            if (this.userRole === 'O SEC NCO') {
+                // Show dropdown for company selection
+                if (companySelection) companySelection.classList.remove('d-none');
+                if (companyDisplay) companyDisplay.classList.add('d-none');
+                if (modalTitle) modalTitle.textContent = 'Parade State Data Management (O SEC NCO)';
+            } else if (this.userRole === 'ONCO') {
+                // Show company display (read-only)
+                if (companySelection) companySelection.classList.add('d-none');
+                if (companyDisplay) companyDisplay.classList.remove('d-none');
+                if (userCompanyDisplay) userCompanyDisplay.textContent = this.userCompany;
+                if (modalTitle) modalTitle.textContent = `Parade State Data Entry - ${this.userCompany}`;
+                
+                // Set current company to user's company
+                this.currentCompany = this.userCompany;
+            } else {
+                // Hide the modal if user doesn't have access
+                this.showAlert('You do not have permission to access parade data', 'error');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('paradeDataModal'));
+                if (modal) modal.hide();
+            }
         },
 
         setupEventListeners() {
@@ -263,14 +360,10 @@ function initializeParadeDataManager() {
 
             if (btnEnterData) {
                 btnEnterData.addEventListener('click', () => this.handleEnterData());
-                console.log('Enter Data button listener added');
-            } else {
-                console.error('btnEnterData element not found');
             }
 
             if (btnViewData) {
                 btnViewData.addEventListener('click', () => this.handleViewData());
-                console.log('View Data button listener added');
             }
 
             if (btnExportCSV) {
@@ -298,40 +391,45 @@ function initializeParadeDataManager() {
         async handleEnterData() {
             console.log('Enter Data clicked');
             
-            const date = document.getElementById('paradeDate')?.value;
-            const company = document.getElementById('paradeCompany')?.value;
-
-            console.log('Checking authentication...');
-    try {
-        const authCheck = await fetch('/debug/user-info');
-        const authData = await authCheck.json();
-        console.log('Current user:', authData);
-    } catch (err) {
-        console.error('Auth check failed:', err);
-    }
-
-    if (!date || !company) {
-        this.showAlert('Please select both date and company', 'warning');
-        return;
-    }
-
-            if (!date || !company) {
-                this.showAlert('Please select both date and company', 'warning');
+            const dateInput = document.getElementById('paradeDate');
+            const date = dateInput?.value;
+            
+            if (!date) {
+                this.showAlert('Please select date', 'warning');
                 return;
             }
-
-            if (company === 'All') {
-                this.showAlert('Please select a specific company for data entry', 'warning');
-                return;
+            
+            // Determine company based on role
+            let company = this.currentCompany;
+            
+            if (this.userRole === 'O SEC NCO') {
+                const companySelect = document.getElementById('paradeCompany');
+                company = companySelect?.value;
+                
+                if (!company) {
+                    this.showAlert('Please select a company', 'warning');
+                    return;
+                }
+                
+                if (company === 'All') {
+                    this.showAlert('Please select a specific company for data entry', 'warning');
+                    return;
+                }
             }
-
-            // Check if date is today
+            
+            // Validate date restriction for ONCO
             const today = new Date().toISOString().split('T')[0];
-            if (date !== today) {
-                this.showAlert('You can only enter/edit data for today', 'error');
+            if (this.userRole === 'ONCO' && date !== today) {
+                this.showAlert('ONCO can only enter/edit data for today', 'error');
                 return;
             }
-
+            
+            // Validate date is not in future
+            if (date > today) {
+                this.showAlert('Cannot enter data for future dates', 'error');
+                return;
+            }
+            
             this.currentMode = 'edit';
             this.currentDate = date;
             this.currentCompany = company;
@@ -341,14 +439,27 @@ function initializeParadeDataManager() {
         async handleViewData() {
             console.log('View Data clicked');
             
-            const date = document.getElementById('paradeDate')?.value;
-            const company = document.getElementById('paradeCompany')?.value;
-
-            if (!date || !company) {
-                this.showAlert('Please select both date and company', 'warning');
+            const dateInput = document.getElementById('paradeDate');
+            const date = dateInput?.value;
+            
+            if (!date) {
+                this.showAlert('Please select date', 'warning');
                 return;
             }
-
+            
+            // Determine company based on role
+            let company = this.currentCompany;
+            
+            if (this.userRole === 'O SEC NCO') {
+                const companySelect = document.getElementById('paradeCompany');
+                company = companySelect?.value;
+                
+                if (!company) {
+                    this.showAlert('Please select a company', 'warning');
+                    return;
+                }
+            }
+            
             this.currentMode = 'view';
             this.currentDate = date;
             this.currentCompany = company;
@@ -356,7 +467,7 @@ function initializeParadeDataManager() {
         },
 
         async loadData() {
-            console.log(`Loading data for ${this.currentCompany} on ${this.currentDate}`);
+            console.log(`Loading data for ${this.currentCompany} on ${this.currentDate}, Role: ${this.userRole}`);
             
             this.showLoading(true);
             const paradeTableContainer = document.getElementById('paradeTableContainer');
@@ -365,26 +476,28 @@ function initializeParadeDataManager() {
             }
 
             try {
-                const url = this.currentCompany === 'All'
-                    ? `/api/parade-data/view-all/${this.currentDate}`
-                    : `/api/parade-data/get/${this.currentDate}/${encodeURIComponent(this.currentCompany)}`;
-
+                let url;
+                
+                // Build URL based on role and company selection
+                if (this.userRole === 'O SEC NCO' && this.currentCompany === 'All') {
+                    url = `/api/parade-data/view-all/${this.currentDate}`;
+                } else {
+                    url = `/api/parade-data/get/${this.currentDate}/${encodeURIComponent(this.currentCompany)}`;
+                }
+                
                 console.log(`Fetching from URL: ${url}`);
                 
                 const response = await fetch(url);
                 
                 if (!response.ok) {
+                    if (response.status === 403) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Access denied');
+                    }
                     if (response.status === 404) {
-                        throw new Error('API endpoint not found. Please check if you are logged in as O SEC NCO.');
+                        throw new Error('Data not found for this date and company');
                     }
                     throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    const text = await response.text();
-                    console.error('Non-JSON response:', text.substring(0, 200));
-                    throw new Error('Server returned non-JSON response. Please check if you are logged in.');
                 }
                 
                 const result = await response.json();
@@ -405,6 +518,8 @@ function initializeParadeDataManager() {
                         this.renderTable();
                         this.updateStatusBar();
                     }
+                    
+                    // Enable export button
                     const exportBtn = document.getElementById('btnExportCSV');
                     if (exportBtn) {
                         exportBtn.disabled = result.is_empty || false;
@@ -581,40 +696,70 @@ function initializeParadeDataManager() {
         },
 
         async saveData() {
-            if (this.currentMode !== 'edit') {
-                this.showAlert('Cannot save in view mode', 'warning');
-                return;
+    if (this.currentMode !== 'edit') {
+        this.showAlert('Cannot save in view mode', 'warning');
+        return;
+    }
+
+    if (!this.paradeData || Object.keys(this.paradeData).length === 0) {
+        this.showAlert('No data to save', 'warning');
+        return;
+    }
+
+    // Validate data for ONCO
+    const today = new Date().toISOString().split('T')[0];
+    if (this.userRole === 'ONCO' && this.currentDate !== today) {
+        this.showAlert('ONCO can only save data for today', 'error');
+        return;
+    }
+
+    // Show saving indicator
+    const saveBtn = document.getElementById('btnSave');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    saveBtn.disabled = true;
+
+    try {
+        // Determine which company to send
+        let companyToSave = this.currentCompany;
+        
+        // For ONCO, always send their own company (even though backend will override)
+        if (this.userRole === 'ONCO') {
+            companyToSave = this.userCompany;
+        }
+        
+        const response = await fetch('/api/parade-data/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                date: this.currentDate,
+                company: companyToSave,  // Send appropriate company
+                data: this.paradeData
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            this.showAlert('Data saved successfully!', 'success');
+            
+            // Switch to view mode after successful save
+            if (this.userRole === 'ONCO') {
+                this.currentMode = 'view';
+                this.renderTable();
+                this.updateStatusBar();
             }
-
-            if (!this.paradeData || Object.keys(this.paradeData).length === 0) {
-                this.showAlert('No data to save', 'warning');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/parade-data/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        date: this.currentDate,
-                        company: this.currentCompany,
-                        data: this.paradeData
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    this.showAlert('Data saved successfully!', 'success');
-                } else {
-                    this.showAlert(result.error || 'Failed to save data', 'error');
-                }
-            } catch (error) {
-                console.error('Save error:', error);
-                this.showAlert('Error saving data: ' + error.message, 'error');
-            }
-        },
-
+        } else {
+            this.showAlert(result.error || 'Failed to save data', 'error');
+        }
+    } catch (error) {
+        console.error('Save error:', error);
+        this.showAlert('Error saving data: ' + error.message, 'error');
+    } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+    }
+},
         async exportCSV() {
             if (!this.currentDate || !this.currentCompany) {
                 this.showAlert('Please load data first', 'warning');
@@ -622,7 +767,15 @@ function initializeParadeDataManager() {
             }
 
             try {
-                const url = `/api/parade-data/export-csv/${this.currentDate}/${encodeURIComponent(this.currentCompany)}`;
+                let url;
+                
+                // For ONCO, always export their own company
+                if (this.userRole === 'ONCO') {
+                    url = `/api/parade-data/export-csv/${this.currentDate}/${encodeURIComponent(this.userCompany)}`;
+                } else {
+                    url = `/api/parade-data/export-csv/${this.currentDate}/${encodeURIComponent(this.currentCompany)}`;
+                }
+                
                 window.open(url, '_blank');
             } catch (error) {
                 console.error('Export error:', error);
@@ -647,6 +800,7 @@ function initializeParadeDataManager() {
         updateStatusBar() {
             const statusBar = document.getElementById('statusBar');
             const modeDisplay = document.getElementById('modeDisplay');
+            const roleDisplay = document.getElementById('roleDisplay');
             const companyDisplay = document.getElementById('companyDisplay');
             const dateDisplay = document.getElementById('dateDisplay');
 
@@ -654,6 +808,10 @@ function initializeParadeDataManager() {
             if (modeDisplay) {
                 modeDisplay.textContent = this.currentMode === 'edit' ? 'EDIT MODE' : 'VIEW MODE';
                 modeDisplay.className = `badge mode-badge ${this.currentMode === 'edit' ? 'bg-success' : 'bg-info'}`;
+            }
+            if (roleDisplay) {
+                roleDisplay.textContent = this.userRole;
+                roleDisplay.className = `badge role-badge ${this.userRole === 'O SEC NCO' ? 'bg-primary' : 'bg-warning'}`;
             }
             if (companyDisplay) companyDisplay.textContent = this.currentCompany;
             if (dateDisplay) dateDisplay.textContent = this.currentDate;
@@ -695,87 +853,5 @@ function initializeParadeDataManager() {
 
     // Initialize the manager
     ParadeDataManager.init();
-}
-
-function loadDashboardIfNeeded() {
-    // Check if dashboard elements exist
-    const hasDashboardElements = document.getElementById('manpowerTotal') || 
-                                 document.getElementById('detachmentTotal') || 
-                                 document.getElementById('interviewPendingCount');
-    
-    if (hasDashboardElements) {
-        console.log('Loading dashboard data...');
-        loadDashboardDataSingleAPI();
-    }
-}
-
-async function loadDashboardDataSingleAPI() {
-    try {
-        console.log("Loading dashboard data...");
-        
-        const response = await fetch('/api/dashboard_summary');
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            console.log("Non-JSON response received:", text.substring(0, 200));
-            throw new Error('Server returned non-JSON response. Please check if you are logged in.');
-        }
-        
-        const data = await response.json();
-        console.log("Dashboard data loaded:", data);
-        
-        if (data.status === 'success') {
-            // Update dashboard elements if they exist
-            updateDashboardElement('manpowerTotal', data.manpower);
-            updateDashboardElement('detachmentTotal', data.detachments);
-            updateDashboardElement('interviewPendingCount', data.interview?.pending_count);
-            updateDashboardElement('projectsTotal', data.projects);
-            updateDashboardElement('boardsTotal', data.boards_count);
-            updateDashboardElement('sensitiveTotal', data.sensitive_count);
-            updateDashboardElement('attachmentTotal', data.attachment_count);
-        } else {
-            console.error('Error from server:', data.message);
-        }
-    } catch (error) {
-        console.error('Error loading dashboard data:', error);
-    }
-}
-
-function updateDashboardElement(elementId, value) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.innerText = value || 0;
-    } else {
-        console.log(`Element ${elementId} not found`);
-    }
-}
-
-function updateDateDisplay() {
-    const dateDisplay = document.getElementById('currentDateDisplay');
-    if (dateDisplay) {
-        const today = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        dateDisplay.textContent = today.toLocaleDateString('en-US', options);
-    }
-}
-// Check user info on page load
-setTimeout(() => {
-    checkUserInfo();
-}, 1000);
-
-async function checkUserInfo() {
-    try {
-        const response = await fetch('/debug/user-info');
-        if (response.ok) {
-            const data = await response.json();
-            console.log('User Info:', data);
-        }
-    } catch (error) {
-        console.log('Cannot access debug endpoint:', error);
-    }
 }
 </script>
