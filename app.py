@@ -12,6 +12,26 @@ CORS(app, supports_credentials=True)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 app.secret_key = os.urandom(24)
 
+
+
+
+# Database configuration
+DB_CONFIG = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'qaz123QAZ!@#',
+    'database': 'hrms',
+    'autocommit': True
+}
+
+def get_db_connection():
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        return connection
+    except Error as e:
+        print(f"Error connecting to MySQL: {e}")
+        return None
+
 app.register_blueprint(personnel_info)
 app.register_blueprint(weight_ms)
 app.register_blueprint(leave_bp)
@@ -20,6 +40,7 @@ app.register_blueprint(task_bp)
 app.register_blueprint(accounts_bp)
 app.register_blueprint(loan_bp)
 app.register_blueprint(roll_call_bp)
+app.register_blueprint(add_user_bp)
 
 
 
@@ -1479,7 +1500,7 @@ def dashboard_summary():
         )
         td_result = cursor.fetchone()
         td_attachments = td_result['count'] if td_result else 0
-        print("####################################################################")
+        
         # count
         # 🔹 Courses Count
         cursor.execute("SELECT COUNT(*) AS count FROM courses")
@@ -1546,7 +1567,57 @@ def dashboard_summary():
 
 
 
-        # ENDS ABOVE
+        
+#================start course details in table format ============
+
+@app.route('/personnel_info/course')
+def course_view():
+    require_login()
+    return render_template('course.html')
+
+
+@app.route('/api/courses', methods=['GET'])
+def get_courses():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    company = user['company']
+
+    try:
+        cursor.execute(
+                '''
+                SELECT 
+                c.sr_no,
+                c.army_number,
+                p.rank,
+                p.name,
+                c.course,
+                DATE_FORMAT(c.from_date, '%d-%m-%Y') AS from_date,
+                DATE_FORMAT(c.to_date, '%d-%m-%Y') AS to_date,
+                c.institute,
+                c.grading
+                FROM courses c
+                LEFT JOIN personnel p 
+                    ON c.army_number = p.army_number
+                ''' + (f" WHERE p.company = %s" if company != "Admin" else "") +
+                '''
+                ORDER BY c.from_date DESC
+                ''',
+                (company,) if company != "Admin" else ()
+            )
+
+        rows = cursor.fetchall()
+        return jsonify({"status": "success", "data": rows}), 200
+        print ('this is my course =========================')
+    except Exception as e:
+        print("Course fetch error:", e)
+        return jsonify({"status": "error"}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+#======================================== end course details in table format show=============================================
         
 @app.route('/api/user-info', methods=['GET'])
 def get_user_info():
