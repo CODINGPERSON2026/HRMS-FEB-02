@@ -37,3 +37,5 @@ from blueprints.account_management import accounts_bp
 from blueprints.weight_ms import compute_authorization
 from blueprints.loan import loan_bp
 from blueprints.roll_call import roll_call_bp
+from blueprints.add_user import add_user_bp
+

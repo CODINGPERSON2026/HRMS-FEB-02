@@ -143,12 +143,7 @@
   <!-- Sidebar -->
   <div class="sidebar p-2">
     <h4 id="dynamicHeading" class="px-3">
-      <span class="heading-loader">
-        
-        <span class="dot">.</span>
-        <span class="dot">.</span>
-        <span class="dot">.</span>
-      </span>
+     
     </h4>
 
     <nav class="nav flex-column">
@@ -168,6 +163,9 @@
     
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <a class="nav-link" href="{{ url_for('mt') }}">MT Management</a>
+      {% endif %}
+      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
+      <a class="nav-link" href="{{ url_for('get_projects') }}">Project Management</a>
       {% endif %}
     
       {% if role == 'CO' %}
@@ -228,24 +226,7 @@
   </script>
 
   <!-- Dynamic Heading Fetch -->
-  <script>
-    document.addEventListener('DOMContentLoaded', async function () {
-      const dynamicHeading = document.getElementById('dynamicHeading');
 
-      try {
-        const response = await fetch('/api/dashboard_heading');
-        const data = await response.json();
-
-        setTimeout(() => {
-          dynamicHeading.textContent = data.heading || 'Unit Management';
-        }, 500);
-
-      } catch (error) {
-        console.error('Heading fetch error:', error);
-        dynamicHeading.textContent = 'Unit Management';
-      }
-    });
-  </script>
 
 </body>
 </html>

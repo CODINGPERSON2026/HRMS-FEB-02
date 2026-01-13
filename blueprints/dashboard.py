@@ -139,7 +139,7 @@ def attachment_details():
                     t.army_number,
                     p.rank,
                     p.name,
-                    t.lcoation,
+                    t.location,
                     t.authority,
                     t.td_date
                 FROM td_table t
@@ -155,7 +155,7 @@ def attachment_details():
                     t.army_number,
                     p.rank,
                     p.name,
-                    t.lcoation,
+                    t.location,
                     t.authority,
                     t.td_date
                 FROM td_table t
@@ -166,7 +166,7 @@ def attachment_details():
             """, (company,))
 
         rows = cursor.fetchall()
-
+        print('this is row for attachemnt details')
         # ✅ FORCE JSON SAFE DATE
         for r in rows:
             td = r.get("td_date")
@@ -207,13 +207,7 @@ def assigned_attachment_alarm():
                 id,
                 army_number,
                 remarks,
-                td_date,
-                last_interview_sm,
-                last_interview_sm_status,
-                last_interview_OC_status,
-                last_interview_oc,
-                lcoation AS location,
-                authority
+                td_date
             FROM td_table WHERE td_date <= NOW() - INTERVAL 5 SECOND
         """)
 

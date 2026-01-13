@@ -1,4 +1,5 @@
 from imports import *
+from middleware import JWT_SECRET, jwt, JWT_ALGO
 import os
 from datetime import date, datetime, timedelta
 from flask import Flask
@@ -6,11 +7,32 @@ from flask_cors import CORS
 import csv
 from io import StringIO, BytesIO
 from flask import send_file
+from functools import wraps
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 app.secret_key = os.urandom(24)
+
+
+
+
+# Database configuration
+DB_CONFIG = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'qaz123QAZ!@#',
+    'database': 'hrms',
+    'autocommit': True
+}
+
+def get_db_connection():
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        return connection
+    except Error as e:
+        print(f"Error connecting to MySQL: {e}")
+        return None
 
 app.register_blueprint(personnel_info)
 app.register_blueprint(weight_ms)
@@ -20,11 +42,21 @@ app.register_blueprint(task_bp)
 app.register_blueprint(accounts_bp)
 app.register_blueprint(loan_bp)
 app.register_blueprint(roll_call_bp)
+app.register_blueprint(add_user_bp)
 
 
 
 
 
+
+
+
+def check_role(user, required_role):
+    """Helper to check role with whitespace handling"""
+    if not user:
+        return False
+    user_role = user.get('role', '').strip()
+    return user_role == required_role.strip()
 
 @app.route("/admin_login", methods=["POST",'GET'])
 def admin_login():
@@ -69,19 +101,28 @@ def admin_login():
 
 @app.route("/logout")
 def logout():
-    resp = redirect(url_for("admin_login"))
+    # Simple logout that clears cookie and redirects to root
+    resp = redirect("/")  # This will trigger the dashboard() function which checks authentication
     resp.set_cookie("token", "", expires=0)
     return resp
-
 
 
 @app.context_processor
 def inject_user():
     user = require_login()
+    if user:
+        return {
+            "current_user": user,
+            "current_user_name": user['username'],
+            "role": user['role']
+        }
+    # Return empty or default values if no user
     return {
-        "current_user": user,
-        "role": user['role'] if user else None
+        "current_user": None,
+        "current_user_name": None,
+        "role": None
     }
+
 
 
 
@@ -94,9 +135,11 @@ def dashboard():
 
     if not user:
         return redirect(url_for('admin_login'))
-    username = user['username'].capitalize()
+    subscript = user['username'].capitalize()
     user_company = user['company']
-    return render_template('dashboard.html', username = username,role = user['role'],user_company=user_company)
+    role = user['role']
+    welcome_msg = f'Welcome {role} , {subscript}'
+    return render_template('dashboard.html', role = role,user_company=user_company)
 
 
 
@@ -1171,11 +1214,10 @@ def get_projects():
         projects = cursor.fetchall()
 
         # 2️⃣ Fetch all heads from project_heads table
-        cursor.execute("SELECT id, head_name, created_at FROM project_heads ORDER BY head_name ASC")
-        heads = cursor.fetchall()  # List of dicts: [{'id':1, 'head_name':'John', 'created_at':...}, ...]
+       
 
         # 3️⃣ Render template with both projects and heads
-        return render_template("projects/projects.html", projects=projects, heads=heads)
+        return render_template("projects/projects.html", projects=projects)
 
     except Exception as e:
         print("Error fetching projects or heads:", str(e))
@@ -1185,7 +1227,59 @@ def get_projects():
         cursor.close()
         conn.close()
 
+@app.route('/api/get_projects')
+def api_get_projects():
+    print("this is in new route of getting projects")
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    company = user['company']
 
+    try:
+        query = """
+            SELECT project_id, head, project_name, current_stage, 
+                   project_cost, project_items, quantity, project_description
+            FROM projects
+        """
+        params = []
+
+        if company != "Admin":
+            query += " WHERE company = %s"
+            params.append(company)
+
+        cursor.execute(query, params)
+        projects = cursor.fetchall()
+
+        return jsonify(projects)  # ← Important: JSON response
+
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify([]), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+@app.route('/get_project_heads')
+def get_project_heads():
+    print("in this route of project heads")
+    try:
+     
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True) 
+        cursor.execute("SELECT id, head_name FROM project_heads ORDER BY head_name")
+        heads = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        print(heads)
+        return jsonify(heads)  # Returns: [{"id": 1, "head_name": "Civil Works"}, ...]
+
+    except Exception as e:
+        print(f"Error fetching heads: {e}")
+        return jsonify([]), 500
 
 
 @app.route("/add_project", methods=["POST"])
@@ -1386,6 +1480,14 @@ def line_unfit_graph():
 
 # single route for all dashboard
 # #################################################################### MAIN API FOR DASHB AORD ##############################
+JCO_RANKS = ('Subedar', 'Naib Subedar', 'Subedar Major')
+
+OFFICER_RANKS = (
+    'Lieutenant', 'Captain', 'Major',
+    'Lieutenant Colonel', 'Colonel',
+    'Brigadier', 'Major General',
+    'Lieutenant General', 'General'
+)
 
 @app.route('/api/dashboard_summary', methods=['GET'])
 def dashboard_summary():
@@ -1406,13 +1508,41 @@ def dashboard_summary():
         detachments = detachment_result['count'] if detachment_result else 0
 
         # 2️⃣ Total Manpower
-        cursor.execute(
-            "SELECT COUNT(*) AS total_count FROM personnel" + 
-            (f" WHERE company = %s" if company != "Admin" else ""),
-            (company,) if company != "Admin" else ()
-        )
+        # 2️⃣ Manpower Count (Rank-wise)
+        yesterday = (datetime.now() - timedelta(days=1)).date()
+        query = """
+SELECT 
+    or_present_unit AS orCount,
+    jco_present_unit AS jcoCount,
+    offr_present_unit AS officerCount,
+    (or_present_unit + jco_present_unit + offr_present_unit) AS total
+FROM parade_state_daily
+WHERE DATE(updated_at) = %s
+"""     
+        params = (yesterday,)
+        # If company-based filtering exists
+        if company != "Admin":
+            query += " AND company = %s"
+            params = (yesterday, company)
+
+        cursor.execute(query, params)
         manpower_result = cursor.fetchone()
-        manpower = manpower_result['total_count'] if manpower_result else 0
+
+        # Safe fallback if no row exists
+        if manpower_result:
+            manpower = {
+                "total": manpower_result["total"] or 0,
+                "jcoCount": manpower_result["jcoCount"] or 0,
+                "officerCount": manpower_result["officerCount"] or 0,
+                "orCount": manpower_result["orCount"] or 0
+            }
+        else:
+            manpower = {
+                "total": 0,
+                "jcoCount": 0,
+                "officerCount": 0,
+                "orCount": 0
+            }
 
         # 3️⃣ Interview Pending
         cursor.execute(
@@ -1480,7 +1610,7 @@ def dashboard_summary():
         )
         td_result = cursor.fetchone()
         td_attachments = td_result['count'] if td_result else 0
-        print("####################################################################")
+        
         # count
         # 🔹 Courses Count
         cursor.execute("SELECT COUNT(*) AS count FROM courses")
@@ -1514,7 +1644,7 @@ def dashboard_summary():
         
         
 
-
+        print("these are roll call points",roll_call_pending_count)
 
         # Return combined JSON
         return jsonify({
@@ -1547,7 +1677,18 @@ def dashboard_summary():
 
 
 
-        # ENDS ABOVE
+        
+#================start course details in table format ============
+
+@app.route('/personnel_info/course')
+def course_view():
+    require_login()
+    return render_template('course.html')
+
+
+
+
+#======================================== end course details in table format show=============================================
         
 @app.route('/api/user-info', methods=['GET'])
 def get_user_info():
@@ -1700,261 +1841,18 @@ def get_parade_state(date_str):
         cursor.close()
         conn.close()
 
-@app.route('/api/parade-state/save', methods=['POST'])
-def save_parade_state():
-    """Save parade state data with calculated columns"""
-    print("\n=== SAVE PARADE STATE ===")
-    
-    # Get current user
+@app.route('/test-auth')
+def test_auth():
     user = get_current_user()
-    if not user:
-        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
-    
-    company = user.get('company')
-    if not company:
-        return jsonify({'success': False, 'error': 'No company assigned'}), 400
-    
-    print(f"User: {user.get('username')}, Company: {company}")
-    
-    try:
-        data = request.get_json()
-        print(f"Received data for date: {data.get('date')}")
-        
-        if not data:
-            return jsonify({'success': False, 'error': 'No data received'}), 400
-            
-        report_date_str = data.get('date')
-        parade_data = data.get('data')
-        
-        if not report_date_str or not parade_data:
-            return jsonify({'success': False, 'error': 'Missing date or data'}), 400
-        
-        # Check if user is trying to save data for future date
-        requested_date = datetime.strptime(report_date_str, '%Y-%m-%d').date()
-        today_date = date.today()
-        
-        if requested_date > today_date:
-            return jsonify({
-                'success': False,
-                'error': 'Cannot save data for future dates',
-                'is_future': True
-            }), 400
-        
-        conn = get_db_connection()
-        if not conn:
-            return jsonify({'success': False, 'error': 'Database connection failed'}), 500
-        
-        cursor = conn.cursor()
-        
-        try:
-            # All input categories from your frontend
-            input_categories = [
-                'offr', 'jco', 'jcoEre', 'or', 'orEre',  # First section
-                'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'  # Second section
-            ]
-            
-            # Build SQL columns and values
-            columns = ['report_date', 'company']
-            values = [report_date_str, company]
-            
-            # Process each input category with calculations
-            for category in input_categories:
-                category_data = parade_data.get(category, [0]*17)
-                print(f"Processing {category}: raw data = {category_data}")
-                
-                # Ensure we have at least 13 values (minimum needed for calculations)
-                if len(category_data) < 13:
-                    # Pad with zeros if needed
-                    category_data = category_data + [0] * (13 - len(category_data))
-                
-                # Extract values for calculations
-                posted_str = category_data[2] if len(category_data) > 2 else 0
-                lve = category_data[3] if len(category_data) > 3 else 0
-                course = category_data[4] if len(category_data) > 4 else 0
-                det_value = category_data[5] if len(category_data) > 5 else 0
-                mh = category_data[6] if len(category_data) > 6 else 0
-                sick_lve = category_data[7] if len(category_data) > 7 else 0
-                ex = category_data[8] if len(category_data) > 8 else 0
-                td = category_data[9] if len(category_data) > 9 else 0
-                att = category_data[10] if len(category_data) > 10 else 0
-                awl_osl_jc = category_data[11] if len(category_data) > 11 else 0
-                
-                # CORRECTED: Calculate T/OUT = LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC
-                trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
-                # Ensure non-negative
-                trout = max(0, trout)
-                
-                # PRESENT/STR DET = DET column value
-                present_det = det_value
-                
-                # PRESENT/STR UNIT = POSTED/STR - T/OUT
-                present_unit = posted_str - trout
-                # Ensure non-negative
-                present_unit = max(0, present_unit)
-                
-                # Create final array with calculated values
-                final_data = [
-                    category_data[0] if len(category_data) > 0 else 0,  # AUTH
-                    category_data[1] if len(category_data) > 1 else 0,  # H/S
-                    posted_str,  # POSTED/STR
-                    lve,         # LVE
-                    course,      # COURSE
-                    det_value,   # DET
-                    mh,          # MH
-                    sick_lve,    # SICK/LVE
-                    ex,          # EX
-                    td,          # TD
-                    att,         # ATT
-                    awl_osl_jc,  # AWL/OSL/JC
-                    trout,       # T/OUT (calculated)
-                    present_det, # PRESENT/STR DET (from DET column)
-                    present_unit, # PRESENT/STR UNIT (calculated)
-                    category_data[15] if len(category_data) > 15 else 0,  # DUES IN
-                    category_data[16] if len(category_data) > 16 else 0   # DUES OUT
-                ]
-                
-                print(f"{category} - Posted/STR: {posted_str}, T/OUT: {trout}, Present Det: {present_det}, Present Unit: {present_unit}")
-                
-                # Add each of the 17 columns for this category
-                for i in range(17):
-                    column_name = f"{category}_{get_column_name(i)}"
-                    columns.append(column_name)
-                    values.append(final_data[i])
-            
-            # Calculate FIRST TOTAL (sum of offr, jco, jcoEre, or, orEre)
-            first_total_values = [0] * 17
-            for cat in ['offr', 'jco', 'jcoEre', 'or', 'orEre']:
-                cat_data = parade_data.get(cat, [0]*17)
-                # Apply same calculations for totals
-                if len(cat_data) >= 13:
-                    posted_str = cat_data[2] if len(cat_data) > 2 else 0
-                    lve = cat_data[3] if len(cat_data) > 3 else 0
-                    course = cat_data[4] if len(cat_data) > 4 else 0
-                    mh = cat_data[6] if len(cat_data) > 6 else 0
-                    sick_lve = cat_data[7] if len(cat_data) > 7 else 0
-                    ex = cat_data[8] if len(cat_data) > 8 else 0
-                    td = cat_data[9] if len(cat_data) > 9 else 0
-                    att = cat_data[10] if len(cat_data) > 10 else 0
-                    awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
-                    
-                    # CORRECTED: T/OUT = sum of deductions
-                    trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
-                    trout = max(0, trout)                                               
-                    
-                    present_unit = posted_str - trout
-                    present_unit = max(0, present_unit)
-                    
-                    # Sum all columns
-                    for i in range(17):
-                        if i == 12:  # T/OUT
-                            first_total_values[i] += trout
-                        elif i == 14:  # PRESENT/STR UNIT
-                            first_total_values[i] += present_unit
-                        elif i < len(cat_data):
-                            first_total_values[i] += cat_data[i]
-                        else:
-                            first_total_values[i] += 0
-            
-            # Store first total in database
-            for i in range(17):
-                column_name = f"firstTotal_{get_column_name(i)}"
-                columns.append(column_name)
-                values.append(first_total_values[i])
-            
-            # Calculate SECOND TOTAL (sum of oaOr, attSummary, attOffr, attJco, attOr)
-            second_total_values = [0] * 17
-            for cat in ['oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr']:
-                cat_data = parade_data.get(cat, [0]*17)
-                if len(cat_data) >= 13:
-                    posted_str = cat_data[2] if len(cat_data) > 2 else 0
-                    lve = cat_data[3] if len(cat_data) > 3 else 0
-                    course = cat_data[4] if len(cat_data) > 4 else 0
-                    mh = cat_data[6] if len(cat_data) > 6 else 0
-                    sick_lve = cat_data[7] if len(cat_data) > 7 else 0
-                    ex = cat_data[8] if len(cat_data) > 8 else 0
-                    td = cat_data[9] if len(cat_data) > 9 else 0
-                    att = cat_data[10] if len(cat_data) > 10 else 0
-                    awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
-                    
-                    # CORRECTED: T/OUT = sum of deductions
-                    trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
-                    trout = max(0, trout)
-                    
-                    present_unit = posted_str - trout
-                    present_unit = max(0, present_unit)
-                    
-                    # Sum all columns
-                    for i in range(17):
-                        if i == 12:  # T/OUT
-                            second_total_values[i] += trout
-                        elif i == 14:  # PRESENT/STR UNIT
-                            second_total_values[i] += present_unit
-                        elif i < len(cat_data):
-                            second_total_values[i] += cat_data[i]
-                        else:
-                            second_total_values[i] += 0
-            
-            # Store second total in database
-            for i in range(17):
-                column_name = f"secondTotal_{get_column_name(i)}"
-                columns.append(column_name)
-                values.append(second_total_values[i])
-            
-            # Calculate GRAND TOTAL (firstTotal + secondTotal)
-            grand_total_values = [0] * 17
-            for i in range(17):
-                grand_total_values[i] = first_total_values[i] + second_total_values[i]
-            
-            # Store grand total in database
-            for i in range(17):
-                column_name = f"grandTotal_{get_column_name(i)}"
-                columns.append(column_name)
-                values.append(grand_total_values[i])
-            
-            print(f"Total columns: {len(columns)}")
-            print(f"Grand Total Auth: {grand_total_values[0]}, Present Unit: {grand_total_values[14]}")
-            
-            # Build SQL query
-            placeholders = ['%s'] * len(values)
-            
-            sql = f"""
-                INSERT INTO parade_state_daily ({', '.join(columns)})
-                VALUES ({', '.join(placeholders)})
-                ON DUPLICATE KEY UPDATE
-                {', '.join([f"{col} = VALUES({col})" for col in columns if col not in ['report_date', 'company']])},
-                updated_at = NOW()
-            """
-            
-            print(f"Executing SQL...")
-            cursor.execute(sql, values)
-            conn.commit()
-            
-            return jsonify({
-                'success': True,
-                'message': f'Parade state saved for {report_date_str} ({company})',
-                'calculations': {
-                    't_out_calculation': 'LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC',
-                    'present_det': 'Same as DET column',
-                    'present_unit': 'POSTED/STR - T/OUT'
-                }
-            })
-            
-        except Exception as e:
-            conn.rollback()
-            print(f"ERROR: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return jsonify({'success': False, 'error': str(e)}), 500
-            
-        finally:
-            cursor.close()
-            conn.close()
-            
-    except Exception as e:
-        print(f"General error: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'success': False, 'error': str(e)}), 500
+    if user:
+        return jsonify({
+            'authenticated': True,
+            'username': user.get('username'),
+            'role': user.get('role'),
+            'company': user.get('company')
+        })
+    else:
+        return jsonify({'authenticated': False}), 401
     
 
 # co dashboard view
@@ -2135,13 +2033,867 @@ def get_co_aggregated_parade_table(date_str):
         cursor.close()
         conn.close()
     
+# ===============================================
+# PARADE DATA ROUTES FOR O SEC NCO
+# ===============================================
 
-
-
-
-
-
-
+@app.route('/api/parade-data/get/<date_str>/<company>', methods=['GET'])
+def get_parade_data_by_company(date_str, company):
+    """Get parade data for specific date and company - O SEC NCO & ONCO only"""
+    print(f"\n=== GET PARADE DATA BY COMPANY ===")
+    print(f"Date: {date_str}, Company: {company}")
     
+    # Get current user
+    user = get_current_user()
+    
+    # Check authentication
+    if not user:
+        print("DEBUG: No user found - not authenticated")
+        return jsonify({
+            'success': False, 
+            'error': 'Not authenticated. Please login again.'
+        }), 401
+    
+    user_role = user.get('role', '').strip()
+    user_company = user.get('company', '').strip()
+    
+    print(f"DEBUG: User: {user.get('username')}, Role: '{user_role}', Company: '{user_company}'")
+    
+    # Check authorization based on role
+    if user_role == 'O SEC NCO':
+        # O SEC NCO can access all companies
+        print("DEBUG: O SEC NCO access granted")
+        pass
+    elif user_role == 'ONCO':
+        # ONCO can only access their own company
+        if company != user_company:
+            print(f"DEBUG: ONCO access denied - trying to access {company} but belongs to {user_company}")
+            return jsonify({
+                'success': False, 
+                'error': f'Access denied - ONCO can only access data for {user_company}'
+            }), 403
+        print("DEBUG: ONCO access granted for own company")
+    else:
+        # Other roles cannot access
+        print(f"DEBUG: Access denied for role: {user_role}")
+        return jsonify({
+            'success': False, 
+            'error': f'Access denied - Only O SEC NCO and ONCO can access parade data'
+        }), 403
+    
+    conn = None
+    cursor = None
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        print(f"DEBUG: Querying database for date={date_str}, company={company}")
+        
+        # Check if table exists first
+        cursor.execute("SHOW TABLES LIKE 'parade_state_daily'")
+        table_exists = cursor.fetchone()
+        
+        if not table_exists:
+            print("DEBUG: parade_state_daily table doesn't exist")
+            return jsonify({
+                'success': True,
+                'data': {
+                    'date': date_str,
+                    'company': company,
+                    'data': {}
+                },
+                'is_empty': True
+            }), 200
+        
+        cursor.execute("""
+            SELECT * FROM parade_state_daily 
+            WHERE report_date = %s AND company = %s
+        """, (date_str, company))
+        
+        row = cursor.fetchone()
+        print(f"DEBUG: Database query result: {row}")
+        
+        if not row:
+            print("DEBUG: No data found in database")
+            return jsonify({
+                'success': True,
+                'data': {
+                    'date': date_str,
+                    'company': company,
+                    'data': {}
+                },
+                'is_empty': True
+            }), 200
+        
+        # Convert database row to frontend format
+        result = {
+            'date': row['report_date'],
+            'company': row['company'],
+            'data': {}
+        }
+        
+        categories = [
+            'offr', 'jco', 'jcoEre', 'or', 'orEre',
+            'firstTotal',
+            'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr',
+            'secondTotal',
+            'grandTotal'
+        ]
+        
+        column_names = [
+            'auth', 'hs', 'posted_str', 'lve', 'course', 'det', 'mh',
+            'sick_lve', 'ex', 'td', 'att', 'awl_osl_jc', 'trout_det',
+            'present_det', 'present_unit', 'dues_in', 'dues_out'
+        ]
+        
+        for category in categories:
+            category_data = []
+            for col in column_names:
+                column_name = f"{category}_{col}"
+                category_data.append(row.get(column_name, 0))
+            result['data'][category] = category_data
+        
+        print(f"DEBUG: Returning data for {company} on {date_str}")
+        return jsonify({
+            'success': True,
+            'data': result,
+            'user_role': user_role,
+            'user_company': user_company
+        }), 200
+        
+    except Exception as e:
+        print(f"ERROR in get_parade_data_by_company: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False, 
+            'error': f'Database error: {str(e)}'
+        }), 500
+        
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+            
+            
+def require_role(*allowed_roles):
+    """Decorator to check if user has required role"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            user = get_current_user()
+            if not user:
+                return jsonify({'success': False, 'error': 'Authentication required'}), 401
+            
+            user_role = user.get('role', '').strip()
+            if user_role not in allowed_roles:
+                return jsonify({
+                    'success': False, 
+                    'error': f'Access denied. Required roles: {", ".join(allowed_roles)}'
+                }), 403
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
+# ===============================================
+# ALSO ADD THESE RELATED ROUTES
+# ===============================================
+
+@app.route('/api/parade-data/view-all/<date_str>', methods=['GET'])
+@require_role('O SEC NCO')  # Only O SEC NCO can view all companies
+def get_all_companies_parade_data(date_str):
+    """Get aggregated parade data for all companies - O SEC NCO ONLY"""
+    print(f"\n=== GET ALL COMPANIES PARADE DATA ===")
+    print(f"Date: {date_str}")
+    
+    conn = None
+    cursor = None
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check if table exists
+        cursor.execute("SHOW TABLES LIKE 'parade_state_daily'")
+        table_exists = cursor.fetchone()
+        
+        if not table_exists:
+            return jsonify({
+                'success': True,
+                'data': {
+                    'date': date_str,
+                    'company': 'ALL COMPANIES',
+                    'data': {}
+                },
+                'is_empty': True,
+                'companies_count': 0
+            }), 200
+        
+        cursor.execute("""
+            SELECT * FROM parade_state_daily
+            WHERE report_date = %s
+        """, (date_str,))
+        
+        companies_data = cursor.fetchall()
+        
+        if not companies_data:
+            return jsonify({
+                'success': True,
+                'data': {
+                    'date': date_str,
+                    'company': 'ALL COMPANIES',
+                    'data': {}
+                },
+                'is_empty': True,
+                'companies_count': 0
+            }), 200
+        
+        # Aggregate data
+        aggregated = {
+            'date': date_str,
+            'company': 'ALL COMPANIES',
+            'data': {}
+        }
+        
+        categories = [
+            'offr', 'jco', 'jcoEre', 'or', 'orEre',
+            'firstTotal',
+            'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr',
+            'secondTotal',
+            'grandTotal'
+        ]
+        
+        column_names = [
+            'auth', 'hs', 'posted_str', 'lve', 'course', 'det', 'mh',
+            'sick_lve', 'ex', 'td', 'att', 'awl_osl_jc', 'trout_det',
+            'present_det', 'present_unit', 'dues_in', 'dues_out'
+        ]
+        
+        for category in categories:
+            aggregated['data'][category] = [0] * 17
+        
+        for company_row in companies_data:
+            for category in categories:
+                for i, col in enumerate(column_names):
+                    db_column = f"{category}_{col}"
+                    if db_column in company_row:
+                        aggregated['data'][category][i] += (company_row[db_column] or 0)
+        
+        return jsonify({
+            'success': True,
+            'data': aggregated,
+            'companies_count': len(companies_data)
+        }), 200
+        
+    except Exception as e:
+        print(f"ERROR in get_all_companies_parade_data: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False, 
+            'error': f'Database error: {str(e)}'
+        }), 500
+        
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+            
+@app.route('/api/parade-data/user-info', methods=['GET'])
+def get_parade_user_info():
+    """Get parade-specific user information"""
+    user = get_current_user()
+    
+    if not user:
+        return jsonify({
+            'success': False, 
+            'error': 'Not authenticated'
+        }), 401
+    
+    user_role = user.get('role', '').strip()
+    user_company = user.get('company', '').strip()
+    
+    # Only allow O SEC NCO and ONCO
+    if user_role not in ['O SEC NCO', 'ONCO']:
+        return jsonify({
+            'success': False,
+            'error': 'Access denied'
+        }), 403
+    
+    return jsonify({
+        'success': True,
+        'role': user_role,
+        'company': user_company,
+        'username': user.get('username')
+    })
+
+# ===============================================
+# DEBUG ENDPOINT - ADD THIS
+# ===============================================
+
+@app.route('/debug/user-info')
+def debug_user_info():
+    """Debug endpoint to check user authentication"""
+    user = get_current_user()
+    if user:
+        return jsonify({
+            'is_authenticated': True,
+            'username': user.get('username'),
+            'role': user.get('role'),
+            'company': user.get('company')
+        })
+    else:
+        return jsonify({
+            'is_authenticated': False,
+            'error': 'No user found'
+        }), 401
+
+@app.route('/api/parade-data/save', methods=['POST'])
+def save_parade_data():
+    """Save parade data - O SEC NCO can save for any company, ONCO only for own"""
+    
+    user = get_current_user()
+    
+    if not user:
+        return jsonify({
+            'success': False, 
+            'error': 'Not authenticated. Please login again.'
+        }), 401
+    
+    user_role = user.get('role', '').strip()
+    user_company = user.get('company', '').strip()
+    
+    print(f"\n=== SAVE PARADE DATA ===")
+    print(f"User: {user.get('username')}, Role: '{user_role}', Company: '{user_company}'")
+    
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False, 
+                'error': 'No data received'
+            }), 400
+        
+        report_date_str = data.get('date')
+        selected_company = data.get('company')  # From dropdown (for O SEC NCO) or user's company (for ONCO)
+        parade_data = data.get('data')
+        
+        if not report_date_str or not selected_company or not parade_data:
+            return jsonify({
+                'success': False, 
+                'error': 'Missing required fields: date, company, or data'
+            }), 400
+        
+        # Validate user role
+        if user_role not in ['O SEC NCO', 'ONCO']:
+            return jsonify({
+                'success': False, 
+                'error': 'Access denied - Only O SEC NCO and ONCO can save parade data'
+            }), 403
+        
+        # Determine which company to save to
+        if user_role == 'O SEC NCO':
+            # O SEC NCO saves to the company they selected from dropdown
+            final_company = selected_company
+            print(f"DEBUG: O SEC NCO saving to selected company: {final_company}")
+            
+            # Validate that O SEC NCO doesn't try to save for "All"
+            if final_company == 'All':
+                return jsonify({
+                    'success': False,
+                    'error': 'Cannot save data for "All Companies". Please select a specific company.'
+                }), 400
+                
+        elif user_role == 'ONCO':
+            # ONCO ALWAYS saves to their own company, regardless of what frontend sends
+            final_company = user_company  # Use logged-in user's company
+            print(f"DEBUG: ONCO detected. Overriding frontend company '{selected_company}' with user's company: '{final_company}'")
+            
+            # Optional: Warn if frontend is sending wrong company (for debugging)
+            if selected_company != user_company:
+                print(f"WARNING: ONCO frontend sent company '{selected_company}' but saving to '{final_company}'")
+        
+        # Validate date restriction for ONCO
+        if user_role == 'ONCO':
+            requested_date = datetime.strptime(report_date_str, '%Y-%m-%d').date()
+            today_date = date.today()
+            
+            if requested_date != today_date:
+                return jsonify({
+                    'success': False,
+                    'error': 'ONCO can only save data for today'
+                }), 400
+        
+        # Validate date is not in future for any user
+        requested_date = datetime.strptime(report_date_str, '%Y-%m-%d').date()
+        today_date = date.today()
+        if requested_date > today_date:
+            return jsonify({
+                'success': False,
+                'error': 'Cannot save data for future dates'
+            }), 400
+        
+        print(f"DEBUG: Saving data for date: {report_date_str}, company: {final_company}, user role: {user_role}")
+        
+        # Continue with save logic...
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'success': False, 'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor()
+        
+        try:
+            # All input categories from your frontend (editable categories)
+            input_categories = [
+                'offr', 'jco', 'jcoEre', 'or', 'orEre',  # First section
+                'oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'  # Second section
+            ]
+            
+            # Build SQL columns and values - Use final_company (determined above)
+            columns = ['report_date', 'company']
+            values = [report_date_str, final_company]
+            
+            # Helper function to get column name from index
+            def get_column_name_for_db(index):
+                columns_list = [
+                    'auth', 'hs', 'posted_str', 'lve', 'course', 'det', 'mh',
+                    'sick_lve', 'ex', 'td', 'att', 'awl_osl_jc', 'trout_det',
+                    'present_det', 'present_unit', 'dues_in', 'dues_out'
+                ]
+                return columns_list[index] if index < len(columns_list) else f'col_{index}'
+            
+            # Process each input category with calculations
+            for category in input_categories:
+                category_data = parade_data.get(category, [0]*17)
+                
+                # Ensure we have at least 13 values (minimum needed for calculations)
+                if len(category_data) < 13:
+                    # Pad with zeros if needed
+                    category_data = category_data + [0] * (13 - len(category_data))
+                
+                # Extract values for calculations
+                posted_str = category_data[2] if len(category_data) > 2 else 0
+                lve = category_data[3] if len(category_data) > 3 else 0
+                course = category_data[4] if len(category_data) > 4 else 0
+                det_value = category_data[5] if len(category_data) > 5 else 0
+                mh = category_data[6] if len(category_data) > 6 else 0
+                sick_lve = category_data[7] if len(category_data) > 7 else 0
+                ex = category_data[8] if len(category_data) > 8 else 0
+                td = category_data[9] if len(category_data) > 9 else 0
+                att = category_data[10] if len(category_data) > 10 else 0
+                awl_osl_jc = category_data[11] if len(category_data) > 11 else 0
+                
+                # Calculate T/OUT = LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC
+                trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
+                trout = max(0, trout)  # Ensure non-negative
+                
+                # PRESENT/STR DET = DET column value
+                present_det = det_value
+                
+                # PRESENT/STR UNIT = POSTED/STR - T/OUT
+                present_unit = posted_str - trout
+                present_unit = max(0, present_unit)  # Ensure non-negative
+                
+                # Create final array with calculated values
+                final_data = [
+                    category_data[0] if len(category_data) > 0 else 0,  # AUTH
+                    category_data[1] if len(category_data) > 1 else 0,  # H/S
+                    posted_str,  # POSTED/STR
+                    lve,         # LVE
+                    course,      # COURSE
+                    det_value,   # DET
+                    mh,          # MH
+                    sick_lve,    # SICK/LVE
+                    ex,          # EX
+                    td,          # TD
+                    att,         # ATT
+                    awl_osl_jc,  # AWL/OSL/JC
+                    trout,       # T/OUT (calculated)
+                    present_det, # PRESENT/STR DET (from DET column)
+                    present_unit, # PRESENT/STR UNIT (calculated)
+                    category_data[15] if len(category_data) > 15 else 0,  # DUES IN
+                    category_data[16] if len(category_data) > 16 else 0   # DUES OUT
+                ]
+                
+                # Add each of the 17 columns for this category
+                for i in range(17):
+                    column_name = f"{category}_{get_column_name_for_db(i)}"
+                    columns.append(column_name)
+                    values.append(final_data[i])
+            
+            # Calculate FIRST TOTAL (sum of offr, jco, jcoEre, or, orEre)
+            first_total_values = [0] * 17
+            for cat in ['offr', 'jco', 'jcoEre', 'or', 'orEre']:
+                cat_data = parade_data.get(cat, [0]*17)
+                if len(cat_data) >= 13:
+                    posted_str = cat_data[2] if len(cat_data) > 2 else 0
+                    lve = cat_data[3] if len(cat_data) > 3 else 0
+                    course = cat_data[4] if len(cat_data) > 4 else 0
+                    mh = cat_data[6] if len(cat_data) > 6 else 0
+                    sick_lve = cat_data[7] if len(cat_data) > 7 else 0
+                    ex = cat_data[8] if len(cat_data) > 8 else 0
+                    td = cat_data[9] if len(cat_data) > 9 else 0
+                    att = cat_data[10] if len(cat_data) > 10 else 0
+                    awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
+                    
+                    trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
+                    trout = max(0, trout)                                               
+                    
+                    present_unit = posted_str - trout
+                    present_unit = max(0, present_unit)
+                    
+                    # Sum all columns
+                    for i in range(17):
+                        if i == 12:  # T/OUT
+                            first_total_values[i] += trout
+                        elif i == 14:  # PRESENT/STR UNIT
+                            first_total_values[i] += present_unit
+                        elif i < len(cat_data):
+                            first_total_values[i] += cat_data[i]
+                        else:
+                            first_total_values[i] += 0
+            
+            # Store first total in database
+            for i in range(17):
+                column_name = f"firstTotal_{get_column_name_for_db(i)}"
+                columns.append(column_name)
+                values.append(first_total_values[i])
+            
+            # Calculate SECOND TOTAL (sum of oaOr, attSummary, attOffr, attJco, attOr)
+            second_total_values = [0] * 17
+            for cat in ['oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr']:
+                cat_data = parade_data.get(cat, [0]*17)
+                if len(cat_data) >= 13:
+                    posted_str = cat_data[2] if len(cat_data) > 2 else 0
+                    lve = cat_data[3] if len(cat_data) > 3 else 0
+                    course = cat_data[4] if len(cat_data) > 4 else 0
+                    mh = cat_data[6] if len(cat_data) > 6 else 0
+                    sick_lve = cat_data[7] if len(cat_data) > 7 else 0
+                    ex = cat_data[8] if len(cat_data) > 8 else 0
+                    td = cat_data[9] if len(cat_data) > 9 else 0
+                    att = cat_data[10] if len(cat_data) > 10 else 0
+                    awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
+                    
+                    trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
+                    trout = max(0, trout)
+                    
+                    present_unit = posted_str - trout
+                    present_unit = max(0, present_unit)
+                    
+                    # Sum all columns
+                    for i in range(17):
+                        if i == 12:  # T/OUT
+                            second_total_values[i] += trout
+                        elif i == 14:  # PRESENT/STR UNIT
+                            second_total_values[i] += present_unit
+                        elif i < len(cat_data):
+                            second_total_values[i] += cat_data[i]
+                        else:
+                            second_total_values[i] += 0
+            
+            # Store second total in database
+            for i in range(17):
+                column_name = f"secondTotal_{get_column_name_for_db(i)}"
+                columns.append(column_name)
+                values.append(second_total_values[i])
+            
+            # Calculate GRAND TOTAL (firstTotal + secondTotal)
+            grand_total_values = [0] * 17
+            for i in range(17):
+                grand_total_values[i] = first_total_values[i] + second_total_values[i]
+            
+            # Store grand total in database
+            for i in range(17):
+                column_name = f"grandTotal_{get_column_name_for_db(i)}"
+                columns.append(column_name)
+                values.append(grand_total_values[i])
+            
+            # Build SQL query
+            placeholders = ['%s'] * len(values)
+            
+            sql = f"""
+                INSERT INTO parade_state_daily ({', '.join(columns)})
+                VALUES ({', '.join(placeholders)})
+                ON DUPLICATE KEY UPDATE
+                {', '.join([f"{col} = VALUES({col})" for col in columns if col not in ['report_date', 'company']])},
+                updated_at = NOW()
+            """
+            
+            print(f"Executing SQL for company: {final_company}")
+            cursor.execute(sql, values)
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Parade data saved successfully for {final_company} on {report_date_str}',
+                'details': {
+                    'company': final_company,
+                    'date': report_date_str,
+                    'entered_by': user.get('username'),
+                    'user_role': user_role,
+                    'grand_total': {
+                        'auth': grand_total_values[0],
+                        'posted_str': grand_total_values[2],
+                        't_out': grand_total_values[12],
+                        'present_unit': grand_total_values[14]
+                    }
+                }
+            }), 200
+            
+        except Exception as e:
+            conn.rollback()
+            print(f"Database error in save: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({
+                'success': False, 
+                'error': f'Database error: {str(e)}'
+            }), 500
+            
+        finally:
+            cursor.close()
+            conn.close()
+            
+    except Exception as e:
+        print(f"Error in save_parade_data: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False, 
+            'error': f'Server error: {str(e)}'
+        }), 500
+
+
+@app.route('/api/parade-data/export-csv/<date_str>/<company>', methods=['GET'])
+def export_parade_csv(date_str, company):
+    """Export parade data to CSV"""
+    
+    # Get current user
+    user = get_current_user()
+    
+    # Check authentication
+    if not user:
+        return jsonify({
+            'success': False, 
+            'error': 'Not authenticated. Please login again.'
+        }), 401
+    
+    user_role = user.get('role', '').strip()
+    user_company = user.get('company', '').strip()
+    
+    # Check authorization based on role
+    if user_role == 'O SEC NCO':
+        # O SEC NCO can export any company
+        pass
+    elif user_role == 'ONCO':
+        # ONCO can only export their own company
+        if company != user_company:
+            return jsonify({
+                'success': False, 
+                'error': f'Access denied - ONCO can only export data for {user_company}'
+            }), 403
+    else:
+        # Other roles cannot export
+        return jsonify({
+            'success': False, 
+            'error': 'Access denied - Only O SEC NCO and ONCO can export parade data'
+        }), 403
+    
+    conn = None
+    cursor = None
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        if company == 'All':
+            # Only O SEC NCO can export all companies
+            if user_role != 'O SEC NCO':
+                return jsonify({
+                    'success': False, 
+                    'error': 'Only O SEC NCO can export data for all companies'
+                }), 403
+                
+            # Get all companies data
+            cursor.execute("""
+                SELECT * FROM parade_state_daily
+                WHERE report_date = %s
+            """, (date_str,))
+            companies_data = cursor.fetchall()
+            
+            if not companies_data:
+                return jsonify({
+                    'success': False, 
+                    'error': 'No data found'
+                }), 404
+            
+            # Create aggregated CSV
+            output = StringIO()
+            writer = csv.writer(output)
+            
+            # Headers
+            headers = ['Category', 'AUTH', 'H/S', 'POSTED/STR', 'LVE', 'COURSE', 'DET', 
+                      'MH', 'SICK/LVE', 'EX', 'TD', 'ATT', 'AWL/OSL/JC', 'T/OUT', 
+                      'PRES/DET', 'PRES/UNIT', 'DUES IN', 'DUES OUT']
+            writer.writerow(['AGGREGATED PARADE STATE - ALL COMPANIES'])
+            writer.writerow([f'Date: {date_str}'])
+            writer.writerow([f'Exported by: {user.get("username")} ({user_role})'])
+            writer.writerow([])
+            writer.writerow(headers)
+            
+            # Aggregate data
+            categories = [
+                ('offr', 'OFFR'),
+                ('jco', 'JCO'),
+                ('jcoEre', 'JCO (ERE)'),
+                ('or', 'OR'),
+                ('orEre', 'OR (ERE)'),
+                ('firstTotal', 'TOTAL (I)'),
+                ('oaOr', 'OA/OR'),
+                ('attSummary', 'SUPERNUMARARY'),
+                ('attOffr', 'ATT (OFFR)'),
+                ('attJco', 'ATT (JCO)'),
+                ('attOr', 'ATT (OR)'),
+                ('secondTotal', 'TOTAL (II)'),
+                ('grandTotal', 'GRAND TOTAL')
+            ]
+            
+            column_names = [
+                'auth', 'hs', 'posted_str', 'lve', 'course', 'det', 'mh',
+                'sick_lve', 'ex', 'td', 'att', 'awl_osl_jc', 'trout_det',
+                'present_det', 'present_unit', 'dues_in', 'dues_out'
+            ]
+            
+            for cat_key, cat_label in categories:
+                row_data = [cat_label]
+                for col in column_names:
+                    total = sum(company.get(f"{cat_key}_{col}", 0) or 0 for company in companies_data)
+                    row_data.append(total)
+                writer.writerow(row_data)
+            
+            filename = f"parade_state_all_companies_{date_str}.csv"
+            
+        else:
+            # Get specific company data
+            cursor.execute("""
+                SELECT * FROM parade_state_daily
+                WHERE report_date = %s AND company = %s
+            """, (date_str, company))
+            
+            row = cursor.fetchone()
+            
+            if not row:
+                return jsonify({
+                    'success': False, 
+                    'error': 'No data found'
+                }), 404
+            
+            # Create CSV
+            output = StringIO()
+            writer = csv.writer(output)
+            
+            # Headers
+            headers = ['Category', 'AUTH', 'H/S', 'POSTED/STR', 'LVE', 'COURSE', 'DET', 
+                      'MH', 'SICK/LVE', 'EX', 'TD', 'ATT', 'AWL/OSL/JC', 'T/OUT', 
+                      'PRES/DET', 'PRES/UNIT', 'DUES IN', 'DUES OUT']
+            writer.writerow([f'PARADE STATE - {company}'])
+            writer.writerow([f'Date: {date_str}'])
+            writer.writerow([f'Exported by: {user.get("username")} ({user_role})'])
+            writer.writerow([])
+            writer.writerow(headers)
+            
+            categories = [
+                ('offr', 'OFFR'),
+                ('jco', 'JCO'),
+                ('jcoEre', 'JCO (ERE)'),
+                ('or', 'OR'),
+                ('orEre', 'OR (ERE)'),
+                ('firstTotal', 'TOTAL (I)'),
+                ('oaOr', 'OA/OR'),
+                ('attSummary', 'SUPERNUMARARY'),
+                ('attOffr', 'ATT (OFFR)'),
+                ('attJco', 'ATT (JCO)'),
+                ('attOr', 'ATT (OR)'),
+                ('secondTotal', 'TOTAL (II)'),
+                ('grandTotal', 'GRAND TOTAL')
+            ]
+            
+            column_names = [
+                'auth', 'hs', 'posted_str', 'lve', 'course', 'det', 'mh',
+                'sick_lve', 'ex', 'td', 'att', 'awl_osl_jc', 'trout_det',
+                'present_det', 'present_unit', 'dues_in', 'dues_out'
+            ]
+            
+            for cat_key, cat_label in categories:
+                row_data = [cat_label]
+                for col in column_names:
+                    row_data.append(row.get(f"{cat_key}_{col}", 0))
+                writer.writerow(row_data)
+            
+            filename = f"parade_state_{company.replace(' ', '_')}_{date_str}.csv"
+        
+        # Prepare response
+        output.seek(0)
+        return send_file(
+            BytesIO(output.getvalue().encode('utf-8')),
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        print(f"Export error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False, 
+            'error': f'Export error: {str(e)}'
+        }), 500
+        
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+        
+    
+@app.route('/api/get-all-courses', methods=['GET'])
+def get_courses():
+    print("in this route")
+    user = require_login()
+    if not user:
+        return jsonify([])
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT 
+            sr_no,
+            army_number,
+            course,
+            DATE_FORMAT(from_date, '%d-%m-%Y') AS from_date,
+            DATE_FORMAT(to_date, '%d-%m-%Y') AS to_date,
+            institute,
+            grading,
+            remarks
+        FROM courses
+        ORDER BY from_date DESC
+    """)
+
+    data = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return jsonify(data)
+
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=1000)
