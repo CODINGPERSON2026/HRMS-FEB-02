@@ -68,9 +68,19 @@
 
 
 <div class="page-title">
-    <div>
-        <h3 class="fw-bold">{{header}}</h3>
-        <p   id="para">{{subscript}}</p>
+    <div class="d-flex align-items-center gap-3">
+        <!-- Logo in front of heading -->
+        <img 
+            src="{{ url_for('static', filename='jimmy.png') }}" 
+            class="org-logo"
+            alt="Unit Logo"
+        >
+
+        <!-- Text -->
+        <div>
+            <h3 class="fw-bold mb-1">{{ header }}</h3>
+            <p id="para">{{ subscript }}</p>
+        </div>
     </div>
-    <img src="/static/image_for_login_page/chinar.jpg" class="org-logo" alt="Organization Logo">
 </div>
+
