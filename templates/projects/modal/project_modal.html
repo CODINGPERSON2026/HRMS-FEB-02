@@ -1,14 +1,22 @@
 <!-- ADD PROJECT MODAL -->
-<div class="modal fade" id="addProjectModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="addProjectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
+         style="max-width: 1200px;">
         <div class="modal-content">
+
+            <!-- MODAL HEADER -->
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
                     <i class="fas fa-plus-circle me-2"></i>Add New Project
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
             </div>
 
+            <!-- MODAL BODY -->
             <div class="modal-body">
                 <form id="addProjectForm" class="row g-3">
 
@@ -58,7 +66,8 @@
                     <!-- PROJECT ITEMS -->
                     <div class="col-md-6">
                         <label class="form-label">Project Items *</label>
-                        <input class="form-control" name="project_items" placeholder="e.g. Radios, Vehicles" required>
+                        <input class="form-control" name="project_items"
+                               placeholder="e.g. Radios, Vehicles" required>
                     </div>
 
                     <!-- QUANTITY -->
@@ -70,25 +79,32 @@
                     <!-- DESCRIPTION -->
                     <div class="col-12">
                         <label class="form-label">Description</label>
-                        <textarea class="form-control" name="project_description" rows="3"></textarea>
+                        <textarea class="form-control"
+                                  name="project_description"
+                                  rows="3"></textarea>
                     </div>
 
                 </form>
             </div>
 
+            <!-- MODAL FOOTER -->
             <div class="modal-footer">
                 <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                 <button class="btn btn-primary" onclick="addProject()">Save Project</button>
             </div>
+
         </div>
     </div>
 </div>
 
+<!-- REQUIRED BOOTSTRAP JS -->
+<script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // Update Add Project Head dropdown when a new head is added
-document.getElementById("addHeadForm").addEventListener("submit", function(e) {
+/* ADD HEAD */
+document.getElementById("addHeadForm").addEventListener("submit", function (e) {
     e.preventDefault();
+
     const headName = document.getElementById("headNameInput").value.trim();
     if (!headName) return;
 
@@ -100,31 +116,33 @@ document.getElementById("addHeadForm").addEventListener("submit", function(e) {
     .then(res => res.json())
     .then(data => {
         const alertDiv = document.getElementById("headAlert");
+
         if (data.status === 'success') {
-            // Update Head dropdown in main filter
+
+            // Main filter dropdown
             const mainSelect = document.getElementById("headSelect");
-            const mainOption = document.createElement("option");
-            mainOption.value = headName;
-            mainOption.textContent = headName;
-            mainSelect.appendChild(mainOption);
+            const opt1 = new Option(headName, headName);
+            mainSelect.add(opt1);
             mainSelect.value = headName;
 
-            // Update Head dropdown in Add Project modal
+            // Add Project modal dropdown
             const projectSelect = document.getElementById("addProjectHeadSelect");
-            const projectOption = document.createElement("option");
-            projectOption.value = headName;
-            projectOption.textContent = headName;
-            projectSelect.appendChild(projectOption);
+            const opt2 = new Option(headName, headName);
+            projectSelect.add(opt2);
+            projectSelect.value = headName;
 
-            alertDiv.innerHTML = '<div class="alert alert-success py-1">Head added successfully!</div>';
+            alertDiv.innerHTML =
+                '<div class="alert alert-success py-1">Head added successfully!</div>';
             document.getElementById("headNameInput").value = '';
+
         } else {
-            alertDiv.innerHTML = `<div class="alert alert-danger py-1">${data.message}</div>`;
+            alertDiv.innerHTML =
+                `<div class="alert alert-danger py-1">${data.message}</div>`;
         }
-    })
-    .catch(err => console.error(err));
+    });
 });
 
+/* ADD PROJECT */
 function addProject() {
     const form = document.getElementById("addProjectForm");
 
@@ -140,9 +158,6 @@ function addProject() {
             alert("Failed to add project");
         }
     })
-    .catch(err => {
-        console.error(err);
-        alert("Server error");
-    });
+    .catch(() => alert("Server error"));
 }
 </script>

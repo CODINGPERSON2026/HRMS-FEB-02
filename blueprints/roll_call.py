@@ -62,12 +62,20 @@ def get_pending_roll_call_points():
     user = require_login()
     company = user['company']
 
+    category = request.args.get('category', 'OR_REQUEST')
+
+    status_map = {
+        'OR_REQUEST': 'PENDING',
+        'SM_SUGGESTION': 'SUGGESTED'
+    }
+
+    status = status_map.get(category, 'PENDING')
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
-        cursor.execute(
-            '''
+        query = '''
             SELECT 
                 rcp.id,
                 rcp.status,
@@ -81,14 +89,20 @@ def get_pending_roll_call_points():
                 p.company
             FROM roll_call_points rcp
             LEFT JOIN personnel p ON rcp.army_number = p.army_number
-            WHERE rcp.status = 'PENDING'
-            ''' + (f" AND p.company = %s" if company != "Admin" else "") + '''
-            ORDER BY rcp.created_at DESC
-            ''',
-            (company,) if company != "Admin" else ()
-        )
+            WHERE rcp.status = %s
+        '''
 
+        params = [status]
+
+        if company != "Admin":
+            query += " AND p.company = %s"
+            params.append(company)
+
+        query += " ORDER BY rcp.created_at DESC"
+
+        cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
+
         return jsonify({"status": "success", "data": rows}), 200
 
     except Exception as e:
