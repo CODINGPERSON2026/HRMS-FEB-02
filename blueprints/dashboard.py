@@ -139,7 +139,7 @@ def attachment_details():
                     t.army_number,
                     p.rank,
                     p.name,
-                    t.lcoation,
+                    t.location,
                     t.authority,
                     t.td_date
                 FROM td_table t
@@ -155,7 +155,7 @@ def attachment_details():
                     t.army_number,
                     p.rank,
                     p.name,
-                    t.lcoation,
+                    t.location,
                     t.authority,
                     t.td_date
                 FROM td_table t
@@ -212,7 +212,7 @@ def assigned_attachment_alarm():
                 last_interview_sm_status,
                 last_interview_OC_status,
                 last_interview_oc,
-                lcoation AS location,
+                location AS location,
                 authority
             FROM td_table WHERE td_date <= NOW() - INTERVAL 5 SECOND
         """)

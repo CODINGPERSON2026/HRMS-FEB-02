@@ -125,9 +125,11 @@ def dashboard():
 
     if not user:
         return redirect(url_for('admin_login'))
-    username = user['username'].capitalize()
+    subscript = user['username'].capitalize()
     user_company = user['company']
-    return render_template('dashboard.html', username = username,role = user['role'],user_company=user_company)
+    role = user['role']
+    welcome_msg = f'Welcome {role} , {subscript}'
+    return render_template('dashboard.html', subscript = subscript,user_company=user_company)
 
 
 

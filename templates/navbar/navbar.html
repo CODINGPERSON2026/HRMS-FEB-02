@@ -1,4 +1,5 @@
-<!-- Apply Leave Header Component -->
+<!-- ================= HEADER WITH LEFT & RIGHT LOGO ================= -->
+
 <style>
     .page-title {
         height: 130px;
@@ -7,10 +8,16 @@
         padding: 2rem;
         border-radius: 15px;
         box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        
+
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .title-section {
+        text-align: center;
+        flex: 1;
     }
 
     .page-title h3 {
@@ -31,6 +38,7 @@
         object-fit: contain;
         border-radius: 20%;
         padding: 10px;
+        background: rgba(255, 255, 255, 0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
@@ -42,35 +50,35 @@
     @media (max-width: 768px) {
         .page-title {
             flex-direction: column;
-            text-align: center;
             height: auto;
+            text-align: center;
         }
 
         .org-logo {
             width: 90px;
             height: 90px;
-            margin-top: 10px;
         }
 
-        .page-title h3 {
-            font-size: 1.5rem;
-        }
-
-        .page-title p {
-            font-size: 0.9rem;
+        .title-section {
+            order: 2;
         }
     }
-
-    
 </style>
 
-
-
-
 <div class="page-title">
-    <div>
-        <h3 class="fw-bold">{{header}}</h3>
-        <p   id="para">{{subscript}}</p>
+    <!-- LEFT LOGO -->
+    <img src="/static/image_for_login_page/rt.jpg"
+         class="org-logo"
+         alt="Left Logo">
+
+    <!-- CENTER TEXT -->
+    <div class="title-section">
+        <h3 class="fw-bold">{{ header }}</h3>
+        <p id="para">{{ subscript }}</p>
     </div>
-    <img src="/static/image_for_login_page/chinar.jpg" class="org-logo" alt="Organization Logo">
+
+    <!-- RIGHT LOGO -->
+    <img src="/static/image_for_login_page/chinar.jpg"
+         class="org-logo"
+         alt="Right Logo">
 </div>

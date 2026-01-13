@@ -343,8 +343,8 @@
     </div>
   </div>
 
-  {% set header = "15CESR UNIT MANAGEMENT DASHBOARD" %}
-  {% set subscript = 'Welcome ' ~ role ~ ' ' ~ username %}
+  {% set header = "15 CORPS ENGINEERING SIGNAL REGIMENT" %}
+  {#{% set subscript = 'Welcome ' ~ role ~ ' ' ~ username %}#}
 
 
   {% include 'navbar/navbar.html' %}
@@ -518,6 +518,9 @@
     {% include 'modals/interview_pending/modal.html' %}
     {% include 'modals/count_parade/modal.html' %}
     {% include 'modals/attachment-modal/modal.html' %}
+    {% include 'modals/loan/loans.html' %}
+    {% include 'modals/roll_call/modal.html' %}
+    {% include 'modals/roll_call/view_roll_call.html' %}
 
     <!-- Parade State Modal -->
     <div class="modal fade modal-fullscreen" id="paradeStateModal" tabindex="-1">
