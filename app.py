@@ -1148,6 +1148,7 @@ def today_event_alarm():
 
 @app.route('/projects')
 def get_projects():
+    print('in this project route')
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     user = require_login()
