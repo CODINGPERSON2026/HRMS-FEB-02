@@ -6,13 +6,15 @@ DB_CONFIG = {
     'user': 'root',
     'password': 'yawar@123',
     'database': 'hrms',
+    'port': 3306,
     'autocommit': True
 }
 
+
 def get_db_connection():
+    print("USING DB CONFIG:", DB_CONFIG)
     try:
-        connection = mysql.connector.connect(**DB_CONFIG)
-        return connection
+        return mysql.connector.connect(**DB_CONFIG)
     except Error as e:
-        print(f"Error connecting to MySQL: {e}")
+        print("Error connecting to MySQL:", e)
         return None

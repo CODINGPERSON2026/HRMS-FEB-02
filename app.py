@@ -10,29 +10,9 @@ from flask import send_file
 from functools import wraps
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 app.secret_key = os.urandom(24)
-
-
-
-
-# Database configuration
-DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'qaz123QAZ!@#',
-    'database': 'hrms',
-    'autocommit': True
-}
-
-def get_db_connection():
-    try:
-        connection = mysql.connector.connect(**DB_CONFIG)
-        return connection
-    except Error as e:
-        print(f"Error connecting to MySQL: {e}")
-        return None
 
 app.register_blueprint(personnel_info)
 app.register_blueprint(weight_ms)
@@ -51,15 +31,11 @@ app.register_blueprint(add_user_bp)
 
 
 
-def check_role(user, required_role):
-    """Helper to check role with whitespace handling"""
-    if not user:
-        return False
-    user_role = user.get('role', '').strip()
-    return user_role == required_role.strip()
+
 
 @app.route("/admin_login", methods=["POST",'GET'])
 def admin_login():
+    print('in this route of admin login')
     if request.method == 'GET':
         return render_template('/loginpage/loginpage.html')
     data = request.get_json()
@@ -67,6 +43,8 @@ def admin_login():
     password = data.get("password")
 
     conn = get_db_connection()
+    if conn is None:
+         return "Database connection failed", 500
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (email, password))
@@ -2893,6 +2871,21 @@ def get_courses():
 
     return jsonify(data)
 
+
+@app.route('/account/departments/all_transactions')
+def all_transactions():
+    limit = int(request.args.get('limit', 10))
+    query = """
+        SELECT date, account_holder, old_balance, credit_amount, debit_amount, new_balance
+        FROM transactions
+        ORDER BY date DESC
+        LIMIT %s
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(query, (limit,))
+    transactions = cursor.fetchall()
+    return jsonify({'transactions': transactions})
 
 
 if __name__ == '__main__':

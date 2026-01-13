@@ -225,7 +225,14 @@
     });
   </script>
 
-  <!-- Dynamic Heading Fetch -->
+ <script>
+  function fixBootstrapModalBug() {
+  document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = '';
+}
+
+ </script>
 
 
 </body>
