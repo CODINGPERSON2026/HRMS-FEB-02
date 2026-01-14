@@ -17,22 +17,7 @@ app.secret_key = os.urandom(24)
 
 
 
-# Database configuration
-DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'qaz123QAZ!@#',
-    'database': 'hrms',
-    'autocommit': True
-}
 
-def get_db_connection():
-    try:
-        connection = mysql.connector.connect(**DB_CONFIG)
-        return connection
-    except Error as e:
-        print(f"Error connecting to MySQL: {e}")
-        return None
 
 app.register_blueprint(personnel_info)
 app.register_blueprint(weight_ms)
@@ -51,12 +36,7 @@ app.register_blueprint(add_user_bp)
 
 
 
-def check_role(user, required_role):
-    """Helper to check role with whitespace handling"""
-    if not user:
-        return False
-    user_role = user.get('role', '').strip()
-    return user_role == required_role.strip()
+
 
 @app.route("/admin_login", methods=["POST",'GET'])
 def admin_login():
@@ -1419,7 +1399,7 @@ def manPower():
         print('There was an exception',str(e))
         return jsonify({'error':'Internal Server Error'}),500
 
-
+#-------------parade state count fuction--------------------------------------------
 @app.route('/api/get-parade-count')
 def get_parade_count():
     conn = get_db_connection()
@@ -1479,6 +1459,8 @@ def line_unfit_graph():
 
 # single route for all dashboard
 # #################################################################### MAIN API FOR DASHB AORD ##############################
+
+
 JCO_RANKS = ('Subedar', 'Naib Subedar', 'Subedar Major')
 
 OFFICER_RANKS = (
@@ -1921,6 +1903,7 @@ def get_co_all_dashboard_data(date_str):
         total_jcos = sum(row['jcos'] or 0 for row in manpower_data)
         total_other_ranks = sum(row['other_ranks'] or 0 for row in manpower_data)
         total_manpower = total_officers + total_jcos + total_other_ranks
+        print(total_manpower)
         
         return jsonify({
             'success': True,

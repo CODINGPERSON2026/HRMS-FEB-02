@@ -148,9 +148,10 @@
                             <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
+                                        
                                         <th>Army No.</th>
                                         <th>Rank</th>
+                                        <th>Name</th>
                                         <th>Company</th>
                                         <th class="text-center">Actions</th>
                                     </tr>
@@ -261,15 +262,17 @@
                     const safeReason = (s.reason || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
                     
                     row.innerHTML = `
-                        <td><strong>${s.name}</strong></td>
+                        
                         <td><code>${s.army_number}</code></td>
                         <td>${s.rank}</td>
+                        <td><strong>${s.name}</strong></td>
                         <td>${s.company || 'N/A'}</td>
                         <td class="text-center">
                             <button class="btn action-btn btn-view" title="View"
                                 data-army="${s.army_number}"
-                                data-name="${s.name}"
+                                
                                 data-rank="${s.rank}"
+                                data-name="${s.name}"
                                 data-company="${s.company || 'N/A'}"
                                 data-reason="${safeReason}"
                                 data-marked="${s.marked_on}">

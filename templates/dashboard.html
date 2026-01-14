@@ -336,8 +336,8 @@
     </div>
   </div>
 
-  {% set header = "15 Corps Engineering Signal Regiment" %}
-  {% set subscript = 'Welcome ' ~ role ~ ' ' ~ current_user_name %}
+  {% set header = "15 CORPS ENGINEERING SIGNAL REGIMENT" %}
+  {#{% set subscript = 'Welcome ' ~ role ~ ' ' ~ current_user_name %}#}
 
   {% include 'navbar/navbar.html' %}
 
@@ -428,7 +428,7 @@
       </div>
 
       <div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
-        <small class="text-muted">DETTACHMENT</small>
+        <small class="text-muted">DETACHMENT</small>
         <h3 id="locationCount">—</h3>
       </div>
 
@@ -462,7 +462,7 @@
 
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal"
         data-bs-target="#centerRollCallModal">
-        <small class="text-muted">CENTER ROLL CALL</small>
+        <small class="text-muted">CENTRAL ROLL CALL</small>
         <h3 id="center-roll-points">—</h3>
       </div>
 
@@ -800,6 +800,8 @@
       }
 
       // ========== MAIN DASHBOARD DATA LOAD ==========
+
+
       async function loadDashboardDataSingleAPI() {
         try {
           const res = await fetch('/api/dashboard_summary');
@@ -837,6 +839,7 @@
           updateIfExists('totalCoursesDone', data.courses_count);
           updateIfExists('center-roll-points', data.roll_call_pending_points);
           updateIfExists('board-count', data.boards_count);
+          
       
         } catch (err) {
           console.error("Error loading dashboard data:", err);
