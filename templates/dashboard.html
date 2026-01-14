@@ -308,6 +308,24 @@
   .modal-fullscreen .modal-content {
     height: 100%;
   }
+
+  .modal-backdrop {
+    --bs-backdrop-opacity: 0.12;
+  }
+
+  .hide {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+  }
+
+  .show {
+    max-height: 1000px;
+    /* must be larger than content height */
+    opacity: 1;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+  }
 </style>
 
 <!-- Dashboard with Local Loader -->
@@ -373,7 +391,7 @@
 
       {% if role in ['CO','2IC','ADJUTANT','OC'] %}
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">ADD EVENT </button>
-      <!-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#countModal">VIEW COUNT</button> -->
+
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">PARADE STATE</button>
       {% endif %}
 
@@ -395,8 +413,8 @@
       <i class="fas fa-chevron-down"></i>
     </button>
 
-    {% if role in ['CO','2IC','ADJUTANT','OC'] %}
-
+    
+    {% if role in ['CO', '2IC', 'ADJUTANT'] %}
     <div id="stats-card-grid" class="stats-grid show">
 
       <!-- First Row Cards -->
@@ -405,8 +423,8 @@
         <small class="text-muted">PARADE STATE</small>
         <h3 id="mainPower"></h3>
       </div>
-
-
+      {% endif %}
+      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#attachmentModal">
 
 
@@ -414,11 +432,15 @@
         <h3 id='attachment-count'>4</h3>
       </div>
 
+      {% endif %}
+
+      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" id="openCourses">
         <small class="text-muted">COURSE</small>
         <h3 id="totalCoursesDone">—</h3>
       </div>
-
+      {% endif %}
+      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" id="interview-card">
         <small class="text-muted">KUNBA INTERVIEW</small>
         <h3>
@@ -426,50 +448,88 @@
         </h3>
         <span id="interview%" class="text-danger">-2.1%</span>
       </div>
+      {% endif %}
 
+
+
+
+
+      {% if role in ['KUNBA TASK'] %}
+<div class="card p-3 text-center"
+     style="cursor:pointer"
+     
+     data-bs-toggle="modal"
+     data-bs-target="#kunbaInterviewModal">
+
+  <small class="text-muted">KUNBA INTERVIEW</small>
+  <h3>
+    <span id="interview-Count"></span>/<span id="total-count"></span>
+  </h3>
+  <span id="interview%" class="text-danger">-2.1%</span>
+</div>
+
+
+<div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
+  <small class="text-muted">TASK ASSIGNED</small>
+  <h3 id="">—</h3>
+</div>
+{% endif %}
+
+
+
+
+      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
         <small class="text-muted">DETACHMENT</small>
         <h3 id="locationCount">—</h3>
       </div>
+      {% endif %}
+
+      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
 
       <div class="card p-3 text-center" style="cursor:pointer" id="openSensitive">
         <small class="text-muted">SENSITIVE INDL</small>
         <h3 id='sensitive-count'>4</h3>
       </div>
 
+      {% endif %}
+
+      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" id="openBoardDetails">
         <small class="text-muted">BOO's</small>
         <h3 id="board-count">98</h3>
       </div>
 
+      {% endif %}
+      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" id="loanDetailGraph" data-bs-toggle="modal"
-      data-bs-target="#loanModal">
-      <small class="text-muted">LOAN</small>
-      <h3 id="active-loan-count">—</h3>
-    </div>
+        data-bs-target="#loanModal">
+        <small class="text-muted">LOAN</small>
+        <h3 id="active-loan-count">—</h3>
+      </div>
+      {% endif %}
 
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
-      <div class="card p-3 text-center" style="cursor:pointer; transition: all 0.3s ease;" 
-     
-    <small class="text-muted" id="openProjects" >TOTAL PROJECTS</small>
-    <h3 class="mb-0" id="get_projects_count">90/125</h3>
-  
-</div>
+      <div class="card p-3 text-center" style="cursor:pointer; transition: all 0.3s ease;" <small class="text-muted"
+        id="openProjects">TOTAL PROJECTS</small>
+        <h3 class="mb-0" id="get_projects_count">90/125</h3>
+
+      </div>
       {% endif %}
-     
+
 
       <!-- Second Row Cards -->
-
+      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal"
         data-bs-target="#centerRollCallModal">
         <small class="text-muted">CENTRAL ROLL CALL</small>
         <h3 id="center-roll-points">—</h3>
       </div>
 
-
+      {% endif %}
     </div>
 
-    {% endif %}
+    
 
     <!-- Add Event Modal -->
     <div class="modal fade" id="addEventModal" tabindex="-1">
@@ -477,6 +537,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Add Today's Event</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <form id="eventForm">
@@ -508,7 +569,9 @@
     {% include 'modals/roll_call/modal.html' %}
     {% include 'modals/roll_call/view_roll_call.html' %}
     {% include 'modals/course/courses.html' %}
-    {% include 'projects/modal/view_all_project.html' %}
+    {% include 'modals/interview_pending/jco-update-modal.html' %}
+    {% include 'modals/success-modal/modal.html' %}
+
 
     <!-- Parade State Modal -->
     <div class="modal fade modal-fullscreen" id="paradeStateModal" tabindex="-1">
@@ -527,29 +590,7 @@
 
 
 
-    <!-- start course model to see table format ========================================================-->
 
-
-    <!-- ✅✅ PUT COURSE MODAL HERE ✅✅ -->
-    <!-- ================= COURSE DETAILS MODAL ================= -->
-    <div class="modal fade" id="courseModal" tabindex="-1">
-      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-
-          <div class="modal-header">
-            <h5 class="modal-title">Course Details</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-
-          <div class="modal-body" id="courseModalBody">
-            <div class="text-center text-muted">Loading...</div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!--============== end course model to see table format-->
 
 
     <!-- Interview Pending Modal -->
@@ -570,9 +611,19 @@
     <canvas id="unfitChart" width="900" height="300"></canvas>
     
   </div> -->
+
+
+    <script>
+      document.addEventListener('hidden.bs.modal', function () {
+        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+      });
+    </script>
+
     <script>
       // ========== SAFE ELEMENT CHECKER ==========
-       function safeQuerySelector(selector) {
+      function safeQuerySelector(selector) {
         const element = document.querySelector(selector);
         if (!element) {
           console.warn(`Element not found: ${selector}`);
@@ -585,7 +636,7 @@
         if (element) {
           element.addEventListener(event, handler);
         }
-      } 
+      }
 
       // ========== CONDITIONAL EVENT LISTENERS ==========
       function setupConditionalEventListeners() {
@@ -620,19 +671,19 @@
 
         const showBtn = safeQuerySelector('#show-btn');
         const statsGrid = safeQuerySelector('#stats-card-grid');
-        if (showBtn && statsGrid) {
-          showBtn.addEventListener('click', function () {
-            if (statsGrid.classList.contains("hide")) {
-              statsGrid.classList.remove("hide");
-              statsGrid.classList.add("show");
-              this.innerHTML = '<i class="fas fa-chevron-down"></i>';
-            } else {
-              statsGrid.classList.remove("show");
-              statsGrid.classList.add("hide");
-              this.innerHTML = '<i class="fas fa-chevron-up"></i>';
-            }
-          });
-        }
+        // if (showBtn && statsGrid) {
+        //   showBtn.addEventListener('click', function () {
+        //     if (statsGrid.classList.contains("hide")) {
+        //       statsGrid.classList.remove("hide");
+        //       statsGrid.classList.add("show");
+        //       this.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        //     } else {
+        //       statsGrid.classList.remove("show");
+        //       statsGrid.classList.add("hide");
+        //       this.innerHTML = '<i class="fas fa-chevron-up"></i>';
+        //     }
+        //   });
+        // }
 
         // Leave Requests Button
         const leaveRequestsBtn = safeQuerySelector('#leaveRequestsBtn');
@@ -720,9 +771,10 @@
         window.location.href = "/mark_personnel";
       });
 
-    
+
 
       document.getElementById("openProjects").addEventListener("click", function () {
+
         window.location.href = "/projects";
       });
 
@@ -734,11 +786,14 @@
         btn = this
 
         if (grid.classList.contains("hide")) {
+
           grid.classList.remove("hide");
           grid.classList.add("show");
           btn.innerHTML = '<i class="fas fa-chevron-down"></i>'
         } else {
+
           grid.classList.remove("show");
+
           grid.classList.add("hide");
           btn.innerHTML = '<i class="fas fa-chevron-up"></i>'
         }
@@ -789,7 +844,7 @@
           el.innerText = value ?? '0';
         }
       }
-      
+
       // ========== DASHBOARD LOADER ==========
       function hideLoaderAndShowContent() {
         const contentLoader = safeQuerySelector('#contentLoader');
@@ -806,17 +861,17 @@
         try {
           const res = await fetch('/api/dashboard_summary');
           if (!res.ok) throw new Error("Failed to fetch dashboard data");
-      
+
           const data = await res.json();
           console.log(data);
-      
+
           updateIfExists('locationCount', data.detachments);
           updateIfExists(
-  'mainPower',
-  `${data.manpower.officerCount} - ${data.manpower.jcoCount} - ${data.manpower.orCount}`
-);
+            'mainPower',
+            `${data.manpower.officerCount} - ${data.manpower.jcoCount} - ${data.manpower.orCount}`
+          );
 
-      
+
           updateIfExists(
             'interview-Count',
             data.interview?.pending_count
@@ -831,7 +886,7 @@
               ? `${data.interview.percentage}%`
               : '0%'
           );
-      
+
           updateIfExists('attachment-count', data.attachment_count);
           updateIfExists('get_projects_count', data.projects);
           updateIfExists('sensitive-count', data.sensitive_count);
@@ -839,15 +894,15 @@
           updateIfExists('totalCoursesDone', data.courses_count);
           updateIfExists('center-roll-points', data.roll_call_pending_points);
           updateIfExists('board-count', data.boards_count);
-          
-      
+
+
         } catch (err) {
           console.error("Error loading dashboard data:", err);
         } finally {
           hideLoaderAndShowContent();
         }
       }
-      
+
 
       // ========== INITIALIZATION ==========
       function initializeDashboard() {

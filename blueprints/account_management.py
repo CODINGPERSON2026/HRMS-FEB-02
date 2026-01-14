@@ -102,7 +102,7 @@ def update_balance():
 # -----------------------------
 # Fetch Department Statement
 # -----------------------------
-from flask import request
+
 
 @accounts_bp.route('/departments/<int:department_id>/statement', methods=['GET'])
 def get_statement(department_id):
@@ -142,4 +142,33 @@ def get_statement(department_id):
         'page': page,
         'per_page': per_page,
         'has_more': len(transactions) == per_page  # flag to check if more pages exist
+    })
+# -----------------------------
+# Fetch Last 10 Transactions for All Grants
+# -----------------------------
+@accounts_bp.route('/departments/all_transactions', methods=['GET'])
+def get_all_transactions():
+    limit = int(request.args.get('limit', 10))  # default 10
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute(
+        """SELECT t.id, t.department_account_id, d.account_holder,
+                  DATE_FORMAT(t.transaction_date, '%d %b %Y') AS date,
+                  t.old_balance, t.credit_amount, t.debit_amount, t.new_balance, t.remarks
+           FROM department_transactions t
+           JOIN department_accounts d ON t.department_account_id = d.id
+           ORDER BY t.transaction_date DESC
+           LIMIT %s""",
+        (limit,)
+    )
+    transactions = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({
+        'transactions': transactions,
+        'has_more': False  # no infinite scroll for all grants
     })

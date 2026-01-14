@@ -10,7 +10,7 @@ from flask import send_file
 from functools import wraps
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 app.secret_key = os.urandom(24)
 
@@ -27,19 +27,13 @@ app.register_blueprint(task_bp)
 app.register_blueprint(accounts_bp)
 app.register_blueprint(loan_bp)
 app.register_blueprint(roll_call_bp)
+app.register_blueprint(inteview_bp)
 app.register_blueprint(add_user_bp)
-
-
-
-
-
-
-
-
 
 
 @app.route("/admin_login", methods=["POST",'GET'])
 def admin_login():
+    print('in this route of admin login')
     if request.method == 'GET':
         return render_template('/loginpage/loginpage.html')
     data = request.get_json()
@@ -47,6 +41,8 @@ def admin_login():
     password = data.get("password")
 
     conn = get_db_connection()
+    if conn is None:
+         return "Database connection failed", 500
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (email, password))
@@ -68,7 +64,8 @@ def admin_login():
         "email": user["email"],
         'username':user['username'],
         "role": user["role"],
-        'company':user['company']
+        'company':user['company'],
+        'army_number':user['army_number']
     }
 
     token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
@@ -266,27 +263,27 @@ def get_dets():
     conn.close()
     return jsonify({'count': result['count']})
 
-@app.route('/get_interview_pending_count')
-def interview():
-    conn = get_db_connection()
-    cursor  =  conn.cursor(dictionary=True)
-    query = """
-    SELECT 
-        SUM(interview_status = 0) AS pending_count,
-        COUNT(*) AS total_count
-    FROM personnel
-"""
+# @app.route('/get_interview_pending_count')
+# def interview():
+#     conn = get_db_connection()
+#     cursor  =  conn.cursor(dictionary=True)
+#     query = """
+#     SELECT 
+#         SUM(interview_status = 0) AS pending_count,
+#         COUNT(*) AS total_count
+#     FROM personnel
+# """
 
-    cursor.execute(query)
-    result = cursor.fetchone()
-    pending_count = result["pending_count"]
-    total_count = result["total_count"]
-    percentage = 0
-    if total_count > 0:
-        percentage = pending_count/total_count * 100
-    cursor.close()
-    conn.close()
-    return jsonify({'result':result,'percentage':round(percentage, 2)})
+#     cursor.execute(query)
+#     result = cursor.fetchone()
+#     pending_count = result["pending_count"]
+#     total_count = result["total_count"]
+#     percentage = 0
+#     if total_count > 0:
+#         percentage = pending_count/total_count * 100
+#     cursor.close()
+#     conn.close()
+#     return jsonify({'result':result,'percentage':round(percentage, 2)})
 
 
 @app.route('/get_pending_interview_list')
@@ -1171,6 +1168,7 @@ def today_event_alarm():
 
 @app.route('/projects')
 def get_projects():
+    print('in this project route')
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     user = require_login()
@@ -1526,11 +1524,24 @@ WHERE DATE(updated_at) = %s
             }
 
         # 3️⃣ Interview Pending
-        cursor.execute(
-            "SELECT SUM(interview_status = 0) AS pending_count, COUNT(*) AS total_count FROM personnel" + 
-            (f" WHERE company = %s" if company != "Admin" else ""),
-            (company,) if company != "Admin" else ()
-        )
+        if company != "Admin":
+             query = """
+            SELECT 
+                SUM(interview_status = 0) AS pending_count,
+                COUNT(*) AS total_count
+            FROM personnel
+            WHERE company = %s
+        """
+             cursor.execute(query, (company,))
+        else:
+            query = """
+            SELECT 
+                SUM(interview_status = 0) AS pending_count,
+                COUNT(*) AS total_count
+            FROM personnel
+        """
+            cursor.execute(query)
+
         interview_result = cursor.fetchone()
         pending_count = interview_result['pending_count'] if interview_result else 0
         total_interview_count = interview_result['total_count'] if interview_result else 0
@@ -1625,7 +1636,7 @@ WHERE DATE(updated_at) = %s
         
         
 
-        print("these are roll call points",roll_call_pending_count)
+        print('interview pending',pending_count)
 
         # Return combined JSON
         return jsonify({
@@ -2874,6 +2885,43 @@ def get_courses():
     conn.close()
 
     return jsonify(data)
+
+
+@app.route('/account/departments/all_transactions')
+def all_transactions():
+    limit = int(request.args.get('limit', 10))
+    query = """
+        SELECT date, account_holder, old_balance, credit_amount, debit_amount, new_balance
+        FROM transactions
+        ORDER BY date DESC
+        LIMIT %s
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(query, (limit,))
+    transactions = cursor.fetchall()
+    return jsonify({'transactions': transactions})
+
+
+def reset_interview_status():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE personnel
+        SET interview_status = 0
+        WHERE TIMESTAMPDIFF(DAY, updated_at, NOW()) > 1
+    """)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("Interview statuses reset where needed")
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=reset_interview_status, trigger="interval", seconds=30)  # check every 30s
+scheduler.start()
+
+
+
 
 
 

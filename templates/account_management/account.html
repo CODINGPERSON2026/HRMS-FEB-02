@@ -45,7 +45,7 @@
   }
 
   #debit-percentage {
-    color: #dc2626;  /* always red */
+    color: #dc2626;
     font-weight: 600;
   }
 
@@ -267,6 +267,13 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(res => res.json())
       .then(data => {
         departmentSelect.innerHTML = '<option selected disabled>-- Select Grant --</option>';
+        
+        // Add "All Grants" option
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = 'All Grants (Last 10 Transactions)';
+        departmentSelect.appendChild(allOption);
+
         updateDepartmentSelect.innerHTML = '<option selected disabled>-- Select Grant --</option>';
         data.forEach(dep => {
           const option1 = document.createElement('option');
@@ -289,32 +296,31 @@ document.addEventListener('DOMContentLoaded', () => {
     noGrantPlaceholder.style.display = show ? 'flex' : 'none';
   }
 
-  // Initially show placeholder
   showPlaceholder(true);
 
-  // Load Grant Statement (paginated)
+  // Load Grant Statement / All Grants
   function loadDepartmentStatement(depId, page=1) {
-    if(!depId || loading || !hasMore) return;
+    if(!depId || loading) return;
     loading = true;
 
-    fetch(`/account/departments/${depId}/statement?page=${page}`)
+    let url = '';
+    if(depId === 'all') {
+      url = `/account/departments/all_transactions?limit=10`;
+      currentPage = 1;
+    } else {
+      url = `/account/departments/${depId}/statement?page=${page}`;
+    }
+
+    fetch(url)
       .then(res => res.json())
       .then(data => {
-        if(page === 1) {
-          statementTableBody.innerHTML = '';
-          hasMore = true;
-        }
-
+        statementTableBody.innerHTML = '';
         showPlaceholder(false);
 
-        if(data.current_balance !== undefined){
+        if(depId !== 'all' && data.current_balance !== undefined){
           currentBalanceDisplay.textContent = `₹${Number(data.current_balance).toLocaleString()}`;
-          
-          // Also update dropdown option text
-          const opt = departmentSelect.querySelector(`option[value='${depId}']`);
-          if(opt) {
-            opt.textContent = `${opt.textContent.split('(')[0].trim()} (₹${Number(data.current_balance).toLocaleString()})`;
-          }
+        } else {
+          currentBalanceDisplay.textContent = ''; // hide balance for All Grants
         }
 
         data.transactions.forEach(tx => {
@@ -331,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
           statementTableBody.appendChild(row);
         });
 
-        hasMore = data.has_more;
+        hasMore = data.has_more !== undefined ? data.has_more : false;
         loading = false;
       })
       .catch(err => { console.error(err); loading = false; });
@@ -347,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Infinite scroll
   statementCard.addEventListener('scroll', () => {
-    if(statementCard.scrollTop + statementCard.clientHeight >= statementCard.scrollHeight - 10 && !loading && hasMore) {
+    if(statementCard.scrollTop + statementCard.clientHeight >= statementCard.scrollHeight - 10 && !loading && hasMore && selectedDep !== 'all') {
       currentPage++;
       loadDepartmentStatement(selectedDep, currentPage);
     }
@@ -418,14 +424,12 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         bootstrap.Modal.getInstance(document.getElementById('updateBalanceModal')).hide();
 
-        // Auto-select updated grant and reload table
         departmentSelect.value = depId;
         selectedDep = depId;
         currentPage = 1;
         hasMore = true;
         loadDepartmentStatement(depId, currentPage);
         location.reload()
-
       }, 500);
     });
   });
