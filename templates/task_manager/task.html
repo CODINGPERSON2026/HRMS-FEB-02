@@ -396,10 +396,10 @@
             data.forEach(item => {
               const li = document.createElement("div");
               li.className = "list-group-item";
-              li.textContent = `${item.name} | ${item.rank} | ${item.company}`;
+              li.textContent = `${item.name} | ${item.rank} | ${item.company} | ${item.army_number}`;
               li.addEventListener("click", () => {
-                document.getElementById("assignedTo").value = item.name;
-                document.getElementById("searchPersonnel").value = `${item.name}`;
+                document.getElementById("assignedTo").value = item.army_number;
+                document.getElementById("searchPersonnel").value = `${item.army_number}`;
                 box.classList.remove("show");
               });
               box.appendChild(li);

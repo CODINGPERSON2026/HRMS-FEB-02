@@ -1361,7 +1361,7 @@ def add_head():
     except Exception as e:
         return jsonify(status='error', message=str(e))
 
-
+ranks = ('Naib Subedar', 'Subedar', 'Subedar Major')
 @app.route("/search_officer")
 def search_officer():
     name_query = request.args.get("name", "")
@@ -1370,16 +1370,16 @@ def search_officer():
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT name,`rank`, company
-        FROM personnel
-        WHERE name LIKE %s AND `rank` = 'JCO'
-        LIMIT 10
-    """, (f"%{name_query}%",))
+    SELECT name, `rank`, company,army_number
+    FROM personnel
+    WHERE name LIKE %s AND `rank` IN (%s, %s, %s)
+    LIMIT 10
+""", (f"%{name_query}%", *ranks))
 
     results = cursor.fetchall()
     cursor.close()
     conn.close()
-
+    print('results',results)
     return jsonify(results)
 
 
@@ -1473,6 +1473,7 @@ def dashboard_summary():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     user = require_login()
+    current_user = user['army_number']
     company = user['company']
     print("Logged-in user's company:", company)
     
@@ -1525,14 +1526,19 @@ WHERE DATE(updated_at) = %s
 
         # 3️⃣ Interview Pending
         if company != "Admin":
+             cursor.execute('select home_state from personnel where army_number =  %s',(current_user,))
+             home_result = cursor.fetchone()
+             home_state = home_result['home_state'] 
+
+
              query = """
             SELECT 
                 SUM(interview_status = 0) AS pending_count,
                 COUNT(*) AS total_count
             FROM personnel
-            WHERE company = %s
+            WHERE company = %s AND home_state = %s
         """
-             cursor.execute(query, (company,))
+             cursor.execute(query, (company,home_state))
         else:
             query = """
             SELECT 
@@ -1633,6 +1639,28 @@ WHERE DATE(updated_at) = %s
         roll_call_result = cursor.fetchone()
         roll_call_pending_count = roll_call_result['count'] if roll_call_result else 0
 
+
+
+
+        # 🔹 Tasks Count (Assigned to current user)
+        cursor.execute(
+            """
+            SELECT 
+                COUNT(*) AS total_tasks,
+                SUM(task_status != 'COMPLETED') AS pending_tasks
+            FROM tasks
+            WHERE assigned_to = %s
+            """,
+            (current_user,)
+        )
+
+        task_result = cursor.fetchone()
+
+        total_tasks = task_result['total_tasks'] if task_result else 0
+        pending_tasks = task_result['pending_tasks'] if task_result else 0
+        pending_percentage = round((pending_tasks / total_tasks) * 100, 2) if total_tasks > 0 else 0
+
+
         
         
 
@@ -1642,6 +1670,11 @@ WHERE DATE(updated_at) = %s
         return jsonify({
             "status": "success",
             "detachments": detachments,
+            "tasks": {
+    "total": total_tasks,
+    "pending": pending_tasks,
+    'pending_percentage':pending_percentage
+},
             "manpower": manpower,
             "interview": {
                 "pending_count": pending_count,
@@ -2908,8 +2941,11 @@ def reset_interview_status():
     cursor = conn.cursor()
     cursor.execute("""
         UPDATE personnel
-        SET interview_status = 0
-        WHERE TIMESTAMPDIFF(DAY, updated_at, NOW()) > 1
+SET interview_status = 0
+WHERE interview_status = 1
+  AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) > 1;
+
+
     """)
     conn.commit()
     cursor.close()

@@ -392,7 +392,7 @@
       {% if role in ['CO','2IC','ADJUTANT','OC'] %}
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">ADD EVENT </button>
 
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">PARADE STATE</button>
+      <!-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">PARADE STATE</button> -->
       {% endif %}
 
       <!-- UPDATED: Parade Data Button for O SEC NCO and ONCO -->
@@ -469,10 +469,16 @@
 </div>
 
 
-<div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
-  <small class="text-muted">TASK ASSIGNED</small>
-  <h3 id="">—</h3>
+<div class="card p-3 text-center" style="cursor:pointer"
+     id="task-assigned"
+     data-bs-toggle="modal"
+     data-bs-target="#taskModal">
+  <small class="text-muted">TASK PENDING</small>
+  <h3 id="task-count">—</h3>
+  <span id="task-pending" class="text-danger">-2.1%</span>
 </div>
+
+
 {% endif %}
 
 
@@ -571,6 +577,7 @@
     {% include 'modals/course/courses.html' %}
     {% include 'modals/interview_pending/jco-update-modal.html' %}
     {% include 'modals/success-modal/modal.html' %}
+    {% include 'task_manager/update_task_by_jco.html' %}
 
 
     <!-- Parade State Modal -->
@@ -894,6 +901,15 @@
           updateIfExists('totalCoursesDone', data.courses_count);
           updateIfExists('center-roll-points', data.roll_call_pending_points);
           updateIfExists('board-count', data.boards_count);
+          const pending = data.tasks?.pending ?? 0;
+          const total = data.tasks?.total ?? 0;
+          
+          updateIfExists('task-count', `${pending} / ${total}`);
+          
+          const percentage = total > 0 ? ((pending / total) * 100).toFixed(1) : 0;
+          updateIfExists('task-pending', `${percentage}%`);
+
+
 
 
         } catch (err) {

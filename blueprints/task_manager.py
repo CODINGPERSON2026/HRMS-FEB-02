@@ -137,3 +137,65 @@ def edit_task(task_id):
     except Exception as e:
         print("Update Task Error:", e)
         return jsonify({"status": "error", "message": "Failed to update task"}), 500
+    
+
+
+
+@task_bp.route('/get_my_tasks')
+def get_my_tasks():
+    user =require_login()
+    current_user = user['army_number']  # assume username is stored in session
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT id, task_name, description, priority, due_date, task_status, remarks, range_status
+        FROM tasks
+        WHERE assigned_to = %s
+        ORDER BY due_date ASC
+    """, (current_user,))
+    tasks = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return jsonify({'tasks': tasks})
+
+
+
+@task_bp.route('/update_task', methods=['POST'])
+def jco_update_task():
+    try:
+        data = request.get_json()
+        task_id = data.get('id')
+        field = data.get('field')
+        value = data.get('value')
+
+        if not task_id or not field:
+            return jsonify({'error': 'Missing id or field'}), 400
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Map field to column name (add more if needed)
+        allowed_fields = {
+            'task_status': 'task_status',
+            'remarks': 'remarks',
+            'range_status': 'range_status'
+        }
+
+        if field not in allowed_fields:
+            return jsonify({'error': 'Invalid field'}), 400
+
+        column = allowed_fields[field]
+
+        # Handle range_status as integer
+        if field == 'range_status':
+            value = int(value)
+
+        query = f"UPDATE tasks SET {column} = %s WHERE id = %s"
+        cursor.execute(query, (value, task_id))
+        
+        cursor.close()
+
+        return jsonify({'success': True, 'message': 'Task updated successfully'})
+
+    except Exception as e:
+        mysql.connection.rollback()
+        return jsonify({'error': str(e)}), 500
