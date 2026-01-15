@@ -533,6 +533,19 @@
       </div>
 
       {% endif %}
+      <!-- Second Row Cards -->
+{% if role in ['CO', '2IC', 'ADJUTANT'] %}
+<div class="card p-3 text-center"
+     style="cursor:pointer"
+     data-bs-toggle="modal"
+     data-bs-target="#addUserModal">
+
+  <small class="text-muted">ADD USER</small>
+  <h3>+</h3>
+
+</div>
+{% endif %}
+
     </div>
 
     
@@ -578,6 +591,10 @@
     {% include 'modals/interview_pending/jco-update-modal.html' %}
     {% include 'modals/success-modal/modal.html' %}
     {% include 'task_manager/update_task_by_jco.html' %}
+    {% include 'modals/adduser/user.html' %}
+    {% if role in ['O SEC NCO', 'ONCO'] %}
+      {% include 'modals/parade_data/index.html' %}
+    {% endif %}
 
 
     <!-- Parade State Modal -->

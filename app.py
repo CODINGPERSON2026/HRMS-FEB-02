@@ -2946,6 +2946,7 @@ WHERE interview_status = 1
   AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) > 1;
 
 
+                   
     """)
     conn.commit()
     cursor.close()
