@@ -137,27 +137,13 @@
     cursor: pointer;
   }
 
-  .btn-outline-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-  }
+  
 
-  .btn-outline-primary:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
-  }
+ 
 
-  .btn-warning {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: white;
-  }
+  
 
-  .btn-warning:hover {
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
-  }
+  
 
   /* Stats Grid */
   .stats-grid {
@@ -376,24 +362,50 @@
     <div class="action-buttons">
       {% if role in ['SEC NCO','SEC JCO'] %}
 
-      <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
         ASSIGN PERSONNAL
       </button>
-      <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#rollCallPoints">
+      
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#rollCallPoints">
         ROLL CALL POINTS
       </button>
 
       {% endif %}
+      
 
+      {% if role == 'CO' %}
+      <button
+        class="btn btn-primary position-relative"
+        data-bs-toggle="modal"
+        data-bs-target="#coRejectedModal"
+        id="coRejectedBtn">
+        REJECTED LEAVES
+        <span
+          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+          id="coRejectedCount">
+          10
+          <span class="visually-hidden">unread messages</span>
+        </span>
+      </button>
+      {% endif %}
+      
+      
+
+
+      {% if role in ['SEC NCO','SEC JCO','OC','2IC'] %}
       <button id="leaveRequestsBtn" class="btn btn-primary">
         LEAVE REQUESTS
       </button>
-
+      {% endif %}
       {% if role in ['CO','2IC','ADJUTANT','OC'] %}
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">ADD EVENT </button>
 
+
       <!-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">PARADE STATE</button> -->
       {% endif %}
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+        ADD USER
+      </button>
 
       <!-- UPDATED: Parade Data Button for O SEC NCO and ONCO -->
       {% if role in ['O SEC NCO', 'ONCO'] %}
@@ -533,17 +545,17 @@
       </div>
 
       {% endif %}
+      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
+      <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal"
+        data-bs-target="#agniveers">
+        <small class="text-muted">AGNIVEER</small>
+        <h3 id="agniveer_count">—</h3>
+      </div>
+
+      {% endif %}
       <!-- Second Row Cards -->
 {% if role in ['CO', '2IC', 'ADJUTANT'] %}
-<div class="card p-3 text-center"
-     style="cursor:pointer"
-     data-bs-toggle="modal"
-     data-bs-target="#addUserModal">
 
-  <small class="text-muted">ADD USER</small>
-  <h3>+</h3>
-
-</div>
 {% endif %}
 
     </div>
@@ -592,8 +604,12 @@
     {% include 'modals/success-modal/modal.html' %}
     {% include 'task_manager/update_task_by_jco.html' %}
     {% include 'modals/adduser/user.html' %}
+    {% include 'modals/adduser/user.html' %}
     {% if role in ['O SEC NCO', 'ONCO'] %}
       {% include 'modals/parade_data/index.html' %}
+    {% endif %}
+    {% if role =='CO'%}
+      {% include 'modals/leaverequest/co-rejected-view.html' %}
     {% endif %}
 
 
@@ -912,6 +928,7 @@
           );
 
           updateIfExists('attachment-count', data.attachment_count);
+          updateIfExists('agniveer_count', data.agniveer_count);
           updateIfExists('get_projects_count', data.projects);
           updateIfExists('sensitive-count', data.sensitive_count);
           updateIfExists('active-loan-count', data.loan_count);
@@ -936,6 +953,25 @@
         }
       }
 
+
+      async function updateRejectedLeaveCount() {
+        try {
+          const res = await fetch("/apply_leave/rejected_leaves");
+          if (!res.ok) throw new Error("Failed to fetch rejected leaves");
+      
+          const { data } = await res.json();
+          const count = data ? data.length : 0;
+      
+          const badge = document.getElementById("coRejectedCount");
+          badge.innerText = count;
+      
+          // Optional: hide badge if 0
+          badge.style.display = count > 0 ? "inline-block" : "none";
+      
+        } catch (err) {
+          console.error("Error fetching rejected leaves count:", err);
+        }
+      }
 
       // ========== INITIALIZATION ==========
       function initializeDashboard() {
@@ -963,6 +999,7 @@
       document.addEventListener('DOMContentLoaded', () => {
         console.log('DOM fully loaded for role:', '{{ role }}');
         initializeDashboard();
+        updateRejectedLeaveCount()
       });
 
       // ========== SAFE UPDATE DATE DISPLAY ==========
@@ -982,6 +1019,12 @@
           loadUnfitGraph(selectedCompany);
         }
       });
+
+
+
+
+
+
 
       // ========== INITIAL CHART LOAD ==========
       document.addEventListener("DOMContentLoaded", () => {

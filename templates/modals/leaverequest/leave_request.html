@@ -481,7 +481,13 @@ async function loadRejectedLeaves() {
             <td>${row.army_number}</td>
             <td>${row.leave_type}</td>
             <td>${row.leave_days}</td>
-            <td><button class="btn btn-sm btn-danger" onclick="viewRejectedLeave(${row.id})">View</button></td>
+            <td>
+  <button class="btn btn-sm btn-danger me-1" onclick="viewRejectedLeave(${row.id})">View</button>
+</td>
+<td>
+  <button class="btn btn-sm btn-warning" onclick="undoReject(${row.id})">Undo</button>
+</td>
+
           </tr>`;
       });
     }
@@ -503,6 +509,35 @@ document.getElementById("leaveRequestsBtn").addEventListener("click", () => {
   else if (activeTab.id === "recommended-tab") loadRecommendedLeaves();
   else if (activeTab.id === "rejected-tab") loadRejectedLeaves();
 });
+
+
+
+async function undoReject(leaveId) {
+  alert(leaveId)
+  if (!confirm("Undo rejection and move back to pending?")) return;
+
+  try {
+    const res = await fetch("/apply_leave/undo_rejected_leave", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leave_id: leaveId })
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Failed");
+
+    alert("Leave moved back to pending");
+    loadRejectedLeaves();
+    loadLeaveRequests();
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Server error");
+  }
+}
+
+
+
 
 // Load data when switching tabs
 document.getElementById("pending-tab").addEventListener("shown.bs.tab", loadLeaveRequests);

@@ -506,6 +506,8 @@ def recommend_leave():
     if current_user_role == 'SEC JCO':
         sent_request_to = 'OC'
         request_status = 'Pending at OC'
+    
+
     try:
         # 1️⃣ Fetch leave request details
         cursor.execute("""
@@ -538,6 +540,9 @@ def recommend_leave():
         elif current_user_role == '2IC':
             sent_request_to = 'Approved'
             request_status = 'Approved'
+        elif  current_user_role == 'CO':
+            sent_request_to = 'Approved'
+            request_status  = 'Approved'
         print(sent_request_to)
         print(request_status)
     
@@ -867,6 +872,148 @@ def get_rejected_requests():
         return jsonify({
             "data": []
         }), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+
+
+
+@leave_bp.route("/undo_rejected_leave", methods=["POST"])
+def undo_reject_leave():
+    data = request.get_json()
+    leave_id = data.get("leave_id")
+    print("this is leave id",leave_id)
+    if not leave_id:
+        return jsonify({"message": "Leave ID missing"}), 400
+
+    user = require_login()
+    current_user_role = user['role']
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+
+    try:
+        # 1️⃣ Ensure leave exists & is rejected
+        cursor.execute("""
+            SELECT id
+            FROM leave_status_info
+            WHERE id = %s AND request_status like '%Rejected at%'
+        """, (leave_id,))
+        leave = cursor.fetchone()
+
+        if not leave:
+            return jsonify({"message": "Rejected leave not found"}), 404
+
+        # 2️⃣ Build role-based pending status
+        sent_request_to = current_user_role
+        request_status = f"Pending at {current_user_role}"
+
+        # 3️⃣ Undo rejection
+        cursor.execute("""
+            UPDATE leave_status_info
+            SET
+                request_sent_to = %s,
+                request_status = %s,
+                rejected_date = NULL,
+                reject_reason = NULL,
+                updated_at = NOW()
+            WHERE id = %s
+        """, (sent_request_to, request_status, leave_id))
+
+        conn.commit()
+
+        return jsonify({"message": "Leave moved back to pending"}), 200
+
+    except Exception as e:
+        conn.rollback()
+        print("UNDO ERROR:", e)
+        return jsonify({"message": "Server error"}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+
+
+
+@leave_bp.route("/rejected_leaves", methods=["GET"])
+def co_rejected_leaves():
+    print("in this routed route")
+    user = require_login()  # get current logged-in user
+    if user['role'] != 'CO':
+        return jsonify({"message": "Unauthorized"}), 403
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Fetch leaves that were rejected
+        cursor.execute("""
+            SELECT 
+                id,
+                army_number,
+                name,
+                leave_type,
+                leave_days,
+                reject_reason,
+                request_status,
+                updated_at
+            FROM leave_status_info
+            WHERE request_status LIKE 'Rejected at %'
+            ORDER BY updated_at DESC
+        """)
+
+        leaves = cursor.fetchall()
+        return jsonify({"data": leaves}), 200
+
+    except Exception as e:
+        print("Error fetching CO rejected leaves:", e)
+        return jsonify({"message": "Server error"}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+
+
+
+@leave_bp.route("/get_leave_for_co/<int:leave_id>", methods=["GET"])
+def get_leave(leave_id):
+    user = require_login()
+    if user['role'] != 'CO':
+        return jsonify({"message": "Unauthorized"}), 403
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id, army_number, name, leave_type, leave_days, from_date, to_date,
+                   leave_reason, reject_reason, request_status
+            FROM leave_status_info
+            WHERE id = %s
+        """, (leave_id,))
+        leave = cursor.fetchone()
+        if not leave:
+            return jsonify({"message": "Leave not found"}), 404
+
+        return jsonify({"data": leave}), 200
+
+    except Exception as e:
+        print("Error fetching leave details:", e)
+        return jsonify({"message": "Server error"}), 500
 
     finally:
         cursor.close()

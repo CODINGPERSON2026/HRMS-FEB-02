@@ -1660,6 +1660,14 @@ WHERE DATE(updated_at) = %s
         pending_tasks = task_result['pending_tasks'] if task_result else 0
         pending_percentage = round((pending_tasks / total_tasks) * 100, 2) if total_tasks > 0 else 0
 
+        # AGNIVEER
+        cursor.execute('''
+            SELECT COUNT(id) as agniveer_count from personnel where `rank` = 'Agniveer';
+
+''')
+        output_result = cursor.fetchone()
+        count_of_agniveer = output_result['agniveer_count'] if output_result else 0
+        print(count_of_agniveer,"this is agmiveer count")
 
         
         
@@ -1688,7 +1696,8 @@ WHERE DATE(updated_at) = %s
             'attachment_count':td_attachments,
             "courses_count": courses_count,
             "loan_count": loan_count,
-            "roll_call_pending_points": roll_call_pending_count
+            "roll_call_pending_points": roll_call_pending_count,
+            'agniveer_count':count_of_agniveer
         }), 200
 
     except Exception as e:
@@ -2954,7 +2963,7 @@ WHERE interview_status = 1
     print("Interview statuses reset where needed")
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=reset_interview_status, trigger="interval", seconds=30)  # check every 30s
+scheduler.add_job(func=reset_interview_status, trigger="interval", seconds=6630)  # check every 30s
 scheduler.start()
 
 
