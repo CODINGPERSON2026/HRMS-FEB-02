@@ -1497,7 +1497,7 @@ SELECT
     offr_present_unit AS officerCount,
     (or_present_unit + jco_present_unit + offr_present_unit) AS total
 FROM parade_state_daily
-WHERE DATE(updated_at) = %s
+WHERE DATE(report_date) = %s
 """     
         params = (yesterday,)
         # If company-based filtering exists
@@ -2968,7 +2968,32 @@ scheduler.start()
 
 
 
+@app.route('/get_all_agniveers')
 
+def get_agniveers():
+    batch = request.args.get('batch')
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    base_query = """
+        SELECT army_number,name,batch,company
+        FROM personnel
+        WHERE `rank` = %s
+    """
+    params = ['AGNIVEER']
+
+    if batch and batch != 'ALL':
+        base_query += " AND batch = %s"
+        params.append(batch)
+
+    cursor.execute(base_query, params)
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(rows)
 
 
 if __name__ == '__main__':

@@ -534,16 +534,16 @@
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label for="rank" class="form-label required">Rank</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="rank"
-                      required
-                    />
+                    <select class="form-control" id="rank" required>
+                      <option value="" disabled selected>Select Rank</option>
+                      <option value="Agniveer">Agniveer</option>
+                      <option value="Signal Man">Signal Man</option>
+                    </select>
                     <div class="error-message" id="rank-error">
-                      Only letters, numbers, hyphens, and underscores are allowed
+                      Please select a rank
                     </div>
                   </div>
+                
                   <div class="col-md-6 mb-3">
                     <label for="trade" class="form-label required">Trade</label>
                     <input
@@ -556,7 +556,20 @@
                       Only letters, numbers, hyphens, and underscores are allowed
                     </div>
                   </div>
+                
+                  <!-- Batch dropdown, hidden by default -->
+                  <div class="col-md-6 mb-3" id="batch-container" style="display: none;">
+                    <label for="batch" class="form-label required">Batch</label>
+                    <select class="form-control" id="batch">
+                      <option value="" disabled selected>Select Batch</option>
+                      <option value="Batch 1">Batch 1</option>
+                      <option value="Batch 2">Batch 2</option>
+                    </select>
+                  </div>
                 </div>
+                
+               
+                
 
                 <div class="row">
                   <div class="col-md-6 mb-3">
@@ -3705,12 +3718,21 @@
       addTableRow("discordTable", "addDiscordRow", "discord-input");
     });
 
+
+    let batch = null;
+
+// Check if batch dropdown is visible and exists
+const batchElement = document.getElementById("batch");
+if (batchElement && batchElement.style.display !== "none") {
+  batch = batchElement.value;
+}
     // Form data collection and submission
     function collectFormData() {
       const data = {
         name: document.getElementById("name").value,
         armyNumber: document.getElementById("armyNumber").value,
         rank: document.getElementById("rank").value,
+        batch:document.getElementById("batch")?.value || null,
         trade: document.getElementById("trade").value,
         dateOfEnrollment: document.getElementById("dateOfEnrollment").value,
         dateOfBirth: document.getElementById("dateOfBirth").value,
@@ -3956,5 +3978,21 @@
     setupDynamicTableValidation();
     setupFormSubmission();
   });
+
+  
+    const rankSelect = document.getElementById('rank');
+    const batchContainer = document.getElementById('batch-container');
+  
+    rankSelect.addEventListener('change', function() {
+      if (this.value === 'Agniveer') {
+        batchContainer.style.display = 'block';
+        document.getElementById('batch').required = true;
+      } else {
+        batchContainer.style.display = 'none';
+        document.getElementById('batch').required = false;
+      }
+    });
+  
+
 </script>
 {% endblock %}

@@ -546,13 +546,15 @@
 
       {% endif %}
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
-      <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal"
-        data-bs-target="#agniveers">
+      <div class="card p-3 text-center"
+           style="cursor:pointer"
+           data-bs-toggle="modal"
+           data-bs-target="#agniveersModal">
         <small class="text-muted">AGNIVEER</small>
         <h3 id="agniveer_count">—</h3>
       </div>
-
       {% endif %}
+      
       <!-- Second Row Cards -->
 {% if role in ['CO', '2IC', 'ADJUTANT'] %}
 
@@ -605,9 +607,16 @@
     {% include 'task_manager/update_task_by_jco.html' %}
     {% include 'modals/adduser/user.html' %}
     {% include 'modals/adduser/user.html' %}
+
+    {% if role in ['CO', '2IC', 'ADJUTANT'] %}
+    {% include 'modals/agniveer/modal.html' %}
+    {% endif %}
+
     {% if role in ['O SEC NCO', 'ONCO'] %}
       {% include 'modals/parade_data/index.html' %}
     {% endif %}
+
+
     {% if role =='CO'%}
       {% include 'modals/leaverequest/co-rejected-view.html' %}
     {% endif %}
