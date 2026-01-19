@@ -1606,7 +1606,8 @@ WHERE DATE(report_date) = %s
             }
 
         # 3️⃣ Interview Pending
-        if company != "Admin" and role != 'OC':
+        if role =='JCO':
+             print("in the route of interview penind ")
              cursor.execute('select home_state from personnel where army_number =  %s',(current_user,))
              home_result = cursor.fetchone()
              home_state = home_result['home_state'] 
