@@ -1023,6 +1023,7 @@ def daily_event():
 # ALARM FUNCTIONALITY
 # ===============================================
 
+
 @app.route('/api/assigned_alarm')
 def assigned_alarm():
     conn = None
@@ -1075,6 +1076,34 @@ def assigned_alarm():
             cursor.close()
         if conn:
             conn.close()
+
+
+
+
+@app.route("/api/assistant_test_alarm")
+def assistant_test_alarm():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = """
+    SELECT 
+        army_no,
+        name,
+        batch,
+        next_test_date
+    FROM assistant_tests
+    WHERE next_test_date > CURDATE()
+    ORDER BY next_test_date ASC
+    """
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({"rows": rows})
+
 
 
 
@@ -1158,6 +1187,52 @@ def today_event_alarm():
             cursor.close()
         if conn:
             conn.close()
+
+
+
+
+
+
+
+
+
+@app.route("/api/assistant_test_alarm")
+def assistant_test_alarm_api():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT army_no, name, batch,
+               asst_test1, asst_test2, asst_test3, asst_test4
+        FROM agniveers
+        WHERE asst_test_status = 'Pending'
+    """)
+
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    today = date.today()
+    alarms = []
+
+    for r in rows:
+        dates = [r["asst_test1"], r["asst_test2"],
+                 r["asst_test3"], r["asst_test4"]]
+        dates = [d for d in dates if d and d >= today]
+
+        if dates:
+            next_test = min(dates)
+            alarms.append({
+                "army_no": r["army_no"],
+                "name": r["name"],
+                "batch": r["batch"],
+                "next_test_date": next_test.strftime("%Y-%m-%d")
+            })
+
+    return jsonify({
+        "count": len(alarms),
+        "rows": alarms
+    })
 
 
 
@@ -2966,29 +3041,22 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(func=reset_interview_status, trigger="interval", seconds=6630)  # check every 30s
 scheduler.start()
 
+# AGNIVEER DATA FATCH WITH TABLE STARTING CODE++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-@app.route('/get_all_agniveers')
 
-def get_agniveers():
-    batch = request.args.get('batch')
+
+@app.route('/get_all_agniveers', methods=['GET'])
+def get_all_agniveers():
+    print("🔥 ROUTE HIT")
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    base_query = """
-        SELECT army_number,name,batch,company
-        FROM personnel
-        WHERE `rank` = %s
-    """
-    params = ['AGNIVEER']
-
-    if batch and batch != 'ALL':
-        base_query += " AND batch = %s"
-        params.append(batch)
-
-    cursor.execute(base_query, params)
+    cursor.execute("SELECT * FROM assistant_test")
     rows = cursor.fetchall()
+
+    print("📦 DATA:", rows)
 
     cursor.close()
     conn.close()
@@ -2996,5 +3064,78 @@ def get_agniveers():
     return jsonify(rows)
 
 
+#=================================AGNIVEER TABLE ENDING CODE---------------------------------------------
+
+
+
+#=======================================================AV details============
+
+
+
+
+@app.route('/api/assistant-test', methods=['POST'])
+def save_assistant_test():
+    """Simple API to store assistant test data"""
+    try:
+        # Get data from frontend
+        data = request.json
+        
+        # Validate batch (required field)
+        if not data.get('batch'):
+            return jsonify({'success': False, 'error': 'Batch is required'}), 400
+        
+        # Connect to MySQL
+        
+        
+        conn = get_db_connection()
+        cursor  =  conn.cursor()
+        
+        # Insert query matching your table structure
+        sql = """
+        INSERT INTO assistant_test 
+        (batch, asst_test1, asst_test2, asst_test3, asst_test4, 
+         test1_status, test2_status, test3_status, test4_status)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        
+        # Prepare values
+        values = (
+            data.get('batch'),
+            data.get('asst_test1'),  # Can be null or datetime string
+            data.get('asst_test2'),
+            data.get('asst_test3'),
+            data.get('asst_test4'),
+            data.get('test1_status', 0),  # Default to 0 if not provided
+            data.get('test2_status', 0),
+            data.get('test3_status', 0),
+            data.get('test4_status', 0)
+        )
+        
+        # Execute insert
+        cursor.execute(sql, values)
+        conn.commit()
+        
+        # Close connection
+        cursor.close()
+        conn.close()
+        
+        # Return success response
+        return jsonify({
+            'success': True,
+            'message': 'Data saved successfully'
+        }), 200
+        
+    except mysql.connector.Error as db_err:
+        return jsonify({'success': False, 'error': f'Database error: {db_err}'}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Server error: {e}'}), 500
+
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=1000)
+
+
+
+
+    

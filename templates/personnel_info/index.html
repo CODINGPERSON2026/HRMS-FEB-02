@@ -538,6 +538,12 @@
                       <option value="" disabled selected>Select Rank</option>
                       <option value="Agniveer">Agniveer</option>
                       <option value="Signal Man">Signal Man</option>
+                      <option value="L/NK">L/NK</option>
+                      <option value="NK">NK</option>
+                      <option value="HAV">HAV</option>
+                      <option value="Nb Sub">Nb Sub</option>
+                      <option value="SUB">SUB</option>
+                      <option value="SUB MAJ">SUB MAJ</option>
                     </select>
                     <div class="error-message" id="rank-error">
                       Please select a rank
@@ -564,6 +570,12 @@
                       <option value="" disabled selected>Select Batch</option>
                       <option value="Batch 1">Batch 1</option>
                       <option value="Batch 2">Batch 2</option>
+                      <option value="Batch 3">Batch 3</option>
+                      <option value="Batch 4">Batch 4</option>
+                      <option value="Batch 5">Batch 5</option>
+                      <option value="Batch 6">Batch 6</option>
+                      <option value="Batch 7">Batch 7</option>
+                      <option value="Batch 8">Batch 8</option>
                     </select>
                   </div>
                 </div>
@@ -693,9 +705,9 @@
                       </div>
                     </div>
                   </div>
-                   <div class="col-md-4 mb-3">
-                    <label for="company" class="form-label required">Company</label>
-                    <select class="form-select" id="company" required>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label required">Company</label>
+                    <select class="form-select" id="company">
                       <option value="">Select</option>
                       <option value="1 Company">1 Company</option>
                       <option value="2 Company">2 Company</option>
@@ -703,6 +715,44 @@
                       <option value="4 Company">4 Company</option>
                     </select>
                   </div>
+                  
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label required">Section</label>
+                    <select class="form-select" id="section">
+                      <option value="">Select</option>
+                    </select>
+                  </div>
+                  
+                  <script>
+                    // Map company to its sections
+                    const companySections = {
+                      "1 Company": ["Microwave", "Line", "OP", "IT", "Power", "CHQ"],
+                      "2 Company": ["MCCS", "CHQ"],
+                      "3 Company": ["DET", "System", "CHQ", "MT"],
+                      "4 Company": ["CHQ", "RHQ", "MT", "TM", "RP/NA", "QM", "LRW"]
+                    };
+                  
+                    const companySelect = document.getElementById('company');
+                    const sectionSelect = document.getElementById('section');
+                  
+                    companySelect.addEventListener('change', function() {
+                      const selectedCompany = this.value;
+                  
+                      // Clear previous options
+                      sectionSelect.innerHTML = '<option value="">Select</option>';
+                  
+                      if (selectedCompany && companySections[selectedCompany]) {
+                        companySections[selectedCompany].forEach(section => {
+                          const option = document.createElement('option');
+                          option.value = section;
+                          option.textContent = section;
+                          sectionSelect.appendChild(option);
+                        });
+                      }
+                    });
+                  </script>
+                  
+                  
                 </div>
 
                 <div class="row">
@@ -991,7 +1041,7 @@
                     </div>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="homeTO" class="form-label">Tehsil Office</label>
+                    <label for="homeTO" class="form-label">Telegram Office</label>
                     <input type="text" class="form-control" id="homeTO" />
                     <div class="error-message" id="homeTO-error">
                       Only letters, numbers, spaces, hyphens, and underscores are allowed
@@ -3733,6 +3783,7 @@ if (batchElement && batchElement.style.display !== "none") {
         armyNumber: document.getElementById("armyNumber").value,
         rank: document.getElementById("rank").value,
         batch:document.getElementById("batch")?.value || null,
+        section: document.getElementById("section").value,
         trade: document.getElementById("trade").value,
         dateOfEnrollment: document.getElementById("dateOfEnrollment").value,
         dateOfBirth: document.getElementById("dateOfBirth").value,
@@ -3996,3 +4047,11 @@ if (batchElement && batchElement.style.display !== "none") {
 
 </script>
 {% endblock %}
+
+
+
+
+
+
+ 
+  

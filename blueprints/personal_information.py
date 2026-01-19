@@ -383,13 +383,13 @@ def create_personnel():
             driving_license_no, license_issue_date, license_expiry_date, disability_child,
             marital_discord, counselling, folder_prepared_on, folder_checked_by, bring_family,
             domestic_issues, other_requests, family_medical_issues, quality_points, strengths,
-            weaknesses, detailed_course,batch
+            weaknesses, detailed_course,batch,section
         ) VALUES (
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s
         )
         """
        
@@ -486,7 +486,8 @@ def create_personnel():
             get_value('strengths'),
             get_value('weaknesses'),
             get_value('detailedCourse'),
-            get_value('batch')
+            get_value('batch'),
+            get_value('section')
         )
         cursor.execute(personnel_query, personnel_values)
         personnel_id = cursor.lastrowid

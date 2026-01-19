@@ -1,0 +1,185 @@
+<div class="modal fade" id="fillupdetailsmodal" tabindex="-1" aria-labelledby="fillupdetailsmodalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-3">
+
+      <form id="assistantTestForm">
+
+        <div class="modal-header bg-primary text-white py-3 border-0">
+          <h5 class="modal-title fw-semibold fs-5" id="fillupdetailsmodalLabel">
+            <i class="bi bi-person-lines-fill me-2"></i> Fill Assistant Test Details
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body py-4">
+          <div class="row g-3">
+            <!-- Batch Selection -->
+            <div class="col-md-12 mb-3">
+              <label class="form-label fw-semibold">Batch *</label>
+              <select name="batch" class="form-select" required>
+                <option value="" disabled selected>Select Batch</option>
+                <option>Batch 1</option>
+                <option>Batch 2</option>
+                <option>Batch 3</option>
+                <option>Batch 4</option>
+                <option>Batch 5</option>
+                <option>Batch 6</option>
+              </select>
+            </div>
+
+            <!-- Test Dates - 2 columns per row -->
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Test 1 Date</label>
+              <input type="date" name="asst_test1" class="form-control test-date-input" data-test="1">
+              <small class="text-muted test-status" id="test1-status"></small>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Test 2 Date</label>
+              <input type="date" name="asst_test2" class="form-control test-date-input" data-test="2">
+              <small class="text-muted test-status" id="test2-status"></small>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Test 3 Date</label>
+              <input type="date" name="asst_test3" class="form-control test-date-input" data-test="3">
+              <small class="text-muted test-status" id="test3-status"></small>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Test 4 Date</label>
+              <input type="date" name="asst_test4" class="form-control test-date-input" data-test="4">
+              <small class="text-muted test-status" id="test4-status"></small>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <small class="text-muted">
+              <i class="bi bi-info-circle me-1"></i>
+              Fields marked with * are required. Status is automatically calculated based on date.
+            </small>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top-0 pt-3">
+          <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary px-4 fw-semibold">
+            <i class="bi bi-check2 me-2"></i> Submit Details
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap Icons (if not already included) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<script>
+  // Function to calculate status based on date (returns boolean 0/1)
+  function calculateTestStatus(dateValue) {
+    if (!dateValue) return 0; // 0 for PENDING if no date
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to compare dates only
+    
+    const testDate = new Date(dateValue);
+    testDate.setHours(0, 0, 0, 0);
+    
+    // Return 1 if date is in the past, 0 otherwise
+    return testDate < today ? 1 : 0;
+  }
+  
+  // Function to get status text for display
+  function getStatusText(statusValue) {
+    return statusValue === 1 ? 'COMPLETED' : 'PENDING';
+  }
+  
+  // Function to get status class for display
+  function getStatusClass(statusValue) {
+    return statusValue === 1 ? 'text-success' : 'text-warning';
+  }
+  
+  // Update status display when date changes
+  document.querySelectorAll('.test-date-input').forEach(input => {
+    input.addEventListener('change', function() {
+      const testNumber = this.getAttribute('data-test');
+      const statusElement = document.getElementById(`test${testNumber}-status`);
+      const statusValue = calculateTestStatus(this.value);
+      const statusText = getStatusText(statusValue);
+      
+      if (this.value) {
+        statusElement.textContent = `Status: ${statusText} (${statusValue})`;
+        statusElement.className = `test-status fw-semibold ${getStatusClass(statusValue)}`;
+      } else {
+        statusElement.textContent = 'Status: PENDING (0) - No date selected';
+        statusElement.className = 'test-status text-secondary';
+      }
+    });
+  });
+
+  // Form submission
+  document.getElementById("assistantTestForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const payload = Object.fromEntries(formData.entries());
+    
+    // Calculate and add boolean status for each test (0 or 1)
+    for (let i = 1; i <= 4; i++) {
+      const dateField = `asst_test${i}`;
+      const statusField = `test${i}_status`;
+      
+      // Convert date to datetime format if exists
+      if (payload[dateField]) {
+        // Convert date to ISO string for datetime format
+        const dateObj = new Date(payload[dateField]);
+        payload[dateField] = dateObj.toISOString().slice(0, 19).replace('T', ' ');
+      } else {
+        payload[dateField] = null;
+      }
+      
+      // Calculate status as tinyint (0 or 1)
+      const statusValue = calculateTestStatus(payload[dateField]);
+      payload[statusField] = statusValue;
+    }
+    
+    // Debug: Show what's being sent
+    console.log('Submitting payload:', payload);
+
+    fetch("/api/assistant-test", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert("Assistant test details saved successfully!");
+        this.reset();
+        
+        // Clear status displays
+        document.querySelectorAll('.test-status').forEach(el => {
+          el.textContent = '';
+          el.className = 'test-status';
+        });
+
+        const modalEl = document.getElementById("fillupdetailsmodal");
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+      } else {
+        alert(data.error || "Failed to save data");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Server error. Please try again.");
+    });
+  });
+</script>

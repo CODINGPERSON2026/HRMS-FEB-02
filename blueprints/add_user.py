@@ -28,7 +28,7 @@ def add_user():
         user = User(
             username=data["username"],
             email=data["email"],
-            password=generate_password_hash(data["password"]),
+            password=(data["password"]),
             role=data["role"],
             company=data.get("company"),
             army_number=data.get("army_number")

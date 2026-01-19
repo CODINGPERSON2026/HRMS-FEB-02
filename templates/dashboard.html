@@ -357,6 +357,7 @@
       {% endif %}
 
       {% include 'modals/alarm/leave_alarm.html' %}
+      {% include 'modals/alarm/test_alarm.html' %}
     </div>
 
     <div class="action-buttons">
@@ -545,7 +546,7 @@
       </div>
 
       {% endif %}
-      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
+      {% if role in ['CO', '2IC', 'ADJUTANT','TRGJCO'] %}
       <div class="card p-3 text-center"
            style="cursor:pointer"
            data-bs-toggle="modal"
@@ -554,6 +555,23 @@
         <h3 id="agniveer_count">—</h3>
       </div>
       {% endif %}
+
+
+      
+      {% if role in ['TRGJCO'] %}
+      <div class="card p-3 text-center"
+           style="cursor:pointer"
+           data-bs-toggle="modal"
+           data-bs-target="#fillupdetailsmodal">
+        <small class="text-muted">FILL UP TEST DETAILS</small>
+        
+      </div>
+      {% endif %}
+
+
+
+
+<!--  END Fill Up Test Details Modal ------------------------------------------------------------------>
       
       <!-- Second Row Cards -->
 {% if role in ['CO', '2IC', 'ADJUTANT'] %}
@@ -606,10 +624,11 @@
     {% include 'modals/success-modal/modal.html' %}
     {% include 'task_manager/update_task_by_jco.html' %}
     {% include 'modals/adduser/user.html' %}
-    {% include 'modals/adduser/user.html' %}
+    
 
-    {% if role in ['CO', '2IC', 'ADJUTANT'] %}
+    {% if role in ['CO', '2IC', 'ADJUTANT','TRGJCO'] %}
     {% include 'modals/agniveer/modal.html' %}
+    {% include 'modals/agniveer/fill_up_test_details.html' %}
     {% endif %}
 
     {% if role in ['O SEC NCO', 'ONCO'] %}
@@ -661,7 +680,8 @@
     
   </div> -->
 
-
+  <!-- agniveer details table configration-->
+   
     <script>
       document.addEventListener('hidden.bs.modal', function () {
         document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
@@ -853,6 +873,77 @@
 
     </script>
 
+
+    
+    
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+      
+        const testModal = document.getElementById("testDetailsModal");
+        const modalBody = document.getElementById("testDetailsModalBody");
+      
+        testModal.addEventListener("show.bs.modal", function () {
+      
+          modalBody.innerHTML = `
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary"></div>
+            </div>
+          `;
+      
+          fetch("/fill-up-test-details")
+            .then(res => res.text())
+            .then(html => {
+              modalBody.innerHTML = html;
+              initFillUpTestForm();
+            })
+            .catch(() => {
+              modalBody.innerHTML = "<p class='text-danger'>Failed to load form</p>";
+            });
+        });
+      
+        function initFillUpTestForm() {
+      
+          // Enable date only if Done
+          modalBody.querySelectorAll(".test-status").forEach(select => {
+            select.addEventListener("change", function () {
+              const dateInput = this.closest(".row").querySelector(".test-date");
+              dateInput.disabled = this.value !== "Done";
+            });
+          });
+      
+          const form = modalBody.querySelector("#fillTestForm");
+      
+          form.addEventListener("submit", function (e) {
+            e.preventDefault();
+      
+            const payload = {
+              army_number: form.army_number.value,
+              tests: [
+                { test: "1st", status: form.test1.value, date: form.test1_date.value },
+                { test: "2nd", status: form.test2.value, date: form.test2_date.value },
+                { test: "3rd", status: form.test3.value, date: form.test3_date.value },
+                { test: "4th", status: form.test4.value, date: form.test4_date.value }
+              ]
+            };
+      
+            fetch("/api/fill-up-test", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(() => {
+              alert("Test details saved");
+              bootstrap.Modal.getInstance(testModal).hide();
+              location.reload();
+            })
+            .catch(() => alert("Save failed"));
+          });
+        }
+      });
+      </script>
+  
     <script>
       async function loadTodayEvents() {
         try {
@@ -938,6 +1029,7 @@
 
           updateIfExists('attachment-count', data.attachment_count);
           updateIfExists('agniveer_count', data.agniveer_count);
+          
           updateIfExists('get_projects_count', data.projects);
           updateIfExists('sensitive-count', data.sensitive_count);
           updateIfExists('active-loan-count', data.loan_count);
