@@ -274,8 +274,9 @@
 
   #show-btn {
     border: none;
-    padding: 2px 4px;
-    font-size: 10px;
+    background-color: gold;
+    padding: 2px 2px;
+    font-size: 9px;
     border-radius: 6px;
     cursor: pointer;
     display: inline-flex;
@@ -348,6 +349,10 @@
   <!-- Main Content (initially hidden) -->
   <div class="main-content" id="mainContent">
 
+   
+
+
+
     <div style="margin-bottom: 10px;">
       {% include 'modals/alarm/event_alarm.html' %}
 
@@ -361,6 +366,9 @@
     </div>
 
     <div class="action-buttons">
+      <button id="show-btn">
+        <i class="fas fa-chevron-down"></i>
+      </button>
       {% if role in ['SEC NCO','SEC JCO','Subedar Major'] %}
 
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
@@ -422,13 +430,11 @@
     </div>
 
 
-    <button id="show-btn">
-      <i class="fas fa-chevron-down"></i>
-    </button>
+  
 
     
+    <div id="stats-card-grid" class="stats-grid show">
     {% if role in ['CO', '2IC', 'ADJUTANT','OC'] %}
-            <div id="stats-card-grid" class="stats-grid show">
 
       <!-- First Row Cards -->
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-target="#paradeStateModal"
@@ -746,19 +752,19 @@
 
         const showBtn = safeQuerySelector('#show-btn');
         const statsGrid = safeQuerySelector('#stats-card-grid');
-        // if (showBtn && statsGrid) {
-        //   showBtn.addEventListener('click', function () {
-        //     if (statsGrid.classList.contains("hide")) {
-        //       statsGrid.classList.remove("hide");
-        //       statsGrid.classList.add("show");
-        //       this.innerHTML = '<i class="fas fa-chevron-down"></i>';
-        //     } else {
-        //       statsGrid.classList.remove("show");
-        //       statsGrid.classList.add("hide");
-        //       this.innerHTML = '<i class="fas fa-chevron-up"></i>';
-        //     }
-        //   });
-        // }
+         if (showBtn && statsGrid) {
+           showBtn.addEventListener('click', function () {
+             if (statsGrid.classList.contains("hide")) {
+               statsGrid.classList.remove("hide");
+               statsGrid.classList.add("show");
+               this.innerHTML = '<i class="fas fa-chevron-down"></i>';
+             } else {
+              statsGrid.classList.remove("show");
+              statsGrid.classList.add("hide");
+               this.innerHTML = '<i class="fas fa-chevron-up"></i>';
+             }
+           });
+        }
 
         // Leave Requests Button
         const leaveRequestsBtn = safeQuerySelector('#leaveRequestsBtn');
@@ -855,24 +861,7 @@
 
 
 
-      document.getElementById("show-btn").addEventListener("click", function () {
-
-        let grid = document.getElementById("stats-card-grid");
-        btn = this
-
-        if (grid.classList.contains("hide")) {
-
-          grid.classList.remove("hide");
-          grid.classList.add("show");
-          btn.innerHTML = '<i class="fas fa-chevron-down"></i>'
-        } else {
-
-          grid.classList.remove("show");
-
-          grid.classList.add("hide");
-          btn.innerHTML = '<i class="fas fa-chevron-up"></i>'
-        }
-      });
+    
 
 
 
