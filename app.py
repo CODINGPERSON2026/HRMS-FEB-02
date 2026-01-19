@@ -1550,6 +1550,7 @@ def dashboard_summary():
     user = require_login()
     current_user = user['army_number']
     company = user['company']
+    role = user['role']
     print("Logged-in user's company:", company)
     
     try:
@@ -1561,6 +1562,8 @@ def dashboard_summary():
         )
         detachment_result = cursor.fetchone()
         detachments = detachment_result['count'] if detachment_result else 0
+
+
 
         # 2️⃣ Total Manpower
         # 2️⃣ Manpower Count (Rank-wise)
@@ -1574,16 +1577,18 @@ SELECT
 FROM parade_state_daily
 WHERE DATE(report_date) = %s
 """     
+        print("reached here")
         params = (yesterday,)
         # If company-based filtering exists
         if company != "Admin":
             query += " AND company = %s"
             params = (yesterday, company)
-
         cursor.execute(query, params)
         manpower_result = cursor.fetchone()
 
         # Safe fallback if no row exists
+        print('query becomes',query)
+
         if manpower_result:
             manpower = {
                 "total": manpower_result["total"] or 0,
@@ -1591,6 +1596,7 @@ WHERE DATE(report_date) = %s
                 "officerCount": manpower_result["officerCount"] or 0,
                 "orCount": manpower_result["orCount"] or 0
             }
+            print(manpower,"this is man powrt")
         else:
             manpower = {
                 "total": 0,
@@ -1600,7 +1606,7 @@ WHERE DATE(report_date) = %s
             }
 
         # 3️⃣ Interview Pending
-        if company != "Admin":
+        if company != "Admin" and role != 'OC':
              cursor.execute('select home_state from personnel where army_number =  %s',(current_user,))
              home_result = cursor.fetchone()
              home_state = home_result['home_state'] 
@@ -1622,6 +1628,7 @@ WHERE DATE(report_date) = %s
             FROM personnel
         """
             cursor.execute(query)
+        print('#############################################################################')
 
         interview_result = cursor.fetchone()
         pending_count = interview_result['pending_count'] if interview_result else 0
@@ -1748,6 +1755,7 @@ WHERE DATE(report_date) = %s
         
 
         print('interview pending',pending_count)
+        print('manpower',manpower)
 
         # Return combined JSON
         return jsonify({
@@ -3035,7 +3043,7 @@ WHERE interview_status = 1
     conn.commit()
     cursor.close()
     conn.close()
-    print("Interview statuses reset where needed")
+    
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=reset_interview_status, trigger="interval", seconds=6630)  # check every 30s
@@ -3048,7 +3056,7 @@ scheduler.start()
 
 @app.route('/get_all_agniveers', methods=['GET'])
 def get_all_agniveers():
-    print("🔥 ROUTE HIT")
+    
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -3056,7 +3064,7 @@ def get_all_agniveers():
     cursor.execute("SELECT * FROM assistant_test")
     rows = cursor.fetchall()
 
-    print("📦 DATA:", rows)
+    
 
     cursor.close()
     conn.close()
@@ -3129,6 +3137,68 @@ def save_assistant_test():
         return jsonify({'success': False, 'error': f'Database error: {db_err}'}), 500
     except Exception as e:
         return jsonify({'success': False, 'error': f'Server error: {e}'}), 500
+
+
+
+
+
+
+@app.route("/api/upcomming_test_alarms")
+def upcomming_test_alarms():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = """
+        SELECT 
+            id,
+            batch,
+            'TEST-1' AS test_name,
+            asst_test1 AS test_date
+        FROM assistant_test
+        WHERE test1_status = 0
+          AND asst_test1 BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+
+        UNION ALL
+
+        SELECT 
+            id,
+            batch,
+            'TEST-2' AS test_name,
+            asst_test2 AS test_date
+        FROM assistant_test
+        WHERE test2_status = 0
+          AND asst_test2 BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+
+        UNION ALL
+
+        SELECT 
+            id,
+            batch,
+            'TEST-3' AS test_name,
+            asst_test3 AS test_date
+        FROM assistant_test
+        WHERE test3_status = 0
+          AND asst_test3 BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+
+        UNION ALL
+
+        SELECT 
+            id,
+            batch,
+            'TEST-4' AS test_name,
+            asst_test4 AS test_date
+        FROM assistant_test
+        WHERE test4_status = 0
+          AND asst_test4 BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+    """
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    print(rows,"these are rows")
+    cursor.close()
+    conn.close()
+
+    return jsonify({"rows": rows})
 
 
 

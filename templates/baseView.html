@@ -164,11 +164,11 @@
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <a class="nav-link" href="{{ url_for('mt') }}">MT Management</a>
       {% endif %}
-      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
+      {% if role in ['CO', '2IC', 'ADJUTANT','PROJECT OFFICER'] %}
       <a class="nav-link" href="{{ url_for('get_projects') }}">Project Management</a>
       {% endif %}
     
-      {% if role == 'CO' %}
+      {% if role in ['CO', '2IC', 'ADJUTANT','JCO','ACCOUNT OFFICER'] %}
       <a class="nav-link" href="/account">Account Management</a>
       {% endif %}
     

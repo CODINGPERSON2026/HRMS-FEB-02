@@ -968,7 +968,7 @@ def co_rejected_leaves():
                 request_status,
                 updated_at
             FROM leave_status_info
-            WHERE request_status LIKE 'Rejected at %'
+            WHERE request_status = 'Rejected at OC' 
             ORDER BY updated_at DESC
         """)
 

@@ -29,9 +29,13 @@ def get_all_dets():
 @dashboard_bp.route('/get_detachment_details')
 def get_detachment_details():
     det_id = request.args.get("det_id")  # optional
+    print(det_id,"this is det id")
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     print("in this route")
+
+    # Get logged in user
+    user = require_login()
 
     try:
         # Base query: only active det assignments (det_status=1)
@@ -54,6 +58,11 @@ def get_detachment_details():
         if det_id:
             query += " AND a.det_id = %s"
             params.append(det_id)
+
+        # ---------- COMPANY FILTER (Admin bypass) ----------
+        if user['company'] != "Admin":
+            query += " AND p.company = %s"
+            params.append(user['company'])
 
         cursor.execute(query, params)
         data = cursor.fetchall()
@@ -194,6 +203,8 @@ def assigned_attachment_alarm():
     user = require_login()
     if not user:
         return jsonify({"error": "Unauthorized"}), 401
+    if user['role'] != 'CO':
+        return jsonify({"error":'Forbidded'}),403
     print('IN THIS ROUTE')
 
     # company = user["company"]

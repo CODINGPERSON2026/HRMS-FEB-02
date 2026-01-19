@@ -1,16 +1,7 @@
-<style>
-    .blink {
-        animation: blinkEffect 4s 2;
-    }
+
     
-    @keyframes blinkEffect {
-        0% { opacity: 1; }
-        50% { opacity: 0; }
-        100% { opacity: 1; }
-    }
-    </style>
-    
-    <span id="eventAlarm" class="badge bg-warning text-dark d-none" style="cursor:pointer;">
+    <!-- Event Alarm Badge -->
+    <span id="eventAlarm" class="alert-gradient d-none" style="cursor:pointer;">
         🔔 You have Event alarms!
     </span>
     
@@ -25,11 +16,11 @@
     
             if (result.rows && result.rows.length > 0) {
                 alarm.classList.remove("d-none");
-                alarm.classList.add("blink");
+                alarm.classList.add("alert-pulse");
                 alarm.innerText = `🔔 ${result.rows.length} Event(s) Today`;
             } else {
                 alarm.classList.add("d-none");
-                alarm.classList.remove("blink");
+                alarm.classList.remove("alert-pulse");
             }
         } catch (err) {
             console.error(err);
@@ -44,4 +35,4 @@
         loadTodayEvents();
     });
     </script>
-     
+    

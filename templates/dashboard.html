@@ -341,7 +341,7 @@
   </div>
 
   {% set header = "15 CORPS ENGINEERING SIGNAL REGIMENT" %}
-  {#{% set subscript = 'Welcome ' ~ role ~ ' ' ~ current_user_name %}#}
+  {% set subscript = 'Welcome ' ~ role ~ ' ' ~ current_user_name %}
 
   {% include 'navbar/navbar.html' %}
 
@@ -354,10 +354,10 @@
       {% if role in ['CO','2IC','ADJUTANT','OC'] %}
       {% include 'modals/alarm/alarm.html' %}
       {% include 'modals/alarm/attachment_alarm.html' %}
-      {% endif %}
-
+      
       {% include 'modals/alarm/leave_alarm.html' %}
-      {% include 'modals/alarm/test_alarm.html' %}
+      {% include 'modals/alarm/agniveer_test_alarms.html' %}
+      {% endif %}
     </div>
 
     <div class="action-buttons">
@@ -427,16 +427,19 @@
     </button>
 
     
-    {% if role in ['CO', '2IC', 'ADJUTANT'] %}
-    <div id="stats-card-grid" class="stats-grid show">
+    {% if role in ['CO', '2IC', 'ADJUTANT','OC'] %}
+            <div id="stats-card-grid" class="stats-grid show">
 
       <!-- First Row Cards -->
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-target="#paradeStateModal"
         data-bs-toggle="modal">
         <small class="text-muted">PARADE STATE</small>
         <h3 id="mainPower"></h3>
-      </div>
+          </div>
       {% endif %}
+
+
+
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#attachmentModal">
 
@@ -467,7 +470,7 @@
 
 
 
-      {% if role in ['KUNBA TASK'] %}
+      {% if role in ['JCO'] %}
 <div class="card p-3 text-center"
      style="cursor:pointer"
      
@@ -528,7 +531,7 @@
       </div>
       {% endif %}
 
-      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
+      {% if role in ['CO', '2IC', 'ADJUTANT','PROJECT OFFICER'] %}
       <div class="card p-3 text-center" style="cursor:pointer; transition: all 0.3s ease;" <small class="text-muted"
         id="openProjects">TOTAL PROJECTS</small>
         <h3 class="mb-0" id="get_projects_count">90/125</h3>
@@ -546,7 +549,7 @@
       </div>
 
       {% endif %}
-      {% if role in ['CO', '2IC', 'ADJUTANT','TRGJCO'] %}
+      {% if role in ['CO', '2IC', 'ADJUTANT','TRGJCO','OC'] %}
       <div class="card p-3 text-center"
            style="cursor:pointer"
            data-bs-toggle="modal"
@@ -626,7 +629,7 @@
     {% include 'modals/adduser/user.html' %}
     
 
-    {% if role in ['CO', '2IC', 'ADJUTANT','TRGJCO'] %}
+    {% if role in ['CO', '2IC', 'ADJUTANT','TRGJCO','OC'] %}
     {% include 'modals/agniveer/modal.html' %}
     {% include 'modals/agniveer/fill_up_test_details.html' %}
     {% endif %}
@@ -638,6 +641,9 @@
 
     {% if role =='CO'%}
       {% include 'modals/leaverequest/co-rejected-view.html' %}
+    {% endif %}
+    {% if role in ['CO', '2IC', 'ADJUTANT','OC']%}
+      {% include 'modals/alarm/agniveer_test_alarms.html' %}
     {% endif %}
 
 
