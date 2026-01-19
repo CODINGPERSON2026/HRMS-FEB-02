@@ -61,6 +61,7 @@ def submit_roll_call():
 def get_pending_roll_call_points():
     user = require_login()
     company = user['company']
+    role = user['role']
 
     category = request.args.get('category', 'OR_REQUEST')
 
@@ -94,7 +95,7 @@ def get_pending_roll_call_points():
 
         params = [status]
 
-        if company != "Admin":
+        if company != "Admin" and role !='Subedar Major':
             query += " AND p.company = %s"
             params.append(company)
 

@@ -1285,6 +1285,7 @@ def api_get_projects():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     user = require_login()
+    role = user['role']
     company = user['company']
 
     try:
@@ -1295,14 +1296,14 @@ def api_get_projects():
         """
         params = []
 
-        if company != "Admin":
+        if company != "Admin" and role != 'PROJECT JCO' and  role != 'PROJECT OFFICER':
             query += " WHERE company = %s"
             params.append(company)
 
         cursor.execute(query, params)
         projects = cursor.fetchall()
 
-        return jsonify(projects)  # ← Important: JSON response
+        return jsonify(projects)  
 
     except Exception as e:
         print("Error:", str(e))
@@ -1454,7 +1455,7 @@ def search_officer():
     results = cursor.fetchall()
     cursor.close()
     conn.close()
-    print('results',results)
+    print('results these are ',results)
     return jsonify(results)
 
 
