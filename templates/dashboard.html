@@ -412,9 +412,9 @@
 
       <!-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">PARADE STATE</button> -->
       {% endif %}
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+      <!-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
         ADD USER
-      </button>
+      </button> -->
 
       <!-- UPDATED: Parade Data Button for O SEC NCO and ONCO -->
       {% if role in ['O SEC NCO', 'ONCO'] %}
@@ -476,7 +476,7 @@
 
 
 
-      {% if role in ['JCO'] %}
+      {% if role in ['JCO' , 'S/JCO'] %}
 <div class="card p-3 text-center"
      style="cursor:pointer"
      

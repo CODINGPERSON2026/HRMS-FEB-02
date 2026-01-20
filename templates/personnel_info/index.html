@@ -66,14 +66,22 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
 }
-  .form-container {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    padding: 30px;
-    margin: 20px 20px 20px 250px;
-    border: 1px solid #e1e5eb;
-    max-width: calc(100% - 270px);
+.form-container {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 30px;
+  
+  border: 1px solid #e1e5eb;
+  max-width: calc(100% - 100px);
+
+  transition: margin-left 0.35s cubic-bezier(.4,0,.2,1),
+              max-width 0.35s cubic-bezier(.4,0,.2,1);
+}
+
+body.sidebar-collapsed .form-container {
+  margin-left: 20px !important;
+  max-width: calc(100% - 40px);
 }
 .container-fluid {
     max-width: 100%;
@@ -384,12 +392,7 @@
     border-color: #198754 !important;
   }
 
-  .wrapper {
-    padding-left: 240px;
-    
-    padding-top: 1px;
-
-  }
+  
 </style>
 <div class="wrapper">
   {% set header = "Personnel Management" %}
@@ -541,9 +544,9 @@
                       <option value="L/NK">L/NK</option>
                       <option value="NK">NK</option>
                       <option value="HAV">HAV</option>
-                      <option value="Nb Sub">Nb Sub</option>
-                      <option value="SUB">SUB</option>
-                      <option value="SUB MAJ">SUB MAJ</option>
+                      <option value="Naib Subedar">Nb Sub</option>
+                      <option value="Subedar">SUB</option>
+                      <option value="Subedar Major">SUB MAJ</option>
                     </select>
                     <div class="error-message" id="rank-error">
                       Please select a rank

@@ -1,16 +1,6 @@
 {% extends "baseView.html" %}
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Daily Vehicle Running Status</title>
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Optional: Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
         .card {
@@ -26,12 +16,7 @@
             font-weight: 600;
             letter-spacing: 0.5px;
         }
-        .content-wrapper {
-        padding-left: 16rem;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        padding-top: 16px;
-        
-    }
+       
     </style>
 </head>
 
@@ -43,10 +28,7 @@
   </div>
 <div class="container py-4">
 
-    <!-- <div class="text-center mb-4">
-        <h2 class="page-title">Daily Vehicle Running Status</h2>
-        <p class="text-muted">Search vehicle → auto-fill type & class → enter trip details</p>
-    </div> -->
+    
    
 
     <div class="row justify-content-center">
@@ -180,7 +162,6 @@ document.getElementById("runningForm").addEventListener("submit", function (e) {
 
 </script>
 
-</body>
-</html>
+
 
 {% endblock %}

@@ -3,12 +3,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-free-7.1.0-web/css/all.min.css') }}" />
 
 <style>
-  .wrapper {
-    padding-left: 240px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    padding-top: 1px;
-    min-height: 100vh;
-  }
+  
 
   /* Active button */
   .active-btn {
@@ -128,7 +123,7 @@
   }
 </style>
 
-<div class="wrapper">
+
   {% set header = "Task Management" %}
   {% set subscript = "Create tasks → View tasks → Update tasks → Assign tasks" %}
   {% include 'navbar/navbar.html' %}
@@ -224,7 +219,7 @@
       </div>
     </div>
   </div>
-</div>
+
 {% include 'modals/delete-confirmation/deleteConfirmation.html'%}
 {% include 'modals/view_task_status/task_status.html'%}
 {% include 'modals/view_task_status/editTaskModal.html'%}
@@ -399,7 +394,7 @@
               li.textContent = `${item.name} | ${item.rank} | ${item.company} | ${item.army_number}`;
               li.addEventListener("click", () => {
                 document.getElementById("assignedTo").value = item.army_number;
-                document.getElementById("searchPersonnel").value = `${item.army_number}`;
+                document.getElementById("searchPersonnel").value = `${item.name}`;
                 box.classList.remove("show");
               });
               box.appendChild(li);

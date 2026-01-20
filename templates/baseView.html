@@ -47,10 +47,7 @@
       width: 70%;
     }
 
-    .dashboard-content {
-      margin-left: 220px;
-      padding: 2px 24px;
-    }
+   
 
     .card {
       border-radius: 18px;
@@ -135,14 +132,51 @@
       justify-content: start;
       margin: 0;
     }
+    /* Sidebar toggle behavior */
+.sidebar {
+  transition: all 0.3s ease;
+}
+
+.sidebar.collapsed {
+  margin-left: -230px;
+}
+
+.dashboard-content,
+.main-content {
+  transition: margin-left 0.3s ease;
+}
+
+body.sidebar-collapsed .dashboard-content,
+body.sidebar-collapsed .main-content {
+  margin-left: 0 !important;
+}
+.page-wrapper {
+  margin-left: 230px;
+  transition: margin-left 0.3s ease;
+  padding: 10px 24px;
+}
+
+/* When sidebar hidden */
+body.sidebar-collapsed .page-wrapper {
+  margin-left: 0;
+}
+
+
   </style>
+  
 </head>
 
 <body>
+  <button id="sidebarToggle"
+        class="btn btn-sm btn-outline-primary position-fixed"
+        style="top:10px; left:10px; z-index:1100;">
+  ☰
+</button>
+
 
   <!-- Sidebar -->
   <div class="sidebar p-2">
-    <h4 id="dynamicHeading" class="px-3">
+    <h4 id="dynamicHeading" class="px-3 mb-5">
      
     </h4>
 
@@ -183,10 +217,11 @@
   </div>
 
   <!-- Main Content -->
-  <div>
+  <div id="pageWrapper" class="page-wrapper">
     {% block content %}
     {% endblock %}
   </div>
+  
 
   <!-- Logout Modal -->
   <div class="modal fade" id="logoutModal" tabindex="-1">
@@ -233,7 +268,18 @@
 }
 
  </script>
-
+ <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+  
+    toggleBtn.addEventListener('click', function () {
+      sidebar.classList.toggle('collapsed');
+      document.body.classList.toggle('sidebar-collapsed');
+    });
+  });
+  </script>
+  
 
 </body>
 </html>

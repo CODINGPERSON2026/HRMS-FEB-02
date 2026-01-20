@@ -1607,7 +1607,8 @@ WHERE DATE(report_date) = %s
             }
 
         # 3️⃣ Interview Pending
-        if role =='JCO':
+        print(role,"this is my role")
+        if role =='JCO' or role == 'S/JCO':
              print("in the route of interview penind ")
              cursor.execute('select home_state from personnel where army_number =  %s',(current_user,))
              home_result = cursor.fetchone()
@@ -1622,6 +1623,7 @@ WHERE DATE(report_date) = %s
             WHERE company = %s AND home_state = %s
         """
              cursor.execute(query, (company,home_state))
+             print("this got exexutd")
         else:
             query = """
             SELECT 

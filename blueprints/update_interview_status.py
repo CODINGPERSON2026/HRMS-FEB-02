@@ -25,6 +25,7 @@ def get_pending_kunba_interviews():
         WHERE interview_status = 0 AND home_state = %s  AND company = %s
     """,(home_state,user_company))
     data = cursor.fetchall()
+    print(data,"this is data coming from backend")
     cursor.close()
     return jsonify(data)
 
