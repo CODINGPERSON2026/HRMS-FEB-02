@@ -1,0 +1,232 @@
+<!-- Modal -->
+<div class="modal fade" id="personnelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Assign Personnel</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Search -->
+        <div class="d-flex mb-3">
+          <input type="text" id="searchInput" class="form-control me-2" placeholder="Enter army number">
+          <button class="btn btn-success" id="searchBtn">Search</button>
+        </div>
+
+        <p id="warningMessage" style="font-weight:bold;font-size:16px;"></p>
+
+        <!-- Action Selector -->
+        <div class="mb-3">
+          <label class="form-label">Select Action</label>
+          <select id="actionType" class="form-select">
+            <option value="">-- Select Action --</option>
+            <option value="det">Detachment</option>
+            <option value="posting">Posting</option>
+            <option value="TD">Attachment</option>
+            <option value="any_other">Any Other</option>
+          </select>
+        </div>
+
+        <!-- Location Dropdown -->
+        <div class="mb-3" id="locationBox">
+          <label class="form-label">Select Location</label>
+          <select id="locationDropdown" class="form-select"></select>
+        </div>
+
+        <!-- TD / Any Other -->
+        <div class="mb-3" id="remarksBox" style="display:none;">
+
+          <!-- TD -->
+          <div id="tdFields" style="display:none;">
+            <label class="form-label">TD Location</label>
+            <input type="text" id="tdLocation" class="form-control mb-2" placeholder="Enter TD Location">
+
+            <label class="form-label">Authority</label>
+            <input type="text" id="tdAuthority" class="form-control" placeholder="Enter Authority">
+          </div>
+
+          <!-- Any Other -->
+          <div id="otherFields" style="display:none;">
+            <label class="form-label">Enter Remarks</label>
+            <input type="text" id="remarksInput" class="form-control" placeholder="Enter reason...">
+          </div>
+
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Select</th>
+                <th>Name</th>
+                <th>Army Number</th>
+                <th>Rank</th>
+                <th>Trade</th>
+                <th>Coy</th>
+              </tr>
+            </thead>
+            <tbody id="personnelTableBody"></tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="assignBtn">Assign Selected</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% include 'modals/success-modal/modal.html' %}
+
+<script>
+let selectedPersonnel = new Set();
+const dropdown = document.getElementById('locationDropdown');
+const actionSelect = document.getElementById('actionType');
+
+// ACTION CHANGE
+actionSelect.addEventListener("change", async function () {
+    const action = this.value;
+
+    dropdown.innerHTML = "";
+    locationBox.style.display = "block";
+    remarksBox.style.display = "none";
+    tdFields.style.display = "none";
+    otherFields.style.display = "none";
+
+    if (action === "posting") {
+        dropdown.innerHTML = ["P1","P2","P3","P4"]
+            .map(p => `<option value="${p}">${p}</option>`).join('');
+
+    } else if (action === "det") {
+        const res = await fetch('/get_locations');
+        const locations = await res.json();
+        dropdown.innerHTML = locations
+            .map(l => `<option value="${l.det_id}">${l.det_name}</option>`).join('');
+
+    } else if (action === "TD") {
+        locationBox.style.display = "none";
+        remarksBox.style.display = "block";
+        tdFields.style.display = "block";
+
+    } else if (action === "any_other") {
+        locationBox.style.display = "none";
+        remarksBox.style.display = "block";
+        otherFields.style.display = "block";
+    }
+});
+
+// LOAD DETACHMENTS ON MODAL OPEN
+document.getElementById('personnelModal').addEventListener('shown.bs.modal', async () => {
+    const res = await fetch('/get_locations');
+    const locations = await res.json();
+    dropdown.innerHTML = locations
+        .map(l => `<option value="${l.det_id}">${l.det_name}</option>`).join('');
+});
+
+// SEARCH
+document.getElementById('searchBtn').addEventListener('click', async () => {
+  const query = searchInput.value.trim();
+  warningMessage.innerText = "";
+  assignBtn.disabled = true;
+
+  if (!query) {
+      warningMessage.innerText = "Please enter Army Number";
+      warningMessage.style.color = "red";
+      return;
+  }
+
+  const res = await fetch('/search_personnel', {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: `army_number=${encodeURIComponent(query)}`
+  });
+
+  const personnel = await res.json();
+
+  if (!personnel || personnel.length === 0) {
+      warningMessage.innerText = "Army no. does not match";
+      warningMessage.style.color = "red";
+      return;
+  }
+
+  personnel.sort((a,b)=>selectedPersonnel.has(b.army_number)-selectedPersonnel.has(a.army_number));
+  personnelTableBody.innerHTML = "";
+
+  personnel.forEach(p => {
+    personnelTableBody.innerHTML += `
+      <tr>
+        <td><input type="checkbox" class="personnel-checkbox" data-id="${p.army_number}" ${selectedPersonnel.has(p.army_number)?"checked":""}></td>
+        <td>${p.name}</td>
+        <td>${p.army_number}</td>
+        <td>${p.rank}</td>
+        <td>${p.trade}</td>
+        <td>${p.company}</td>
+      </tr>`;
+  });
+
+  const p = personnel[0];
+  if (p.posting_status || p.leave_status || p.det_status) {
+      warningMessage.innerText = "Personnel not available";
+      warningMessage.style.color = "red";
+      return;
+  }
+
+  warningMessage.innerText = "Personnel is Available";
+  warningMessage.style.color = "green";
+  assignBtn.disabled = false;
+});
+
+// CHECKBOX TRACK
+document.addEventListener('change', e => {
+  if (e.target.classList.contains('personnel-checkbox')) {
+      const id = e.target.dataset.id;
+      e.target.checked ? selectedPersonnel.add(id) : selectedPersonnel.delete(id);
+  }
+});
+
+// SUBMIT
+assignBtn.addEventListener('click', async () => {
+    let remarks = "";
+    const action = actionSelect.value;
+
+    if (!action) return alert("Select Action First");
+
+    if (action === "TD") {
+        const loc = tdLocation.value.trim();
+        const auth = tdAuthority.value.trim();
+        if (!loc || !auth) return alert("Enter TD Location and Authority");
+        remarks = `Location: ${loc}, Authority: ${auth}`;
+
+    } else if (action === "any_other") {
+        remarks = remarksInput.value.trim();
+        if (!remarks) return alert("Enter Remarks");
+
+    } else {
+        remarks = dropdown.value;
+        if (!remarks) return alert("Select Location");
+    }
+
+    if (selectedPersonnel.size === 0) return alert("Select at least one person");
+
+    const res = await fetch('/assign_personnel', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+            army_number: [...selectedPersonnel],
+            status: action,
+            remarks: remarks
+        })
+    });
+
+    const data = await res.json();
+    showStatusModal(`Personnel ${data.message}`, "Green", 2500);
+    setTimeout(()=>location.reload(),2500);
+});
+</script>

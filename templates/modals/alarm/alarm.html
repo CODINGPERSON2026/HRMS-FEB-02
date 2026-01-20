@@ -1,0 +1,54 @@
+
+
+<style>
+    .blink {
+        animation: blinkEffect 4s 2;
+    }
+    
+    @keyframes blinkEffect {
+        0% { opacity: 1; }
+        50% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    </style>
+
+<!-- Toast Container -->
+<span id="alarmAlert" class="badge bg-danger d-none" style="cursor:pointer;">
+    🔔 You have Detachment alarms!
+</span>
+
+
+<script>
+    async function showAssignedAlarms() {
+        try {
+            
+            const res = await fetch('/api/assigned_alarm');
+            if (!res.ok) throw new Error("Network error");
+            const result = await res.json();
+    
+            const alarmAlert = document.getElementById("alarmAlert");
+    
+            if(result.rows && result.rows.length > 0) {
+                alarmAlert.classList.remove("d-none");
+                alarmAlert.classList.add("blink");
+                alarmAlert.innerText = `🔔 You have ${result.rows.length} Detachment alarm(s)!`;
+            } else {
+                alarmAlert.classList.add("d-none");
+                alarmAlert.classList.remove("blink");
+            }
+    
+        } catch (err) {
+            console.error("Error fetching assigned alarms:", err);
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', showAssignedAlarms);
+    document.getElementById("alarmAlert").addEventListener("click", function () {
+        const detModal = new bootstrap.Modal(document.getElementById('detModal'));
+        detModal.show();
+        load_det_personnel();
+        load_detachments();
+      });
+    </script>
+    
+    

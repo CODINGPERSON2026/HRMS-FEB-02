@@ -1,0 +1,52 @@
+<style>
+    .blink {
+        animation: blinkEffect 4s 2;
+    }
+
+    @keyframes blinkEffect {
+        0% { opacity: 1; }
+        50% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+</style>
+
+<!-- Attachment Alarm Badge -->
+<span id="attachmentAlarmAlert" class="badge bg-danger text-white d-none" style="cursor:pointer;">
+    📎 You have Attachment alarms!
+</span>
+
+<script>
+    async function showAssignedAttachmentAlarms() {
+        try {
+            const res = await fetch('/stats/assigned_attachment_alarm'); // 🔁 new API
+            if (!res.ok) throw new Error("Network error");
+
+            const result = await res.json();
+            const alarmAlert = document.getElementById("attachmentAlarmAlert");
+
+            if (result.rows && result.rows.length > 0) {
+                alarmAlert.classList.remove("d-none");
+                alarmAlert.classList.add("blink");
+                alarmAlert.innerText =
+                    `📎 You have ${result.rows.length} Attachment alarm(s)!`;
+            } else {
+                alarmAlert.classList.add("d-none");
+                alarmAlert.classList.remove("blink");
+            }
+
+        } catch (err) {
+            console.error("Error fetching attachment alarms:", err);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', showAssignedAttachmentAlarms);
+
+    document.getElementById("attachmentAlarmAlert")
+        .addEventListener("click", function () {
+            const attachModal = new bootstrap.Modal(
+                document.getElementById('attachmentModal')
+            );
+            attachModal.show();
+            load_attachment_personnel(); // 🔁 attachment loader
+        });
+</script>
