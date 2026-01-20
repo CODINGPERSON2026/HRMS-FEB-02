@@ -3069,88 +3069,6 @@ def save_assistant_test():
 
 #trade
 
-@app.route('/api/trade-manpower/get/<date>', methods=['GET'])
-def get_trade_manpower(date):
-    """
-    Get trade manpower data for a specific date.
-    If data doesn't exist for requested date, return data from last available date.
-    """
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        
-        # First, check if data exists for requested date
-        cursor.execute("""
-            SELECT * FROM trade_manpower_daily 
-            WHERE report_date = %s
-        """, (date,))
-        
-        current_data = cursor.fetchone()
-        
-        if current_data:
-            # Data exists for requested date
-            return_data = format_data_for_frontend(current_data, date, False)
-            return jsonify({
-                'success': True,
-                'has_data': True,
-                'data': return_data,
-                'message': f'Data loaded for {date}',
-                'is_template': False,
-                'template_date': None
-            })
-        else:
-            # No data for requested date, find last available date
-            cursor.execute("""
-                SELECT report_date FROM trade_manpower_daily 
-                WHERE report_date < %s
-                ORDER BY report_date DESC 
-                LIMIT 1
-            """, (date,))
-            
-            last_date_row = cursor.fetchone()
-            
-            if last_date_row:
-                # Found data from previous date
-                last_date = last_date_row['report_date'].strftime('%Y-%m-%d')
-                
-                cursor.execute("""
-                    SELECT * FROM trade_manpower_daily 
-                    WHERE report_date = %s
-                """, (last_date,))
-                
-                template_data = cursor.fetchone()
-                return_data = format_data_for_frontend(template_data, date, True)
-                
-                return jsonify({
-                    'success': True,
-                    'has_data': False,  # No data for current date
-                    'data': return_data,
-                    'message': f'No data found for {date}. Showing template from {last_date}.',
-                    'is_template': True,
-                    'template_date': last_date
-                })
-            else:
-                # No data at all in database
-                return jsonify({
-                    'success': True,
-                    'has_data': False,
-                    'data': [],  # Empty array to trigger new data entry
-                    'message': 'No historical data found. Please enter new data.',
-                    'is_template': False,
-                    'template_date': None
-                })
-                
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
-
 def format_data_for_frontend(db_row, requested_date, is_template=False):
     """
     Convert database row to frontend format
@@ -3209,6 +3127,113 @@ def format_data_for_frontend(db_row, requested_date, is_template=False):
     
     return result
 
+def calculate_totals(data):
+    """
+    Calculate total columns from all trades
+    """
+    trades = ['op_ciph', 'oss', 'occ', 'ttc', 'lmn', 'efs', 'dvr_mt', 'dr', 'dtmn', 
+              'skt', 'artsn', 'w_man', 'steward', 'dresser', 'hkeeper', 'mkeeper', 
+              'chef_mess', 'chef_com', 'er', 'tlr', 'clk_sd', 'ere']
+    
+    fields = ['auth', 'hs', 'held', 'av', 'dist_hq', 'dist_1', 'dist_2', 'dist_3',
+              'state_hq', 'state_1', 'state_2', 'state_3', 'present_hq', 'present_1',
+              'present_2', 'present_3']
+    
+    totals = {}
+    
+    for field in fields:
+        total = 0
+        for trade in trades:
+            key = f"{trade}_{field}"
+            total += data.get(key, 0)
+        totals[f"total_{field}"] = total
+    
+    return totals
+
+@app.route('/api/trade-manpower/get/<date>', methods=['GET'])
+def get_trade_manpower(date):
+    """
+    Get trade manpower data for a specific date.
+    If data doesn't exist for requested date, return data from last available date.
+    """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # First, check if data exists for requested date
+        cursor.execute("""
+            SELECT * FROM trade_manpower_daily 
+            WHERE report_date = %s
+        """, (date,))
+        
+        current_data = cursor.fetchone()
+        
+        if current_data:
+            # Data exists for requested date
+            return_data = format_data_for_frontend(current_data, date, False)
+            return jsonify({
+                'success': True,
+                'has_data': True,
+                'data': return_data,
+                'message': f'Data loaded for {date}',
+                'is_template': False,
+                'template_date': None,
+                'is_present_day': True  # Add this flag
+            })
+        else:
+            # No data for requested date, find last available date
+            cursor.execute("""
+                SELECT report_date FROM trade_manpower_daily 
+                WHERE report_date < %s
+                ORDER BY report_date DESC 
+                LIMIT 1
+            """, (date,))
+            
+            last_date_row = cursor.fetchone()
+            
+            if last_date_row:
+                # Found data from previous date
+                last_date = last_date_row['report_date'].strftime('%Y-%m-%d')
+                
+                cursor.execute("""
+                    SELECT * FROM trade_manpower_daily 
+                    WHERE report_date = %s
+                """, (last_date,))
+                
+                template_data = cursor.fetchone()
+                return_data = format_data_for_frontend(template_data, date, True)
+                
+                return jsonify({
+                    'success': True,
+                    'has_data': False,  # No data for current date
+                    'data': return_data,
+                    'message': f'No data found for {date}. Showing template from {last_date}.',
+                    'is_template': True,
+                    'template_date': last_date,
+                    'is_present_day': True  # Add this flag
+                })
+            else:
+                # No data at all in database
+                return jsonify({
+                    'success': True,
+                    'has_data': False,
+                    'data': [],  # Empty array to trigger new data entry
+                    'message': 'No historical data found. Please enter new data.',
+                    'is_template': False,
+                    'template_date': None,
+                    'is_present_day': True  # Add this flag
+                })
+                
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
 
 @app.route('/api/trade-manpower/save', methods=['POST'])
 def save_trade_manpower():
@@ -3232,6 +3257,8 @@ def save_trade_manpower():
         # Check if data already exists for this date
         cursor.execute("SELECT id FROM trade_manpower_daily WHERE report_date = %s", (date,))
         existing = cursor.fetchone()
+        
+        print(f"DEBUG: Saving for date {date}, existing: {existing}")
         
         # Create data dictionary for insertion
         insert_data = {'report_date': date}
@@ -3268,45 +3295,72 @@ def save_trade_manpower():
             trade_code = trade_mapping.get(trade_name)
             
             if not trade_code:
+                print(f"WARNING: No mapping for trade: {trade_name}")
                 continue
                 
             # Map each field to column name
-            insert_data[f"{trade_code}_auth"] = trade.get('auth', 0)
-            insert_data[f"{trade_code}_hs"] = trade.get('hs', 0)
-            insert_data[f"{trade_code}_held"] = trade.get('held', 0)
-            insert_data[f"{trade_code}_av"] = trade.get('av', 0)
-            insert_data[f"{trade_code}_dist_hq"] = trade.get('dist_hq', 0)
-            insert_data[f"{trade_code}_dist_1"] = trade.get('dist_1', 0)
-            insert_data[f"{trade_code}_dist_2"] = trade.get('dist_2', 0)
-            insert_data[f"{trade_code}_dist_3"] = trade.get('dist_3', 0)
-            insert_data[f"{trade_code}_state_hq"] = trade.get('state_hq', 0)
-            insert_data[f"{trade_code}_state_1"] = trade.get('state_1', 0)
-            insert_data[f"{trade_code}_state_2"] = trade.get('state_2', 0)
-            insert_data[f"{trade_code}_state_3"] = trade.get('state_3', 0)
-            insert_data[f"{trade_code}_present_hq"] = trade.get('present_hq', 0)
-            insert_data[f"{trade_code}_present_1"] = trade.get('present_1', 0)
-            insert_data[f"{trade_code}_present_2"] = trade.get('present_2', 0)
-            insert_data[f"{trade_code}_present_3"] = trade.get('present_3', 0)
+            fields_to_map = [
+                ('auth', 'auth'),
+                ('hs', 'hs'),
+                ('held', 'held'),
+                ('av', 'av'),
+                ('dist_hq', 'dist_hq'),
+                ('dist_1', 'dist_1'),
+                ('dist_2', 'dist_2'),
+                ('dist_3', 'dist_3'),
+                ('state_hq', 'state_hq'),
+                ('state_1', 'state_1'),
+                ('state_2', 'state_2'),
+                ('state_3', 'state_3'),
+                ('present_hq', 'present_hq'),
+                ('present_1', 'present_1'),
+                ('present_2', 'present_2'),
+                ('present_3', 'present_3')
+            ]
+            
+            for frontend_field, db_field in fields_to_map:
+                column_name = f"{trade_code}_{db_field}"
+                value = trade.get(frontend_field, 0)
+                insert_data[column_name] = value
         
         # Calculate totals
         totals = calculate_totals(insert_data)
         insert_data.update(totals)
         
+        print(f"DEBUG: insert_data keys: {list(insert_data.keys())[:5]}...")
+        print(f"DEBUG: insert_data sample values: {list(insert_data.values())[:5]}...")
+        
         if existing:
-            # Update existing record
-            set_clause = ', '.join([f"{k} = %s" for k in insert_data.keys() if k != 'report_date'])
-            values = list(insert_data.values())
-            values.append(date)  # For WHERE clause
+            # Update existing record - FIXED VERSION
+            print(f"DEBUG: Updating existing record for {date}")
+            
+            # Create SET clause
+            set_items = []
+            set_values = []
+            
+            for key, value in insert_data.items():
+                if key != 'report_date':  # Don't update the report_date in SET clause
+                    set_items.append(f"{key} = %s")
+                    set_values.append(value)
+            
+            # Add the WHERE clause value
+            set_values.append(date)
             
             query = f"""
                 UPDATE trade_manpower_daily 
-                SET {set_clause}
+                SET {', '.join(set_items)}
                 WHERE report_date = %s
             """
-            cursor.execute(query, values)
+            
+            print(f"DEBUG: UPDATE query: {query}")
+            print(f"DEBUG: UPDATE values: {set_values[:5]}...")
+            
+            cursor.execute(query, set_values)
             action = 'updated'
         else:
             # Insert new record
+            print(f"DEBUG: Inserting new record for {date}")
+            
             columns = ', '.join(insert_data.keys())
             placeholders = ', '.join(['%s'] * len(insert_data))
             
@@ -3314,10 +3368,13 @@ def save_trade_manpower():
                 INSERT INTO trade_manpower_daily ({columns})
                 VALUES ({placeholders})
             """
+            
             cursor.execute(query, list(insert_data.values()))
-            action = 'saved'
+            action = 'inserted'
         
         conn.commit()
+        
+        print(f"DEBUG: Data {action} successfully for {date}")
         
         return jsonify({
             'success': True,
@@ -3327,6 +3384,9 @@ def save_trade_manpower():
         })
         
     except Exception as e:
+        print(f"ERROR in save_trade_manpower: {str(e)}")
+        import traceback
+        traceback.print_exc()
         if 'conn' in locals():
             conn.rollback()
         return jsonify({
@@ -3338,30 +3398,7 @@ def save_trade_manpower():
             cursor.close()
         if 'conn' in locals():
             conn.close()
-
-def calculate_totals(data):
-    """
-    Calculate total columns from all trades
-    """
-    trades = ['op_ciph', 'oss', 'occ', 'ttc', 'lmn', 'efs', 'dvr_mt', 'dr', 'dtmn', 
-              'skt', 'artsn', 'w_man', 'steward', 'dresser', 'hkeeper', 'mkeeper', 
-              'chef_mess', 'chef_com', 'er', 'tlr', 'clk_sd', 'ere']
-    
-    fields = ['auth', 'hs', 'held', 'av', 'dist_hq', 'dist_1', 'dist_2', 'dist_3',
-              'state_hq', 'state_1', 'state_2', 'state_3', 'present_hq', 'present_1',
-              'present_2', 'present_3']
-    
-    totals = {}
-    
-    for field in fields:
-        total = 0
-        for trade in trades:
-            key = f"{trade}_{field}"
-            total += data.get(key, 0)
-        totals[f"total_{field}"] = total
-    
-    return totals
-
+                        
 @app.route('/api/trade-manpower/export-csv/<date>', methods=['GET'])
 def export_trade_csv(date):
     """
