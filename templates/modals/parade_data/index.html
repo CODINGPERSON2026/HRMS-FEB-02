@@ -629,12 +629,26 @@ function initializeParadeDataManager() {
             const data = this.paradeData[categoryKey];
             if (!data || data.length < 17) return;
 
-            const tOut = data[3] + data[4] + data[6] + data[7] + data[8] + data[9] + data[10] + data[11];
+            const tOut = data[3] + data[4] +  data[5] + data[6] + data[7] + data[8] + data[9] + data[10] + data[11];
             data[12] = Math.max(0, tOut);
             data[13] = data[5];
             data[14] = Math.max(0, data[2] - data[12]);
 
             this.updateRowDisplay(categoryKey);
+        },
+
+        calculateTOutForTotals(rowData) {
+            const lve = rowData[3] || 0;
+            const course = rowData[4] || 0;
+            // DET is excluded from total out calculation for totals
+            const mh = rowData[6] || 0;
+            const sickLve = rowData[7] || 0;
+            const ex = rowData[8] || 0;
+            const td = rowData[9] || 0;
+            const att = rowData[10] || 0;
+            const awlOslJc = rowData[11] || 0;
+
+            return lve + course + mh + sickLve + ex + td + att + awlOslJc;
         },
 
         calculateAllTotals() {
@@ -838,7 +852,6 @@ function initializeParadeDataManager() {
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
-
             const modalBody = document.querySelector('#paradeDataModal .modal-body');
             if (modalBody) {
                 modalBody.insertBefore(alertDiv, modalBody.firstChild);

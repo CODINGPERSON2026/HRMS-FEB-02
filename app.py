@@ -1917,8 +1917,8 @@ def get_co_all_dashboard_data(date_str):
     
     try:
         cursor.execute("""
-            SELECT 
-                SUM(grandTotal_auth) as total_auth,
+            SELECT
+                SUM(grandTotal_posted_str) as total_auth,
                 SUM(grandTotal_present_unit) as present_unit,
                 SUM(grandTotal_trout_det) as total_out,
                 COUNT(DISTINCT company) as company_count
@@ -2536,14 +2536,11 @@ def save_parade_data():
                 att = category_data[10] if len(category_data) > 10 else 0
                 awl_osl_jc = category_data[11] if len(category_data) > 11 else 0
                 
-                # Calculate T/OUT = LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC
-                trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
-                trout = max(0, trout)  # Ensure non-negative
+                trout = lve + course + mh + sick_lve + ex + det_value + td + att + awl_osl_jc
+                trout = max(0, trout)
                 
-                # PRESENT/STR DET = DET column value
                 present_det = det_value
                 
-                # PRESENT/STR UNIT = POSTED/STR - T/OUT
                 present_unit = posted_str - trout
                 present_unit = max(0, present_unit)  # Ensure non-negative
                 
@@ -2589,7 +2586,7 @@ def save_parade_data():
                     att = cat_data[10] if len(cat_data) > 10 else 0
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
-                    trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
+                    trout = lve + course + mh + sick_lve + ex + det_value + td + att + awl_osl_jc
                     trout = max(0, trout)                                               
                     
                     present_unit = posted_str - trout
@@ -2627,7 +2624,7 @@ def save_parade_data():
                     att = cat_data[10] if len(cat_data) > 10 else 0
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
-                    trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
+                    trout = lve + course + mh + sick_lve +  ex + det_value + td + att + awl_osl_jc
                     trout = max(0, trout)
                     
                     present_unit = posted_str - trout
@@ -2650,18 +2647,15 @@ def save_parade_data():
                 columns.append(column_name)
                 values.append(second_total_values[i])
             
-            # Calculate GRAND TOTAL (firstTotal + secondTotal)
             grand_total_values = [0] * 17
             for i in range(17):
                 grand_total_values[i] = first_total_values[i] + second_total_values[i]
             
-            # Store grand total in database
             for i in range(17):
                 column_name = f"grandTotal_{get_column_name_for_db(i)}"
                 columns.append(column_name)
                 values.append(grand_total_values[i])
             
-            # Build SQL query
             placeholders = ['%s'] * len(values)
             
             sql = f"""
@@ -2671,7 +2665,6 @@ def save_parade_data():
                 {', '.join([f"{col} = VALUES({col})" for col in columns if col not in ['report_date', 'company']])},
                 updated_at = NOW()
             """
-            
             print(f"Executing SQL for company: {final_company}")
             cursor.execute(sql, values)
             conn.commit()

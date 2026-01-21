@@ -771,7 +771,7 @@
         <div class="stats-bar">
             <div class="stat-item">
                 <div class="stat-value" id="totalAuth">0</div>
-                <div class="stat-label">Total Authorized Strength</div>
+                <div class="stat-label">Total Posted Strength</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value" id="presentUnit">0</div>
@@ -974,14 +974,15 @@
         function calculateTOut(rowData) {
             const lve = rowData[COL_INDICES.LVE] || 0;
             const course = rowData[COL_INDICES.COURSE] || 0;
+            const det = rowData[COL_INDICES.DET] || 0;
             const mh = rowData[COL_INDICES.MH] || 0;
             const sickLve = rowData[COL_INDICES.SICK_LVE] || 0;
             const ex = rowData[COL_INDICES.EX] || 0;
             const td = rowData[COL_INDICES.TD] || 0;
             const att = rowData[COL_INDICES.ATT] || 0;
             const awlOslJc = rowData[COL_INDICES.AWL_OSL_JC] || 0;
-            
-            return lve + course + mh + sickLve + ex + td + att + awlOslJc;
+
+            return lve + course + det + mh + sickLve + ex + td + att + awlOslJc;
         }
 
         function calculatePresentUnit(rowData) {
@@ -1026,7 +1027,7 @@
         function calculateSecondTotal(columnIndex) {
             let total = 0;
             const secondSectionCategories = categories.filter(cat => cat.isSecondSection && !cat.isTotal);
-            
+
             secondSectionCategories.forEach(cat => {
                 if (data[cat.key] && data[cat.key].length > columnIndex) {
                     if (columnIndex === COL_INDICES.T_OUT) {
@@ -1040,7 +1041,7 @@
                     }
                 }
             });
-            
+
             return total;
         }
 
@@ -1111,6 +1112,8 @@
                     input.disabled = true;
                     input.title = "Cannot edit data for future dates";
                 }
+
+                
                 
                 input.addEventListener('input', (e) => {
                     const value = parseFloat(e.target.value);
@@ -1758,7 +1761,7 @@
         }
 
         function updateStats() {
-            document.getElementById('totalAuth').textContent = calculateGrandTotal(COL_INDICES.AUTH);
+            document.getElementById('totalAuth').textContent = calculateGrandTotal(COL_INDICES.POSTED_STR);
             document.getElementById('presentUnit').textContent = calculateGrandTotal(COL_INDICES.PRESENT_UNIT);
             document.getElementById('totalOut').textContent = calculateGrandTotal(COL_INDICES.T_OUT);
         }
