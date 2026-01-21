@@ -688,7 +688,6 @@ def delete_member(member_id):
     cur.close()
     return jsonify({"status": "success"})
 
-
 @app.route("/edit_member/<int:member_id>", methods=["POST"])
 def edit_member(member_id):
     data = request.form
@@ -1439,7 +1438,6 @@ def add_head():
         return jsonify(status='error', message=str(e))
 
 ranks = ('Naib Subedar', 'Subedar', 'Subedar Major')
-
 @app.route("/search_officer")
 def search_officer():
     name_query = request.args.get("name", "")
@@ -2009,7 +2007,7 @@ def get_co_all_dashboard_data(date_str):
     try:
         cursor.execute("""
             SELECT 
-                SUM(grandTotal_auth) as total_auth,
+                SUM(grandTotal_posted_str) as total_posted_str,
                 SUM(grandTotal_present_unit) as present_unit,
                 SUM(grandTotal_trout_det) as total_out,
                 COUNT(DISTINCT company) as company_count
@@ -2021,9 +2019,9 @@ def get_co_all_dashboard_data(date_str):
         cursor.execute("""
             SELECT 
                 company,
-                grandTotal_lve as on_leave,
-                grandTotal_auth as total_strength,
-                ROUND((grandTotal_lve / NULLIF(grandTotal_auth, 0) * 100), 2) as leave_percentage
+                grandTotal_trout_det as on_leave,
+                grandTotal_posted_str as total_strength,
+                ROUND((grandTotal_trout_det / NULLIF(grandTotal_posted_str, 0) * 100), 2) as leave_percentage
             FROM parade_state_daily
             WHERE report_date = %s
             ORDER BY company
@@ -2065,7 +2063,7 @@ def get_co_all_dashboard_data(date_str):
             'success': True,
             'data': {
                 'parade_summary': {
-                    'total_auth': parade_summary['total_auth'] or 0,
+                    'total_posted_str': parade_summary['total_posted_str'] or 0,
                     'present_unit': parade_summary['present_unit'] or 0,
                     'total_out': parade_summary['total_out'] or 0,
                     'company_count': parade_summary['company_count'] or 0,
@@ -2680,7 +2678,7 @@ def save_parade_data():
                     att = cat_data[10] if len(cat_data) > 10 else 0
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
-                    trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
+                    trout = lve + course + mh + sick_lve + ex + det_value + td + att + awl_osl_jc
                     trout = max(0, trout)                                               
                     
                     present_unit = posted_str - trout
@@ -2718,7 +2716,7 @@ def save_parade_data():
                     att = cat_data[10] if len(cat_data) > 10 else 0
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
-                    trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
+                    trout = lve + course + mh + sick_lve +  ex + det_value + td + att + awl_osl_jc
                     trout = max(0, trout)
                     
                     present_unit = posted_str - trout
@@ -3032,7 +3030,6 @@ def get_courses():
     conn.close()
 
     return jsonify(data)
-
 
 
 @app.route('/account/departments/all_transactions')
