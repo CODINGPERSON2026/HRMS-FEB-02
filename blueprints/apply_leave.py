@@ -160,7 +160,7 @@ def search_personnel():
 
         # No existing leave → search personnel
         cursor.execute("""
-            SELECT name, army_number, `rank`, trade, company
+            SELECT name, army_number, `rank`, trade, company,section
             FROM personnel
             WHERE army_number LIKE %s
             LIMIT 1

@@ -742,7 +742,7 @@ COMPANIES = [
     "1 Company",
     "2 Company",
     "3 Company",
-    "4 Company"
+    "HQ company"
 ]
 
 def auto_save_monthly_unfit():

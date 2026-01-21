@@ -43,6 +43,7 @@
         <th>Rank</th>
         <th>Name</th>
         <th>Trade</th>
+        <th>Section NCO</th>
         <th>Company</th>
       </tr>
     </thead>
@@ -257,6 +258,7 @@ if (data.exists) {
     r.insertCell().textContent = p.rank;
     r.insertCell().textContent = p.name;
     r.insertCell().textContent = p.trade;
+    r.insertCell().textContent = p.section;
     r.insertCell().textContent = p.company;
   });
 

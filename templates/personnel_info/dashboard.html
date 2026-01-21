@@ -44,7 +44,7 @@ body::before {
 }
 .dashboard-container {
   margin-top: -40px;
-  margin-left: 240px;
+  
   padding: 1.5rem;
   min-height: 100vh;
   position: relative;
@@ -222,15 +222,15 @@ body.sidebar-collapsed .dashboard-container {
   {% set subscript = "Add Personnel → Update Personnel → View Personnel" %}
   {% include 'navbar/navbar.html' %}
 </br>
-  {% if role in ['JCO'] %}
-  <div class="page-header">
+<div class="page-header">
+  {% if role in ['JCO','ONCO'] %}
     
  
     <div class="header-right " >
       <a href="/personnel_information" class="header-link">Dashboard</a>
     </div>
-      {% endif %}
-    {% if role in ['JCO', 'SEC NCO','O SEC NCO'] %}
+      
+    
       <div class="header-right " >
       
       <a href="/personnel_information/add-personnel" class="header-link">Add Personnel</a>

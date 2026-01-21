@@ -969,7 +969,7 @@ def company_status():
         overall["company"] = "15 XYZ"
         data.append(overall)
 
-        companies = ["1 company", "2 company", "3 company", "4 company"]
+        companies = ["1 company", "2 company", "3 company", "HQ company"]
         sql_with_where = rank_sql + " WHERE company = %s"
 
         for company in companies:

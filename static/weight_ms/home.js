@@ -39,7 +39,7 @@ async function loadCompanies() {
           companySelect.remove(1);
       }
       
-      const companyNumbers = ['1', '2', '3', '4'];
+      const companyNumbers = ['1', '2', '3', 'HQ'];
       companyNumbers.forEach(num => {
           const option = document.createElement("option");
           option.value = `${num} Company`;

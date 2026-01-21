@@ -715,24 +715,24 @@ body.sidebar-collapsed .form-container {
                       <option value="1 Company">1 Company</option>
                       <option value="2 Company">2 Company</option>
                       <option value="3 Company">3 Company</option>
-                      <option value="4 Company">4 Company</option>
+                      <option value="HQ company">HQ company</option>
                     </select>
                   </div>
                   
                   <div class="col-md-4 mb-3">
                     <label class="form-label required">Section</label>
                     <select class="form-select" id="section">
-                      <option value="">Select</option>
+                      <option value="">Choose company first</option>
                     </select>
                   </div>
                   
                   <script>
                     // Map company to its sections
                     const companySections = {
-                      "1 Company": ["Microwave", "Line", "OP", "IT", "Power", "CHQ"],
-                      "2 Company": ["MCCS", "CHQ"],
+                      "1 Company": ["NCO MW", "NCO LINE", "NCO OP", "NCO IT", "NCO PWR", "NCO CHQ"],
+                      "2 Company": ["NCO MCCS", "NCO CHQ"],
                       "3 Company": ["DET", "System", "CHQ", "MT"],
-                      "4 Company": ["CHQ", "RHQ", "MT", "TM", "RP/NA", "QM", "LRW"]
+                      "HQ company": ["NCO RHQ", "NCO CHQ", "NCO LRW", "NCO QM", "NCO RP", "NCO MT", "NCO TM",'NCO MM','NCO NA']
                     };
                   
                     const companySelect = document.getElementById('company');
@@ -1167,14 +1167,14 @@ body.sidebar-collapsed .form-container {
 
                 <div class="row">
                   <div class="col-md-3 mb-3">
-                    <label for="height" class="form-label">Height</label>
+                    <label for="height" class="form-label required">Height</label>
                     <input type="text" class="form-control" id="height" />
                     <div class="error-message" id="height-error">
                       Only numbers and decimal points are allowed
                     </div>
                   </div>
                   <div class="col-md-3 mb-3">
-                    <label for="weight" class="form-label">Weight</label>
+                    <label for="weight" class="form-label required">Weight</label>
                     <input type="text" class="form-control" id="weight" />
                     <div class="error-message" id="weight-error">
                       Only numbers and decimal points are allowed
