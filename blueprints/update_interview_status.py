@@ -20,9 +20,19 @@ def get_pending_kunba_interviews():
 
 
     cursor.execute("""
-        SELECT id, army_number, `rank`, name,home_state
-        FROM personnel
-        WHERE interview_status = 0 AND home_state = %s  AND company = %s
+      SELECT id, army_number, `rank`, name, home_state
+FROM personnel
+WHERE interview_status = 0
+  AND home_state = %s
+  AND company = %s
+  AND `rank` NOT IN (
+      'Subedar', 'Naib Subedar', 'Subedar Major',
+      'Lieutenant', 'Captain', 'Major',
+      'Lieutenant Colonel', 'Colonel',
+      'Brigadier', 'Major General',
+      'Lieutenant General', 'General'
+  );
+
     """,(home_state,user_company))
     data = cursor.fetchall()
     print(data,"this is data coming from backend")

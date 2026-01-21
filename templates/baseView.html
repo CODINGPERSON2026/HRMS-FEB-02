@@ -187,11 +187,11 @@ body.sidebar-collapsed .page-wrapper {
       <a class="nav-link" href="/task_manager/">Task Management</a>
       {% endif %}
     
-      {% if role in ['CO', '2IC', 'ADJUTANT','OC'] %}
+      {% if role in ['CO', '2IC', 'ADJUTANT','OC','NCO PWR','NCO LINE'] %}
       <a class="nav-link" href="/weight_system">Weight Management</a>
       {% endif %}
     
-      {% if role in ['CO', '2IC', 'ADJUTANT','OC','SEC NCO','JCO'] %}
+      {% if role in ['CO', '2IC', 'ADJUTANT','OC','NCO LINE','JCO','O SEC NCO'] %}
       <a class="nav-link" href="/personnel_information">Personnel Management</a>
       {% endif %}
     
@@ -207,7 +207,7 @@ body.sidebar-collapsed .page-wrapper {
       {% endif %}
     
 
-      {% if role in ['SEC NCO','O NCO'] %}
+      {% if role in ['NCO PWR','O NCO','NCO LINE'] %}
       <a class="nav-link" href="/apply_leave/">Leave Management</a>
       {% endif %}
     

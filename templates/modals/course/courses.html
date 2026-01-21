@@ -12,14 +12,17 @@
             <table class="table table-bordered table-striped">
               <thead class="table-dark">
                 <tr>
-                  <th>Sr No</th>
+                  
                   <th>Army No</th>
-                  <th>Course</th>
+                  <th>Rank</th>
+                  <th>Name </th>
+                  
+                  <th>Course Name</th>
                   <th>From</th>
                   <th>To</th>
-                  <th>Institute</th>
-                  <th>Grading</th>
-                  <th>Remarks</th>
+                  <th>Institute Name</th>
+                  
+                  
                 </tr>
               </thead>
               <tbody id="coursesTableBody">
@@ -59,14 +62,16 @@
           data.forEach((row, index) => {
             tbody.innerHTML += `
               <tr>
-                <td>${index + 1}</td>
+                
                 <td>${row.army_number}</td>
-                <td>${row.course}</td>
+                <td>${row.rank}</td>
+                <td>${row.name}</td>
+                <td>${row.course_name}</td>
                 <td>${row.from_date}</td>
                 <td>${row.to_date}</td>
-                <td>${row.institute}</td>
-                <td>${row.grading}</td>
-                <td>${row.remarks || "-"}</td>
+                <td>${row.institute_name}</td>
+                
+                
               </tr>`;
           });
         })

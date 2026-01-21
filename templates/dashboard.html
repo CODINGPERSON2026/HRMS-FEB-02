@@ -369,12 +369,14 @@
       <button id="show-btn">
         <i class="fas fa-chevron-down"></i>
       </button>
-      {% if role in ['SEC NCO','SEC JCO','Subedar Major'] %}
+      {% if role in ['NCO PWR','SEC JCO','Subedar Major'] %}
 
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
         ASSIGN PERSONNAL
       </button>
-      
+      {% endif %}
+      {% if role in ['NCO PWR','NCO LINE','SEC JCO','Subedar Major','O SEC NCO'] %}
+
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#rollCallPoints">
         ROLL CALL POINTS
       </button>
@@ -397,11 +399,17 @@
         </span>
       </button>
       {% endif %}
+      {% if role == 'O SEC NCO'%}
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tradeModal">
+        <i class="fas fa-plus-circle me-1"></i>
+        ADD TRADE
+      </button>
+      {% endif %}
       
       
 
 
-      {% if role in ['SEC NCO','SEC JCO','OC','2IC'] %}
+      {% if role in ['NCO PWR','NCO LINE','SEC JCO','OC','2IC','JCO LINE','S/JCO','NCO CHQ','JCO CHQ'] %}
       <button id="leaveRequestsBtn" class="btn btn-primary">
         LEAVE REQUESTS
       </button>
@@ -564,30 +572,52 @@
         <h3 id="agniveer_count">—</h3>
       </div>
       {% endif %}
+      {% if role in ['TRGJCO'] %}
+      <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#on_courses_modal">
+        <small class="text-muted">ADD INDL ON COURSE</small>
+      </div>
+      {% endif %}
 
 
       
+      
+      
+      
+      
+      
+
+      
       {% if role in ['TRGJCO'] %}
+      
       <div class="card p-3 text-center"
-           style="cursor:pointer"
-           data-bs-toggle="modal"
-           data-bs-target="#fillupdetailsmodal">
+      style="cursor:pointer"
+      data-bs-toggle="modal"
+      data-bs-target="#fillupdetailsmodal">
         <small class="text-muted">FILL UP TEST DETAILS</small>
         
       </div>
       {% endif %}
 
+      
+      
+
+      
+      
+      
+
+      
 
 
 
-<!--  END Fill Up Test Details Modal ------------------------------------------------------------------>
+
+      <!--  END Fill Up Test Details Modal ------------------------------------------------------------------>
       
       <!-- Second Row Cards -->
 {% if role in ['CO', '2IC', 'ADJUTANT'] %}
 
 {% endif %}
 
-    </div>
+</div>
 
     
 
@@ -603,7 +633,7 @@
             <form id="eventForm">
               <label>Event Date:</label>
               <input type="date" class="form-control" name="event_date" value="{{ today }}" required>
-
+              
               <label class="mt-2">Event Name:</label>
               <input type="text" class="form-control" name="event_name" required>
 
@@ -633,6 +663,17 @@
     {% include 'modals/success-modal/modal.html' %}
     {% include 'task_manager/update_task_by_jco.html' %}
     {% include 'modals/adduser/user.html' %}
+    {% include 'modals/oncourses/modal.html' %}
+    
+    {% if role in ['O SEC NCO'] %}
+    <div class="modal fade" id="tradeModal" tabindex="-1">
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+          {% include 'modals/trade/trade.html' %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
     
 
     {% if role in ['CO', '2IC', 'ADJUTANT','TRGJCO','OC'] %}

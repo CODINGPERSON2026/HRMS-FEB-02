@@ -29,6 +29,7 @@ app.register_blueprint(loan_bp)
 app.register_blueprint(roll_call_bp)
 app.register_blueprint(inteview_bp)
 app.register_blueprint(add_user_bp)
+app.register_blueprint(oncourses_bp)
 
 
 @app.route("/admin_login", methods=["POST",'GET'])
@@ -1438,6 +1439,7 @@ def add_head():
         return jsonify(status='error', message=str(e))
 
 ranks = ('Naib Subedar', 'Subedar', 'Subedar Major')
+
 @app.route("/search_officer")
 def search_officer():
     name_query = request.args.get("name", "")
@@ -1550,6 +1552,7 @@ def dashboard_summary():
     cursor = conn.cursor(dictionary=True)
     user = require_login()
     current_user = user['army_number']
+    print(current_user,"this is current user")
     company = user['company']
     role = user['role']
     print("Logged-in user's company:", company)
@@ -1608,19 +1611,31 @@ WHERE DATE(report_date) = %s
 
         # 3️⃣ Interview Pending
         print(role,"this is my role")
+        print(user['army_number'],'army_number JC393919L')
         if role =='JCO' or role == 'S/JCO':
              print("in the route of interview penind ")
+
              cursor.execute('select home_state from personnel where army_number =  %s',(current_user,))
              home_result = cursor.fetchone()
-             home_state = home_result['home_state'] 
+             home_state = home_result['home_state']
+             print("in home state")
+             print(home_state)
 
 
              query = """
-            SELECT 
-                SUM(interview_status = 0) AS pending_count,
-                COUNT(*) AS total_count
-            FROM personnel
-            WHERE company = %s AND home_state = %s
+           SELECT 
+    SUM(interview_status = 0) AS pending_count,
+    COUNT(*) AS total_count
+FROM personnel
+WHERE company = %s
+  AND home_state = %s
+  AND `rank` NOT IN (
+      'Subedar', 'Naib Subedar', 'Subedar Major',
+      'Lieutenant', 'Captain', 'Major',
+      'Lieutenant Colonel', 'Colonel',
+      'Brigadier', 'Major General',
+      'Lieutenant General', 'General'
+  );
         """
              cursor.execute(query, (company,home_state))
              print("this got exexutd")
@@ -1636,6 +1651,7 @@ WHERE DATE(report_date) = %s
 
         interview_result = cursor.fetchone()
         pending_count = interview_result['pending_count'] if interview_result else 0
+        print("this is pending_count")
         total_interview_count = interview_result['total_count'] if interview_result else 0
         interview_percentage = round((pending_count / total_interview_count) * 100, 2) if total_interview_count > 0 else 0
 
@@ -1697,7 +1713,7 @@ WHERE DATE(report_date) = %s
         
         # count
         # 🔹 Courses Count
-        cursor.execute("SELECT COUNT(*) AS count FROM courses")
+        cursor.execute("SELECT COUNT(*) AS count FROM candidate_on_courses")
         courses_result = cursor.fetchone()
         courses_count = courses_result['count'] if courses_result else 0
         print(courses_count,"this is count")
@@ -2997,23 +3013,26 @@ def get_courses():
 
     cursor.execute("""
         SELECT 
-            sr_no,
-            army_number,
-            course,
-            DATE_FORMAT(from_date, '%d-%m-%Y') AS from_date,
-            DATE_FORMAT(to_date, '%d-%m-%Y') AS to_date,
-            institute,
-            grading,
-            remarks
-        FROM courses
-        ORDER BY from_date DESC
+            coc.army_number,
+            p.name,
+            p.rank,
+            coc.course_name,
+            DATE_FORMAT(coc.course_starting_date, '%d-%m-%Y') AS from_date,
+            DATE_FORMAT(coc.course_end_date, '%d-%m-%Y') AS to_date,
+            coc.institute_name
+        FROM candidate_on_courses coc
+        LEFT JOIN personnel p 
+            ON coc.army_number = p.army_number
     """)
 
     data = cursor.fetchall()
+    print("get all courses")
+    print("data",data)
     cursor.close()
     conn.close()
 
     return jsonify(data)
+
 
 
 @app.route('/account/departments/all_transactions')
@@ -3203,6 +3222,10 @@ def upcomming_test_alarms():
     conn.close()
 
     return jsonify({"rows": rows})
+
+
+
+
 
 
 

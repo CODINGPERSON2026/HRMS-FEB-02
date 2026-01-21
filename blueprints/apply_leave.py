@@ -267,15 +267,18 @@ def submit_leave_request():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT company,`rank` FROM personnel WHERE army_number = %s", (army_number,))
+        cursor.execute("SELECT company,`rank`,section FROM personnel WHERE army_number = %s", (army_number,))
         result = cursor.fetchone()
         if not result:
             return jsonify({"message": "Invalid Army Number. Personnel not found"}), 404
         company_name = result['company'].lower()
         rank = result['rank']
+        section = result['section']
+        print(company_name,section,rank)
+        request_status = section
         print(company_name,'this is company')
         # Find SEC NCO of the same company
-        cursor.execute('SELECT role FROM users WHERE company = %s AND role = %s', (company_name,'SEC NCO'))
+        cursor.execute('SELECT role FROM users WHERE company = %s AND role = %s', (company_name,''))
         sec_nco = cursor.fetchone()
         print('#########################################################################################')
         request_status = ''
@@ -283,8 +286,8 @@ def submit_leave_request():
             request_sent_to = 'OC'
             request_status = 'Pending at OC'
         else : 
-            request_sent_to = 'SEC NCO'
-            request_status = 'Pending at SEC NCO'
+            request_sent_to = section
+            request_status = f'Pending at {section}'
     except Exception as e:
         return jsonify({"message": "Database error", "error": str(e),'status':'error'}), 500
     finally:
@@ -385,7 +388,9 @@ def get_leave_requests():
         
         if current_user_role != '2IC' and current_user_role != 'CO':
             query = query + 'AND company = %s' + 'ORDER BY created_at DESC'
+            print(current_user_role,request_status,current_user_company)
             cursor.execute(query, (current_user_role,request_status,current_user_company))
+            print("in the route that sjould worldds  adsdsfdjfklfjdlf fljalfjdsklfjs ")
         elif current_user_role == 'CO':
             print('IN CO USER ROLE')
             query =  '''SELECT
@@ -493,6 +498,9 @@ def recommend_leave():
     leave_id = data.get("leave_id")
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
+    send_request_to = ''
+    current_user_role = ''
+    request_status = ''
 
     if not leave_id:
         return jsonify({"message": "Leave ID missing"}), 400
@@ -500,12 +508,24 @@ def recommend_leave():
     current_user_role = user['role']
     current_user_company = user['company']
     print('current_user_role',current_user_role)
-    if current_user_role == 'SEC NCO':
-        sent_request_to = 'SEC JCO'
-        request_status  = 'Pending at SEC JCO'
-    if current_user_role == 'SEC JCO':
-        sent_request_to = 'OC'
-        request_status = 'Pending at OC'
+    if current_user_role.startswith("NCO "):
+         send_request_to = current_user_role.replace("NCO ", "JCO ", 1)
+         request_status = f"Pending at {send_request_to}"
+    if current_user_role.startswith("JCO "):
+         send_request_to = 'S/JCO'
+         request_status = f"Pending at {send_request_to}"
+         print(current_user_company)
+    if current_user_role.startswith("S/JCO"):
+         send_request_to = 'OC'
+         request_status = f"Pending at {send_request_to}"
+         print(current_user_company)
+        
+
+    
+
+    print('current user role',current_user_role)
+    print('send request to ',send_request_to)
+    
     
 
     try:
@@ -526,9 +546,11 @@ def recommend_leave():
         leave = cursor.fetchone()
         
     # check what the rank of the personnel 
-        cursor.execute('select `rank` from personnel where army_number = %s',(leave['army_number'],))
+        cursor.execute('select `rank`,section from personnel where army_number = %s',(leave['army_number'],))
         result_rank = cursor.fetchone()
         rank =  result_rank['rank']
+
+
 
         if current_user_role == 'OC' and rank != 'Subedar' and rank !='Naib Subedar' and rank !='Subedar Major':
             sent_request_to = 'Approved'
@@ -543,15 +565,16 @@ def recommend_leave():
         elif  current_user_role == 'CO':
             sent_request_to = 'Approved'
             request_status  = 'Approved'
-        print(sent_request_to)
-        print(request_status)
-    
+        
+        
+        
+        print("##################################################################################")
+
         if not leave:
             return jsonify({"message": "Leave request not found"}), 404
         print(leave,"this is leave")
         # Logged-in user (SEC NCO)
         
- 
         # 2️⃣ Insert into leave_history
         cursor.execute("""
             INSERT INTO hrms.leave_history (
@@ -579,6 +602,8 @@ def recommend_leave():
             leave["leave_reason"],
             request_status
         ))
+        print(request_status,"before query")
+        
 
         # 3️⃣ Update main leave table
         cursor.execute("""
@@ -590,7 +615,7 @@ def recommend_leave():
                 rejected_date = NULL,
                 updated_at = NOW()
             WHERE id = %s
-        """, (sent_request_to,request_status,leave_id))
+        """, (send_request_to,request_status,leave_id))
 
         conn.commit()
 
@@ -643,6 +668,7 @@ def get_recommended_requests():
         cursor.execute(query, (recommended_by, user_company))
 
     data = cursor.fetchall()
+    print(data,"this is data")
 
     
     cursor.close()
