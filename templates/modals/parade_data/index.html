@@ -638,34 +638,75 @@ function initializeParadeDataManager() {
         },
 
         calculateAllTotals() {
-            const firstTotalData = Array(17).fill(0);
-            ['offr', 'jco', 'jcoEre', 'or', 'orEre'].forEach(cat => {
-                const data = this.paradeData[cat] || Array(17).fill(0);
-                for (let i = 0; i < 17; i++) {
-                    firstTotalData[i] += data[i] || 0;
-                }
-            });
-            this.paradeData.firstTotal = firstTotalData;
+    const firstTotalData = Array(17).fill(0);
+    const secondTotalData = Array(17).fill(0);
 
-            const secondTotalData = Array(17).fill(0);
-            ['oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'].forEach(cat => {
-                const data = this.paradeData[cat] || Array(17).fill(0);
-                for (let i = 0; i < 17; i++) {
-                    secondTotalData[i] += data[i] || 0;
-                }
-            });
-            this.paradeData.secondTotal = secondTotalData;
+    // Helper to sum a specific column across categories
+    const sumColumn = (categories, colIndex) => {
+        return categories.reduce((sum, cat) => {
+            const data = this.paradeData[cat] || Array(17).fill(0);
+            return sum + (data[colIndex] || 0);
+        }, 0);
+    };
 
-            const grandTotalData = Array(17).fill(0);
-            for (let i = 0; i < 17; i++) {
-                grandTotalData[i] = firstTotalData[i] + secondTotalData[i];
-            }
-            this.paradeData.grandTotal = grandTotalData;
+    // === FIRST TOTAL (I) ===
+    const firstCats = ['offr', 'jco', 'jcoEre', 'or', 'orEre'];
 
-            this.updateRowDisplay('firstTotal');
-            this.updateRowDisplay('secondTotal');
-            this.updateRowDisplay('grandTotal');
-        },
+    // Sum all columns directly from source rows
+    for (let i = 0; i < 17; i++) {
+        firstTotalData[i] = sumColumn(firstCats, i);
+    }
+
+    // But override calculated fields properly
+    const firstTOut = 
+        sumColumn(firstCats, 3)  + // LVE
+        sumColumn(firstCats, 4)  + // COURSE
+        sumColumn(firstCats, 5)  + // DET
+        sumColumn(firstCats, 6)  + // MH
+        sumColumn(firstCats, 7)  + // SICK/LVE
+        sumColumn(firstCats, 8)  + // EX
+        sumColumn(firstCats, 9)  + // TD
+        sumColumn(firstCats, 10) + // ATT
+        sumColumn(firstCats, 11);  // AWL/OSL/JC
+
+    firstTotalData[12] = Math.max(0, firstTOut);
+    firstTotalData[13] = sumColumn(firstCats, 5); // PRES/DET = sum of DET
+    firstTotalData[14] = Math.max(0, firstTotalData[2] - firstTotalData[12]);
+
+    this.paradeData.firstTotal = firstTotalData;
+
+    // === SECOND TOTAL (II) ===
+    const secondCats = ['oaOr', 'attSummary', 'attOffr', 'attJco', 'attOr'];
+
+    for (let i = 0; i < 17; i++) {
+        secondTotalData[i] = sumColumn(secondCats, i);
+    }
+
+    const secondTOut = 
+        sumColumn(secondCats, 3) + sumColumn(secondCats, 4) +
+        sumColumn(secondCats, 5) + sumColumn(secondCats, 6) +
+        sumColumn(secondCats, 7) + sumColumn(secondCats, 8) +
+        sumColumn(secondCats, 9) + sumColumn(secondCats, 10) +
+        sumColumn(secondCats, 11);
+
+    secondTotalData[12] = Math.max(0, secondTOut);
+    secondTotalData[13] = sumColumn(secondCats, 5);
+    secondTotalData[14] = Math.max(0, secondTotalData[2] - secondTotalData[12]);
+
+    this.paradeData.secondTotal = secondTotalData;
+
+    // === GRAND TOTAL ===
+    const grandTotalData = Array(17).fill(0);
+    for (let i = 0; i < 17; i++) {
+        grandTotalData[i] = firstTotalData[i] + secondTotalData[i];
+    }
+    this.paradeData.grandTotal = grandTotalData;
+
+    // Update display
+    this.updateRowDisplay('firstTotal');
+    this.updateRowDisplay('secondTotal');
+    this.updateRowDisplay('grandTotal');
+},
 
         updateRowDisplay(categoryKey) {
             const data = this.paradeData[categoryKey];

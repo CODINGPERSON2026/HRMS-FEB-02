@@ -1930,9 +1930,9 @@ def get_co_all_dashboard_data(date_str):
         cursor.execute("""
             SELECT 
                 company,
-                grandTotal_lve as on_leave,
-                grandTotal_auth as total_strength,
-                ROUND((grandTotal_lve / NULLIF(grandTotal_auth, 0) * 100), 2) as leave_percentage
+                grandTotal_trout_det as on_leave,
+                grandTotal_posted_str as total_strength,
+                ROUND((grandTotal_trout_det / NULLIF(grandTotal_posted_str, 0) * 100), 2) as leave_percentage
             FROM parade_state_daily
             WHERE report_date = %s
             ORDER BY company
