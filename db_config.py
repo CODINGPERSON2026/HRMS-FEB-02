@@ -36,7 +36,7 @@ def get_db_connection():
                 database='hrms',
                 port=3306
             )
-            print("✅ Database connected successfully (without auth_plugin)")
+            print("✅ Database connected successfully (without au   th_plugin)")
             return conn
         except mysql.connector.Error as e2:
             print(f"❌ Connection without auth_plugin also failed: {e2}")

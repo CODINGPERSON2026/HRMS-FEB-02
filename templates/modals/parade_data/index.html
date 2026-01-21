@@ -637,20 +637,6 @@ function initializeParadeDataManager() {
             this.updateRowDisplay(categoryKey);
         },
 
-        calculateTOutForTotals(rowData) {
-            const lve = rowData[3] || 0;
-            const course = rowData[4] || 0;
-            // DET is excluded from total out calculation for totals
-            const mh = rowData[6] || 0;
-            const sickLve = rowData[7] || 0;
-            const ex = rowData[8] || 0;
-            const td = rowData[9] || 0;
-            const att = rowData[10] || 0;
-            const awlOslJc = rowData[11] || 0;
-
-            return lve + course + mh + sickLve + ex + td + att + awlOslJc;
-        },
-
         calculateAllTotals() {
             const firstTotalData = Array(17).fill(0);
             ['offr', 'jco', 'jcoEre', 'or', 'orEre'].forEach(cat => {

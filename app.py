@@ -1917,8 +1917,8 @@ def get_co_all_dashboard_data(date_str):
     
     try:
         cursor.execute("""
-            SELECT
-                SUM(grandTotal_posted_str) as total_auth,
+            SELECT 
+                SUM(grandTotal_posted_str) as total_posted_str,
                 SUM(grandTotal_present_unit) as present_unit,
                 SUM(grandTotal_trout_det) as total_out,
                 COUNT(DISTINCT company) as company_count
@@ -1974,7 +1974,7 @@ def get_co_all_dashboard_data(date_str):
             'success': True,
             'data': {
                 'parade_summary': {
-                    'total_auth': parade_summary['total_auth'] or 0,
+                    'total_posted_str': parade_summary['total_posted_str'] or 0,
                     'present_unit': parade_summary['present_unit'] or 0,
                     'total_out': parade_summary['total_out'] or 0,
                     'company_count': parade_summary['company_count'] or 0,
@@ -2647,15 +2647,18 @@ def save_parade_data():
                 columns.append(column_name)
                 values.append(second_total_values[i])
             
+            # Calculate GRAND TOTAL (firstTotal + secondTotal)
             grand_total_values = [0] * 17
             for i in range(17):
                 grand_total_values[i] = first_total_values[i] + second_total_values[i]
             
+            # Store grand total in database
             for i in range(17):
                 column_name = f"grandTotal_{get_column_name_for_db(i)}"
                 columns.append(column_name)
                 values.append(grand_total_values[i])
             
+            # Build SQL query
             placeholders = ['%s'] * len(values)
             
             sql = f"""
@@ -2665,6 +2668,7 @@ def save_parade_data():
                 {', '.join([f"{col} = VALUES({col})" for col in columns if col not in ['report_date', 'company']])},
                 updated_at = NOW()
             """
+            
             print(f"Executing SQL for company: {final_company}")
             cursor.execute(sql, values)
             conn.commit()
