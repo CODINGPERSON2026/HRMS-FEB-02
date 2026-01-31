@@ -1282,8 +1282,50 @@ def update_personnel(army_number):
         cursor.close()
         connection.close()
 
+@personnel_info.route('/delete-personnel')
+def delete_personnel_page():
+    """Render the delete personnel page"""
+    return render_template('/personnel_info/delete.html', active_tab='delete-personnel')
+
+@personnel_info.route('/api/personnel/delete/<army_number>', methods=['DELETE'])
+def delete_personnel(army_number):
+    """Delete personnel and all related records"""
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({'success': False, 'message': 'Database connection failed'}), 500
+    cursor = connection.cursor()
+    try:
+        # First, get the personnel ID
+        cursor.execute("SELECT id FROM personnel WHERE army_number = %s", (army_number,))
+        result = cursor.fetchone()
+        
+        if not result:
+            return jsonify({'success': False, 'message': 'Personnel not found'}), 404
+        
+        personnel_id = result[0]
+        
+        # Delete related records
+        delete_related_records(cursor, personnel_id, army_number)
+        
+        # Finally delete from personnel table
+        cursor.execute("DELETE FROM personnel WHERE id = %s", (personnel_id,))
+        
+        connection.commit()
+        return jsonify({'success': True, 'message': 'Personnel deleted successfully'}), 200
+    except Error as e:
+        connection.rollback()
+        print(f"Database error during deletion: {e}")
+        return jsonify({'success': False, 'message': f"Database error: {str(e)}"}), 500
+    except Exception as e:
+        connection.rollback()
+        print(f"General error during deletion: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
 def delete_related_records(cursor, personnel_id, army_number):
-    """Delete all related records for a personnel before updating"""
+    """Delete all related records for a personnel before updating/deleting"""
     tables = [
         'courses', 'units_served', 'loans', 'punishments',
         'detailed_courses', 'leave_details', 'family_members',

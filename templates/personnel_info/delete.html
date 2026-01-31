@@ -1,0 +1,296 @@
+{% extends 'baseView.html' %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #2c5aa0;
+        --secondary-color: #8a0a0a;
+        --light-bg: #f8f9fa;
+        --accent-color: #d4af37;
+        --saffron: #ff9933;
+        --white: #ffffff;
+        --green: #138808;
+        --accent: #000080;
+    }
+
+    .container-fluid {
+        max-width: 80%;
+        padding: 0 20px;
+    }
+
+    .form-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        padding: 30px;
+        border: 1px solid #e1e5eb;
+        max-width: calc(100% - 100px);
+        transition: margin-left 0.35s cubic-bezier(.4, 0, .2, 1),
+            max-width 0.35s cubic-bezier(.4, 0, .2, 1);
+        margin: auto;
+    }
+
+    .search-section {
+        background-color: var(--light-bg);
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .search-section h3 {
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--secondary-color);
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-search {
+        background: linear-gradient(135deg, var(--primary-color), #1a3a7a);
+        color: white;
+        padding: 10px 20px;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-search:hover {
+        background: linear-gradient(135deg, #1a3a7a, var(--primary-color));
+        transform: translateY(-2px);
+    }
+
+    .btn-delete-final {
+        background: linear-gradient(135deg, #dc3545, #a71d2a);
+        color: white;
+        padding: 12px 40px;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-delete-final:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        background: linear-gradient(135deg, #bd2130, #a71d2a);
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background-color: lightgray;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .header-right {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .header-link {
+        padding: 0.6rem 1.2rem;
+        background: rgba(255, 255, 255, 0.3);
+        color: #000 !important;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .header-link:hover {
+        background: var(--accent);
+        color: #fff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
+    }
+
+    .header-section {
+        background: linear-gradient(135deg, #dc3545, #8a0a0a);
+        color: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--accent-color);
+    }
+
+    .personnel-preview {
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        display: none;
+    }
+
+    .preview-item {
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+
+    .preview-label {
+        font-weight: 700;
+        color: var(--primary-color);
+        width: 150px;
+        display: inline-block;
+    }
+
+    .warning-box {
+        background-color: #fff3cd;
+        border-left: 5px solid #ffca2c;
+        color: #856404;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="wrapper">
+    {% set header = "Personnel Management" %}
+    {% set subscript = "Add Personnel → Update Personnel → Delete Personnel" %}
+    {% include 'navbar/navbar.html' %}
+    <div class="page-header">
+        <div class="header-right">
+            <a href="/personnel_information" class="header-link">Dashboard</a>
+            <a href="/personnel_information/add-personnel" class="header-link">Add Personnel</a>
+            <a href="/personnel_information/update-personnel" class="header-link">Update Personnel</a>
+            <a href="/personnel_information/delete-personnel" class="header-link">Delete Personnel</a>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-xxl-8">
+            <div class="form-container">
+                <div class="header-section">
+                    <h1><i class="fas fa-user-minus"></i> Delete Army Personnel</h1>
+                    <p>Search and remove personnel records permanently</p>
+                </div>
+
+                <div class="search-section">
+                    <h3><i class="fas fa-search"></i> Search Personnel to Delete</h3>
+                    <div class="row align-items-end">
+                        <div class="col-md-8 mb-3">
+                            <label for="searchArmyNumber" class="form-label">Enter Army Number</label>
+                            <input type="text" class="form-control" id="searchArmyNumber"
+                                placeholder="Enter army number...">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button type="button" class="btn btn-search w-100" id="btnSearch">
+                                <i class="fas fa-search me-2"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="personnelDetails" class="personnel-preview">
+                    <h3 class="mb-4">Personnel Found</h3>
+                    <div class="preview-item"><span class="preview-label">Name:</span> <span id="displayName">-</span>
+                    </div>
+                    <div class="preview-item"><span class="preview-label">Army Number:</span> <span
+                            id="displayArmyNo">-</span></div>
+                    <div class="preview-item"><span class="preview-label">Rank:</span> <span id="displayRank">-</span>
+                    </div>
+                    <div class="preview-item"><span class="preview-label">Company:</span> <span
+                            id="displayCompany">-</span></div>
+
+                    <div class="warning-box">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> Deleting this record will also remove all associated data including
+                        courses, medical history, family details, and service records. This action cannot be undone.
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-delete-final" id="btnDelete">
+                            <i class="fas fa-trash-alt me-2"></i> Confirm and Delete Personnel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('btnSearch').addEventListener('click', function () {
+        const armyNumber = document.getElementById('searchArmyNumber').value;
+        if (!armyNumber) {
+            alert('Please enter an army number');
+            return;
+        }
+
+        fetch(`/personnel_information/api/personnel/search/${armyNumber}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const p = data.data.personnel;
+                    document.getElementById('displayName').textContent = p.name;
+                    document.getElementById('displayArmyNo').textContent = p.army_number;
+                    document.getElementById('displayRank').textContent = p.rank;
+                    document.getElementById('displayCompany').textContent = p.company;
+                    document.getElementById('personnelDetails').style.display = 'block';
+                } else {
+                    alert('Personnel not found');
+                    document.getElementById('personnelDetails').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error searching for personnel');
+            });
+    });
+
+    document.getElementById('btnDelete').addEventListener('click', function () {
+        const armyNumber = document.getElementById('displayArmyNo').textContent;
+
+        if (confirm(`Are you sure you want to permanently delete personnel ${armyNumber}? This action cannot be undone.`)) {
+            fetch(`/personnel_information/api/personnel/delete/${armyNumber}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Personnel deleted successfully');
+                        window.location.href = '/personnel_information';
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting personnel');
+                });
+        }
+    });
+</script>
+{% endblock %}

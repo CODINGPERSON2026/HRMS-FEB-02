@@ -265,7 +265,7 @@
   };
 
   function downloadCertificate(armyNumber) {
-    window.open(`/apply_leave/leave/download_certificate/${armyNumber}`, '_blank');
+    window.location.href = `/apply_leave/leave/download_certificate/${armyNumber}`;
   }
   /* FETCH LEAVE DETAILS */
   async function getLeaveDetails(id, name) {
@@ -282,19 +282,13 @@
     leaveDetailsDiv.style.display = "block";
 
     data.leave_balance.forEach(l => {
-      const row = leaveTable.insertRow();
-      if (l.leave_type === "Total") {
-        row.classList.add("table-secondary", "fw-bold");
-      }
-      row.innerHTML =
+      leaveTable.insertRow().innerHTML =
         `<td>${l.leave_type}</td>
        <td>${l.total_leave}</td>
        <td>${l.leave_taken}</td>
        <td>${l.balance_leave}</td>`;
 
-      if (l.leave_type !== "Total") {
-        leaveType.add(new Option(l.leave_type, l.leave_type));
-      }
+      leaveType.add(new Option(l.leave_type, l.leave_type));
     });
     hideLoading();
   }
@@ -312,22 +306,18 @@
       return;
     }
 
-    // Base leave days (inclusive) - this is the actual leave that counts against balance
-    let actualLeaveDays = Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
+    // Base leave days (inclusive)
+    let totalDays = Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
 
-    // Total days includes prefix/suffix for administrative purposes
-    let totalDays = actualLeaveDays;
+    // Prefix & Suffix logic
     if (prefixCheck.checked) totalDays += 1;
     if (suffixCheck.checked) totalDays += 1;
 
     days.value = totalDays;
-    // Store actual leave days in a hidden field or data attribute
-    days.setAttribute('data-actual-days', actualLeaveDays);
 
     leaveSummary.innerHTML = `
     <strong>${totalDays} days ${leaveType.value}</strong><br>
     Leave Period: ${fromDate.value} to ${toDate.value}<br>
-    Actual Leave Days (counted against balance): ${actualLeaveDays}<br>
     Prefix: ${prefixCheck.checked ? "Yes (+1 day)" : "No"}<br>
     Suffix: ${suffixCheck.checked ? "Yes (+1 day)" : "No"}
   `;
@@ -355,8 +345,7 @@
           leave_type: leaveType.value,
           from_date: fromDate.value,
           to_date: toDate.value,
-          actual_leave_days: parseInt(days.getAttribute('data-actual-days')), // Days that count against balance
-          total_days: parseInt(days.value), // Total days including prefix/suffix
+          total_days: days.value, // includes prefix/suffix automatically
           reason: reason.value,
           name: personnel_name
         })

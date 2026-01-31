@@ -30,6 +30,7 @@ app.register_blueprint(roll_call_bp)
 app.register_blueprint(inteview_bp)
 app.register_blueprint(add_user_bp)
 app.register_blueprint(oncourses_bp)
+app.register_blueprint(agniveer_bp)
 
 
 @app.route("/admin_login", methods=["POST",'GET'])
@@ -88,6 +89,7 @@ def logout():
 @app.context_processor
 def inject_user():
     user = require_login()
+    
     if user:
         return {
             "current_user": user,
@@ -117,7 +119,11 @@ def dashboard():
     user_company = user['company']
     role = user['role']
     welcome_msg = f'Welcome {role} , {subscript}'
-    return render_template('dashboard.html', role = role,user_company=user_company)
+    if user_company == 'Admin':
+        print('entering co dashboard')
+        return render_template('CO/co_dashboard.html', role = role,user_company=user_company)
+    else:
+        return render_template('dashboard.html', role = role,user_company=user_company)
 
 
 
@@ -303,10 +309,28 @@ def get_pending_interview_list():
         """
         params = []
 
-        # Apply company filter if user is not Admin
-        if company != "Admin":
+        # Apply company filter if user is not Admin and not in Command roles
+        command_roles = ['CO', '2IC', 'ADJUTANT', 'OC']
+        if company != "Admin" and user['role'] not in command_roles:
             query += " AND company = %s"
             params.append(company)
+
+        # Exclude detailed ranks if role is CO
+        if user['role'] == 'CO':
+             query += " AND `rank` NOT IN ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')"
+
+        # JCO Filtering: Same State + Rank Exclusion
+        if user['role'] in ['JCO', 'S/JCO', 'SEC JCO']:
+             # Fetch JCO's home state
+             cursor.execute("SELECT home_state FROM personnel WHERE army_number = %s", (user['army_number'],))
+             state_row = cursor.fetchone()
+             cursor.fetchall() # Clear cursor
+
+             if state_row and state_row['home_state']:
+                 query += " AND home_state = %s"
+                 params.append(state_row['home_state'])
+             
+             query += " AND `rank` NOT IN ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')"
 
         # Apply search filter
         if search:
@@ -409,13 +433,11 @@ def assign_personnel():
                         army_number,
                         remarks,
                         td_date,
-                        lcoation,
+                        location,
                         authority,
-                        company,
-                        last_interview_sm_status,
-                        last_interview_OC_status
+                        company
                     )
-                    VALUES (%s, %s, NOW(), %s, %s, %s, 0, 0)
+                    VALUES (%s, %s, NOW(), %s, %s, %s)
                 """, (
                     pid,
                     remarks,
@@ -1160,22 +1182,23 @@ def today_event_alarm():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        query = """
-            SELECT id, event_name, venue
-            FROM daily_events
-            WHERE event_date = CURDATE()
-        """
+        # 🔹 Dynamically check if 'company' column exists to avoid SQL errors
+        cursor.execute("DESCRIBE daily_events")
+        columns = [col['Field'] for col in cursor.fetchall()]
+        has_company = 'company' in columns
 
+        query = "SELECT id, event_name, venue FROM daily_events WHERE event_date = CURDATE()"
         params = []
 
-        # Apply company filter if not Admin
-        if user_company != "Admin":
-            query += " AND company = %s"  # assuming there is a 'company' column
+        # Apply company filter only if column exists and user is not Admin
+        if has_company and user_company != "Admin":
+            query += " AND company = %s"
             params.append(user_company)
-
+        
         cursor.execute(query, params)
+        
         rows = cursor.fetchall()
-
+        print(rows,"these are todays events")
         return jsonify({"status": "success", "rows": rows})
 
     except Exception as e:
@@ -1209,6 +1232,7 @@ def assistant_test_alarm_api():
     """)
 
     rows = cursor.fetchall()
+    print(rows,"asistent test pending alarm")
     cursor.close()
     conn.close()
 
@@ -1549,8 +1573,10 @@ def dashboard_summary():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+        
     current_user = user['army_number']
-    print(current_user,"this is current user")
     company = user['company']
     role = user['role']
     print("Logged-in user's company:", company)
@@ -1565,64 +1591,111 @@ def dashboard_summary():
         detachment_result = cursor.fetchone()
         detachments = detachment_result['count'] if detachment_result else 0
 
+        
 
-
-        # 2️⃣ Total Manpower
-        # 2️⃣ Manpower Count (Rank-wise)
-        yesterday = (datetime.now() - timedelta(days=1)).date()
-        query = """
-SELECT 
-    or_present_unit AS orCount,
-    jco_present_unit AS jcoCount,
-    offr_present_unit AS officerCount,
-    (or_present_unit + jco_present_unit + offr_present_unit) AS total
-FROM parade_state_daily
-WHERE DATE(report_date) = %s
-"""     
-        print("reached here")
-        params = (yesterday,)
-        # If company-based filtering exists
+        # 2️⃣ Manpower Count (Rank-wise - Aggregated for latest available date)
+        # Get the latest reporting date across all companies (if Admin) or for specific company
+        date_query = "SELECT MAX(report_date) as max_date FROM parade_state_daily"
+        date_params = []
         if company != "Admin":
-            query += " AND company = %s"
-            params = (yesterday, company)
-        cursor.execute(query, params)
-        manpower_result = cursor.fetchone()
+            date_query += " WHERE company = %s"
+            date_params.append(company)
+        
+        cursor.execute(date_query, date_params)
+        
+        max_date_result = cursor.fetchone()
+        print("max_date_result")
+        print(max_date_result)
+        latest_date = max_date_result['max_date'] if max_date_result else None
 
-        # Safe fallback if no row exists
-        print('query becomes',query)
-
-        if manpower_result:
-            manpower = {
-                "total": manpower_result["total"] or 0,
-                "jcoCount": manpower_result["jcoCount"] or 0,
-                "officerCount": manpower_result["officerCount"] or 0,
-                "orCount": manpower_result["orCount"] or 0
-            }
-            print(manpower,"this is man powrt")
+        if latest_date:
+            query = """
+                SELECT 
+                    SUM(IFNULL(offr_present_unit, 0)) AS officerCount,
+                    SUM(IFNULL(jco_present_unit, 0) + IFNULL(jcoEre_present_unit, 0)) AS jcoCount,
+                    SUM(IFNULL(or_present_unit, 0) + IFNULL(orEre_present_unit, 0)) AS orCount,
+                    SUM(
+                        IFNULL(offr_present_unit, 0) + 
+                        IFNULL(jco_present_unit, 0) + 
+                        IFNULL(jcoEre_present_unit, 0) + 
+                        IFNULL(or_present_unit, 0) + 
+                        IFNULL(orEre_present_unit, 0)
+                    ) AS total
+                FROM parade_state_daily
+                WHERE report_date = %s
+            """
+            params = [latest_date]
+            if company != "Admin":
+                query += " AND company = %s"
+                params.append(company)
+            
+            cursor.execute(query, params)
+            manpower_result = cursor.fetchone()
         else:
+            manpower_result = None
+
+        if manpower_result and manpower_result['total'] is not None:
             manpower = {
-                "total": 0,
-                "jcoCount": 0,
-                "officerCount": 0,
-                "orCount": 0
+                "total": int(manpower_result["total"]),
+                "jcoCount": int(manpower_result["jcoCount"]),
+                "officerCount": int(manpower_result["officerCount"]),
+                "orCount": int(manpower_result["orCount"])
             }
+        else:
+            manpower = {"total": 0, "jcoCount": 0, "officerCount": 0, "orCount": 0}
+
+        print(manpower_result,"this is the main power result")
+        # Check if we have valid data from parade_state_daily
+        has_parade_data = manpower_result and (
+            (manpower_result["officerCount"] or 0) > 0 or 
+            (manpower_result["jcoCount"] or 0) > 0 or 
+            (manpower_result["orCount"] or 0) > 0
+        )
+
+        if has_parade_data:
+            manpower = {
+                "total": int(manpower_result["total"] or 0),
+                "jcoCount": int(manpower_result["jcoCount"] or 0),
+                "officerCount": int(manpower_result["officerCount"] or 0),
+                "orCount": int(manpower_result["orCount"] or 0)
+            }
+        else:
+            # FALLBACK: Calculate from personnel table directly
+            print(f"Fallback to personnel table for company: {company}")
+            fallback_query = """
+                SELECT 
+                    SUM(CASE WHEN `rank` IN ('Lieutenant', 'Captain', 'Major', 'Lieutenant Colonel', 'Colonel', 'Brigadier', 'Major General', 'Lieutenant General', 'General', 'OC') THEN 1 ELSE 0 END) as officerCount,
+                    SUM(CASE WHEN `rank` IN ('Subedar', 'Naib Subedar', 'Subedar Major', 'JCO') THEN 1 ELSE 0 END) as jcoCount,
+                    SUM(CASE WHEN `rank` NOT IN ('Lieutenant', 'Captain', 'Major', 'Lieutenant Colonel', 'Colonel', 'Brigadier', 'Major General', 'Lieutenant General', 'General', 'OC', 'Subedar', 'Naib Subedar', 'Subedar Major', 'JCO') THEN 1 ELSE 0 END) as orCount
+                FROM personnel
+                WHERE 1=1
+            """
+            fallback_params = []
+            if company != "Admin":
+                fallback_query += " AND company = %s"
+                fallback_params.append(company)
+            
+            cursor.execute(fallback_query, fallback_params)
+            fb_res = cursor.fetchone()
+            if fb_res:
+                manpower = {
+                    "officerCount": int(fb_res["officerCount"] or 0),
+                    "jcoCount": int(fb_res["jcoCount"] or 0),
+                    "orCount": int(fb_res["orCount"] or 0),
+                    "total": int((fb_res["officerCount"] or 0) + (fb_res["jcoCount"] or 0) + (fb_res["orCount"] or 0))
+                }
+            else:
+                manpower = {"total": 0, "jcoCount": 0, "officerCount": 0, "orCount": 0}
 
         # 3️⃣ Interview Pending
-        print(role,"this is my role")
-        print(user['army_number'],'army_number JC393919L')
-        if role =='JCO' or role == 'S/JCO':
-             print("in the route of interview penind ")
-
-             cursor.execute('select home_state from personnel where army_number =  %s',(current_user,))
+        if role in ['JCO', 'S/JCO']:
+             cursor.execute('SELECT home_state FROM personnel WHERE army_number = %s', (current_user,))
              home_result = cursor.fetchone()
-             home_state = home_result['home_state']
-             print("in home state")
-             print(home_state)
-
+             home_state = home_result['home_state'] if home_result else None
 
              query = """
            SELECT 
-    SUM(interview_status = 0) AS pending_count,
+    COALESCE(SUM(interview_status = 0), 0) AS pending_count,
     COUNT(*) AS total_count
 FROM personnel
 WHERE company = %s
@@ -1635,26 +1708,33 @@ WHERE company = %s
       'Lieutenant General', 'General'
   );
         """
-             cursor.execute(query, (company,home_state))
-             print("this got exexutd")
+             cursor.execute(query, (company, home_state))
         else:
             query = """
             SELECT 
-                SUM(interview_status = 0) AS pending_count,
+                COALESCE(SUM(interview_status = 0), 0) AS pending_count,
                 COUNT(*) AS total_count
             FROM personnel
+            WHERE `rank` IN ('AGNIVEER', ' SIGNAL MAN', 'L/NK', 'NK', 'HAV')
         """
-            cursor.execute(query)
-        print('#############################################################################')
+            params = []
+            if company != "Admin":
+                query += " AND company = %s"
+                params.append(company)
+            cursor.execute(query, params)
 
         interview_result = cursor.fetchone()
         pending_count = interview_result['pending_count'] if interview_result else 0
-        print("this is pending_count")
         total_interview_count = interview_result['total_count'] if interview_result else 0
         interview_percentage = round((pending_count / total_interview_count) * 100, 2) if total_interview_count > 0 else 0
 
         # 4️⃣ Projects Count
-        cursor.execute("SELECT COUNT(*) AS count FROM projects")
+        project_query = "SELECT COUNT(*) AS count FROM projects WHERE 1=1"
+        project_params = []
+        if company != "Admin":
+            project_query += " AND company = %s"
+            project_params.append(company)
+        cursor.execute(project_query, project_params)
         projects_result = cursor.fetchone()
         projects = projects_result['count'] if projects_result else 0
 
@@ -1695,6 +1775,7 @@ WHERE company = %s
         )
         sensitive_result = cursor.fetchone()
         sensitive_count = sensitive_result['count'] if sensitive_result else 0
+        
         # 7️⃣ Boards Count
         cursor.execute("SELECT COUNT(*) AS count FROM boards")
         boards_result = cursor.fetchone()
@@ -1709,13 +1790,20 @@ WHERE company = %s
         td_result = cursor.fetchone()
         td_attachments = td_result['count'] if td_result else 0
         
-        # count
         # 🔹 Courses Count
-        cursor.execute("SELECT COUNT(*) AS count FROM candidate_on_courses")
+        course_query = """
+            SELECT COUNT(*) AS count 
+            FROM candidate_on_courses c
+            LEFT JOIN personnel p ON c.army_number = p.army_number
+            WHERE 1=1
+        """
+        course_params = []
+        if company != "Admin":
+            course_query += " AND p.company = %s"
+            course_params.append(company)
+        cursor.execute(course_query, course_params)
         courses_result = cursor.fetchone()
         courses_count = courses_result['count'] if courses_result else 0
-        print(courses_count,"this is count")
-
 
         # 🔹 Loans Count
         cursor.execute(
@@ -1728,62 +1816,51 @@ WHERE company = %s
         )
         loan_result = cursor.fetchone()
         loan_count = loan_result['count'] if loan_result else 0
+        
         # 8️⃣ Roll Call Pending Points
-        cursor.execute(
-    '''
-    SELECT count(id) as count
-    FROM roll_call_points
-    WHERE status = 'PENDING'
-    '''
-)
+        cursor.execute("SELECT count(id) as count FROM roll_call_points WHERE status = 'PENDING'")
         roll_call_result = cursor.fetchone()
         roll_call_pending_count = roll_call_result['count'] if roll_call_result else 0
-
-
-
 
         # 🔹 Tasks Count (Assigned to current user)
         cursor.execute(
             """
             SELECT 
                 COUNT(*) AS total_tasks,
-                SUM(task_status != 'COMPLETED') AS pending_tasks
+                COALESCE(SUM(task_status != 'COMPLETED'), 0) AS pending_tasks
             FROM tasks
             WHERE assigned_to = %s
             """,
             (current_user,)
         )
-
         task_result = cursor.fetchone()
-
         total_tasks = task_result['total_tasks'] if task_result else 0
         pending_tasks = task_result['pending_tasks'] if task_result else 0
         pending_percentage = round((pending_tasks / total_tasks) * 100, 2) if total_tasks > 0 else 0
 
         # AGNIVEER
-        cursor.execute('''
-            SELECT COUNT(id) as agniveer_count from personnel where `rank` = 'Agniveer';
-
-''')
-        output_result = cursor.fetchone()
-        count_of_agniveer = output_result['agniveer_count'] if output_result else 0
-        print(count_of_agniveer,"this is agmiveer count")
-
-        
-        
-
-        print('interview pending',pending_count)
-        print('manpower',manpower)
+        agniveer_query = "SELECT COUNT(id) as agniveer_count from personnel where `rank` = 'Agniveer'"
+        agniveer_params = []
+        # Roles that should see total unit count
+        privileged_roles = ['Admin', 'CO', '2IC', 'ADJUTANT', 'TRGJCO', 'OC']
+        if company != "Admin" and role not in privileged_roles:
+            agniveer_query += " AND company = %s"
+            agniveer_params.append(company)
+        cursor.execute(agniveer_query, agniveer_params)
+        agniveer_result = cursor.fetchone()
+        count_of_agniveer = agniveer_result['agniveer_count'] if agniveer_result else 0
+        print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+        print(manpower,'this is result of man power')
 
         # Return combined JSON
         return jsonify({
             "status": "success",
             "detachments": detachments,
             "tasks": {
-    "total": total_tasks,
-    "pending": pending_tasks,
-    'pending_percentage':pending_percentage
-},
+                "total": total_tasks,
+                "pending": pending_tasks,
+                "pending_percentage": pending_percentage
+            },
             "manpower": manpower,
             "interview": {
                 "pending_count": pending_count,
@@ -1794,15 +1871,17 @@ WHERE company = %s
             "boards_count": boards_count, 
             "assigned_alarm": assigned_alarm_rows,
             "sensitive_count": sensitive_count,
-            'attachment_count':td_attachments,
+            "attachment_count": td_attachments,
             "courses_count": courses_count,
             "loan_count": loan_count,
             "roll_call_pending_points": roll_call_pending_count,
-            'agniveer_count':count_of_agniveer
+            "agniveer_count": count_of_agniveer
         }), 200
 
     except Exception as e:
         print("Error fetching dashboard summary:", str(e))
+        import traceback
+        traceback.print_exc()
         return jsonify({"status": "error", "message": "Internal Server Error"}), 500
 
     finally:
@@ -1918,15 +1997,12 @@ def get_parade_state(date_str):
                 row['is_previous_day_template'] = True
                 row['original_date'] = row['report_date']
                 row['report_date'] = date_str
-                
-        elif not row:
-            print(f"No data found for date: {date_str}, company: {company}")
-            return jsonify({
-                'success': False,
-                'message': 'No data found for this date'
-            }), 404
-        
-        print(f"Data found for {date_str}")
+            else:
+                print(f"No data found for date: {date_str} or previous day, company: {company}")
+                return jsonify({
+                    'success': False,
+                    'message': 'No data found for this date or previous day'
+                }), 404
         
         # Convert database row back to frontend format
         result = {
@@ -1957,7 +2033,7 @@ def get_parade_state(date_str):
             result['data'][category] = category_data
         
         result['calculations'] = {
-            't_out_formula': 'LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC',
+            't_out_formula': 'LVE + COURSE + DET + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC',
             'present_det': 'Same as DET column value',
             'present_unit': 'POSTED/STR - T/OUT'
         }
@@ -2031,9 +2107,9 @@ def get_co_all_dashboard_data(date_str):
         cursor.execute("""
             SELECT 
                 company,
-                (offr_auth + attOffr_auth) as officers,
-                (jco_auth + jcoEre_auth + attJco_auth) as jcos,
-                (or_auth + orEre_auth + oaOr_auth + attOr_auth) as other_ranks
+                (IFNULL(offr_present_unit, 0) + IFNULL(attOffr_present_unit, 0)) as officers,
+                (IFNULL(jco_present_unit, 0) + IFNULL(jcoEre_present_unit, 0) + IFNULL(attJco_present_unit, 0)) as jcos,
+                (IFNULL(or_present_unit, 0) + IFNULL(orEre_present_unit, 0) + IFNULL(oaOr_present_unit, 0) + IFNULL(attOr_present_unit, 0)) as other_ranks
             FROM parade_state_daily
             WHERE report_date = %s
             ORDER BY company
@@ -2625,8 +2701,8 @@ def save_parade_data():
                 att = category_data[10] if len(category_data) > 10 else 0
                 awl_osl_jc = category_data[11] if len(category_data) > 11 else 0
                 
-                # Calculate T/OUT = LVE + COURSE + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC
-                trout = lve + course + mh + sick_lve + ex + td + att + awl_osl_jc
+                # Calculate T/OUT = LVE + COURSE + DET + MH + SICK/LVE + EX + TD + ATT + AWL/OSL/JC
+                trout = lve + course + det_value + mh + sick_lve + ex + td + att + awl_osl_jc
                 trout = max(0, trout)  # Ensure non-negative
                 
                 # PRESENT/STR DET = DET column value
@@ -2671,6 +2747,7 @@ def save_parade_data():
                     posted_str = cat_data[2] if len(cat_data) > 2 else 0
                     lve = cat_data[3] if len(cat_data) > 3 else 0
                     course = cat_data[4] if len(cat_data) > 4 else 0
+                    det_value = cat_data[5] if len(cat_data) > 5 else 0
                     mh = cat_data[6] if len(cat_data) > 6 else 0
                     sick_lve = cat_data[7] if len(cat_data) > 7 else 0
                     ex = cat_data[8] if len(cat_data) > 8 else 0
@@ -2678,7 +2755,7 @@ def save_parade_data():
                     att = cat_data[10] if len(cat_data) > 10 else 0
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
-                    trout = lve + course + mh + sick_lve + ex + det_value + td + att + awl_osl_jc
+                    trout = lve + course + det_value + mh + sick_lve + ex + td + att + awl_osl_jc
                     trout = max(0, trout)                                               
                     
                     present_unit = posted_str - trout
@@ -2709,6 +2786,7 @@ def save_parade_data():
                     posted_str = cat_data[2] if len(cat_data) > 2 else 0
                     lve = cat_data[3] if len(cat_data) > 3 else 0
                     course = cat_data[4] if len(cat_data) > 4 else 0
+                    det_value = cat_data[5] if len(cat_data) > 5 else 0
                     mh = cat_data[6] if len(cat_data) > 6 else 0
                     sick_lve = cat_data[7] if len(cat_data) > 7 else 0
                     ex = cat_data[8] if len(cat_data) > 8 else 0
@@ -2716,7 +2794,7 @@ def save_parade_data():
                     att = cat_data[10] if len(cat_data) > 10 else 0
                     awl_osl_jc = cat_data[11] if len(cat_data) > 11 else 0
                     
-                    trout = lve + course + mh + sick_lve +  ex + det_value + td + att + awl_osl_jc
+                    trout = lve + course + det_value + mh + sick_lve + ex + td + att + awl_osl_jc
                     trout = max(0, trout)
                     
                     present_unit = posted_str - trout
@@ -2980,7 +3058,8 @@ def export_parade_csv(date_str, company):
             BytesIO(output.getvalue().encode('utf-8')),
             mimetype='text/csv',
             as_attachment=True,
-            download_name=filename
+            download_name=filename,
+            max_age=0
         )
         
     except Exception as e:
@@ -3226,10 +3305,581 @@ def upcomming_test_alarms():
 
 
 
-if __name__ == '__main__':
-    app.run(debug=True, port=1000)
 
 
+##############################################################################################################################################################################################################################################################################################
 
+
+# ========== 1. DETACHMENTS COUNT ==========
+@app.route('/api/dashboard/detachments', methods=['GET'])
+def get_detachments_count():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    company = user['company']
+    
+    try:
+        query = "SELECT COUNT(*) AS count FROM personnel WHERE detachment_status = 1"
+        params = []
+        if company != "Admin":
+            query += " AND company = %s"
+            params.append(company)
+        
+        cursor.execute(query, params)
+        result = cursor.fetchone()
+        count = result['count'] if result else 0
+        
+        return jsonify({
+            "status": "success",
+            "count": count
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching detachments count:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 2. MANPOWER DATA ==========
+@app.route('/api/dashboard/manpower', methods=['GET'])
+def get_manpower_data():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    company = user['company']
+    
+    try:
+        # Get the latest reporting date
+        date_query = "SELECT MAX(report_date) as max_date FROM parade_state_daily"
+        date_params = []
+        if company != "Admin":
+            date_query += " WHERE company = %s"
+            date_params.append(company)
+        
+        cursor.execute(date_query, date_params)
+        max_date_result = cursor.fetchone()
+        latest_date = max_date_result['max_date'] if max_date_result else None
+
+        if latest_date:
+            query = """
+                SELECT 
+                    SUM(IFNULL(offr_present_unit, 0)) AS officerCount,
+                    SUM(IFNULL(jco_present_unit, 0) + IFNULL(jcoEre_present_unit, 0)) AS jcoCount,
+                    SUM(IFNULL(or_present_unit, 0) + IFNULL(orEre_present_unit, 0)) AS orCount,
+                    SUM(
+                        IFNULL(offr_present_unit, 0) + 
+                        IFNULL(jco_present_unit, 0) + 
+                        IFNULL(jcoEre_present_unit, 0) + 
+                        IFNULL(or_present_unit, 0) + 
+                        IFNULL(orEre_present_unit, 0)
+                    ) AS total
+                FROM parade_state_daily
+                WHERE report_date = %s
+            """
+            params = [latest_date]
+            if company != "Admin":
+                query += " AND company = %s"
+                params.append(company)
+            
+            cursor.execute(query, params)
+            manpower_result = cursor.fetchone()
+        else:
+            manpower_result = None
+
+        # Check if we have valid parade data
+        has_parade_data = manpower_result and (
+            (manpower_result["officerCount"] or 0) > 0 or 
+            (manpower_result["jcoCount"] or 0) > 0 or 
+            (manpower_result["orCount"] or 0) > 0
+        )
+
+        if has_parade_data:
+            officerCount = int(manpower_result["officerCount"] or 0)
+            jcoCount = int(manpower_result["jcoCount"] or 0)
+            orCount = int(manpower_result["orCount"] or 0)
+            total = int(manpower_result["total"] or 0)
+        else:
+            # Fallback to personnel table
+            fallback_query = """
+                SELECT 
+                    SUM(CASE WHEN `rank` IN ('Lieutenant', 'Captain', 'Major', 'Lieutenant Colonel', 'Colonel', 'Brigadier', 'Major General', 'Lieutenant General', 'General', 'OC') THEN 1 ELSE 0 END) as officerCount,
+                    SUM(CASE WHEN `rank` IN ('Subedar', 'Naib Subedar', 'Subedar Major', 'JCO') THEN 1 ELSE 0 END) as jcoCount,
+                    SUM(CASE WHEN `rank` NOT IN ('Lieutenant', 'Captain', 'Major', 'Lieutenant Colonel', 'Colonel', 'Brigadier', 'Major General', 'Lieutenant General', 'General', 'OC', 'Subedar', 'Naib Subedar', 'Subedar Major', 'JCO') THEN 1 ELSE 0 END) as orCount
+                FROM personnel
+                WHERE 1=1
+            """
+            fallback_params = []
+            if company != "Admin":
+                fallback_query += " AND company = %s"
+                fallback_params.append(company)
+            
+            cursor.execute(fallback_query, fallback_params)
+            fb_res = cursor.fetchone()
+            
+            if fb_res:
+                officerCount = int(fb_res["officerCount"] or 0)
+                jcoCount = int(fb_res["jcoCount"] or 0)
+                orCount = int(fb_res["orCount"] or 0)
+                total = officerCount + jcoCount + orCount
+            else:
+                officerCount = jcoCount = orCount = total = 0
+
+        return jsonify({
+            "status": "success",
+            "officerCount": officerCount,
+            "jcoCount": jcoCount,
+            "orCount": orCount,
+            "total": total
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching manpower data:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 3. INTERVIEW DATA ==========
+@app.route('/api/dashboard/interviews', methods=['GET'])
+def get_interview_data():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    company = user['company']
+    role = user['role']
+    current_user = user['army_number']
+    
+    try:
+        if role in ['JCO', 'S/JCO']:
+            cursor.execute('SELECT home_state FROM personnel WHERE army_number = %s', (current_user,))
+            home_result = cursor.fetchone()
+            home_state = home_result['home_state'] if home_result else None
+
+            query = """
+                SELECT 
+                    COALESCE(SUM(interview_status = 0), 0) AS pending_count,
+                    COUNT(*) AS total_count
+                FROM personnel
+                WHERE company = %s
+                  AND home_state = %s
+                  AND `rank` NOT IN (
+                      'Subedar', 'Naib Subedar', 'Subedar Major',
+                      'Lieutenant', 'Captain', 'Major',
+                      'Lieutenant Colonel', 'Colonel',
+                      'Brigadier', 'Major General',
+                      'Lieutenant General', 'General'
+                  )
+            """
+            cursor.execute(query, (company, home_state))
+        else:
+            query = """
+                SELECT 
+                    COALESCE(SUM(interview_status = 0), 0) AS pending_count,
+                    COUNT(*) AS total_count
+                FROM personnel
+                WHERE `rank` IN ('AGNIVEER', ' SIGNAL MAN', 'L/NK', 'NK', 'HAV')
+            """
+            params = []
+            if company != "Admin":
+                query += " AND company = %s"
+                params.append(company)
+            cursor.execute(query, params)
+
+        result = cursor.fetchone()
+        pending_count = result['pending_count'] if result else 0
+        total_count = result['total_count'] if result else 0
+        percentage = round((pending_count / total_count) * 100, 2) if total_count > 0 else 0
+
+        return jsonify({
+            "status": "success",
+            "pending_count": pending_count,
+            "total_count": total_count,
+            "percentage": percentage
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching interview data:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 4. ATTACHMENTS/TD COUNT ==========
+@app.route('/api/dashboard/attachments', methods=['GET'])
+def get_attachments_count():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    company = user['company']
+    
+    try:
+        query = "SELECT COUNT(*) AS count FROM personnel WHERE td_status = 1"
+        params = []
+        if company != "Admin":
+            query += " AND company = %s"
+            params.append(company)
+        
+        cursor.execute(query, params)
+        result = cursor.fetchone()
+        count = result['count'] if result else 0
+        
+        return jsonify({
+            "status": "success",
+            "count": count
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching attachments count:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 5. AGNIVEER COUNT ==========
+@app.route('/api/dashboard/agniveers', methods=['GET'])
+def get_agniveer_count():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    company = user['company']
+    role = user['role']
+    
+    try:
+        query = "SELECT COUNT(id) as count from personnel where `rank` = 'Agniveer'"
+        params = []
+        
+        privileged_roles = ['Admin', 'CO', '2IC', 'ADJUTANT', 'TRGJCO', 'OC']
+        if company != "Admin" and role not in privileged_roles:
+            query += " AND company = %s"
+            params.append(company)
+        
+        cursor.execute(query, params)
+        result = cursor.fetchone()
+        count = result['count'] if result else 0
+        
+        return jsonify({
+            "status": "success",
+            "count": count
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching agniveer count:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 6. PROJECTS COUNT ==========
+@app.route('/api/dashboard/projects', methods=['GET'])
+def get_projects_count():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    company = user['company']
+    
+    try:
+        query = "SELECT COUNT(*) AS count FROM projects WHERE 1=1"
+        params = []
+        if company != "Admin":
+            query += " AND company = %s"
+            params.append(company)
+        
+        cursor.execute(query, params)
+        result = cursor.fetchone()
+        count = result['count'] if result else 0
+        
+        return jsonify({
+            "status": "success",
+            "count": count
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching projects count:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 7. SENSITIVE PERSONNEL COUNT ==========
+@app.route('/api/dashboard/sensitive', methods=['GET'])
+def get_sensitive_count():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    company = user['company']
+    
+    try:
+        query = """
+            SELECT COUNT(*) AS count
+            FROM sensitive_marking sm
+            LEFT JOIN personnel p ON sm.army_number = p.army_number
+            WHERE 1=1
+        """
+        params = []
+        if company != "Admin":
+            query += " AND p.company = %s"
+            params.append(company)
+        
+        cursor.execute(query, params)
+        result = cursor.fetchone()
+        count = result['count'] if result else 0
+        
+        return jsonify({
+            "status": "success",
+            "count": count
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching sensitive count:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 8. LOANS COUNT ==========
+@app.route('/api/dashboard/loans', methods=['GET'])
+def get_loans_count():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    company = user['company']
+    
+    try:
+        query = """
+            SELECT COUNT(*) AS count
+            FROM loans l
+            LEFT JOIN personnel p ON l.army_number = p.army_number
+            WHERE 1=1
+        """
+        params = []
+        if company != "Admin":
+            query += " AND p.company = %s"
+            params.append(company)
+        
+        cursor.execute(query, params)
+        result = cursor.fetchone()
+        count = result['count'] if result else 0
+        
+        return jsonify({
+            "status": "success",
+            "count": count
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching loans count:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 9. COURSES COUNT ==========
+@app.route('/api/dashboard/courses', methods=['GET'])
+def get_courses_count():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    company = user['company']
+    
+    try:
+        query = """
+            SELECT COUNT(*) AS count 
+            FROM candidate_on_courses c
+            LEFT JOIN personnel p ON c.army_number = p.army_number
+            WHERE 1=1
+        """
+        params = []
+        if company != "Admin":
+            query += " AND p.company = %s"
+            params.append(company)
+        
+        cursor.execute(query, params)
+        result = cursor.fetchone()
+        count = result['count'] if result else 0
+        
+        return jsonify({
+            "status": "success",
+            "count": count
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching courses count:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 10. ROLL CALL POINTS ==========
+@app.route('/api/dashboard/rollcall', methods=['GET'])
+def get_rollcall_points():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    try:
+        cursor.execute("SELECT count(id) as count FROM roll_call_points WHERE status = 'PENDING'")
+        result = cursor.fetchone()
+        count = result['count'] if result else 0
+        
+        return jsonify({
+            "status": "success",
+            "points": count
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching rollcall points:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 11. BOARDS COUNT ==========
+@app.route('/api/dashboard/boards', methods=['GET'])
+def get_boards_count():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    try:
+        cursor.execute("SELECT COUNT(*) AS count FROM boards")
+        result = cursor.fetchone()
+        count = result['count'] if result else 0
+        
+        return jsonify({
+            "status": "success",
+            "count": count
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching boards count:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 12. TASKS DATA ==========
+@app.route('/api/dashboard/tasks', methods=['GET'])
+def get_tasks_data():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    current_user = user['army_number']
+    
+    try:
+        cursor.execute(
+            """
+            SELECT 
+                COUNT(*) AS total,
+                COALESCE(SUM(task_status != 'COMPLETED'), 0) AS pending
+            FROM tasks
+            WHERE assigned_to = %s
+            """,
+            (current_user,)
+        )
+        result = cursor.fetchone()
+        total = result['total'] if result else 0
+        pending = result['pending'] if result else 0
+        
+        return jsonify({
+            "status": "success",
+            "total": total,
+            "pending": pending
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching tasks data:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== 13. ASSIGNED ALARM (for modal) ==========
+@app.route('/api/dashboard/assigned_alarm', methods=['GET'])
+def get_assigned_alarm():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    user = require_login()
+    if not user:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    company = user['company']
+    
+    try:
+        query = '''
+            SELECT 
+                ad.army_number, 
+                p.name,
+                p.rank,
+                p.company,
+                ad.det_id, 
+                d.det_name, 
+                ad.assigned_on,
+                ad.det_status,
+                DATEDIFF(NOW(), ad.assigned_on) AS days_on_det
+            FROM assigned_det ad
+            LEFT JOIN dets d ON ad.det_id = d.det_id
+            LEFT JOIN personnel p ON ad.army_number = p.army_number
+            WHERE DATEDIFF(NOW(), ad.assigned_on) > 5
+              AND ad.det_status = 1
+        '''
+        params = []
+        if company != "Admin":
+            query += " AND p.company = %s"
+            params.append(company)
+        
+        query += " ORDER BY ad.assigned_on ASC;"
+        
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        
+        return jsonify({
+            "status": "success",
+            "data": rows
+        }), 200
+        
+    except Exception as e:
+        print("Error fetching assigned alarm data:", str(e))
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ========== OPTIONAL: Keep original endpoint for backward compatibility ==========
 
     
+if __name__ == '__main__':
+    app.run(host= '192.168.1.43',port=4000,debug=True)

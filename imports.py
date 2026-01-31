@@ -10,6 +10,8 @@ from flask import (
     make_response
 )
 
+
+
 from xhtml2pdf import pisa
 from io import BytesIO
 from middleware import require_login
@@ -41,4 +43,5 @@ from blueprints.add_user import add_user_bp
 from blueprints.update_interview_status import inteview_bp
 from blueprints.oncourses import oncourses_bp
 from apscheduler.schedulers.background import BackgroundScheduler
+from blueprints.agniveer_asst import agniveer_bp
 

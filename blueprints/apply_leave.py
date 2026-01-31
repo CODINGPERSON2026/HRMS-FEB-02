@@ -39,37 +39,88 @@ def get_leave_details():
         leaveinfo = cursor.fetchone()
         print(leaveinfo)
 
-        cursor.close()
-        conn.close()
-
         if not leaveinfo:
-            return jsonify({
-                "success": True,
-                "personnel": personnel,
-                "leave_balance": []
-            })
+            # If no record in leave_details, we can still show standard entitlements
+            # or return empty. Given the user's comment, I'll provide the standard ones.
+            leaveinfo = {
+                "al_days": 60,
+                "cl_days": 30,
+                "aal_days": 30
+            }
 
-        # Return leave rows as an ARRAY
+        # Query actual leave taken from approved requests
+        cursor.execute("""
+            SELECT leave_type, SUM(leave_days) as taken
+            FROM leave_status_info
+            WHERE army_number = %s AND request_status = 'Approved'
+            GROUP BY leave_type
+        """, (army_no,))
+        taken_info = cursor.fetchall()
+        taken_dict = {row['leave_type']: row['taken'] for row in taken_info}
+
+        # Get personnel rank to determine entitlements
+        rank = personnel.get('rank', '').strip().upper()
+        
+        # Check if Agniveer rank
+        is_agniveer = rank in ['AGNIVEER', 'AV']
+        
+        # Set entitlements based on rank
+        if is_agniveer:
+            # Agniveer: Only AL=30 days
+            al_total = 30
+            cl_total = 0
+            aal_total = 0
+        else:
+            # Other ranks: AL=60, CL=30, AAL=30
+            al_total = 60
+            cl_total = 30
+            aal_total = 30
+
+        al_taken = taken_dict.get('AL', 0) or 0
+        cl_taken = taken_dict.get('CL', 0) or 0
+        aal_taken = taken_dict.get('AAL', 0) or 0
+
+        # Build leave balance array based on rank
         leave_balance = [
             {
                 "leave_type": "AL",
-                "total_leave": leaveinfo["al_days"],
-                "leave_taken": 0,
-                "balance_leave": leaveinfo["al_days"]
-            },
-            {
-                "leave_type": "CL",
-                "total_leave": leaveinfo["cl_days"],
-                "leave_taken": 0,
-                "balance_leave": leaveinfo["cl_days"]
-            },
-            {
-                "leave_type": "AAL",
-                "total_leave": leaveinfo["aal_days"],
-                "leave_taken": 0,
-                "balance_leave": leaveinfo["aal_days"]
+                "total_leave": al_total,
+                "leave_taken": int(al_taken),
+                "balance_leave": al_total - int(al_taken)
             }
         ]
+        
+        # Only add CL and AAL for non-Agniveer ranks
+        if not is_agniveer:
+            leave_balance.extend([
+                {
+                    "leave_type": "CL",
+                    "total_leave": cl_total,
+                    "leave_taken": int(cl_taken),
+                    "balance_leave": cl_total - int(cl_taken)
+                },
+                {
+                    "leave_type": "AAL",
+                    "total_leave": aal_total,
+                    "leave_taken": int(aal_taken),
+                    "balance_leave": aal_total - int(aal_taken)
+                }
+            ])
+
+        # Add Summary Total Row
+        total_auth = sum(l['total_leave'] for l in leave_balance)
+        total_taken = sum(l['leave_taken'] for l in leave_balance)
+        total_balance = sum(l['balance_leave'] for l in leave_balance)
+
+        leave_balance.append({
+            "leave_type": "Total",
+            "total_leave": total_auth,
+            "leave_taken": total_taken,
+            "balance_leave": total_balance
+        })
+
+        cursor.close()
+        conn.close()
 
         return jsonify({
             "success": True,
@@ -83,41 +134,7 @@ def get_leave_details():
 
 
 
-# @leave_bp.route("/search_personnel")
-# def search_personnel():
-#     print("in this route")
-#     query = request.args.get("query", "").strip()
-#     print('search ',query)
-#     if query == "":
-#         return jsonify([])
-#     try:
 
-#         conn = get_db_connection()
-#         cursor = conn.cursor(dictionary=True)
-#         existing_leave_query = '''select army_number,request_status,leave_type from leave_status_info where army_number = %s'''
-#         cursor.execute(existing_leave_query,(query,))
-#         existing = cursor.fetchone()
-        
-#         print(existing)
-#         if not existing:
-
-#         # Search by army number (exact or partial)
-#             cursor.execute("""
-#                 SELECT name, army_number,`rank`,trade,company
-#                 FROM personnel
-#                 WHERE army_number LIKE %s
-#                 LIMIT 1
-#             """, (f"%{query}%",))
-#             results = cursor.fetchall()
-#             cursor.close()
-#             conn.close()
-#             return jsonify(results)
-
-#         print("there is an existing leave request")
-#         return jsonify({'exists':'True','existing_leave':existing})
-        
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
 
 
 # ########################################################### UPDATED CERTIFICATE DOWNLOAD FUNCTIONLAITY
@@ -188,35 +205,100 @@ def download_leave_certificate(army_number):
         cursor = conn.cursor(dictionary=True)
 
         # Fetch approved leave + personnel details
+        # We join leave_status_info with personnel to get all needed data
+        # We take the latest APPROVED leave for this user or a specific one if ID was passed (but URL uses army_number)
+        # Assuming we want the LATEST approved leave for this user.
+        
         cursor.execute("""
             SELECT 
+                l.id as leave_id,
+                l.leave_type,
+                l.leave_days,
+                l.from_date,
+                l.to_date,
+                l.created_at as applied_on,
+                l.updated_at as issue_date,
                 p.name,
                 p.army_number,
                 p.rank,
                 p.company,
-                l.leave_type,
-                l.from_date,
-                l.to_date
+                p.section,
+                p.trade,
+                p.home_house_no,
+                p.home_village,
+                p.home_po,
+                p.home_teh,
+                p.home_district,
+                p.home_state
+                
             FROM leave_status_info l
             JOIN personnel p 
                 ON p.army_number = l.army_number
             WHERE l.army_number = %s
               AND l.request_status = 'Approved'
+            ORDER BY l.created_at DESC
+            LIMIT 1
         """, (army_number,))
 
         data = cursor.fetchone()
 
         if not data:
-            return "No approved leave certificate found", 404
+            return "No approved leave certificate found for this user.", 404
 
-        # Issue date
-        issued_on = datetime.now()
+        # Prepare Applicant Object
+        applicant = {
+            "name": data['name'],
+            "rank": data['rank'],
+            "army_number": data['army_number'],
+            "unit": "15 CORPS ENGG SIG REGT", # Hardcoded as per header
+            "company_name": data['company'],
+            "section_name": data['section'] if data['section'] else "HQ"
+        }
+
+        # Format Address from personnel table
+        # Construct address from components: House No, Village, PO, Tehsil, District, State
+        parts = []
+        if data.get('home_house_no'): parts.append(f"House No: {data['home_house_no']}")
+        if data.get('home_village'): parts.append(f"Vill: {data['home_village']}")
+        if data.get('home_po'): parts.append(f"PO: {data['home_po']}")
+        if data.get('home_teh'): parts.append(f"Teh: {data['home_teh']}")
+        if data.get('home_district'): parts.append(f"Dist: {data['home_district']}")
+        if data.get('home_state'): parts.append(data['home_state'])
+        
+        details_address = ", ".join(parts)
+
+        if not details_address.strip():
+             details_address = "Address not updated in records."
+
+        # Prepare Leave Object
+        # Certificate Number: LEAVE/YEAR/ID
+        current_year = datetime.now().year
+        cert_no = f"LEAVE/{current_year}/{data['leave_id']}"
+
+        # Calculate Duration
+        # We can use logic to calculate duration or just use leave_days
+        # data['from_date'] and data['to_date'] are likely date objects
+        
+        leave_info = {
+            "certificate_number": cert_no,
+            "leave_type": data['leave_type'],
+            "start_date": data['from_date'],
+            "end_date": data['to_date'],
+            "total_days": data['leave_days'],
+            "applied_on": data['applied_on'],
+            "issue_date": data['issue_date'] if data['issue_date'] else datetime.now(),
+            "prefix_details": "NIL", # Not currently captured in DB
+            "suffix_details": "NIL", # Not currently captured in DB
+            "address_during_leave": details_address,
+            
+            "reporting_date": data['to_date'] # Usually Next Day 1800 hrs? For now, using to_date or we can add 1 day
+        }
 
         # Render HTML template
         html = render_template(
             "leave_certificate.html",
-            data=data,
-            issued_on=issued_on
+            applicant=applicant,
+            leave=leave_info
         )
 
         # Create PDF
@@ -230,17 +312,20 @@ def download_leave_certificate(army_number):
         response = make_response(pdf_buffer.getvalue())
         response.headers["Content-Type"] = "application/pdf"
         response.headers["Content-Disposition"] = (
-            f"attachment; filename=Leave_Certificate_{army_number}.pdf"
+            f"inline; filename=Leave_Certificate_{army_number}.pdf"
         )
 
         return response
 
     except Exception as e:
+        print(f"Error: {e}")
         return str(e), 500
 
     finally:
-        cursor.close()
-        conn.close()
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'conn' in locals() and conn:
+            conn.close()
 
 
 @leave_bp.route("/submit_leave", methods=["POST"])
@@ -250,7 +335,8 @@ def submit_leave_request():
 
     army_number = data.get("person_id")
     leave_type = data.get("leave_type")
-    total_days = data.get("total_days")  # total_days includes prefix/suffix
+    actual_leave_days = data.get("actual_leave_days")  # Days that count against balance (without prefix/suffix)
+    total_days = data.get("total_days")  # Total days including prefix/suffix
     from_date = data.get("from_date")
     to_date = data.get("to_date")
     reason = data.get("reason")
@@ -260,7 +346,7 @@ def submit_leave_request():
     
 
     # Validate required fields
-    if not all([army_number, leave_type, total_days, from_date, to_date, reason]):
+    if not all([army_number, leave_type, actual_leave_days, total_days, from_date, to_date, reason]):
         return jsonify({"message": "Missing required fields"}), 400
 
     # Get company of personnel
@@ -286,8 +372,9 @@ def submit_leave_request():
             request_sent_to = 'OC'
             request_status = 'Pending at OC'
         else : 
-            request_sent_to = section
-            request_status = f'Pending at {section}'
+            # Prefix section with 'NCO ' to match role format in users table
+            request_sent_to = f'NCO {section}'
+            request_status = f'Pending at NCO {section}'
     except Exception as e:
         return jsonify({"message": "Database error", "error": str(e),'status':'error'}), 500
     finally:
@@ -297,7 +384,7 @@ def submit_leave_request():
     
 
 
-    # Insert leave request
+    # Insert leave request - use actual_leave_days for leave_days field
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -310,16 +397,16 @@ def submit_leave_request():
             name,
             army_number,
             leave_type,
-            int(total_days),
+            int(actual_leave_days),  # Store actual leave days (without prefix/suffix) for balance calculation
             from_date,
             to_date,
             request_sent_to,
             request_status,
-            f"{leave_type} for {total_days} day(s)",
+            f"{leave_type} for {total_days} day(s) (Actual: {actual_leave_days} days)",
             reason
         ))
         conn.commit()
-        return jsonify({'status':'success',"message": f"Leave request for {total_days} day(s) sent to OC successfully!"})
+        return jsonify({'status':'success',"message": f"Leave request for {total_days} day(s) sent successfully!"})
     except Exception as e:
         conn.rollback()
         return jsonify({"message": "Failed to apply leave", "error": str(e)}), 500
@@ -344,7 +431,7 @@ def update_leave_status():
         if status == 'Approved':
             cursor.execute("""
                 UPDATE leave_status_info
-                SET request_status = %s, approval_date = NOW()
+                SET request_status = %s, updated_at = NOW()
                 WHERE id = %s
             """, (status, leave_id))
         else:

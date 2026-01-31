@@ -13,17 +13,17 @@
     --text-secondary: #718096;
     --bg-light: #f8fafc;
   }
-  
+
   /* Fix sidebar overlap */
- 
+
 
   /* Make it responsive */
   @media (max-width: 768px) {
-      .container-fluid {
-          margin-left: 0 !important;
-          width: 100% !important;
-          padding: 1rem !important;
-      }
+    .container-fluid {
+      margin-left: 0 !important;
+      width: 100% !important;
+      padding: 1rem !important;
+    }
   }
 
   body {
@@ -73,7 +73,7 @@
     text-decoration: none;
     gap: 0.5rem;
     transition: all 0.3s ease;
-    
+
   }
 
 
@@ -97,13 +97,13 @@
     .stats-grid {
       grid-template-columns: 1fr;
     }
-    
+
     .dashboard-navbar {
       flex-direction: column;
       align-items: flex-start;
       gap: 1rem;
     }
-    
+
     .navbar-right {
       width: 100%;
       justify-content: flex-start;
@@ -229,18 +229,24 @@
   .modal-overlay {
     display: none;
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.85);
     z-index: 9999;
   }
 
-  .modal-overlay.show { display: block; }
+  .modal-overlay.show {
+    display: block;
+  }
 
   .modal-container {
     position: fixed;
-    top: 3%; left: 3%;
-    width: 94%; height: 94%;
+    top: 3%;
+    left: 3%;
+    width: 94%;
+    height: 94%;
     background: white;
     border-radius: 14px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
@@ -250,8 +256,13 @@
     flex-direction: column;
   }
 
-  body.modal-open nav.navbar { display: none !important; }
-  body.modal-open { overflow: hidden; }
+  body.modal-open nav.navbar {
+    display: none !important;
+  }
+
+  body.modal-open {
+    overflow: hidden;
+  }
 
   /* Header */
   .modal-header {
@@ -276,7 +287,8 @@
     color: white;
     font-size: 1.4rem;
     cursor: pointer;
-    width: 36px; height: 36px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -306,7 +318,9 @@
     padding: 1.2rem;
   }
 
-  .tab-content.active { display: flex; }
+  .tab-content.active {
+    display: flex;
+  }
 
   /* Tabular Tab */
   .tabular-content {
@@ -399,8 +413,13 @@
     z-index: 10;
   }
 
-  .personnel-table th:first-child { border-radius: 10px 0 0 0; }
-  .personnel-table th:last-child { border-radius: 0 10px 0 0; }
+  .personnel-table th:first-child {
+    border-radius: 10px 0 0 0;
+  }
+
+  .personnel-table th:last-child {
+    border-radius: 0 10px 0 0;
+  }
 
   .personnel-table td {
     padding: 0.9rem 0.6rem;
@@ -423,77 +442,116 @@
   /* ==================== MOBILE RESPONSIVE (≤768px) ==================== */
   @media (max-width: 768px) {
     .modal-container {
-      top: 2%; left: 2%; width: 96%; height: 96%;
+      top: 2%;
+      left: 2%;
+      width: 96%;
+      height: 96%;
       border-radius: 12px;
     }
 
-    .modal-header { padding: 0.8rem 1rem; }
-    .modal-title { font-size: 1.25rem; }
-    .modal-close { width: 32px; height: 32px; font-size: 1.2rem; }
+    .modal-header {
+      padding: 0.8rem 1rem;
+    }
 
-    .modal-nav { padding: 0 0.8rem; }
- 
+    .modal-title {
+      font-size: 1.25rem;
+    }
 
-    .tab-content { padding: 0.8rem; }
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      font-size: 1.2rem;
+    }
 
-    .filter-controls { flex-direction: column; align-items: stretch; gap: 0.6rem; }
-    .company-select { min-width: auto; font-size: 0.9rem; padding: 0.5rem 0.7rem; }
+    .modal-nav {
+      padding: 0 0.8rem;
+    }
 
-    .table-container-modal { padding: 0.8rem; }
-    .table-wrapper { max-height: 380px; }
 
-    .personnel-table { font-size: 0.82rem; }
+    .tab-content {
+      padding: 0.8rem;
+    }
+
+    .filter-controls {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.6rem;
+    }
+
+    .company-select {
+      min-width: auto;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.7rem;
+    }
+
+    .table-container-modal {
+      padding: 0.8rem;
+    }
+
+    .table-wrapper {
+      max-height: 380px;
+    }
+
+    .personnel-table {
+      font-size: 0.82rem;
+    }
+
     .personnel-table th,
-    .personnel-table td { padding: 0.7rem 0.4rem; }
+    .personnel-table td {
+      padding: 0.7rem 0.4rem;
+    }
 
-    .company-badge { font-size: 0.7rem; padding: 0.3rem 0.7rem; }
+    .company-badge {
+      font-size: 0.7rem;
+      padding: 0.3rem 0.7rem;
+    }
   }
-  
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
 
-.header-left img {
-  width: 45px;
-  height: 45px;
-  object-fit: contain;
-}
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
 
-.header-left h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #000;
-  margin: 0;
-}
+  .header-left img {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+  }
 
-.header-right {
-  display: flex;
-  gap: 0.75rem;
-}
+  .header-left h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+  }
 
-.header-link {
-  padding: 0.6rem 1.2rem;
-  background: rgba(255, 255, 255, 0.3);
-  color: #000 !important;
-  text-decoration: none;
-  border-radius: 10px;
-  font-weight: 500;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
+  .header-right {
+    display: flex;
+    gap: 0.75rem;
+  }
 
-.header-link:hover {
-  background: var(--accent);
-  color: #fff !important;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
-}
+  .header-link {
+    padding: 0.6rem 1.2rem;
+    background: rgba(255, 255, 255, 0.3);
+    color: #000 !important;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .header-link:hover {
+    background: var(--accent);
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 128, 0.3);
+  }
 </style>
 
 <div class="container-fluid px-4 py-4">
@@ -503,21 +561,22 @@
     {% set subscript = "Add Personnel → Update Personnel → View Personnel" %}
     {% include 'navbar/navbar.html' %}
     <div class="page-header">
-      
+
       <div class="header-right">
-      
+
         <a href="/personnel_information" class="header-link">Dashboard</a>
-      
+
         <a href="/personnel_information/add-personnel" class="header-link">Add Personnel</a>
         <a href="/personnel_information/update-personnel" class="header-link">Update Personnel</a>
-        
+        <a href="/personnel_information/delete-personnel" class="header-link">Delete Personnel</a>
+
       </div>
-      
+
     </div>
   </div>
 
   <!-- Dashboard Header -->
- 
+
 
   <!-- Stats Grid -->
   <div class="stats-grid">
@@ -631,27 +690,27 @@
       if (!response.ok) {
         throw new Error("Failed to fetch medical personnel data");
       }
-  
+
       const data = await response.json();
       if (!data.success) {
         throw new Error("API returned unsuccessful response");
       }
-  
+
       // Extract data
       const companyDistribution = data.company_distribution;
       const totalMedical = data.total_medical;
-  
+
       // Build company name list dynamically
       const companies = companyDistribution.map(item => item.company);
       const counts = companyDistribution.map(item => item.count);
-  
+
       const ctx = document.getElementById("companyChart").getContext("2d");
-  
+
       // Destroy previous chart if it exists
       if (companyChart) {
         companyChart.destroy();
       }
-  
+
       // Color palette
       const colors = [
         "#667eea",
@@ -661,7 +720,7 @@
         "#ffcc00",
         "#00b894"
       ];
-  
+
       // Create new Chart.js instance
       companyChart = new Chart(ctx, {
         type: "doughnut",
@@ -703,7 +762,7 @@
           cutout: "65%"
         }
       });
-  
+
     } catch (error) {
       console.error("Error initializing company chart:", error);
     }
@@ -729,7 +788,7 @@
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       tabularContent.classList.add('active');
     }
-    
+
     loadAllPersonnelData();
   }
 
@@ -741,14 +800,14 @@
   }
 
   // Close modal with Escape key
-  document.addEventListener('keydown', function(event) {
+  document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
       closeModal();
     }
   });
 
   // Close modal when clicking outside
-  document.addEventListener('click', function(event) {
+  document.addEventListener('click', function (event) {
     const modal = document.getElementById('analyticsModal');
     if (event.target === modal) {
       closeModal();
@@ -760,7 +819,7 @@
     try {
       const response = await fetch('/personnel_information/api/all-personnel');
       const data = await response.json();
-      
+
       if (data.success) {
         window.allPersonnelData = data.personnel;
         renderModalTable(data.personnel);
@@ -791,7 +850,7 @@
 
   function renderModalTable(personnel) {
     const tableBody = document.getElementById('modalTableBody');
-    
+
     if (!personnel || personnel.length === 0) {
       tableBody.innerHTML = `
         <tr>
@@ -803,7 +862,7 @@
       `;
       return;
     }
-  
+
     tableBody.innerHTML = personnel.map(person => {
       const name = person.name || 'N/A';
       const armyNumber = person.army_number || 'N/A';
@@ -813,11 +872,11 @@
       const enrollmentDate = person.date_of_enrollment
         ? new Date(person.date_of_enrollment).toLocaleDateString('en-GB')
         : 'N/A';
-      
-      const companyBadge = company !== 'Unknown' 
+
+      const companyBadge = company !== 'Unknown'
         ? `<span class="company-badge">${company}</span>`
         : `<span class="badge bg-secondary">${company}</span>`;
-  
+
       return `
         <tr data-company="${company}" data-medical="${person.med_cat || 'No'}">
           <td class="fw-semibold">${name}</td>
@@ -833,8 +892,8 @@
 
   function setupModalCompanyFilter() {
     const companyFilter = document.getElementById('modalCompanyFilter');
-    
-    companyFilter.addEventListener('change', function() {
+
+    companyFilter.addEventListener('change', function () {
       const selectedCompany = this.value;
       const tableRows = document.querySelectorAll('#modalTableBody tr');
       let visibleCount = 0;
@@ -857,11 +916,11 @@
   }
 
   // Initialize when page loads
-  document.addEventListener('DOMContentLoaded', async function() {
+  document.addEventListener('DOMContentLoaded', async function () {
     await initCompanyChart();
     setupModalCompanyFilter();
-    
-    window.addEventListener('resize', function() {
+
+    window.addEventListener('resize', function () {
       if (companyChart) companyChart.resize();
       if (modalCompanyChart) modalCompanyChart.resize();
     });
