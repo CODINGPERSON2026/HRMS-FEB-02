@@ -295,51 +295,55 @@ def get_dets():
 
 @app.route('/get_pending_interview_list')
 def get_pending_interview_list():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    user = require_login()  # Get logged-in user
-    company = user['company']
+    print("in this route")
+
     search = request.args.get("search", "").strip()
 
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
     try:
-        query = """
-            SELECT name, army_number, home_state, company
-            FROM personnel
-            WHERE interview_status = 0
-        """
-        params = []
-
-        # Apply company filter if user is not Admin and not in Command roles
-        command_roles = ['CO', '2IC', 'ADJUTANT', 'OC']
-        if company != "Admin" and user['role'] not in command_roles:
-            query += " AND company = %s"
-            params.append(company)
-
-        # Exclude detailed ranks if role is CO
-        if user['role'] == 'CO':
-             query += " AND `rank` NOT IN ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')"
-
-        # JCO Filtering: Same State + Rank Exclusion
-        if user['role'] in ['JCO', 'S/JCO', 'SEC JCO']:
-             # Fetch JCO's home state
-             cursor.execute("SELECT home_state FROM personnel WHERE army_number = %s", (user['army_number'],))
-             state_row = cursor.fetchone()
-             cursor.fetchall() # Clear cursor
-
-             if state_row and state_row['home_state']:
-                 query += " AND home_state = %s"
-                 params.append(state_row['home_state'])
-             
-             query += " AND `rank` NOT IN ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')"
-
-        # Apply search filter
+        # 1️⃣ Fetch pending interviews (with optional search)
         if search:
-            query += " AND army_number LIKE %s"
-            params.append(f"%{search}%")
+            cursor.execute("""
+                SELECT name, army_number, home_state, company, `rank`
+                FROM personnel
+                WHERE interview_status = 0
+                  AND (
+                        army_number LIKE %s
+                        OR name LIKE %s
+                      )
+            """, (f"%{search}%", f"%{search}%"))
+        else:
+            cursor.execute("""
+                SELECT name, army_number, home_state, company, `rank`
+                FROM personnel
+                WHERE interview_status = 0
+            """)
 
-        cursor.execute(query, params)
-        data = cursor.fetchall()
-        return jsonify({"status": "success", "data": data})
+        pending_data = cursor.fetchall()
+
+        # 2️⃣ Collect unique home_states from pending interviews
+        home_states = list({row['home_state'] for row in pending_data if row['home_state']})
+
+        # 3️⃣ Fetch senior ranks for these home_states
+        senior_ranks = []
+        if home_states:
+            format_strings = ",".join(["%s"] * len(home_states))
+            query = f"""
+                SELECT name, army_number, home_state, company, `rank`
+                FROM personnel
+                WHERE home_state IN ({format_strings})
+                  AND `rank` IN ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')
+            """
+            cursor.execute(query, home_states)
+            senior_ranks = cursor.fetchall()
+
+        return jsonify({
+            "status": "success",
+            "pending_interviews": pending_data,
+            "senior_same_state": senior_ranks
+        })
 
     except Exception as e:
         print("Error fetching pending interview list:", str(e))
@@ -2246,12 +2250,12 @@ def get_co_aggregated_parade_table(date_str):
         conn.close()
     
 # ===============================================
-# PARADE DATA ROUTES FOR O SEC NCO
+# PARADE DATA ROUTES FOR O CENTRE NCO
 # ===============================================
 
 @app.route('/api/parade-data/get/<date_str>/<company>', methods=['GET'])
 def get_parade_data_by_company(date_str, company):
-    """Get parade data for specific date and company - O SEC NCO & ONCO only"""
+    """Get parade data for specific date and company - O CENTRE NCO & ONCO only"""
     print(f"\n=== GET PARADE DATA BY COMPANY ===")
     print(f"Date: {date_str}, Company: {company}")
     
@@ -2272,9 +2276,9 @@ def get_parade_data_by_company(date_str, company):
     print(f"DEBUG: User: {user.get('username')}, Role: '{user_role}', Company: '{user_company}'")
     
     # Check authorization based on role
-    if user_role == 'O SEC NCO':
-        # O SEC NCO can access all companies
-        print("DEBUG: O SEC NCO access granted")
+    if user_role == 'O CENTRE NCO':
+        # O CENTRE NCO can access all companies
+        print("DEBUG: O CENTRE NCO access granted")
         pass
     elif user_role == 'ONCO':
         # ONCO can only access their own company
@@ -2290,7 +2294,7 @@ def get_parade_data_by_company(date_str, company):
         print(f"DEBUG: Access denied for role: {user_role}")
         return jsonify({
             'success': False, 
-            'error': f'Access denied - Only O SEC NCO and ONCO can access parade data'
+            'error': f'Access denied - Only O CENTRE NCO and ONCO can access parade data'
         }), 403
     
     conn = None
@@ -2416,9 +2420,9 @@ def require_role(*allowed_roles):
 # ===============================================
 
 @app.route('/api/parade-data/view-all/<date_str>', methods=['GET'])
-@require_role('O SEC NCO')  # Only O SEC NCO can view all companies
+@require_role('O CENTRE NCO')  # Only O CENTRE NCO can view all companies
 def get_all_companies_parade_data(date_str):
-    """Get aggregated parade data for all companies - O SEC NCO ONLY"""
+    """Get aggregated parade data for all companies - O CENTRE NCO ONLY"""
     print(f"\n=== GET ALL COMPANIES PARADE DATA ===")
     print(f"Date: {date_str}")
     
@@ -2530,8 +2534,8 @@ def get_parade_user_info():
     user_role = user.get('role', '').strip()
     user_company = user.get('company', '').strip()
     
-    # Only allow O SEC NCO and ONCO
-    if user_role not in ['O SEC NCO', 'ONCO']:
+    # Only allow O CENTRE NCO and ONCO
+    if user_role not in ['O CENTRE NCO', 'ONCO']:
         return jsonify({
             'success': False,
             'error': 'Access denied'
@@ -2567,7 +2571,7 @@ def debug_user_info():
 
 @app.route('/api/parade-data/save', methods=['POST'])
 def save_parade_data():
-    """Save parade data - O SEC NCO can save for any company, ONCO only for own"""
+    """Save parade data - O CENTRE NCO can save for any company, ONCO only for own"""
     
     user = get_current_user()
     
@@ -2593,7 +2597,7 @@ def save_parade_data():
             }), 400
         
         report_date_str = data.get('date')
-        selected_company = data.get('company')  # From dropdown (for O SEC NCO) or user's company (for ONCO)
+        selected_company = data.get('company')  # From dropdown (for O CENTRE NCO) or user's company (for ONCO)
         parade_data = data.get('data')
         
         if not report_date_str or not selected_company or not parade_data:
@@ -2603,19 +2607,19 @@ def save_parade_data():
             }), 400
         
         # Validate user role
-        if user_role not in ['O SEC NCO', 'ONCO']:
+        if user_role not in ['O CENTRE NCO', 'ONCO']:
             return jsonify({
                 'success': False, 
-                'error': 'Access denied - Only O SEC NCO and ONCO can save parade data'
+                'error': 'Access denied - Only O CENTRE NCO and ONCO can save parade data'
             }), 403
         
         # Determine which company to save to
-        if user_role == 'O SEC NCO':
-            # O SEC NCO saves to the company they selected from dropdown
+        if user_role == 'O CENTRE NCO':
+            # O CENTRE NCO saves to the company they selected from dropdown
             final_company = selected_company
-            print(f"DEBUG: O SEC NCO saving to selected company: {final_company}")
+            print(f"DEBUG: O CENTRE NCO saving to selected company: {final_company}")
             
-            # Validate that O SEC NCO doesn't try to save for "All"
+            # Validate that O CENTRE NCO doesn't try to save for "All"
             if final_company == 'All':
                 return jsonify({
                     'success': False,
@@ -2902,8 +2906,8 @@ def export_parade_csv(date_str, company):
     user_company = user.get('company', '').strip()
     
     # Check authorization based on role
-    if user_role == 'O SEC NCO':
-        # O SEC NCO can export any company
+    if user_role == 'O CENTRE NCO':
+        # O CENTRE NCO can export any company
         pass
     elif user_role == 'ONCO':
         # ONCO can only export their own company
@@ -2916,7 +2920,7 @@ def export_parade_csv(date_str, company):
         # Other roles cannot export
         return jsonify({
             'success': False, 
-            'error': 'Access denied - Only O SEC NCO and ONCO can export parade data'
+            'error': 'Access denied - Only O CENTRE NCO and ONCO can export parade data'
         }), 403
     
     conn = None
@@ -2927,11 +2931,11 @@ def export_parade_csv(date_str, company):
         cursor = conn.cursor(dictionary=True)
         
         if company == 'All':
-            # Only O SEC NCO can export all companies
-            if user_role != 'O SEC NCO':
+            # Only O CENTRE NCO can export all companies
+            if user_role != 'O CENTRE NCO':
                 return jsonify({
                     'success': False, 
-                    'error': 'Only O SEC NCO can export data for all companies'
+                    'error': 'Only O CENTRE NCO can export data for all companies'
                 }), 403
                 
             # Get all companies data
@@ -3878,8 +3882,468 @@ def get_assigned_alarm():
         cursor.close()
         conn.close()
 
-# ========== OPTIONAL: Keep original endpoint for backward compatibility ==========
+
+
+
+
+
+#api for trade functionality
+
+
+def format_data_for_frontend(db_row, requested_date, is_template=False):
+    """
+    Convert database row to frontend format
+    """
+    if not db_row:
+        return []
+    
+    trades = [
+        {'code': 'op_ciph', 'name': 'OP CIPH'},
+        {'code': 'oss', 'name': 'OSS'},
+        {'code': 'occ', 'name': 'OCC'},
+        {'code': 'ttc', 'name': 'TTC'},
+        {'code': 'lmn', 'name': 'LMN'},
+        {'code': 'efs', 'name': 'EFS'},
+        {'code': 'dvr_mt', 'name': 'DVR MT'},
+        {'code': 'dr', 'name': 'DR'},
+        {'code': 'dtmn', 'name': 'DTMN'},
+        {'code': 'skt', 'name': 'SKT'},
+        {'code': 'artsn', 'name': 'ARTSN'},
+        {'code': 'w_man', 'name': 'W/MAN'},
+        {'code': 'steward', 'name': 'STEWARD'},
+        {'code': 'dresser', 'name': 'DRESSER'},
+        {'code': 'hkeeper', 'name': 'HKEEPER'},
+        {'code': 'mkeeper', 'name': 'MKEEPER'},
+        {'code': 'chef_mess', 'name': 'CHEF MESS'},
+        {'code': 'chef_com', 'name': 'CHEF COM'},
+        {'code': 'er', 'name': 'ER'},
+        {'code': 'tlr', 'name': 'TLR'},
+        {'code': 'clk_sd', 'name': 'CLK SD'},
+        {'code': 'ere', 'name': 'ERE'}
+    ]
+    
+    result = []
+    for trade in trades:
+        trade_data = {
+            'trade': trade['name'],
+            'auth': db_row.get(f"{trade['code']}_auth", 0),
+            'hs': db_row.get(f"{trade['code']}_hs", 0),
+            'held': db_row.get(f"{trade['code']}_held", 0),
+            'av': db_row.get(f"{trade['code']}_av", 0),
+            'dist_hq': db_row.get(f"{trade['code']}_dist_hq", 0),
+            'dist_1': db_row.get(f"{trade['code']}_dist_1", 0),
+            'dist_2': db_row.get(f"{trade['code']}_dist_2", 0),
+            'dist_3': db_row.get(f"{trade['code']}_dist_3", 0),
+            'state_hq': db_row.get(f"{trade['code']}_state_hq", 0),
+            'state_1': db_row.get(f"{trade['code']}_state_1", 0),
+            'state_2': db_row.get(f"{trade['code']}_state_2", 0),
+            'state_3': db_row.get(f"{trade['code']}_state_3", 0),
+            'present_hq': db_row.get(f"{trade['code']}_present_hq", 0),
+            'present_1': db_row.get(f"{trade['code']}_present_1", 0),
+            'present_2': db_row.get(f"{trade['code']}_present_2", 0),
+            'present_3': db_row.get(f"{trade['code']}_present_3", 0),
+            'is_template': is_template  # Flag for frontend to show template indicator
+        }
+        result.append(trade_data)
+    
+    return result
+
+
+@app.route('/api/trade-manpower/get/<date>', methods=['GET'])
+def get_trade_manpower(date):
+    """
+    Get trade manpower data for a specific date.
+    If data doesn't exist for requested date, return data from last available date.
+    """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        # First, check if data exists for requested date
+        cursor.execute("""
+            SELECT * FROM trade_manpower_daily 
+            WHERE report_date = %s
+        """, (date,))
+        
+        current_data = cursor.fetchone()
+        
+        if current_data:
+            # Data exists for requested date
+            return_data = format_data_for_frontend(current_data, date, False)
+            return jsonify({
+                'success': True,
+                'has_data': True,
+                'data': return_data,
+                'message': f'Data loaded for {date}',
+                'is_template': False,
+                'template_date': None,
+                'is_present_day': True  # Add this flag
+            })
+        else:
+            # No data for requested date, find last available date
+            cursor.execute("""
+                SELECT report_date FROM trade_manpower_daily 
+                WHERE report_date < %s
+                ORDER BY report_date DESC 
+                LIMIT 1
+            """, (date,))
+            
+            last_date_row = cursor.fetchone()
+            
+            if last_date_row:
+                # Found data from previous date
+                last_date = last_date_row['report_date'].strftime('%Y-%m-%d')
+                
+                cursor.execute("""
+                    SELECT * FROM trade_manpower_daily 
+                    WHERE report_date = %s
+                """, (last_date,))
+                
+                template_data = cursor.fetchone()
+                return_data = format_data_for_frontend(template_data, date, True)
+                
+                return jsonify({
+                    'success': True,
+                    'has_data': False,  # No data for current date
+                    'data': return_data,
+                    'message': f'No data found for {date}. Showing template from {last_date}.',
+                    'is_template': True,
+                    'template_date': last_date,
+                    'is_present_day': True  # Add this flag
+                })
+            else:
+                # No data at all in database
+                return jsonify({
+                    'success': True,
+                    'has_data': False,
+                    'data': [],  # Empty array to trigger new data entry
+                    'message': 'No historical data found. Please enter new data.',
+                    'is_template': False,
+                    'template_date': None,
+                    'is_present_day': True  # Add this flag
+                })
+                
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+def calculate_totals(data):
+    """
+    Calculate total columns from all trades
+    """
+    trades = ['op_ciph', 'oss', 'occ', 'ttc', 'lmn', 'efs', 'dvr_mt', 'dr', 'dtmn', 
+              'skt', 'artsn', 'w_man', 'steward', 'dresser', 'hkeeper', 'mkeeper', 
+              'chef_mess', 'chef_com', 'er', 'tlr', 'clk_sd', 'ere']
+    
+    fields = ['auth', 'hs', 'held', 'av', 'dist_hq', 'dist_1', 'dist_2', 'dist_3',
+              'state_hq', 'state_1', 'state_2', 'state_3', 'present_hq', 'present_1',
+              'present_2', 'present_3']
+    
+    totals = {}
+    
+    for field in fields:
+        total = 0
+        for trade in trades:
+            key = f"{trade}_{field}"
+            total += data.get(key, 0)
+        totals[f"total_{field}"] = total
+    
+    return totals
+@app.route('/api/trade-manpower/save', methods=['POST'])
+def save_trade_manpower():
+    """
+    Save trade manpower data for a specific date
+    """
+    try:
+        data = request.json
+        date = data.get('date')
+        trades = data.get('trades', [])
+        
+        if not date or not trades:
+            return jsonify({
+                'success': False,
+                'error': 'Missing date or trades data'
+            }), 400
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if data already exists for this date
+        cursor.execute("SELECT id FROM trade_manpower_daily WHERE report_date = %s", (date,))
+        existing = cursor.fetchone()
+        
+        print(f"DEBUG: Saving for date {date}, existing: {existing}")
+        
+        # Create data dictionary for insertion
+        insert_data = {'report_date': date}
+        
+        # Map trade names to column names
+        trade_mapping = {
+            'OP CIPH': 'op_ciph',
+            'OSS': 'oss',
+            'OCC': 'occ',
+            'TTC': 'ttc',
+            'LMN': 'lmn',
+            'EFS': 'efs',
+            'DVR MT': 'dvr_mt',
+            'DR': 'dr',
+            'DTMN': 'dtmn',
+            'SKT': 'skt',
+            'ARTSN': 'artsn',
+            'W/MAN': 'w_man',
+            'STEWARD': 'steward',
+            'DRESSER': 'dresser',
+            'HKEEPER': 'hkeeper',
+            'MKEEPER': 'mkeeper',
+            'CHEF MESS': 'chef_mess',
+            'CHEF COM': 'chef_com',
+            'ER': 'er',
+            'TLR': 'tlr',
+            'CLK SD': 'clk_sd',
+            'ERE': 'ere'
+        }
+        
+        # Process each trade
+        for trade in trades:
+            trade_name = trade['trade']
+            trade_code = trade_mapping.get(trade_name)
+            
+            if not trade_code:
+                print(f"WARNING: No mapping for trade: {trade_name}")
+                continue
+                
+            # Map each field to column name
+            fields_to_map = [
+                ('auth', 'auth'),
+                ('hs', 'hs'),
+                ('held', 'held'),
+                ('av', 'av'),
+                ('dist_hq', 'dist_hq'),
+                ('dist_1', 'dist_1'),
+                ('dist_2', 'dist_2'),
+                ('dist_3', 'dist_3'),
+                ('state_hq', 'state_hq'),
+                ('state_1', 'state_1'),
+                ('state_2', 'state_2'),
+                ('state_3', 'state_3'),
+                ('present_hq', 'present_hq'),
+                ('present_1', 'present_1'),
+                ('present_2', 'present_2'),
+                ('present_3', 'present_3')
+            ]
+            
+            for frontend_field, db_field in fields_to_map:
+                column_name = f"{trade_code}_{db_field}"
+                value = trade.get(frontend_field, 0)
+                insert_data[column_name] = value
+        
+        # Calculate totals
+        totals = calculate_totals(insert_data)
+        insert_data.update(totals)
+        
+        print(f"DEBUG: insert_data keys: {list(insert_data.keys())[:5]}...")
+        print(f"DEBUG: insert_data sample values: {list(insert_data.values())[:5]}...")
+        
+        if existing:
+            # Update existing record - FIXED VERSION
+            print(f"DEBUG: Updating existing record for {date}")
+            
+            # Create SET clause
+            set_items = []
+            set_values = []
+            
+            for key, value in insert_data.items():
+                if key != 'report_date':  # Don't update the report_date in SET clause
+                    set_items.append(f"{key} = %s")
+                    set_values.append(value)
+            
+            # Add the WHERE clause value
+            set_values.append(date)
+            
+            query = f"""
+                UPDATE trade_manpower_daily 
+                SET {', '.join(set_items)}
+                WHERE report_date = %s
+            """
+            
+            print(f"DEBUG: UPDATE query: {query}")
+            print(f"DEBUG: UPDATE values: {set_values[:5]}...")
+            
+            cursor.execute(query, set_values)
+            action = 'updated'
+        else:
+            # Insert new record
+            print(f"DEBUG: Inserting new record for {date}")
+            
+            columns = ', '.join(insert_data.keys())
+            placeholders = ', '.join(['%s'] * len(insert_data))
+            
+            query = f"""
+                INSERT INTO trade_manpower_daily ({columns})
+                VALUES ({placeholders})
+            """
+            
+            cursor.execute(query, list(insert_data.values()))
+            action = 'inserted'
+        
+        conn.commit()
+        
+        print(f"DEBUG: Data {action} successfully for {date}")
+        
+        return jsonify({
+            'success': True,
+            'message': f'Data {action} successfully for {date}',
+            'date': date,
+            'action': action
+        })
+        
+    except Exception as e:
+        print(f"ERROR in save_trade_manpower: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        if 'conn' in locals():
+            conn.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+                        
+@app.route('/api/trade-manpower/export-csv/<date>', methods=['GET'])
+def export_trade_csv(date):
+    """
+    Export trade manpower data to CSV
+    """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT * FROM trade_manpower_daily 
+            WHERE report_date = %s
+        """, (date,))
+        
+        data = cursor.fetchone()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data found for the specified date'
+            }), 404
+        
+        # Create CSV
+        output = StringIO()
+        writer = csv.writer(output)
+        
+        # Write header
+        header = [
+            'SR NO', 'TRADE/CAT', 'AUTH', 'H/S', 'HELD', 'AV',
+            'HQ COY DIST', '1 COY DIST', '2 COY DIST', '3 COY DIST',
+            'HQ COY STATE', '1 COY STATE', '2 COY STATE', '3 COY STATE',
+            'HQ COY PRESENT', '1 COY PRESENT', '2 COY PRESENT', '3 COY PRESENT'
+        ]
+        writer.writerow(header)
+        
+        # Trade order
+        trades = [
+            ('OP CIPH', 'op_ciph'),
+            ('OSS', 'oss'),
+            ('OCC', 'occ'),
+            ('TTC', 'ttc'),
+            ('LMN', 'lmn'),
+            ('EFS', 'efs'),
+            ('DVR MT', 'dvr_mt'),
+            ('DR', 'dr'),
+            ('DTMN', 'dtmn'),
+            ('SKT', 'skt'),
+            ('ARTSN', 'artsn'),
+            ('W/MAN', 'w_man'),
+            ('STEWARD', 'steward'),
+            ('DRESSER', 'dresser'),
+            ('HKEEPER', 'hkeeper'),
+            ('MKEEPER', 'mkeeper'),
+            ('CHEF MESS', 'chef_mess'),
+            ('CHEF COM', 'chef_com'),
+            ('ER', 'er'),
+            ('TLR', 'tlr'),
+            ('CLK SD', 'clk_sd'),
+            ('ERE', 'ere')
+        ]
+        
+        # Write trade rows
+        for sr_no, (trade_name, trade_code) in enumerate(trades, 1):
+            row = [
+                sr_no,
+                trade_name,
+                data.get(f"{trade_code}_auth", 0),
+                data.get(f"{trade_code}_hs", 0),
+                data.get(f"{trade_code}_held", 0),
+                data.get(f"{trade_code}_av", 0),
+                data.get(f"{trade_code}_dist_hq", 0),
+                data.get(f"{trade_code}_dist_1", 0),
+                data.get(f"{trade_code}_dist_2", 0),
+                data.get(f"{trade_code}_dist_3", 0),
+                data.get(f"{trade_code}_state_hq", 0),
+                data.get(f"{trade_code}_state_1", 0),
+                data.get(f"{trade_code}_state_2", 0),
+                data.get(f"{trade_code}_state_3", 0),
+                data.get(f"{trade_code}_present_hq", 0),
+                data.get(f"{trade_code}_present_1", 0),
+                data.get(f"{trade_code}_present_2", 0),
+                data.get(f"{trade_code}_present_3", 0)
+            ]
+            writer.writerow(row)
+        
+        # Write totals row
+        totals_row = [
+            '', 'TOTAL',
+            data.get('total_auth', 0),
+            data.get('total_hs', 0),
+            data.get('total_held', 0),
+            data.get('total_av', 0),
+            data.get('total_dist_hq', 0),
+            data.get('total_dist_1', 0),
+            data.get('total_dist_2', 0),
+            data.get('total_dist_3', 0),
+            data.get('total_state_hq', 0),
+            data.get('total_state_1', 0),
+            data.get('total_state_2', 0),
+            data.get('total_state_3', 0),
+            data.get('total_present_hq', 0),
+            data.get('total_present_1', 0),
+            data.get('total_present_2', 0),
+            data.get('total_present_3', 0)
+        ]
+        writer.writerow(totals_row)
+        
+        # Prepare response
+        response = make_response(output.getvalue())
+        response.headers['Content-Disposition'] = f'attachment; filename=trade_manpower_{date}.csv'
+        response.headers['Content-type'] = 'text/csv'
+        
+        return response
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
 
     
 if __name__ == '__main__':
-    app.run(host= '192.168.1.43',port=4000,debug=True)
+    app.run(host= '127.0.0.1',port=4000,debug=True)

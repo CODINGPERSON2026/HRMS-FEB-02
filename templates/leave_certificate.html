@@ -5,13 +5,14 @@
     <style>
         @page {
             size: a4 portrait;
-            margin: 1cm;
+            margin: 1.5cm;
         }
 
         body {
             font-family: "Times New Roman", serif;
-            font-size: 11pt;
+            font-size: 12pt;
             color: #000;
+            line-height: 1.5;
         }
 
         .container {
@@ -28,41 +29,47 @@
         .header-table td {
             text-align: center;
             vertical-align: top;
+            padding-bottom: 20px;
         }
 
         h2 {
             margin: 0;
-            font-size: 14pt;
+            font-size: 18pt;
             font-weight: bold;
             text-decoration: underline;
+            letter-spacing: 2px;
         }
 
         .sub-header {
-            font-size: 10pt;
-            margin-top: 5px;
+            font-size: 12pt;
+            /* Increased from 10pt */
+            margin-top: 10px;
             text-transform: uppercase;
+            font-weight: bold;
         }
 
         /* Content Section */
         .details-table {
-            margin-top: 20px;
+            margin-top: 40px;
+            /* Increased from 20px */
             width: 100%;
         }
 
         .details-table td {
-            padding: 5px;
+            padding: 6px;
             vertical-align: top;
         }
 
         .label {
             font-weight: bold;
-            width: 150px;
+            width: 200px;
+            /* Increased from 150px */
         }
 
         /* Signature Section */
         .signature-table {
             width: 100%;
-            margin-top: 50px;
+            margin-top: 60px;
         }
 
         .signature-table td {
@@ -73,49 +80,45 @@
         .seal-box {
             border: 2px solid red;
             color: red;
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            /* Increased from 80px */
+            height: 100px;
+            /* Increased from 80px */
             border-radius: 50%;
-            /* Won't render perfect circle in all PDF engines but worth a try, otherwise square */
-            padding: 10px;
-            font-size: 9pt;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-size: 10pt;
+            /* Increased from 9pt */
             font-weight: bold;
             text-align: center;
-            vertical-align: middle;
             margin: 0 auto;
         }
 
         .digital-sig {
             border: 1px solid #000;
-            padding: 5px;
-            font-size: 8pt;
-            margin-bottom: 5px;
+            padding: 10px;
+            font-size: 9pt;
+            /* Increased from 8pt */
+            margin-bottom: 10px;
             display: inline-block;
             text-align: left;
         }
 
         .footer {
-            margin-top: 30px;
+            margin-top: 40px;
             text-align: center;
-            border-top: 1px solid #000;
-            padding-top: 5px;
-            font-size: 9pt;
+            border-top: 2px solid #000;
+            padding-top: 15px;
+            font-size: 11pt;
             font-weight: bold;
         }
-
-        .separator {
-            width: 100%;
-            border-bottom: 1px dashed #000;
-            margin: 40px 0;
-            height: 10px;
-        }
     </style>
+
 </head>
 
 <body>
-
-    <!-- Loop for 2 copies: Original and Duplicate/Office Copy -->
-    {% for i in range(2) %}
 
     <div class="container">
 
@@ -140,7 +143,7 @@
         </table>
 
         <!-- Body Content -->
-        <div style="margin-top: 20px; text-align: justify; line-height: 1.5;">
+        <div style="margin-top: 25px; text-align: justify; line-height: 1.6; font-size: 13pt;">
             Certified that <strong>{{ applicant.rank }} {{ applicant.name }}</strong>
             (Army No <strong>{{ applicant.army_number }}</strong>) of
             <strong>{{ applicant.company_name }} Company, {{ applicant.section_name }}</strong>
@@ -150,7 +153,7 @@
             to <strong>{{ leave.end_date.strftime('%d-%m-%Y') }}</strong>.
         </div>
 
-        <table class="details-table">
+        <table class="details-table" style="margin-top: 20px;">
             <tr>
                 <td class="label">Prefix (if any):</td>
                 <td>{{ leave.prefix_details }}</td>
@@ -165,7 +168,7 @@
             </tr>
             <tr>
                 <td class="label">Contact No:</td>
-                <!-- <td colspan="3">{{ leave.mobile_during_leave }}</td> -->
+                <td colspan="3">{{ leave.mobile_during_leave }}</td>
             </tr>
             <tr>
                 <td class="label">Address during leave:</td>
@@ -173,7 +176,7 @@
             </tr>
         </table>
 
-        <div style="margin-top: 15px;">
+        <div style="margin-top: 30px; line-height: 1.8;">
             The individual is directed to report back to the unit on expiry of leave by
             <strong>{{ leave.reporting_date.strftime('%d %b %Y') }} (1800 hrs)</strong>.
             Any extension will require prior approval through proper channel.
@@ -189,7 +192,7 @@
                 </td>
                 <td width="33%">
                     <div class="seal-box">
-                        <br>UNIT<br>SEAL
+                        UNIT<br>SEAL
                     </div>
                 </td>
                 <td width="33%">
@@ -206,17 +209,11 @@
         </table>
 
         <div class="footer">
-            JAI HIND | 15 CORPS ENGG SIG REGT
+            15 CORPS ENGG SIG REGT<br>
+            Subedar Major: 95555555555 | Adjt: 9555898989
         </div>
 
     </div>
-
-    <!-- Separator for the second copy -->
-    {% if loop.first %}
-    <div class="separator"></div>
-    {% endif %}
-
-    {% endfor %}
 
 </body>
 

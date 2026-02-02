@@ -24,64 +24,95 @@
     min-height: 100vh;
   }
 
-  /* Local Content Loader (only covers dashboard area) */
-  .content-loader {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(248, 250, 252, 0.97);
-    backdrop-filter: blur(10px);
+  /* Shimmer Effect */
+  .shimmer-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: #f6f7f8;
+    border-radius: 12px;
+  }
+
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .shimmer-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    min-height: 140px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 999;
-    border-radius: 20px;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    gap: 10px;
   }
 
-  .content-loader.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .spinner {
-    width: 60px;
-    height: 60px;
-    border: 6px solid #e2e8f0;
-    border-top: 6px solid var(--light-blue);
+  .shimmer-circle {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 
-  .loader-text {
-    font-size: 1.2rem;
-    color: #475569;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+  .shimmer-line {
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+  .shimmer-line.short {
+    width: 60%;
+  }
+
+  .shimmer-line.medium {
+    width: 80%;
+  }
+
+  .shimmer-line.long {
+    width: 100%;
+  }
+
+  .shimmer-title {
+    height: 18px;
+    width: 90px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .shimmer-number {
+    height: 30px;
+    width: 70px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 
   /* Main Content */
   .main-content {
     padding: 1px;
     min-height: 100vh;
-    opacity: 0;
-    /* Hidden until loader is removed */
-    transition: opacity 0.6s ease;
-  }
-
-  .main-content.loaded {
-    opacity: 1;
   }
 
   /* Action Section */
@@ -123,40 +154,33 @@
     flex-wrap: wrap;
   }
 
-
-
-
-
-
-
-
-
   /* Stats Grid */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 2px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
     margin-bottom: 10px;
-    transition:
-      opacity 0.3s ease,
-      transform 0.3s ease,
-      max-height 0.5s ease,
-      padding 0.3s ease,
-      margin 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.5s ease,
+      padding 0.3s ease, margin 0.3s ease;
     overflow: hidden;
   }
 
   .card {
     border: none;
-    border-radius: 20px;
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     overflow: hidden;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid #e2e8f0;
     text-align: center;
-    padding: 20px;
+    padding: 16px;
     position: relative;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
   .card::before {
@@ -165,15 +189,19 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--light-blue) 0%, var(--dark-blue) 100%);
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      var(--light-blue) 0%,
+      var(--dark-blue) 100%
+    );
     opacity: 0;
     transition: opacity 0.3s ease;
   }
 
   .card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   }
 
   .card:hover::before {
@@ -181,30 +209,49 @@
   }
 
   .card h3 {
-    font-size: 2.2rem;
-    margin: 15px 0;
-    font-weight: 800;
+    font-size: 1.8rem;
+    margin: 10px 0 5px 0;
+    font-weight: 700;
     color: var(--text-dark);
+    line-height: 1.2;
   }
 
   .card .text-muted {
     color: var(--text-light) !important;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    margin-bottom: 8px;
   }
 
   .card .text-success {
     color: #10b981 !important;
-    font-weight: 700;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.85rem;
   }
 
   .card .text-danger {
     color: #ef4444 !important;
-    font-weight: 700;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .card .icon-circle,
+  .card .mb-2,
+  .card .loan-icon {
+    margin-bottom: 8px;
+  }
+
+  .card .icon-circle i,
+  .card .mb-2 i,
+  .card .loan-icon i {
+    font-size: 1.5rem;
+    color: var(--light-blue);
+  }
+
+  .card .fa-2x {
+    font-size: 1.5rem !important;
   }
 
   .view-details {
@@ -236,6 +283,30 @@
     .action-section-title {
       font-size: 1.2rem;
     }
+
+    .stats-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      padding: 14px;
+      min-height: 120px;
+    }
+
+    .card h3 {
+      font-size: 1.5rem;
+    }
+
+    .card .text-muted {
+      font-size: 0.7rem;
+    }
+
+    .card .icon-circle i,
+    .card .mb-2 i,
+    .card .loan-icon i {
+      font-size: 1.3rem;
+    }
   }
 
   .btn-close {
@@ -255,7 +326,6 @@
     opacity: 1;
     transform: translateY(0);
     max-height: 2000px;
-    /* must be bigger than actual content height */
   }
 
   #show-btn {
@@ -302,25 +372,16 @@
 
   .show {
     max-height: 1000px;
-    /* must be larger than content height */
     opacity: 1;
     transition: max-height 0.4s ease, opacity 0.3s ease;
   }
 </style>
 
-<!-- Dashboard with Local Loader -->
+<!-- Dashboard -->
 <div class="dashboard-content">
-
-  <!-- Local Loader (only inside dashboard-content) -->
-  <div class="content-loader" id="contentLoader">
-    <div class="spinner"></div>
-    <div class="loader-text">Loading your dashboard...</div>
-  </div>
-
   <div class="modal fade" id="eventModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
-
         <div class="modal-header">
           <h5 class="modal-title">📅 Today's Events</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -329,7 +390,6 @@
         <div class="modal-body">
           <ul id="eventList" class="list-group"></ul>
         </div>
-
       </div>
     </div>
   </div>
@@ -339,33 +399,26 @@
 
   {% include 'navbar/navbar.html' %}
 
-  <!-- Main Content (initially hidden) -->
+  <!-- Main Content -->
   <div class="main-content" id="mainContent">
-
-
-
-
-
     <div style="margin-bottom: 10px;">
-      
       {% if role in ['CO','2IC','ADJUTANT','OC'] %}
       {% include 'modals/alarm/event_alarm.html' %}
       {% include 'modals/alarm/alarm.html' %}
       {% include 'modals/alarm/attachment_alarm.html' %}
-
       {% include 'modals/alarm/leave_alarm.html' %}
       {% include 'modals/alarm/agniveer_test_alarms.html' %}
       {% endif %}
     </div>
 
     <div class="action-buttons">
-      
-        <button id="show-btn">
-          <i class="fas fa-chevron-down"></i>
-        </button>
+      <button id="show-btn">
+        <i class="fas fa-chevron-down"></i>
+      </button>
       {% if role in ['NCO PWR','SEC JCO','Subedar Major','NCO CHQ','NCO IT','NCO OP','NCO PWR','NCO MW','NCO
       MCCS','NCO
-      CHQ','SEC JCO','JCO LINE','S/JCO','NCO CHQ','JCO CHQ','ONCO','NCO RHQ','NCO TM','NCO MT','NCO RP/NA','NCO QM']
+      CHQ','SEC JCO','JCO LINE','S/JCO','NCO CHQ','JCO CHQ','ONCO','NCO RHQ','NCO TM','NCO MT','NCO RP/NA','NCO QM','O
+      CENTRAL NCO']
       %}
 
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
@@ -376,13 +429,11 @@
       {% if role in ['NCO PWR','SEC JCO','Subedar Major','NCO CHQ','NCO IT','NCO OP','NCO PWR','NCO MW','NCO
       MCCS','NCO
       CHQ','SEC JCO','JCO LINE','S/JCO','OC','NCO CHQ','JCO CHQ','ONCO','NCO RHQ','NCO TM','NCO MT','NCO RP/NA','NCO
-      QM'] %}
+      QM','O CENTRE NCO'] %}
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#rollCallPoints">
         ROLL CALL POINTS
       </button>
-
       {% endif %}
-
 
       {% if role == 'CO' %}
       <button class="btn btn-primary position-relative" data-bs-toggle="modal" data-bs-target="#coRejectedModal"
@@ -390,20 +441,18 @@
         REJECTED LEAVES
         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
           id="coRejectedCount">
-          10
+          <span class="shimmer-line" style="width: 20px; height: 8px; display: inline-block;"></span>
           <span class="visually-hidden">unread messages</span>
         </span>
       </button>
       {% endif %}
-      {% if role == ''%}
+      
+      {% if role in ['', 'O CENTRE NCO'] %}
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tradeModal">
         <i class="fas fa-plus-circle me-1"></i>
         ADD TRADE
       </button>
       {% endif %}
-
-
-
 
       {% if role|trim in [
       'NCO PWR',
@@ -435,17 +484,13 @@
 
       {% if role in ['CO','2IC','ADJUTANT','OC'] %}
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">ADD EVENT </button>
-
-
-      <!-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeStateModal">PARADE STATE</button> -->
       {% endif %}
-      
 
-      <!-- UPDATED: Parade Data Button for  and ONCO -->
-      {% if role in ['', 'ONCO'] %}
+      <!-- UPDATED: Parade Data Button for O CENTRE NCO and ONCO -->
+      {% if role in ['O CENTRE NCO', 'ONCO'] %}
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paradeDataModal">
         <i class="fas fa-clipboard-list me-1"></i>
-        {% if role == '' %}
+        {% if role in ['O CENTRE NCO'] %}
         Parade Data Management
         {% else %}
         Enter Parade Data
@@ -454,35 +499,31 @@
       {% endif %}
     </div>
 
-
-
-
-
     <div id="stats-card-grid" class="stats-grid show">
       {% if role in ['CO', '2IC', 'ADJUTANT','OC'] %}
-
       <!-- First Row Cards -->
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-target="#paradeStateModal"
         data-bs-toggle="modal">
         <div class="icon-circle">
           <i class="fas fa-book-open"></i>
         </div>
-
         <small class="text-muted">PARADE STATE</small>
-        <h3 id="mainPower"></h3>
+        <h3 id="mainPower">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
       {% endif %}
 
-
-
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#attachmentModal">
-
-
+        <div class="icon-circle mb-2">
+          <i class="fas fa-cloud-upload-alt"></i>
+        </div>
         <small class="text-muted">TD/ATTACHMENT</small>
-        <h3 id='attachment-count'>4</h3>
+        <h3 id='attachment-count'>
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
-
       {% endif %}
 
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
@@ -491,9 +532,12 @@
           <i class="fas fa-graduation-cap"></i>
         </div>
         <small class="text-muted">COURSE</small>
-        <h3 id="totalCoursesDone">—</h3>
+        <h3 id="totalCoursesDone">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
       {% endif %}
+
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" id="interview-card">
         <div class="icon-circle mb-2">
@@ -501,40 +545,43 @@
         </div>
         <small class="text-muted">KUNBA INTERVIEW</small>
         <h3>
-          <span id="interview-Count"></span>/<span id="total-count"></span>
+          <span id="interview-Count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>/<span id="total-count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>
         </h3>
-        <span id="interview%" class="text-danger">-2.1%</span>
+        <span id="interview%" class="text-danger">
+          <div class="shimmer-line" style="width: 50px; height: 14px; display: inline-block;"></div>
+        </span>
       </div>
       {% endif %}
-
-
-
-
 
       {% if role in ['JCO' , 'S/JCO','SEC JCO'] %}
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal"
         data-bs-target="#kunbaInterviewModal">
-
+        <div class="icon-circle mb-2">
+          <i class="fa fa-male" aria-hidden="true"></i>
+        </div>
         <small class="text-muted">KUNBA INTERVIEW</small>
         <h3>
-          <span id="interview-Count"></span>/<span id="total-count"></span>
+          <span id="interview-Count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>/<span id="total-count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>
         </h3>
-        <span id="interview%" class="text-danger">-2.1%</span>
+        <span id="interview%" class="text-danger">
+          <div class="shimmer-line" style="width: 50px; height: 14px; display: inline-block;"></div>
+        </span>
       </div>
-
 
       <div class="card p-3 text-center" style="cursor:pointer" id="task-assigned" data-bs-toggle="modal"
         data-bs-target="#taskModal">
+        <div class="icon-circle mb-2">
+          <i class="fas fa-tasks"></i>
+        </div>
         <small class="text-muted">TASK PENDING</small>
-        <h3 id="task-count">—</h3>
-        <span id="task-pending" class="text-danger">-2.1%</span>
+        <h3 id="task-count">
+          <div class="shimmer-line" style="width: 60px; height: 24px; display: inline-block;"></div>
+        </h3>
+        <span id="task-pending" class="text-danger">
+          <div class="shimmer-line" style="width: 50px; height: 14px; display: inline-block;"></div>
+        </span>
       </div>
-
-
       {% endif %}
-
-
-
 
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" id="viewDetailsBtn">
@@ -542,26 +589,36 @@
           <i class="fas fa-user-plus fa-2x text-primary"></i>
         </div>
         <small class="text-muted">DETACHMENT</small>
-        <h3 id="locationCount">—</h3>
+        <h3 id="locationCount">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
       {% endif %}
 
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
-
       <div class="card p-3 text-center" style="cursor:pointer" id="openSensitive">
+        <div class="icon-circle mb-2">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
         <small class="text-muted">SENSITIVE INDL</small>
-        <h3 id='sensitive-count'>4</h3>
+        <h3 id='sensitive-count'>
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
-
       {% endif %}
 
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" id="openBoardDetails">
+        <div class="icon-circle mb-2">
+          <i class="fas fa-user-tie me-1"></i>
+        </div>
         <small class="text-muted">BOO's</small>
-        <h3 id="board-count">98</h3>
+        <h3 id="board-count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
-
       {% endif %}
+
       {% if role in ['CO', '2IC', 'ADJUTANT'] %}
       <div class="card p-3 text-center" style="cursor:pointer" id="loanDetailGraph" data-bs-toggle="modal"
         data-bs-target="#loanModal">
@@ -569,32 +626,35 @@
           <i class="fa-solid fa-hand-holding-dollar"></i>
         </div>
         <small class="text-muted">LOAN</small>
-        <h3 id="active-loan-count">—</h3>
-
+        <h3 id="active-loan-count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
       {% endif %}
 
       {% if role in ['CO', '2IC', 'ADJUTANT','PROJECT OFFICER','PROJECT JCO'] %}
       <div class="card p-3 text-center" style="cursor:pointer; transition: all 0.3s ease;" id="openProjects">
+        <div class="icon-circle mb-2">
+          <i class="fas fa-rocket"></i>
+        </div>
         <small class="text-muted">TOTAL PROJECTS</small>
-        <h3 class="mb-0" id="get_projects_count">—</h3>
+        <h3 class="mb-0" id="get_projects_count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
       {% endif %}
-
 
       <!-- Second Row Cards -->
       {% if role in ['CO', '2IC', 'ADJUTANT','Subedar Major'] %}
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal"
         data-bs-target="#centerRollCallModal">
-
         <div class="mb-2">
           <i class="fas fa-clipboard-list fa-2x text-primary"></i>
-          <!-- OR -->
-          <!-- <i class="fas fa-hand-paper fa-2x text-primary"></i> -->
         </div>
-
         <small class="text-muted">CENTRAL ROLL CALL</small>
-        <h3 id="center-roll-points">—</h3>
+        <h3 id="center-roll-points">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
       {% endif %}
 
@@ -603,58 +663,33 @@
         <div class="icon-circle">
           <i class="fas fa-user-shield"></i>
         </div>
-
         <small class="text-muted">AGNIVEER</small>
-        <h3 id="agniveer_count">—</h3>
+        <h3 id="agniveer_count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
       {% endif %}
+
       {% if role in ['TRGJCO'] %}
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal"
         data-bs-target="#on_courses_modal">
+        <div class="icon-circle mb-2">
+          <i class="fas fa-user-graduate"></i>
+        </div>
         <small class="text-muted">ADD INDL ON COURSE</small>
       </div>
       {% endif %}
 
-
-
-
-
-
-
-
-
-
       {% if role in ['TRGJCO'] %}
-
       <div class="card p-3 text-center" style="cursor:pointer" data-bs-toggle="modal"
         data-bs-target="#fillupdetailsmodal">
+        <div class="icon-circle mb-2">
+          <i class="fas fa-edit"></i>
+        </div>
         <small class="text-muted">FILL UP TEST DETAILS</small>
-
       </div>
       {% endif %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <!--  END Fill Up Test Details Modal ------------------------------------------------------------------>
-
-      <!-- Second Row Cards -->
-      {% if role in ['CO', '2IC', 'ADJUTANT'] %}
-
-      {% endif %}
-
     </div>
-
-
 
     <!-- Add Event Modal -->
     <div class="modal fade" id="addEventModal" tabindex="-1">
@@ -700,7 +735,7 @@
     {% include 'modals/adduser/user.html' %}
     {% include 'modals/oncourses/modal.html' %}
 
-    {% if role in [''] %}
+    {% if role in ['O CENTRE NCO'] %}
     <div class="modal fade" id="tradeModal" tabindex="-1">
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
@@ -710,24 +745,22 @@
     </div>
     {% endif %}
 
-
     {% if role in ['CO', '2IC', 'ADJUTANT','TRGJCO','OC'] %}
     {% include 'modals/agniveer/modal.html' %}
     {% include 'modals/agniveer/fill_up_test_details.html' %}
     {% endif %}
 
-    {% if role in ['', 'ONCO'] %}
+    {% if role in ['O CENTRE NCO', 'ONCO'] %}
     {% include 'modals/parade_data/index.html' %}
     {% endif %}
-
 
     {% if role =='CO'%}
     {% include 'modals/leaverequest/co-rejected-view.html' %}
     {% endif %}
+    
     {% if role in ['CO', '2IC', 'ADJUTANT','OC']%}
     {% include 'modals/alarm/agniveer_test_alarms.html' %}
     {% endif %}
-
 
     <!-- Parade State Modal -->
     <div class="modal fade modal-fullscreen" id="paradeStateModal" tabindex="-1">
@@ -744,12 +777,6 @@
       </div>
     </div>
 
-
-
-
-
-
-
     <script>
       document.addEventListener('hidden.bs.modal', function () {
         document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
@@ -757,7 +784,7 @@
         document.body.style.overflow = '';
       });
     </script>
-    
+
     <script>
       // ========== SAFE ELEMENT CHECKER ==========
       function safeQuerySelector(selector) {
@@ -767,14 +794,14 @@
         }
         return element;
       }
-    
+
       function safeAddEventListener(selector, event, handler) {
         const element = safeQuerySelector(selector);
         if (element) {
           element.addEventListener(event, handler);
         }
       }
-    
+
       // ========== CONDITIONAL EVENT LISTENERS ==========
       function setupConditionalEventListeners() {
         // Only add listeners if elements exist
@@ -784,28 +811,28 @@
             window.location.href = "/board_details";
           });
         }
-    
+
         const openSensitive = safeQuerySelector('#openSensitive');
         if (openSensitive) {
           openSensitive.addEventListener('click', function () {
             window.location.href = "/mark_personnel";
           });
         }
-    
+
         const overAllParadeState = safeQuerySelector('#overAllParadeState');
         if (overAllParadeState) {
           overAllParadeState.addEventListener('click', function () {
             window.location.href = "/paradeState";
           });
         }
-    
+
         const openProjects = safeQuerySelector('#openProjects');
         if (openProjects) {
           openProjects.addEventListener('click', function () {
             window.location.href = "/projects";
           });
         }
-    
+
         const showBtn = safeQuerySelector('#show-btn');
         const statsGrid = safeQuerySelector('#stats-card-grid');
         if (showBtn && statsGrid) {
@@ -821,65 +848,62 @@
             }
           });
         }
-    
+
         // Leave Requests Button
         const leaveRequestsBtn = safeQuerySelector('#leaveRequestsBtn');
         if (leaveRequestsBtn) {
           leaveRequestsBtn.addEventListener('click', function () {
-            // Your leave request logic here
             console.log('Leave requests clicked');
           });
         }
       }
-    
+
       // ========== DASHBOARD DATA LOADING ==========
       const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    
+
       async function loadUnfitGraph(company) {
         try {
           const companySelect = safeQuerySelector('#companyFilter');
-          if (!companySelect) return; // Element doesn't exist for this user
-    
+          if (!companySelect) return;
+
           const res = await fetch(`/api/unfit-graph?company=${encodeURIComponent(company)}`);
           const data = await res.json();
-    
+
           if (!data || !data.length) {
             console.warn("No data returned for company:", company);
             return;
           }
-    
+
           const months = data.map(d => MONTHS[d.month - 1]);
           const values = data.map(d => d.unfit_count);
-    
+
           drawAreaLineGraph(months, values);
         } catch (err) {
           console.error("Error fetching unfit data:", err);
         }
       }
-    
+
       function drawAreaLineGraph(months, values) {
         const canvas = safeQuerySelector('#unfitChart');
-        if (!canvas) return; // Chart doesn't exist for this user
-    
+        if (!canvas) return;
+
         const ctx = canvas.getContext("2d");
         const padding = 55;
         const maxVal = Math.max(...values, 5);
         const width = canvas.width - padding * 2;
         const height = canvas.height - padding * 2;
         const pointCount = values.length === 1 ? 1 : values.length - 1;
-    
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-        // ... rest of your chart drawing code ...
       }
-    
+
       // ========== EVENT HANDLING ==========
       function saveEvent() {
         const eventForm = safeQuerySelector('#eventForm');
         if (!eventForm) return;
-    
+
         let formData = new FormData(eventForm);
-    
+
         fetch("/add_event", {
           method: "POST",
           body: formData
@@ -892,7 +916,7 @@
             }
           });
       }
-    
+
       // ========== HELPER FUNCTIONS ==========
       function updateIfExists(id, value) {
         const el = document.getElementById(id);
@@ -900,27 +924,18 @@
           el.innerText = value ?? '0';
         }
       }
-    
-      // ========== DASHBOARD LOADER ==========
-      function hideLoaderAndShowContent() {
-        const contentLoader = safeQuerySelector('#contentLoader');
-        const mainContent = safeQuerySelector('#mainContent');
-    
-        if (contentLoader) contentLoader.classList.add("hidden");
-        if (mainContent) mainContent.classList.add("loaded");
-      }
-    
+
       // ========== INDIVIDUAL CARD API FETCHERS ==========
-      
+
       // Simple card fetcher (for cards with single value)
       async function fetchCardData(cardId, endpoint, dataKey) {
         const element = document.getElementById(cardId);
-        if (!element) return; // Skip if card doesn't exist
-        
+        if (!element) return;
+
         try {
           const res = await fetch(endpoint);
           if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          
+
           const data = await res.json();
           element.innerText = data[dataKey] || '—';
         } catch (err) {
@@ -928,12 +943,12 @@
           element.innerText = '—';
         }
       }
-    
+
       // Special card fetchers for complex cards
       async function fetchManpowerData() {
         const element = document.getElementById('mainPower');
         if (!element) return;
-        
+
         try {
           const res = await fetch('/api/dashboard/manpower');
           const data = await res.json();
@@ -943,21 +958,21 @@
           element.innerText = '—';
         }
       }
-    
+
       async function fetchInterviewData() {
         const pendingEl = document.getElementById('interview-Count');
         const totalEl = document.getElementById('total-count');
         const percentEl = document.getElementById('interview%');
-        
+
         if (!pendingEl || !totalEl || !percentEl) return;
-        
+
         try {
           const res = await fetch('/api/dashboard/interviews');
           const data = await res.json();
-          
+
           pendingEl.innerText = data.pending_count || '0';
           totalEl.innerText = data.total_count || '0';
-          
+
           const percentage = data.percentage ? `Pending ${data.percentage}%` : '0%';
           percentEl.innerText = percentage;
           percentEl.className = data.percentage >= 0 ? 'text-danger' : 'text-danger';
@@ -968,22 +983,22 @@
           percentEl.innerText = '0%';
         }
       }
-    
+
       async function fetchTasksData() {
         const countEl = document.getElementById('task-count');
         const percentEl = document.getElementById('task-pending');
-        
+
         if (!countEl || !percentEl) return;
-        
+
         try {
           const res = await fetch('/api/dashboard/tasks');
           const data = await res.json();
-          
+
           const pending = data.pending || 0;
           const total = data.total || 0;
-          
+
           countEl.innerText = `${pending} / ${total}`;
-          
+
           const percentage = total > 0 ? ((pending / total) * 100).toFixed(1) : 0;
           percentEl.innerText = `Pending ${percentage}%`;
           percentEl.className = percentage < 50 ? 'text-success' : 'text-danger';
@@ -993,12 +1008,11 @@
           percentEl.innerText = '0%';
         }
       }
-    
+
       // ========== LOAD ALL CARDS BASED ON EXISTENCE ==========
       async function loadAllDashboardCards() {
-        // Create array of all fetch promises
         const fetchPromises = [];
-        
+
         // Simple cards (single value)
         const simpleCards = [
           { id: 'locationCount', endpoint: '/api/dashboard/detachments', key: 'count' },
@@ -1011,44 +1025,41 @@
           { id: 'center-roll-points', endpoint: '/api/dashboard/rollcall', key: 'points' },
           { id: 'board-count', endpoint: '/api/dashboard/boards', key: 'count' }
         ];
-        
+
         // Add simple card fetches
         simpleCards.forEach(card => {
           if (document.getElementById(card.id)) {
             fetchPromises.push(fetchCardData(card.id, card.endpoint, card.key));
           }
         });
-        
+
         // Add special card fetches
         if (document.getElementById('mainPower')) {
           fetchPromises.push(fetchManpowerData());
         }
-        
+
         if (document.getElementById('interview-Count')) {
           fetchPromises.push(fetchInterviewData());
         }
-        
+
         if (document.getElementById('task-count')) {
           fetchPromises.push(fetchTasksData());
         }
-        
+
         // Execute all fetches in parallel
         await Promise.allSettled(fetchPromises);
-        
-        // Hide loader and show content
-        hideLoaderAndShowContent();
       }
-    
+
       async function loadTodayEvents() {
         try {
           const res = await fetch('/api/today_event_alarm');
           const data = await res.json();
-    
+
           const list = safeQuerySelector("#eventList");
           if (!list) return;
-    
+
           list.innerHTML = "";
-    
+
           if (!data.rows || data.rows.length === 0) {
             list.innerHTML = `
               <li class="list-group-item text-muted text-center">
@@ -1056,7 +1067,7 @@
               </li>`;
             return;
           }
-    
+
           data.rows.forEach(event => {
             list.innerHTML += `
               <li class="list-group-item">
@@ -1065,20 +1076,20 @@
               </li>
             `;
           });
-    
+
         } catch (err) {
           console.error("Error loading events:", err);
         }
       }
-    
+
       async function updateRejectedLeaveCount() {
         try {
           const res = await fetch("/apply_leave/rejected_leaves");
           if (!res.ok) throw new Error("Failed to fetch rejected leaves");
-    
+
           const { data } = await res.json();
           const count = data ? data.length : 0;
-    
+
           const badge = document.getElementById("coRejectedCount");
           if (badge) {
             badge.innerText = count;
@@ -1088,12 +1099,12 @@
           console.error("Error fetching rejected leaves count:", err);
         }
       }
-    
+
       // ========== TEST DETAILS MODAL ==========
       document.addEventListener("DOMContentLoaded", function () {
         const testModal = document.getElementById("testDetailsModal");
         const modalBody = document.getElementById("testDetailsModalBody");
-    
+
         if (testModal) {
           testModal.addEventListener("show.bs.modal", function () {
             modalBody.innerHTML = `
@@ -1101,7 +1112,7 @@
                 <div class="spinner-border text-primary"></div>
               </div>
             `;
-    
+
             fetch("/fill-up-test-details")
               .then(res => res.text())
               .then(html => {
@@ -1112,21 +1123,20 @@
                 modalBody.innerHTML = "<p class='text-danger'>Failed to load form</p>";
               });
           });
-    
+
           function initFillUpTestForm() {
-            // Enable date only if Done
             modalBody.querySelectorAll(".test-status").forEach(select => {
               select.addEventListener("change", function () {
                 const dateInput = this.closest(".row").querySelector(".test-date");
                 dateInput.disabled = this.value !== "Done";
               });
             });
-    
+
             const form = modalBody.querySelector("#fillTestForm");
             if (form) {
               form.addEventListener("submit", function (e) {
                 e.preventDefault();
-    
+
                 const payload = {
                   army_number: form.army_number.value,
                   tests: [
@@ -1136,7 +1146,7 @@
                     { test: "4th", status: form.test4.value, date: form.test4_date.value }
                   ]
                 };
-    
+
                 fetch("/api/fill-up-test", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
@@ -1154,20 +1164,20 @@
           }
         }
       });
-    
+
       // ========== INITIALIZATION ==========
       function initializeDashboard() {
         console.log('Dashboard initialized for role:', '{{ role }}');
-    
+
         // Setup event listeners only for elements that exist
         setupConditionalEventListeners();
-    
+
         // Load dashboard data for existing cards
         loadAllDashboardCards();
-    
+
         // Load events if needed
         loadTodayEvents();
-    
+
         // Initialize date display if element exists
         const dateDisplay = safeQuerySelector('#currentDateDisplay');
         if (dateDisplay) {
@@ -1176,13 +1186,13 @@
           dateDisplay.textContent = today.toLocaleDateString('en-US', options);
         }
       }
-    
+
       // ========== DOM READY ==========
       document.addEventListener('DOMContentLoaded', () => {
         console.log('DOM fully loaded for role:', '{{ role }}');
         initializeDashboard();
         updateRejectedLeaveCount();
-        
+
         // Company filter event delegation
         document.addEventListener("change", (e) => {
           if (e.target && e.target.id === "companyFilter") {
@@ -1190,7 +1200,7 @@
             loadUnfitGraph(selectedCompany);
           }
         });
-        
+
         // Initial chart load
         const companySelect = safeQuerySelector("#companyFilter");
         if (companySelect) {

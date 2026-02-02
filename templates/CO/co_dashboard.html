@@ -23,64 +23,95 @@
     min-height: 100vh;
   }
 
-  /* Local Content Loader (only covers dashboard area) */
-  .content-loader {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(248, 250, 252, 0.97);
-    backdrop-filter: blur(10px);
+  /* Shimmer Effect */
+  .shimmer-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: #f6f7f8;
+    border-radius: 12px;
+  }
+
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .shimmer-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    min-height: 140px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 999;
-    border-radius: 20px;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    gap: 10px;
   }
 
-  .content-loader.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .spinner {
-    width: 60px;
-    height: 60px;
-    border: 6px solid #e2e8f0;
-    border-top: 6px solid var(--light-blue);
+  .shimmer-circle {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 
-  .loader-text {
-    font-size: 1.2rem;
-    color: #475569;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+  .shimmer-line {
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+  .shimmer-line.short {
+    width: 60%;
+  }
+
+  .shimmer-line.medium {
+    width: 80%;
+  }
+
+  .shimmer-line.long {
+    width: 100%;
+  }
+
+  .shimmer-title {
+    height: 18px;
+    width: 90px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .shimmer-number {
+    height: 30px;
+    width: 70px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 
   /* Main Content */
   .main-content {
     padding: 1px;
     min-height: 100vh;
-    opacity: 0;
-    /* Hidden until loader is removed */
-    transition: opacity 0.6s ease;
-  }
-
-  .main-content.loaded {
-    opacity: 1;
   }
 
   /* Action Section */
@@ -132,8 +163,8 @@
   /* Stats Grid */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 2px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
     margin-bottom: 10px;
     transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.5s ease,
       padding 0.3s ease, margin 0.3s ease;
@@ -142,15 +173,20 @@
 
   .card {
     border: none;
-    border-radius: 20px;
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     overflow: hidden;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid #e2e8f0;
     text-align: center;
-    padding: 20px;
+    padding: 16px;
     position: relative;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
   .card::before {
@@ -159,7 +195,7 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
+    height: 3px;
     background: linear-gradient(
       90deg,
       var(--light-blue) 0%,
@@ -171,7 +207,7 @@
 
   .card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   }
 
   .card:hover::before {
@@ -179,30 +215,49 @@
   }
 
   .card h3 {
-    font-size: 2.2rem;
-    margin: 15px 0;
-    font-weight: 800;
+    font-size: 1.8rem;
+    margin: 10px 0 5px 0;
+    font-weight: 700;
     color: var(--text-dark);
+    line-height: 1.2;
   }
 
   .card .text-muted {
     color: var(--text-light) !important;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    margin-bottom: 8px;
   }
 
   .card .text-success {
     color: #10b981 !important;
-    font-weight: 700;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.85rem;
   }
 
   .card .text-danger {
     color: #ef4444 !important;
-    font-weight: 700;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .card .icon-circle,
+  .card .mb-2,
+  .card .loan-icon {
+    margin-bottom: 8px;
+  }
+
+  .card .icon-circle i,
+  .card .mb-2 i,
+  .card .loan-icon i {
+    font-size: 1.5rem;
+    color: var(--light-blue);
+  }
+
+  .card .fa-2x {
+    font-size: 1.5rem !important;
   }
 
   .view-details {
@@ -238,6 +293,30 @@
     .action-section-title {
       font-size: 1.2rem;
     }
+
+    .stats-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      padding: 14px;
+      min-height: 120px;
+    }
+
+    .card h3 {
+      font-size: 1.5rem;
+    }
+
+    .card .text-muted {
+      font-size: 0.7rem;
+    }
+
+    .card .icon-circle i,
+    .card .mb-2 i,
+    .card .loan-icon i {
+      font-size: 1.3rem;
+    }
   }
 
   .btn-close {
@@ -257,13 +336,12 @@
     opacity: 1;
     transform: translateY(0);
     max-height: 2000px;
-    /* must be bigger than actual content height */
   }
 
   #show-btn {
     border: none;
-    background-color: gold;
-    padding: 8px 16px;
+    
+    padding: 2px 6px;
     font-size: 14px;
     font-weight: bold;
     border-radius: 8px;
@@ -275,10 +353,7 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
 
-  #show-btn:hover {
-    background-color: #ffd700;
-    transform: translateY(-2px);
-  }
+ 
 
   /* Full screen modal with 10px gap */
   .modal-fullscreen .modal-dialog {
@@ -304,21 +379,14 @@
 
   .show {
     max-height: 1000px;
-    /* must be larger than content height */
     opacity: 1;
     transition: max-height 0.4s ease, opacity 0.3s ease;
   }
   
 </style>
 
-<!-- Dashboard with Local Loader -->
+<!-- Dashboard -->
 <div class="dashboard-content">
-  <!-- Local Loader (only inside dashboard-content) -->
-  <div class="content-loader" id="contentLoader">
-    <div class="spinner"></div>
-    <div class="loader-text">Loading your dashboard...</div>
-  </div>
-
   <div class="modal fade" id="eventModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
@@ -342,7 +410,7 @@
   'Welcome ' ~ role ~ ' ' ~ current_user_name %} {% include 'navbar/navbar.html'
   %}
 
-  <!-- Main Content (initially hidden) -->
+  <!-- Main Content -->
   <div class="main-content" id="mainContent">
     <div style="margin-bottom: 10px">
       {% include 'modals/alarm/alarm.html' %}
@@ -369,14 +437,12 @@
           class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
           id="coRejectedCount"
         >
-          10
+          <span class="shimmer-line" style="width: 20px; height: 8px; display: inline-block;"></span>
           <span class="visually-hidden">unread messages</span>
         </span>
       </button>
 
-      <button id="leaveRequestsBtn" class="btn btn-primary">
-        LEAVE REQUESTS
-      </button>
+      
 
       <button
         class="btn btn-primary"
@@ -394,13 +460,16 @@
         style="cursor: pointer"
         data-bs-target="#paradeStateModal"
         data-bs-toggle="modal"
+        id="card-parade"
       >
         <div class="icon-circle">
           <i class="fas fa-book-open"></i>
         </div>
 
         <small class="text-muted">PARADE STATE</small>
-        <h3 id="mainPower"></h3>
+        <h3 id="mainPower">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
 
       <div
@@ -408,9 +477,15 @@
         style="cursor: pointer"
         data-bs-toggle="modal"
         data-bs-target="#attachmentModal"
+        id="card-attachment"
       >
+      <div class="icon-circle mb-2">
+        <i class="fas fa-cloud-upload-alt"></i>
+      </div>
         <small class="text-muted">TD/ATTACHMENT</small>
-        <h3 id="attachment-count">4</h3>
+        <h3 id="attachment-count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
 
       <div
@@ -422,7 +497,9 @@
           <i class="fas fa-graduation-cap"></i>
         </div>
         <small class="text-muted">COURSE</small>
-        <h3 id="totalCoursesDone">—</h3>
+        <h3 id="totalCoursesDone">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
 
       <div
@@ -435,14 +512,12 @@
         </div>
         <small class="text-muted">KUNBA INTERVIEW</small>
         <h3>
-          <span id="interview-Count"></span>/<span id="total-count"></span>
+          <span id="interview-Count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>/<span id="total-count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>
         </h3>
-        <span id="interview%" class="text-danger">-2.1%</span>
+        <span id="interview%" class="text-danger">
+          <div class="shimmer-line" style="width: 50px; height: 14px; display: inline-block;"></div>
+        </span>
       </div>
-
-      
-
-     
 
       <div
         class="card p-3 text-center"
@@ -453,7 +528,9 @@
           <i class="fas fa-user-plus fa-2x text-primary"></i>
         </div>
         <small class="text-muted">DETACHMENT</small>
-        <h3 id="locationCount">—</h3>
+        <h3 id="locationCount">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
 
       <div
@@ -461,13 +538,24 @@
         style="cursor: pointer"
         id="openSensitive"
       >
-        <small class="text-muted">SENSITIVE INDL</small>
-        <h3 id="sensitive-count">4</h3>
+      <div class="icon-circle mb-2">
+        <i class="fas fa-exclamation-circle"></i>
       </div>
-
+        <small class="text-muted">SENSITIVE INDL</small>
+        <h3 id="sensitive-count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+      
+      
       <div class="card p-3 text-center" id="openBoardDetails">
+        <div class="icon-circle mb-2">
+          <i class="fas fa-user-tie me-1"></i>
+        </div>
         <small class="text-muted">BOO's</small>
-        <h3 id="board-count">98</h3>
+        <h3 id="board-count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
 
       <div
@@ -481,7 +569,9 @@
           <i class="fa-solid fa-hand-holding-dollar"></i>
         </div>
         <small class="text-muted">LOAN</small>
-        <h3 id="active-loan-count">—</h3>
+        <h3 id="active-loan-count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
 
       <div
@@ -489,8 +579,13 @@
         style="cursor: pointer; transition: all 0.3s ease"
         id="openProjects"
       >
+      <div class="icon-circle mb-2">
+      <i class="fas fa-rocket"></i>
+    </div>
         <small class="text-muted">TOTAL PROJECTS</small>
-        <h3 class="mb-0" id="get_projects_count">—</h3>
+        <h3 class="mb-0" id="get_projects_count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
 
       <!-- Second Row Cards -->
@@ -499,15 +594,16 @@
         style="cursor: pointer"
         data-bs-toggle="modal"
         data-bs-target="#centerRollCallModal"
+        id="card-rollcall"
       >
         <div class="mb-2">
           <i class="fas fa-clipboard-list fa-2x text-primary"></i>
-          <!-- OR -->
-          <!-- <i class="fas fa-hand-paper fa-2x text-primary"></i> -->
         </div>
 
         <small class="text-muted">CENTRAL ROLL CALL</small>
-        <h3 id="center-roll-points">—</h3>
+        <h3 id="center-roll-points">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
 
       <div
@@ -515,13 +611,16 @@
         style="cursor: pointer"
         data-bs-toggle="modal"
         data-bs-target="#agniveersModal"
+        id="card-agniveer"
       >
         <div class="icon-circle">
           <i class="fas fa-user-shield"></i>
         </div>
 
         <small class="text-muted">AGNIVEER</small>
-        <h3 id="agniveer_count">—</h3>
+        <h3 id="agniveer_count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
       </div>
     </div>
 
@@ -567,22 +666,39 @@
       </div>
     </div>
 
-    {% include 'modals/detachmentModal/detachment.html' %} {% include
-    'modals/personnelModal/personal_modal.html' %} {% include
-    'modals/salesmodal/salesModal.html' %} {% include
-    'modals/leaverequest/leave_request.html' %} {% include
-    'modals/interview_pending/modal.html' %} {% include
-    'modals/count_parade/modal.html' %} {% include
-    'modals/attachment-modal/modal.html' %} {% include 'modals/loan/loans.html'
-    %} {% include 'modals/roll_call/modal.html' %} {% include
-    'modals/roll_call/view_roll_call.html' %} {% include
-    'modals/course/courses.html' %} {% include
-    'modals/interview_pending/jco-update-modal.html' %} {% include
-    'modals/success-modal/modal.html' %} {% include
-    'task_manager/update_task_by_jco.html' %} {% include
-    'modals/adduser/user.html' %} {% include 'modals/oncourses/modal.html' %} {%
-    include 'modals/leaverequest/co-rejected-view.html' %} {% include
+    {% include 'modals/detachmentModal/detachment.html' %} 
+    {% include
+    'modals/personnelModal/personal_modal.html' %}
+     {% include
+    'modals/salesmodal/salesModal.html' %} 
+    {% include
+    'modals/leaverequest/leave_request.html' %} 
+    {% include
+    'modals/interview_pending/modal.html' %} 
+    {% include
+    'modals/count_parade/modal.html' %}
+     {% include
+    'modals/attachment-modal/modal.html' %}
+     {% include 'modals/loan/loans.html'
+    %} {% include 'modals/roll_call/modal.html' %}
+     {% include
+    'modals/roll_call/view_roll_call.html' %}
+     {% include
+    'modals/course/courses.html' %} 
+    {% include
+    'modals/interview_pending/jco-update-modal.html' %} 
+    {% include
+    'modals/success-modal/modal.html' %}
+     {% include
+    'task_manager/update_task_by_jco.html' %}
+     {% include
+    'modals/adduser/user.html' %}
+     {% include 'modals/oncourses/modal.html' %} {%
+    include 'modals/leaverequest/co-rejected-view.html' %}
+     {% include
     'modals/alarm/agniveer_test_alarms.html' %}
+     {% include
+    'modals/agniveer/modal.html' %}
 
     <!-- Parade State Modal -->
     <div
@@ -693,11 +809,6 @@
     }
   }
 
-
-  
-
- 
-
   // ========== EVENT HANDLING ==========
   function saveEvent() {
     const eventForm = safeQuerySelector("#eventForm");
@@ -717,11 +828,6 @@
         }
       });
   }
-  // References
-  const contentLoader = document.getElementById("contentLoader");
-  const mainContent = document.getElementById("mainContent");
-
-  // Leave Requests Button
 
   document
     .getElementById("openBoardDetails")
@@ -865,17 +971,7 @@
     }
   }
 
-  // ========== DASHBOARD LOADER ==========
-  function hideLoaderAndShowContent() {
-    const contentLoader = safeQuerySelector("#contentLoader");
-    const mainContent = safeQuerySelector("#mainContent");
-
-    if (contentLoader) contentLoader.classList.add("hidden");
-    if (mainContent) mainContent.classList.add("loaded");
-  }
-
   // ========== MAIN DASHBOARD DATA LOAD ==========
-
   async function loadDashboardDataSingleAPI() {
     try {
       const res = await fetch("/api/dashboard_summary");
@@ -908,7 +1004,7 @@
         mainPower: `${manpower.officerCount ?? 0} - ${manpower.jcoCount ?? 0} - ${manpower.orCount ?? 0}`,
         "interview-Count": interview.pending_count ?? 0,
         "total-count": interview.total_count ?? 0,
-        "interview%": `${interview.percentage ?? 0}%`,
+        "interview%": `Pending ${interview.percentage ?? 0}%`,
         "attachment-count": attachment_count ?? 0,
         agniveer_count,
         get_projects_count: projects ?? 0,
@@ -928,11 +1024,8 @@
   
     } catch (err) {
       console.error("Error loading dashboard data:", err);
-    } finally {
-      hideLoaderAndShowContent();
     }
   }
-  
 
   async function updateRejectedLeaveCount() {
     try {

@@ -301,7 +301,7 @@ def download_leave_certificate(army_number):
             leave=leave_info
         )
 
-        # Create PDF
+        # Create PDF using xhtml2pdf (pisa) - Stable on Windows
         pdf_buffer = BytesIO()
         pisa_status = pisa.CreatePDF(html, dest=pdf_buffer)
 
