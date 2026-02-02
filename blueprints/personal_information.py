@@ -1228,7 +1228,6 @@ def update_personnel(army_number):
         cursor.execute(personnel_query, personnel_values)
 
         delete_related_records(cursor, personnel_id, army_number)
-        insert_dynamic_data(cursor, personnel_id, army_number, data)
 
         # NEW/UPDATED: Re-insert into weight_info (after deleting old) with section status (shape/category), permanent/temporary (if category), and restrictions
         # Skip if core fields missing

@@ -1719,7 +1719,7 @@ WHERE company = %s
                 COALESCE(SUM(interview_status = 0), 0) AS pending_count,
                 COUNT(*) AS total_count
             FROM personnel
-            WHERE `rank` IN ('AGNIVEER', ' SIGNAL MAN', 'L/NK', 'NK', 'HAV')
+            WHERE `rank` IN ('AGNIVEER', 'Signal Man', 'L NK', 'NK', 'HAV','LOC NK','L HAV','CHM','RHM')
         """
             params = []
             if company != "Admin":
