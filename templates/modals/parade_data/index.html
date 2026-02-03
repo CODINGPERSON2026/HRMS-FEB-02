@@ -68,16 +68,305 @@
     }
 
     .company-display {
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 0.375rem;
-        padding: 0.375rem 0.75rem;
+        background-color: #ffffff;
+        border: 2px solid #e3e6ea;
+        border-radius: 0.5rem;
+        padding: 0.625rem 1rem;
         font-weight: 500;
+        color: #495057;
+        font-size: 0.9375rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .date-restricted {
         background-color: #f8f9fa;
         cursor: not-allowed;
+    }
+
+    /* ========================================
+       POLISHED CONTROL PANEL STYLING
+       ======================================== */
+    
+    .control-panel-card {
+        border: none;
+        background: #ffffff;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+
+    .control-panel-card .card-body {
+        padding: 1.5rem 2rem;
+    }
+
+    /* Control Panel Container */
+    .control-panel-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    /* Left Section - Inputs */
+    .control-panel-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Right Section - Buttons */
+    .control-panel-right {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    /* Input Groups */
+    .input-group-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+        min-width: 180px;
+    }
+
+    .input-label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin: 0;
+    }
+
+    .input-label i {
+        font-size: 0.875rem;
+        color: #667eea;
+    }
+
+    /* Form Controls Enhanced */
+    .form-control-enhanced,
+    .form-select-enhanced {
+        height: 42px;
+        border: 2px solid #e3e6ea;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.875rem;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: #2d3748;
+        transition: all 0.2s ease;
+        background-color: #ffffff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .form-control-enhanced:focus,
+    .form-select-enhanced:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .form-control-enhanced:hover,
+    .form-select-enhanced:hover {
+        border-color: #c5cad5;
+    }
+
+    /* Action Buttons Enhanced */
+    .btn-action {
+        height: 42px;
+        padding: 0 1.5rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-action:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-action i {
+        font-size: 1rem;
+    }
+
+    /* Button Variants */
+    .btn-enter {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-enter:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #63368d 100%);
+    }
+
+    .btn-view {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+    }
+
+    .btn-view:hover {
+        background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
+    }
+
+    .btn-export {
+        background: linear-gradient(135deg, #28a745 0%, #20873a 100%);
+        color: white;
+    }
+
+    .btn-export:hover {
+        background: linear-gradient(135deg, #20873a 0%, #1a6d2f 100%);
+    }
+
+    .btn-export:disabled {
+        background: #e9ecef;
+        color: #adb5bd;
+        cursor: not-allowed;
+        opacity: 0.6;
+        box-shadow: none;
+    }
+
+    .btn-export:disabled:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 1200px) {
+        .control-panel-container {
+            gap: 1.5rem;
+        }
+
+        .control-panel-left {
+            gap: 1rem;
+        }
+
+        .input-group-wrapper {
+            min-width: 160px;
+        }
+
+        .btn-action {
+            padding: 0 1.25rem;
+            font-size: 0.875rem;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .control-panel-container {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1.25rem;
+        }
+
+        .control-panel-left {
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .control-panel-right {
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .input-group-wrapper {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .btn-action {
+            flex: 1;
+            justify-content: center;
+            min-width: 140px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .control-panel-card .card-body {
+            padding: 1.25rem 1rem;
+        }
+
+        .control-panel-left {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .control-panel-right {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .input-group-wrapper,
+        .btn-action {
+            width: 100%;
+            min-width: 100%;
+        }
+    }
+
+    /* Status Bar Enhancement */
+    .status-bar-custom {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 4px solid #667eea;
+        border-radius: 0.5rem;
+        padding: 1rem;
+    }
+
+    .status-bar-custom .btn-light {
+        background: white;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-bar-custom .btn-light:hover {
+        background: #f8f9fa;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Modal Header Enhancement */
+    .modal-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-header .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .modal-header .modal-title i {
+        font-size: 1.25rem;
+        margin-right: 0.5rem;
+    }
+
+    /* Loading Spinner Enhancement */
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+    }
+
+    .spinner-border {
+        border-width: 0.3rem;
     }
 </style>
 
@@ -88,7 +377,7 @@
             <div class="modal-header bg-gradient"
                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 <h5 class="modal-title text-white">
-                    <i class="fas fa-clipboard-list me-2"></i>
+                    <i class="fas fa-clipboard-list"></i>
                     Parade State Data Management
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -97,52 +386,61 @@
             <!-- Body -->
             <div class="modal-body p-3">
                 <!-- Control Panel -->
-                <div class="card shadow-sm mb-3">
+                <div class="card control-panel-card mb-3">
                     <div class="card-body">
-                        <div class="row g-3 align-items-end">
-                            <!-- Date Selection -->
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold mb-1">
-                                    <i class="fas fa-calendar text-primary me-1"></i> Select Date
-                                </label>
-                                <input type="date" class="form-control" id="paradeDate" />
-                            </div>
+                        <div class="control-panel-container">
+                            <!-- Left Section: Date & Company -->
+                            <div class="control-panel-left">
+                                <!-- Date Selection -->
+                                <div class="input-group-wrapper">
+                                    <label class="input-label">
+                                        <i class="fas fa-calendar"></i>
+                                        Select Date
+                                    </label>
+                                    <input type="date" class="form-control-enhanced" id="paradeDate" />
+                                </div>
 
-                            <!-- Company Selection for O CENTRE NCO -->
-                            <div class="col-md-3" id="companySelectionContainer">
-                                <label class="form-label fw-bold mb-1">
-                                    <i class="fas fa-building text-success me-1"></i> Select Company
-                                </label>
-                                <select class="form-select" id="paradeCompany">
-                                    <option value="">-- Select Company --</option>
-                                    <option value="1 company">1 Company</option>
-                                    <option value="2 company">2 Company</option>
-                                    <option value="3 company">3 Company</option>
-                                    <option value="hq company">HQCompany</option>
-                                    <option value="All">All Companies</option>
-                                </select>
-                            </div>
+                                <!-- Company Selection for O CENTRE NCO -->
+                                <div class="input-group-wrapper" id="companySelectionContainer">
+                                    <label class="input-label">
+                                        <i class="fas fa-building"></i>
+                                        Select Company
+                                    </label>
+                                    <select class="form-select-enhanced" id="paradeCompany">
+                                        <option value="">-- Select Company --</option>
+                                        <option value="1 company">1 Company</option>
+                                        <option value="2 company">2 Company</option>
+                                        <option value="3 company">3 Company</option>
+                                        <option value="hq company">HQ Company</option>
+                                        <option value="All">All Companies</option>
+                                    </select>
+                                </div>
 
-                            <!-- Company Display for ONCO -->
-                            <div class="col-md-3 d-none" id="companyDisplayContainer">
-                                <label class="form-label fw-bold mb-1">
-                                    <i class="fas fa-building text-success me-1"></i> Your Company
-                                </label>
-                                <div class="company-display" id="userCompanyDisplay">
-                                    Loading...
+                                <!-- Company Display for ONCO -->
+                                <div class="input-group-wrapper d-none" id="companyDisplayContainer">
+                                    <label class="input-label">
+                                        <i class="fas fa-building"></i>
+                                        Your Company
+                                    </label>
+                                    <div class="company-display" id="userCompanyDisplay">
+                                        Loading...
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Action Buttons -->
-                            <div class="col-md-6">
-                                <button class="btn btn-primary me-2" id="btnEnterData">
-                                    <i class="fas fa-edit me-1"></i> Enter/Edit
+                            <!-- Right Section: Action Buttons -->
+                            <div class="control-panel-right">
+                                <button class="btn-action btn-enter" id="btnEnterData">
+                                    <i class="fas fa-edit"></i>
+                                    ENTER/EDIT
                                 </button>
-                                <button class="btn btn-info text-white me-2" id="btnViewData">
-                                    <i class="fas fa-eye me-1"></i> View
+                                <button class="btn-action btn-view" id="btnViewData">
+                                    <i class="fas fa-eye"></i>
+                                    VIEW
                                 </button>
-                                <button class="btn btn-success" id="btnExportCSV" disabled>
-                                    <i class="fas fa-download me-1"></i> Export CSV
+                                <button class="btn-action btn-export" id="btnExportCSV" disabled>
+                                    <i class="fas fa-download"></i>
+                                    EXPORT CSV
                                 </button>
                             </div>
                         </div>
@@ -150,13 +448,17 @@
                 </div>
 
                 <!-- Status Bar -->
-                <div class="alert alert-info d-none mb-3" id="statusBar">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="badge mode-badge bg-primary me-2" id="modeDisplay">-</span>
+                <div class="alert status-bar-custom d-none mb-3" id="statusBar">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <span class="badge mode-badge bg-primary" id="modeDisplay">-</span>
                             <span class="badge role-badge bg-secondary" id="roleDisplay">-</span>
-                            <strong>Company:</strong> <span id="companyDisplay">-</span> |
-                            <strong>Date:</strong> <span id="dateDisplay">-</span>
+                            <span class="ms-2">
+                                <strong>Company:</strong> <span id="companyDisplay">-</span>
+                            </span>
+                            <span class="ms-2">
+                                <strong>Date:</strong> <span id="dateDisplay">-</span>
+                            </span>
                         </div>
                         <button class="btn btn-sm btn-light" id="btnRefresh">
                             <i class="fas fa-sync-alt"></i> Refresh
@@ -165,11 +467,11 @@
                 </div>
 
                 <!-- Loading Spinner -->
-                <div class="text-center py-5 d-none" id="loadingSpinner">
+                <div class="text-center d-none loading-container" id="loadingSpinner">
                     <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p class="mt-3 text-muted">Loading parade data...</p>
+                    <p class="mt-3 text-muted fw-medium">Loading parade data...</p>
                 </div>
 
                 <!-- Parade Table -->
@@ -332,13 +634,13 @@
                     // Show dropdown for company selection
                     if (companySelection) companySelection.classList.remove('d-none');
                     if (companyDisplay) companyDisplay.classList.add('d-none');
-                    if (modalTitle) modalTitle.textContent = 'Parade State Data Management (O CENTRE NCO)';
+                    if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-clipboard-list"></i> Parade State Data Management (O CENTRE NCO)';
                 } else if (this.userRole === 'ONCO') {
                     // Show company display (read-only)
                     if (companySelection) companySelection.classList.add('d-none');
                     if (companyDisplay) companyDisplay.classList.remove('d-none');
                     if (userCompanyDisplay) userCompanyDisplay.textContent = this.userCompany;
-                    if (modalTitle) modalTitle.textContent = `Parade State Data Entry - ${this.userCompany}`;
+                    if (modalTitle) modalTitle.innerHTML = `<i class="fas fa-clipboard-list"></i> Parade State Data Entry - ${this.userCompany}`;
 
                     // Set current company to user's company
                     this.currentCompany = this.userCompany;
@@ -775,7 +1077,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             date: this.currentDate,
-                            company: companyToSave,  // Send appropriate company
+                            company: companyToSave,
                             data: this.paradeData
                         })
                     });
@@ -802,6 +1104,7 @@
                     saveBtn.disabled = false;
                 }
             },
+
             async exportCSV() {
                 if (!this.currentDate || !this.currentCompany) {
                     this.showAlert('Please load data first', 'warning');

@@ -1,10 +1,5 @@
 from imports import *
-
-
-
 loan_bp = Blueprint('loan_bp', __name__, url_prefix='/loan_details')
-
-
 
 @loan_bp.route("/summary")
 def loan_summary():
@@ -28,17 +23,6 @@ def loan_summary():
 
     return jsonify(data)
 
-
-
-
-
-
-
-
-
-
-
-
 @loan_bp.route("/by-range/<range_key>")
 def loans_by_range(range_key):
     ranges = {
@@ -54,9 +38,11 @@ def loans_by_range(range_key):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
+    # Updated query to include rank
     base_query = """
         SELECT
             l.army_number,
+            p.rank,  # ADD THIS LINE
             p.name AS name,
             p.company AS company_name,
             l.loan_type,
@@ -82,9 +68,8 @@ def loans_by_range(range_key):
         cursor.execute(query, (low,))
 
     rows = cursor.fetchall()
-    print(rows)
+    print(rows)  # Debug: check if rank is included
     cursor.close()
     conn.close()
 
     return jsonify(rows)
-

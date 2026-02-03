@@ -135,7 +135,6 @@
     }
   }
   
-  /* ================= COMPLETED ================= */
   let completedLoaded = false;
   
   document.querySelector('[data-bs-target="#completedTab"]')
@@ -169,8 +168,7 @@
       `;
     });
   }
-  
-  /* Reload on close (your existing logic) */
+     
   document.getElementById('kunbaInterviewModal')
     .addEventListener('hidden.bs.modal', () => location.reload());
   </script>

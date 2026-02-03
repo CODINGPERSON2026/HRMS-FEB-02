@@ -222,9 +222,17 @@ def search_person():
 
     query = request.form.get('army_number')  # ✅ CORRECT
     
-
     if not query:
         return jsonify([])
+
+    # Get logged-in user
+    user = require_login()
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+    
+    user_company = user.get('company')
+    if not user_company:
+        return jsonify({'error': 'User company not found'}), 400
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -240,15 +248,14 @@ def search_person():
             posting_status,
             onleave_status AS leave_status
         FROM personnel
-        WHERE army_number = %s
-    """, (query,))
+        WHERE army_number = %s AND company = %s
+    """, (query, user_company))  # Added company filter
 
     results = cursor.fetchall()
     cursor.close()
     conn.close()
 
     return jsonify(results)
-
 
 
 @app.route('/get_locations')
@@ -303,23 +310,30 @@ def get_pending_interview_list():
     cursor = conn.cursor(dictionary=True)
 
     try:
+        excluded_ranks = ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')
+        rank_placeholders = ",".join(["%s"] * len(excluded_ranks))
+        
         # 1️⃣ Fetch pending interviews (with optional search)
         if search:
-            cursor.execute("""
+            cursor.execute(f"""
                 SELECT name, army_number, home_state, company, `rank`
                 FROM personnel
                 WHERE interview_status = 0
-                  AND (
-                        army_number LIKE %s
-                        OR name LIKE %s
-                      )
-            """, (f"%{search}%", f"%{search}%"))
+                AND `rank` NOT IN ({rank_placeholders})
+                AND (
+                    army_number LIKE %s
+                    OR name LIKE %s
+                )
+                ORDER BY name
+            """, excluded_ranks + (f"%{search}%", f"%{search}%"))
         else:
-            cursor.execute("""
+            cursor.execute(f"""
                 SELECT name, army_number, home_state, company, `rank`
                 FROM personnel
                 WHERE interview_status = 0
-            """)
+                AND `rank` NOT IN ({rank_placeholders})
+                ORDER BY name
+            """, excluded_ranks)
 
         pending_data = cursor.fetchall()
 
@@ -334,7 +348,8 @@ def get_pending_interview_list():
                 SELECT name, army_number, home_state, company, `rank`
                 FROM personnel
                 WHERE home_state IN ({format_strings})
-                  AND `rank` IN ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')
+                AND `rank` IN ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')
+                ORDER BY `rank`, name
             """
             cursor.execute(query, home_states)
             senior_ranks = cursor.fetchall()
@@ -347,16 +362,26 @@ def get_pending_interview_list():
 
     except Exception as e:
         print("Error fetching pending interview list:", str(e))
+        import traceback
+        traceback.print_exc()
         return jsonify({"status": "error", "message": "Server error"}), 500
 
     finally:
         cursor.close()
         conn.close()
 
-
 @app.route('/assign_personnel', methods=['POST'])
 def assign_personnel():
     data = request.get_json()
+    
+    # Get logged-in user
+    user = require_login()
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+    
+    user_company = user.get('company')
+    if not user_company:
+        return jsonify({'error': 'User company not found'}), 400
 
     personnel_ids = data.get('army_number', [])
     action_type = data.get('status', '').lower()
@@ -369,17 +394,32 @@ def assign_personnel():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # STATUS CHECK
+        # VERIFY ALL PERSONNEL BELONG TO USER'S COMPANY
+        if personnel_ids:
+            placeholders = ', '.join(['%s'] * len(personnel_ids))
+            query = f"""
+                SELECT COUNT(*) as count 
+                FROM personnel 
+                WHERE army_number IN ({placeholders}) 
+                AND company = %s
+            """
+            cursor.execute(query, tuple(personnel_ids) + (user_company,))
+            result = cursor.fetchone()
+            
+            if result['count'] != len(personnel_ids):
+                return jsonify({"error": "Some personnel not found in your company"}), 403
+
+        # STATUS CHECK (existing code with company filter)
         for pid in personnel_ids:
             cursor.execute("""
                 SELECT detachment_status, posting_status, td_status, company
                 FROM personnel
-                WHERE army_number=%s
-            """, (pid,))
+                WHERE army_number=%s AND company=%s
+            """, (pid, user_company))  # Added company filter
             status = cursor.fetchone()
 
             if not status:
-                return jsonify({"error": f"{pid} not found"}), 404
+                return jsonify({"error": f"{pid} not found in your company"}), 404
 
             if action_type == "det" and status['detachment_status'] == 1:
                 return jsonify({"error": f"{pid} is already in Detachment"}), 400
@@ -390,7 +430,7 @@ def assign_personnel():
             if action_type == "td" and status['td_status'] == 1:
                 return jsonify({"error": f"{pid} is already on TD"}), 400
 
-        # ASSIGN
+        # ASSIGN (existing code - no changes needed here)
         for pid in personnel_ids:
             cursor.execute("""
                 SELECT company FROM personnel WHERE army_number=%s
@@ -465,7 +505,6 @@ def assign_personnel():
     finally:
         cursor.close()
         conn.close()
-
 
 @app.route("/get_personnel_details/<army_number>")
 def get_personnel_details(army_number):
@@ -2090,6 +2129,7 @@ def get_co_all_dashboard_data(date_str):
                 SUM(grandTotal_posted_str) as total_posted_str,
                 SUM(grandTotal_present_unit) as present_unit,
                 SUM(grandTotal_trout_det) as total_out,
+                SUM(grandTotal_lve) as total_lve,  -- Add this line
                 COUNT(DISTINCT company) as company_count
             FROM parade_state_daily
             WHERE report_date = %s
@@ -2099,9 +2139,9 @@ def get_co_all_dashboard_data(date_str):
         cursor.execute("""
             SELECT 
                 company,
-                grandTotal_trout_det as on_leave,
+                grandTotal_lve as on_leave,  -- Changed from grandTotal_trout_det to grandTotal_lve
                 grandTotal_posted_str as total_strength,
-                ROUND((grandTotal_trout_det / NULLIF(grandTotal_posted_str, 0) * 100), 2) as leave_percentage
+                ROUND((grandTotal_lve / NULLIF(grandTotal_posted_str, 0) * 100), 2) as leave_percentage  -- Changed here too
             FROM parade_state_daily
             WHERE report_date = %s
             ORDER BY company
@@ -2126,6 +2166,7 @@ def get_co_all_dashboard_data(date_str):
                 'message': 'No data found for this date'
             }), 404
         
+        # Update totals to use leave (lve) instead of total out (trout_det)
         total_on_leave = sum(row['on_leave'] or 0 for row in leave_data)
         total_strength = sum(row['total_strength'] or 0 for row in leave_data)
         total_leave_percentage = round((total_on_leave / total_strength * 100), 2) if total_strength > 0 else 0
@@ -2137,7 +2178,6 @@ def get_co_all_dashboard_data(date_str):
         total_jcos = sum(row['jcos'] or 0 for row in manpower_data)
         total_other_ranks = sum(row['other_ranks'] or 0 for row in manpower_data)
         total_manpower = total_officers + total_jcos + total_other_ranks
-        print(total_manpower)
         
         return jsonify({
             'success': True,
@@ -2146,6 +2186,7 @@ def get_co_all_dashboard_data(date_str):
                     'total_posted_str': parade_summary['total_posted_str'] or 0,
                     'present_unit': parade_summary['present_unit'] or 0,
                     'total_out': parade_summary['total_out'] or 0,
+                    'total_lve': parade_summary['total_lve'] or 0,  # Add this
                     'company_count': parade_summary['company_count'] or 0,
                     'report_date': date_str
                 },
@@ -2176,8 +2217,7 @@ def get_co_all_dashboard_data(date_str):
         return jsonify({'success': False, 'error': str(e)}), 500
     finally:
         cursor.close()
-        conn.close()
-        
+        conn.close()        
 # Add this new route to your Flask app (app.py)
 # Place it near your other CO dashboard endpoints
 
@@ -3663,44 +3703,43 @@ def get_sensitive_count():
         conn.close()
 
 # ========== 8. LOANS COUNT ==========
-@app.route('/api/dashboard/loans', methods=['GET'])
-def get_loans_count():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    user = require_login()
-    if not user:
-        return jsonify({"status": "error", "message": "Unauthorized"}), 401
-    
-    company = user['company']
-    
-    try:
-        query = """
-            SELECT COUNT(*) AS count
-            FROM loans l
-            LEFT JOIN personnel p ON l.army_number = p.army_number
-            WHERE 1=1
-        """
-        params = []
-        if company != "Admin":
-            query += " AND p.company = %s"
-            params.append(company)
+    @app.route('/api/dashboard/loans', methods=['GET'])
+    def get_loans_count():
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        user = require_login()
+        if not user:
+            return jsonify({"status": "error", "message": "Unauthorized"}), 401
         
-        cursor.execute(query, params)
-        result = cursor.fetchone()
-        count = result['count'] if result else 0
+        company = user['company']
         
-        return jsonify({
-            "status": "success",
-            "count": count
-        }), 200
-        
-    except Exception as e:
-        print("Error fetching loans count:", str(e))
-        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
-    finally:
-        cursor.close()
-        conn.close()
-
+        try:
+            query = """
+                SELECT COUNT(*) AS count
+                FROM loans l
+                LEFT JOIN personnel p ON l.army_number = p.army_number
+                WHERE 1=1
+            """
+            params = []
+            if company != "Admin":
+                query += " AND p.company = %s"
+                params.append(company)
+            
+            cursor.execute(query, params)
+            result = cursor.fetchone()
+            count = result['count'] if result else 0
+            
+            return jsonify({
+                "status": "success",
+                "count": count
+            }), 200
+            
+        except Exception as e:
+            print("Error fetching loans count:", str(e))
+            return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+        finally:
+            cursor.close()
+            conn.close()
 # ========== 9. COURSES COUNT ==========
 @app.route('/api/dashboard/courses', methods=['GET'])
 def get_courses_count():
