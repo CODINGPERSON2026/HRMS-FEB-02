@@ -18,6 +18,44 @@
   .table td {
     vertical-align: middle;
   }
+  .fancy-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: red; /* Red background */
+    border: none;
+    position: relative;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hover effect */
+.fancy-close:hover {
+    background: #ff7875;
+    transform: scale(1.1);
+}
+
+/* Cross lines */
+.fancy-close::before,
+.fancy-close::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background-color: white;
+    border-radius: 1px;
+}
+
+/* Rotate lines to make X */
+.fancy-close::before {
+    transform: rotate(45deg);
+}
+.fancy-close::after {
+    transform: rotate(-45deg);
+}
 </style>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-free-7.1.0-web/css/all.min.css') }}" />

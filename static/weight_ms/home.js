@@ -222,7 +222,7 @@ function drawBarGraphs(data) {
   window.jcoSafeOrCategoryChartInstance = new Chart(jcoSafeOrCategoryCtx, {
       type: 'doughnut',
       data: {
-          labels: data.jcoSafeOrCategory?.labels || [`JCO ${jcoSafeOrFilter.charAt(0).toUpperCase() + jcoSafeOrFilter.slice(1)}`, `OR ${jcoSafeOrFilter.charAt(0).toUpperCase() + jcoSafeOrFilter.slice(1)}`],
+          labels: data.jcoSafeOrCategory?.labels || ["JCO", "OR"],
           datasets: [{
               label: `JCO vs OR ${jcoSafeOrFilter.charAt(0).toUpperCase() + jcoSafeOrFilter.slice(1)}`,
               data: data.jcoSafeOrCategory?.data || [34, 118],
@@ -645,7 +645,7 @@ function handleScroll() {
 
 document.getElementById("load-unauth-btn").addEventListener("click", () => fetchAndShow("/weight_system/api/unauthorized", "unauth"));
 document.getElementById("load-auth-btn").addEventListener("click", () => fetchAndShow("/weight_system/api/authorized", "auth"));
-document.getElementById("load-safe-btn").addEventListener("click", () => fetchStatusData("sHape"));
+document.getElementById("load-safe-btn").addEventListener("click", () => fetchStatusData("shape"));
 document.getElementById("load-category-btn").addEventListener("click", () => fetchStatusData("category"));
 document.getElementById("close-table-btn").addEventListener("click", closeTable);
 document.getElementById("table-wrapper").addEventListener("scroll", handleScroll);

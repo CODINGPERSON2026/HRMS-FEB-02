@@ -510,81 +510,123 @@ def api_status_data():
 @weight_ms.route('/api/bar-graph-data')
 def api_bar_graph_data():
     company = request.args.get('company', 'All')
-    fit_unfit_filter = request.args.get('fitUnfitFilter', 'Fit')
-    safe_category_filter = request.args.get('safeCategoryFilter', 'shape')  # 'shape' or 'category'
-    
+    fit_unfit_filter = request.args.get('fitUnfitFilter', 'Fit')   # Fit / UnFit
+    safe_category_filter = request.args.get('safeCategoryFilter', 'shape')  # shape / category
+
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
-    
+
+    JCO_RANKS = ("Naib Subedar", "Subedar", "Subedar Major")
+
     try:
-        # === 1. Fit / Unfit counts (unchanged) ===
+        # ============================================================
+        # 1. Fit / Unfit counts (from computed authorization)
+        # ============================================================
         data = compute_authorization(company)
+
         fit_count = sum(1 for d in data if d['status'] == "Fit")
         unfit_count = sum(1 for d in data if d['status'] == "UnFit")
-        
-        # === 2. JCO / OR counts for selected Fit/Unfit (unchanged) ===
-        jco_status_count = sum(1 for d in data if d['status'] == fit_unfit_filter and d['rank'] == "JCO")
-        or_status_count = sum(1 for d in data if d['status'] == fit_unfit_filter and d['rank'] != "JCO")
-        
-        # === 3. Total Safe & Category counts (unchanged) ===
+
+        # ============================================================
+        # 2. JCO / OR counts for selected Fit / UnFit
+        # ============================================================
+        jco_status_count = sum(
+            1 for d in data
+            if d['status'] == fit_unfit_filter
+            and d['rank'] in JCO_RANKS
+        )
+
+        or_status_count = sum(
+            1 for d in data
+            if d['status'] == fit_unfit_filter
+            and d['rank'] not in JCO_RANKS
+        )
+
+        # ============================================================
+        # 3. Total Safe & Category counts (DB truth)
+        # ============================================================
         if company != "All":
-            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE company = %s AND status_type = 'shape'", (company,))
+            cursor.execute("""
+                SELECT COUNT(*) AS count
+                FROM weight_info
+                WHERE company = %s AND status_type = 'shape'
+            """, (company,))
         else:
-            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'shape'")
+            cursor.execute("""
+                SELECT COUNT(*) AS count
+                FROM weight_info
+                WHERE status_type = 'shape'
+            """)
         total_safe_count = cursor.fetchone()['count'] or 0
-        
+
         if company != "All":
-            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE company = %s AND status_type = 'category'", (company,))
+            cursor.execute("""
+                SELECT COUNT(*) AS count
+                FROM weight_info
+                WHERE company = %s AND status_type = 'category'
+            """, (company,))
         else:
-            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'category'")
+            cursor.execute("""
+                SELECT COUNT(*) AS count
+                FROM weight_info
+                WHERE status_type = 'category'
+            """)
         total_category_count = cursor.fetchone()['count'] or 0
 
-
-        # === 4. jcoSafeOrCategory – SMART LOGIC BASED ON FILTER ===
+        # ============================================================
+        # 4. JCO vs OR → Safe / Category SMART LOGIC
+        # ============================================================
         if safe_category_filter == 'shape':
-            # For "safe" → no temporary/permanent → just show total JCO vs OR
+            # -------------------------------
+            # SHAPE → only totals (no temp/perm)
+            # -------------------------------
             if company != "All":
                 cursor.execute("""
-                    SELECT COUNT(*) as count FROM weight_info 
-                    WHERE company = %s AND status_type = 'shape' AND `rank` = 'JCO'
+                    SELECT `rank`, COUNT(*) AS cnt
+                    FROM weight_info
+                    WHERE company = %s AND status_type = 'shape'
+                    GROUP BY `rank`
                 """, (company,))
             else:
-                cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'shape' AND `rank` = 'JCO'")
-            jco_val = cursor.fetchone()['count'] or 0
+                cursor.execute("""
+                    SELECT `rank`, COUNT(*) AS cnt
+                    FROM weight_info
+                    WHERE status_type = 'shape'
+                    GROUP BY `rank`
+                """)
 
-            if company != "All":
-                cursor.execute("""
-                    SELECT COUNT(*) as count FROM weight_info 
-                    WHERE company = %s AND status_type = 'shape' AND `rank` != 'JCO'
-                """, (company,))
-            else:
-                cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'shape' AND `rank` != 'JCO'")
-            or_val = cursor.fetchone()['count'] or 0
+            rows = cursor.fetchall()
+
+            jco_val = sum(r['cnt'] for r in rows if (r['rank'] or '').strip().lower() in [x.lower() for x in JCO_RANKS])
+            or_val = sum(r['cnt'] for r in rows if (r['rank'] or '').strip().lower() not in [x.lower() for x in JCO_RANKS])
+
 
             jcoSafeOrCategory = {
                 "labels": ["JCO Safe", "OR Safe"],
-                "data": [jco_val, or_val],
-                
+                "data": [jco_val, or_val]
             }
 
-        else:  # safe_category_filter == 'category'
-            # For "category" → split into Temporary & Permanent
+        else:
+            # -------------------------------
+            # CATEGORY → Temporary / Permanent
+            # -------------------------------
             query = """
                 SELECT `rank`,
                        COALESCE(LOWER(TRIM(category_type)), 'unknown') AS cat_type,
                        COUNT(*) AS cnt
-                FROM weight_info 
+                FROM weight_info
                 WHERE status_type = 'category'
             """
             params = []
+
             if company != "All":
                 query += " AND company = %s"
                 params.append(company)
+
             query += " GROUP BY `rank`, category_type"
 
             cursor.execute(query, params)
             results = cursor.fetchall()
-            #results,"these are results")
 
             jco_temp = jco_perm = or_temp = or_perm = 0
 
@@ -593,30 +635,31 @@ def api_bar_graph_data():
                 cat_type = row['cat_type']
                 cnt = row['cnt']
 
-                if rank == 'JCO':
-                    if cat_type in ('temporary', 'temp'):
+                is_jco = rank in JCO_RANKS
+
+                if cat_type in ('temporary', 'temp'):
+                    if is_jco:
                         jco_temp += cnt
-                    elif cat_type in ('permanent', 'perm'):
-                        jco_perm += cnt
-                else:
-                    # All other ranks = OR (including AGNIVEER, Havaldar, MAJOR, etc.)
-                    if cat_type in ('temporary', 'temp'):
+                    else:
                         or_temp += cnt
-                    elif cat_type in ('permanent', 'perm'):
+
+                elif cat_type in ('permanent', 'perm'):
+                    if is_jco:
+                        jco_perm += cnt
+                    else:
                         or_perm += cnt
 
-            #jco_temp, jco_perm, or_temp, or_perm)
-
             jcoSafeOrCategory = {
-                "labels": ["JCO Temporary", "JCO Permanent", "OR Temporary", "OR Permanent"],
-                "data": [jco_temp, jco_perm, or_temp, or_perm],
-                
+                "labels": [
+                    "JCO Temporary", "JCO Permanent",
+                    "OR Temporary", "OR Permanent"
+                ],
+                "data": [jco_temp, jco_perm, or_temp, or_perm]
             }
 
-
-        #total_safe_count, total_category_count, "→ bar graph")
-        #jco_status_count, or_status_count, "→ donut graph (fit)")
-
+        # ============================================================
+        # FINAL RESPONSE
+        # ============================================================
         return jsonify({
             "fitUnfit": {
                 "labels": ["Fit", "Unfit"],
@@ -630,16 +673,17 @@ def api_bar_graph_data():
                 "labels": [f"JCO {fit_unfit_filter}", f"OR {fit_unfit_filter}"],
                 "data": [jco_status_count, or_status_count]
             },
-            "jcoSafeOrCategory": jcoSafeOrCategory   # ← Smart response
+            "jcoSafeOrCategory": jcoSafeOrCategory
         })
-        
+
     except mysql.connector.Error as err:
-        print(f"DB Error: {err}")
+        print("DB Error:", err)
         return jsonify({'error': 'Database error occurred'}), 500
+
     finally:
         cursor.close()
         connection.close()
-
+        
 # API Route to Get User by Army Number
 @weight_ms.route('/api/user/<army_number>', methods=['GET'])
 def get_user(army_number):
