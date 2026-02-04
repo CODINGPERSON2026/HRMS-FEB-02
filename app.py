@@ -324,7 +324,7 @@ def get_pending_interview_list():
                     army_number LIKE %s
                     OR name LIKE %s
                 )
-                ORDER BY name
+                ORDER BY home_state
             """, excluded_ranks + (f"%{search}%", f"%{search}%"))
         else:
             cursor.execute(f"""
@@ -332,7 +332,7 @@ def get_pending_interview_list():
                 FROM personnel
                 WHERE interview_status = 0
                 AND `rank` NOT IN ({rank_placeholders})
-                ORDER BY name
+                ORDER BY home_state
             """, excluded_ranks)
 
         pending_data = cursor.fetchall()
@@ -342,6 +342,7 @@ def get_pending_interview_list():
 
         # 3️⃣ Fetch senior ranks for these home_states
         senior_ranks = []
+        senior_map = {}          # home_state -> JCO name
         if home_states:
             format_strings = ",".join(["%s"] * len(home_states))
             query = f"""
@@ -349,11 +350,52 @@ def get_pending_interview_list():
                 FROM personnel
                 WHERE home_state IN ({format_strings})
                 AND `rank` IN ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')
-                ORDER BY `rank`, name
+                ORDER BY home_state
             """
             cursor.execute(query, home_states)
             senior_ranks = cursor.fetchall()
+            print(senior_ranks,"these are senior ranks")
 
+            # Build map for quick lookup
+            for jco in senior_ranks:
+                state = jco['home_state']
+                if state not in senior_map:
+                    senior_map[state] = jco['name']
+
+        # 4️⃣ Fetch assigned JCOs from jco_assignment for home_states without senior JCO
+        assigned_jco_map = {}
+        if home_states:
+            placeholders = ",".join(["%s"] * len(home_states))
+            cursor.execute(f"""
+                SELECT ja.additional_assigned_home_state AS home_state, p.name AS jco_name
+                FROM jco_kunda_assignment ja
+                JOIN personnel p ON p.army_number = ja.army_number
+                WHERE ja.additional_assigned_home_state IN ({placeholders})
+                  AND ja.interview_status = 'Pending'
+            """, home_states)
+
+            assigned_rows = cursor.fetchall()
+            print("these are assigned rows",assigned_rows)
+            for row in assigned_rows:
+                state = row['home_state']
+                if state not in senior_map:  # only fallback if no live senior
+                    assigned_jco_map[state] = f"Temporary Assigned  JCO {row['jco_name']}"
+                    print(assigned_jco_map)
+
+        # 5️⃣ Attach JCO info to pending_data (no change to response keys)
+        for row in pending_data:
+            state = row['home_state']
+            if state in senior_map:
+                row['jco_name'] = senior_map[state]
+                row['jco_source'] = 'live'
+            elif state in assigned_jco_map:
+                row['jco_name'] = assigned_jco_map[state]
+                row['jco_source'] = 'assigned'
+            else:
+                row['jco_name'] = None
+                row['jco_source'] = None
+        print(senior_ranks)
+        print(pending_data)
         return jsonify({
             "status": "success",
             "pending_interviews": pending_data,
@@ -369,6 +411,7 @@ def get_pending_interview_list():
     finally:
         cursor.close()
         conn.close()
+
 
 @app.route('/assign_personnel', methods=['POST'])
 def assign_personnel():
@@ -4398,7 +4441,319 @@ def export_trade_csv(date):
         if 'conn' in locals():
             conn.close()
 
+@app.route('/api/company/interview-pending')
+def company_interview_pending():
+    user = require_login()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
 
+    company = user['company']
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        excluded_ranks = ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')
+        rank_placeholders = ",".join(["%s"] * len(excluded_ranks))
+
+        # 1️⃣ Pending interviews
+        cursor.execute(f"""
+            SELECT name, army_number, home_state, company, `rank`
+            FROM personnel
+            WHERE interview_status = 0
+              AND company = %s
+              AND `rank` NOT IN ({rank_placeholders})
+            ORDER BY home_state, name
+        """, (company, *excluded_ranks))
+
+        pending_data = cursor.fetchall()
+
+        # 2️⃣ Collect unique home_states
+        home_states = list({
+            row['home_state']
+            for row in pending_data
+            if row['home_state']
+        })
+
+        # Maps
+        jco_map = {}              # live eligible JCOs
+        assigned_jco_map = {}     # assigned (Pending) JCOs
+
+        if home_states:
+            placeholders = ",".join(["%s"] * len(home_states))
+
+            # 3️⃣ Live eligible JCOs
+            cursor.execute(f"""
+                SELECT name, home_state, `rank`
+                FROM personnel
+                WHERE home_state IN ({placeholders})
+                  AND `rank` IN ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')
+                  AND onleave_status = 0
+                  AND detachment_status = 0
+                  AND posting_status = 0
+                ORDER BY
+                  FIELD(`rank`,
+                        'Sub Maj',
+                        'Subedar Major',
+                        'Subedar',
+                        'Naib Subedar'),
+                  name
+            """, home_states)
+
+            senior_ranks = cursor.fetchall()
+
+            for jco in senior_ranks:
+                state = jco['home_state']
+                if state not in jco_map:
+                    jco_map[state] = jco['name']
+
+            # 4️⃣ Assigned JCOs (Pending)
+            cursor.execute(f"""
+                SELECT 
+                    ja.additional_assigned_home_state AS home_state,
+                    p.name AS jco_name
+                FROM jco_kunda_assignment ja
+                JOIN personnel p
+                    ON p.army_number = ja.army_number
+                WHERE ja.additional_assigned_home_state IN ({placeholders})
+                  AND ja.interview_status = 'Pending'
+            """, home_states)
+
+            assigned_rows = cursor.fetchall()
+
+            for row in assigned_rows:
+                state = row['home_state']
+                if state not in assigned_jco_map:
+                    assigned_jco_map[state] = row['jco_name']
+
+        # 5️⃣ Attach JCO with fallback logic
+        for row in pending_data:
+            state = row['home_state']
+
+            if state in jco_map:
+                row['jco_name'] = jco_map[state]
+                row['jco_source'] = 'live'
+
+            elif state in assigned_jco_map:
+                row['jco_name'] = f"Temporaray assigned JCO {assigned_jco_map[state]}"
+                row['jco_source'] = 'assigned'
+
+            else:
+                row['jco_name'] = None
+                row['jco_source'] = None
+
+
+        return jsonify({
+            "status": "success",
+            "pending_interviews": pending_data
+        })
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+@app.route('/api/company/available-jcos')
+def get_available_jcos():
+    user = require_login()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    company = user['company']
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT 
+                army_number,
+                name,
+                `rank`,
+                home_state
+            FROM personnel
+            
+              where `rank` IN ('Naib Subedar', 'Subedar', 'Sub Maj', 'Subedar Major')
+              AND onleave_status = 0
+              AND detachment_status = 0
+              AND posting_status = 0
+            ORDER BY
+              FIELD(`rank`,
+                    'Sub Maj',
+                    'Subedar Major',
+                    'Subedar',
+                    'Naib Subedar'),
+              name
+        """,)
+
+        jco_result = cursor.fetchall()
+        print(jco_result)
+
+        return jsonify({
+            "status": "success",
+            "jcos": jco_result
+        })
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/assign_jco', methods=['POST'])
+def assign_jco():
+    data = request.get_json()
+
+    army_number = data.get('army_number')
+    state = data.get('additional_assigned_home_state')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            INSERT INTO jco_kunda_assignment 
+            (army_number, additional_assigned_home_state, interview_status)
+            VALUES (%s, %s, 'Pending')
+            ON DUPLICATE KEY UPDATE
+                additional_assigned_home_state = VALUES(additional_assigned_home_state),
+                interview_status = 'Pending'
+        """, (army_number, state))
+
+        conn.commit()
+        return jsonify(success=True)
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify(success=False, message=str(e))
+
+    finally:
+        cursor.close()
+        conn.close()
+@app.route('/api/alarms_pending_kunda_assignments')
+def pending_kunda_assignments():
+    user = require_login()
+    army_number = user['army_number']
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    print('route hit')
+    print('------------------------')
+
+    try:
+        cursor.execute("""
+            SELECT army_number, additional_assigned_home_state
+            FROM jco_kunda_assignment
+            WHERE interview_status = 'Pending' AND army_number = %s
+        """, (army_number,))  # ✅ Correctly pass parameters as a tuple
+
+        rows = cursor.fetchall()
+        print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+        print(rows)
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return jsonify({"rows": rows})
+
+@app.route('/api/kunda_pending_personnel')
+def kunda_pending_personnel():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Ensure the user is logged in
+    user = require_login()
+    army_number = user['army_number']
+
+    # 1️⃣ Get pending home_states assigned to this army_number
+    cursor.execute("""
+        SELECT additional_assigned_home_state
+        FROM jco_kunda_assignment
+        WHERE interview_status='Pending' AND army_number=%s
+    """, (army_number,))
     
+    home_states = [row['additional_assigned_home_state'] for row in cursor.fetchall()]
+
+    if not home_states:
+        cursor.close()
+        conn.close()
+        return jsonify({"rows": []})
+
+    # 2️⃣ Fetch personnel with all statuses = 0 and home_state in pending list
+    placeholders = ",".join(["%s"] * len(home_states))
+    query = f"""
+        SELECT id, army_number, `rank`, name, home_state
+        FROM personnel
+        WHERE onleave_status=0
+          AND detachment_status=0
+          AND posting_status=0
+          AND interview_status=0
+          AND home_state IN ({placeholders})
+    """
+    cursor.execute(query, home_states)
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return jsonify({"rows": rows})
+@app.route('/api/mark_interview_done', methods=['POST'])
+def mark_interview_done():
+    data = request.get_json()
+    home_state = data.get('home_state')
+    army_number_front_end = data.get('army_number_front_end')
+    print(data, 'incoming data')
+
+    if not home_state or not army_number_front_end:
+        return jsonify({"success": False, "message": "home_state and army_number are required"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        conn.start_transaction()
+
+        # 1️⃣ Update the specific personnel row
+        cursor.execute("""
+            UPDATE personnel
+            SET interview_status = 1
+            WHERE home_state = %s
+              AND army_number = %s
+              AND interview_status = 0
+        """, (home_state, army_number_front_end))
+
+        # 2️⃣ Check if any other personnel with the same home_state is still pending
+        cursor.execute("""
+            SELECT COUNT(*) AS pending_count
+            FROM personnel
+            WHERE home_state = %s
+              AND interview_status = 0
+        """, (home_state,))
+        result = cursor.fetchone()
+        pending_count = result['pending_count'] if result else 0
+
+        # 3️⃣ If no pending personnel, mark assignment done
+        if pending_count == 0:
+            cursor.execute("""
+                UPDATE jco_kunda_assignment
+                SET interview_status = 'Done'
+                WHERE additional_assigned_home_state = %s
+                  AND interview_status = 'Pending'
+            """, (home_state,))
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": False, "message": str(e)}), 500
+
+    cursor.close()
+    conn.close()
+    return jsonify({"success": True})
+
+
+# Mark interview done
 if __name__ == '__main__':
     app.run(host= '127.0.0.1',port=4000,debug=True)

@@ -402,13 +402,12 @@
   <!-- Main Content -->
   <div class="main-content" id="mainContent">
     <div style="margin-bottom: 10px;">
-      {% if role in ['CO','2IC','ADJUTANT','OC'] %}
-      {% include 'modals/alarm/event_alarm.html' %}
-      {% include 'modals/alarm/alarm.html' %}
-      {% include 'modals/alarm/attachment_alarm.html' %}
-      {% include 'modals/alarm/leave_alarm.html' %}
-      {% include 'modals/alarm/agniveer_test_alarms.html' %}
-      {% endif %}
+      {% if role == 'JCO' %}
+      {% include 'modals/alarm/no_jco_kunba.html' %}
+  {% endif %}
+  
+    
+      
     </div>
 
     <div class="action-buttons">
@@ -416,16 +415,19 @@
         <i class="fas fa-chevron-down"></i>
       </button>
       {% if role in ['NCO PWR','SEC JCO','Subedar Major','NCO CHQ','NCO IT','NCO OP','NCO PWR','NCO MW','NCO
-      MCCS','NCO
-      CHQ','SEC JCO','JCO LINE','S/JCO','NCO CHQ','JCO CHQ','ONCO','NCO RHQ','NCO TM','NCO MT','NCO RP/NA','NCO QM','O
-      CENTRAL NCO']
+      MCCS','NCO CHQ','SEC JCO','JCO LINE','S/JCO','NCO CHQ','JCO CHQ','ONCO','NCO RHQ','NCO TM','NCO MT','NCO RP/NA','NCO QM','O CENTRAL NCO']
       %}
 
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#personnelModal">
         ASSIGN PERSONNEL
       </button>
       {% endif %}
-
+      {%if role == 'S/JCO'%}
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#view_company_interview_pending">
+        INTERVIEW PENDING
+      </button>
+      {%endif%}
+      
       {% if role in ['NCO PWR','SEC JCO','Subedar Major','NCO CHQ','NCO IT','NCO OP','NCO PWR','NCO MW','NCO
       MCCS','NCO
       CHQ','SEC JCO','JCO LINE','S/JCO','OC','NCO CHQ','JCO CHQ','ONCO','NCO RHQ','NCO TM','NCO MT','NCO RP/NA','NCO
@@ -761,6 +763,11 @@
     {% if role in ['CO', '2IC', 'ADJUTANT','OC']%}
     {% include 'modals/alarm/agniveer_test_alarms.html' %}
     {% endif %}
+    {% if role == 'S/JCO'%}
+    {% include 'modals/coy_kunba/view_company_kunba.html' %}
+    {% endif %}
+
+
 
     <!-- Parade State Modal -->
     <div class="modal fade modal-fullscreen" id="paradeStateModal" tabindex="-1">
