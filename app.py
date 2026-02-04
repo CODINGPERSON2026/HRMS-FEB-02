@@ -1055,16 +1055,32 @@ def paradeState():
 
 @app.route("/add_event", methods=["POST"])
 def add_event():
+    user = require_login()  # Get logged-in user
+    user_company = user['company']
+    
     event_date = request.form["event_date"]
     event_name = request.form["event_name"]
     venue = request.form["venue"]
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO daily_events (event_date, event_name, venue) VALUES (%s, %s, %s)",
-        (event_date, event_name, venue)
-    )
+    
+    # Check if company column exists
+    cursor.execute("DESCRIBE daily_events")
+    columns = [col[0] for col in cursor.fetchall()]
+    has_company = 'company' in columns
+    
+    if has_company:
+        cursor.execute(
+            "INSERT INTO daily_events (event_date, event_name, venue, company) VALUES (%s, %s, %s, %s)",
+            (event_date, event_name, venue, user_company)
+        )
+    else:
+        cursor.execute(
+            "INSERT INTO daily_events (event_date, event_name, venue) VALUES (%s, %s, %s)",
+            (event_date, event_name, venue)
+        )
+    
     conn.commit()
     cursor.close()
     conn.close()
@@ -1115,7 +1131,7 @@ def assigned_alarm():
         FROM assigned_det ad
         LEFT JOIN dets d ON ad.det_id = d.det_id
         LEFT JOIN personnel p ON ad.army_number = p.army_number
-        WHERE DATEDIFF(NOW(), ad.assigned_on) > 5
+        WHERE DATEDIFF(NOW(), ad.assigned_on) > 90
           AND ad.det_status = 1
         '''
 
@@ -3896,8 +3912,8 @@ def get_assigned_alarm():
             FROM assigned_det ad
             LEFT JOIN dets d ON ad.det_id = d.det_id
             LEFT JOIN personnel p ON ad.army_number = p.army_number
-            WHERE DATEDIFF(NOW(), ad.assigned_on) > 5
-              AND ad.det_status = 1
+            WHERE DATEDIFF(NOW(), ad.assigned_on) > 90
+              
         '''
         params = []
         if company != "Admin":

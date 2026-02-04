@@ -44,6 +44,7 @@
     0% {
       background-position: -200% 0;
     }
+
     100% {
       background-position: 200% 0;
     }
@@ -190,11 +191,9 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(
-      90deg,
-      var(--light-blue) 0%,
-      var(--dark-blue) 100%
-    );
+    background: linear-gradient(90deg,
+        var(--light-blue) 0%,
+        var(--dark-blue) 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
   }
@@ -402,8 +401,8 @@
   <!-- Main Content -->
   <div class="main-content" id="mainContent">
     <div style="margin-bottom: 10px;">
-      {% if role in ['CO','2IC','ADJUTANT','OC'] %}
       {% include 'modals/alarm/event_alarm.html' %}
+      {% if role in ['CO','2IC','ADJUTANT','OC'] %}
       {% include 'modals/alarm/alarm.html' %}
       {% include 'modals/alarm/attachment_alarm.html' %}
       {% include 'modals/alarm/leave_alarm.html' %}
@@ -446,7 +445,7 @@
         </span>
       </button>
       {% endif %}
-      
+
       {% if role in ['', 'O CENTRE NCO'] %}
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tradeModal">
         <i class="fas fa-plus-circle me-1"></i>
@@ -546,7 +545,11 @@
         </div>
         <small class="text-muted">KUNBA INTERVIEW</small>
         <h3>
-          <span id="interview-Count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>/<span id="total-count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>
+          <span id="interview-Count">
+            <div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div>
+          </span>/<span id="total-count">
+            <div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div>
+          </span>
         </h3>
         <span id="interview%" class="text-danger">
           <div class="shimmer-line" style="width: 50px; height: 14px; display: inline-block;"></div>
@@ -562,7 +565,11 @@
         </div>
         <small class="text-muted">KUNBA INTERVIEW</small>
         <h3>
-          <span id="interview-Count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>/<span id="total-count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>
+          <span id="interview-Count">
+            <div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div>
+          </span>/<span id="total-count">
+            <div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div>
+          </span>
         </h3>
         <span id="interview%" class="text-danger">
           <div class="shimmer-line" style="width: 50px; height: 14px; display: inline-block;"></div>
@@ -758,7 +765,7 @@
     {% if role =='CO'%}
     {% include 'modals/leaverequest/co-rejected-view.html' %}
     {% endif %}
-    
+
     {% if role in ['CO', '2IC', 'ADJUTANT','OC']%}
     {% include 'modals/alarm/agniveer_test_alarms.html' %}
     {% endif %}

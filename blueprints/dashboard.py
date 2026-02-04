@@ -29,6 +29,7 @@ def get_all_dets():
 @dashboard_bp.route('/get_detachment_details')
 def get_detachment_details():
     det_id = request.args.get("det_id")  # optional
+    min_days = request.args.get("min_days", 0, type=int) # optional filter
     print(det_id,"this is det id")
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -58,6 +59,11 @@ def get_detachment_details():
         if det_id:
             query += " AND a.det_id = %s"
             params.append(det_id)
+            
+        # Apply min_days filter
+        if min_days > 0:
+            query += " AND DATEDIFF(CURDATE(), a.assigned_on) > %s"
+            params.append(min_days)
 
         # ---------- COMPANY FILTER (Admin bypass) ----------
         if user['company'] != "Admin":
@@ -223,7 +229,6 @@ def assigned_attachment_alarm():
         """)
 
         rows = cursor.fetchall()
-        print('rows',rows)
 
         return jsonify({
             "count": len(rows),

@@ -1,67 +1,71 @@
 <style>
   /* Increase width */
   .custom-size {
-      max-width: 90% !important;   /* Adjust width percentage */
-      width: 90% !important;
+    max-width: 90% !important;
+    /* Adjust width percentage */
+    width: 90% !important;
   }
-  
+
   /* Increase height */
   .custom-size .modal-content {
-      height: 85vh !important;      /* 85% of screen height */
-      overflow-y: auto;             /* Enable scroll inside */
+    height: 85vh !important;
+    /* 85% of screen height */
+    overflow-y: auto;
+    /* Enable scroll inside */
   }
-  
-  .table th, .table td {
-      vertical-align: middle;
+
+  .table th,
+  .table td {
+    vertical-align: middle;
   }
 </style>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-free-7.1.0-web/css/all.min.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-free-7.1.0-web/css/all.min.css') }}" />
 
 <div class="modal fade" id="detModal" tabindex="-1">
-    <div class="modal-dialog modal-lg custom-size">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Personnel in DET</h5>
-          <button class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-  
-        <div class="modal-body">
+  <div class="modal-dialog modal-lg custom-size">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Personnel in DET</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
 
-            <!-- Detachment Filter -->
-            <div class="mb-3">
-              <label for="detachmentFilter" class="form-label">Filter by Detachment:</label>
-              <select id="detachmentFilter" class="form-select">
-                <option value="">All Detachments</option>
-                <!-- Options will be populated dynamically via fetch() -->
-              </select>
-            </div>
-  
-            <!-- Spinner (visible while fetching) -->
-            <div id="detSpinner" class="text-center my-4">
-              <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
-              <p class="mt-2">Fetching data...</p>
-            </div>
-  
-            <!-- Table (hidden until fetch is complete) -->
-            <table class="table table-striped d-none" id="detTable" style="max-height:200px">
-              <thead>
-                <tr>
-                  <th>Army Number</th>
-                  <th>Name</th>
-                  <th>Rank</th>
-                  <th>Det Name</th>
-                  <th>Days on Det</th>
-                  <th>Company</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="detTableBody"></tbody>
-            </table>
-  
+      <div class="modal-body">
+
+        <!-- Detachment Filter -->
+        <div class="mb-3">
+          <label for="detachmentFilter" class="form-label">Filter by Detachment:</label>
+          <select id="detachmentFilter" class="form-select">
+            <option value="">All Detachments</option>
+            <!-- Options will be populated dynamically via fetch() -->
+          </select>
         </div>
+
+        <!-- Spinner (visible while fetching) -->
+        <div id="detSpinner" class="text-center my-4">
+          <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+          <p class="mt-2">Fetching data...</p>
+        </div>
+
+        <!-- Table (hidden until fetch is complete) -->
+        <table class="table table-striped d-none" id="detTable" style="max-height:200px">
+          <thead>
+            <tr>
+              <th>Army Number</th>
+              <th>Name</th>
+              <th>Rank</th>
+              <th>Det Name</th>
+              <th>Days on Det</th>
+              <th>Company</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="detTableBody"></tbody>
+        </table>
+
       </div>
     </div>
+  </div>
 </div>
 
 <script>
@@ -106,7 +110,7 @@
     }
   }
 
-  async function load_det_personnel(det_id = "") {
+  async function load_det_personnel(det_id = "", min_days = 0) {
     const spinner = document.getElementById("detSpinner");
     const table = document.getElementById("detTable");
     const tbody = document.getElementById("detTableBody");
@@ -117,11 +121,16 @@
 
     try {
       let url = "/stats/get_detachment_details";
-      if (det_id) url += `?det_id=${encodeURIComponent(det_id)}`;
+      // Construct URL carefully
+      const params = new URLSearchParams();
+      if (det_id) params.append("det_id", det_id);
+      if (min_days > 0) params.append("min_days", min_days);
+
+      if (Array.from(params).length > 0) url += "?" + params.toString();
 
       const response = await fetch(url);
       const result = await response.json();
-      console.log(result,"this is result");
+      console.log(result, "this is result");
 
       if (result.status !== "success") throw new Error("Fetch failed");
 
