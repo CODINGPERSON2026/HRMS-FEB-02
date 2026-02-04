@@ -1,0 +1,182 @@
+<style>
+  /* Custom table styling */
+  .custom-table th, .custom-table td {
+      padding: 12px 15px;
+      text-align: left; /* Align all TD content left */
+      font-size: 14px;
+      vertical-align: middle;
+  }
+
+  .custom-table th {
+      background-color: #f3f4f6; /* Light gray background */
+      font-weight: 600;
+      color: #1f2937;
+  }
+
+  .custom-table td {
+      color: #51373d;
+  }
+
+  /* Optional: zebra stripes for rows */
+  .custom-table tbody tr:nth-child(even) {
+      background-color: #f9fafb;
+  }
+</style>
+<style>
+  /* Custom table styling */
+  .custom-table th, .custom-table td {
+      padding: 12px 15px;
+      text-align: left; /* Align all TD content left */
+      font-size: 16px;
+      vertical-align: middle;
+  }
+
+  .custom-table th {
+      background-color: #f3f4f6; /* Light gray background */
+      font-weight: 600;
+      color: #1f2937;
+  }
+
+  .custom-table td {
+      color: #51373d;
+  }
+
+  /* Optional: zebra stripes for rows */
+  .custom-table tbody tr:nth-child(even) {
+      background-color: #f9fafb;
+  }
+
+  /* Make JCO column bold (last column) */
+  .custom-table tbody tr td:last-child {
+      font-weight: 700;
+      color: #000; /* optional: make it darker */
+  }
+</style>
+
+
+
+<div class="modal fade" id="interviewModal" tabindex="-1">
+  <div class="modal-dialog modal-xl"> <!-- Increased modal size -->
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Interview Management</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <!-- Top controls: Search -->
+        <div class="d-flex mb-3 align-items-center">
+          <div class="input-group w-50">
+            <input type="text" class="form-control" placeholder="Enter Army Number or Name" id="interview-search">
+          </div>
+        </div>
+
+        <!-- Spinner -->
+        <div class="text-center my-3" id="spinner" style="display: none;">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div style="max-height: 500px; overflow-y: auto;">
+          <table class="table table-bordered table-striped mb-0 custom-table">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th>Army Number</th>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Home State</th>
+                <th>Company</th>
+                <th>JCO</th>
+              </tr>
+            </thead>
+            <tbody id="interview-table-body">
+              <!-- Dynamic rows go here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("interview-search");
+    const tableBody = document.getElementById("interview-table-body");
+    const spinner = document.getElementById("spinner");
+
+    function debounce(func, delay) {
+        let timer;
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    async function fetchInterviews(query = "") {
+        spinner.style.display = "block";
+        tableBody.innerHTML = "";
+
+        try {
+            const url = `/get_pending_interview_list?search=${encodeURIComponent(query)}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            spinner.style.display = "none";
+
+            if (!data || (data.pending_interviews && data.pending_interviews.length === 0)) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No personnel found</td></tr>`;
+                return;
+            }
+
+            const pending = data.pending_interviews || [];
+            const seniors = data.senior_same_state || [];
+
+            const seniorMap = {};
+            seniors.forEach(senior => {
+                if (!seniorMap[senior.home_state]) seniorMap[senior.home_state] = [];
+                seniorMap[senior.home_state].push(`${senior.rank} ${senior.name}`);
+            });
+
+            pending.forEach(item => {
+                const seniorList = seniorMap[item.home_state] || [];
+                const seniorDisplay = seniorList.length ? seniorList.join(", ") : "—";
+
+                const row = `
+                    <tr>
+                      <td>${item.army_number}</td>
+                      <td>${item.rank}</td>
+                        <td>${item.name}</td>
+                        <td>${item.home_state}</td>
+                        <td>${item.company}</td>
+                        <td>${seniorDisplay}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+
+        } catch (err) {
+            spinner.style.display = "none";
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error loading data</td></tr>`;
+            console.error(err);
+        }
+    }
+
+    const debouncedFetch = debounce(fetchInterviews, 500);
+
+    searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.trim();
+        debouncedFetch(query);
+    });
+
+    document.getElementById("interview-card").addEventListener("click", () => {
+        debouncedFetch(""); 
+        new bootstrap.Modal(document.getElementById("interviewModal")).show();
+    });
+});
+</script>

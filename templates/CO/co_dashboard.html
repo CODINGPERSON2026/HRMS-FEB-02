@@ -1,0 +1,1116 @@
+{% extends "baseView.html" %} {% block content %}
+
+<style>
+  :root {
+    --light-blue: #3b82f6;
+    --dark-blue: #2563eb;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Dashboard Wrapper */
+  .dashboard-content {
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* Shimmer Effect */
+  .shimmer-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: #f6f7f8;
+    border-radius: 12px;
+  }
+
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .shimmer-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .shimmer-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .shimmer-line {
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .shimmer-line.short {
+    width: 60%;
+  }
+
+  .shimmer-line.medium {
+    width: 80%;
+  }
+
+  .shimmer-line.long {
+    width: 100%;
+  }
+
+  .shimmer-title {
+    height: 18px;
+    width: 90px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .shimmer-number {
+    height: 30px;
+    width: 70px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Main Content */
+  .main-content {
+    padding: 1px;
+    min-height: 100vh;
+  }
+
+  /* Action Section */
+  .action-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    margin-bottom: 35px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .action-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(
+      90deg,
+      #ff9933 0%,
+      #ff9933 33%,
+      #ffffff 33%,
+      #ffffff 66%,
+      #138808 66%
+    );
+  }
+
+  .action-section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .action-buttons {
+    margin: 4px 10px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 10px;
+    transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.5s ease,
+      padding 0.3s ease, margin 0.3s ease;
+    overflow: hidden;
+  }
+
+  .card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    padding: 16px;
+    position: relative;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      var(--light-blue) 0%,
+      var(--dark-blue) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .card:hover::before {
+    opacity: 1;
+  }
+
+  .card h3 {
+    font-size: 1.8rem;
+    margin: 10px 0 5px 0;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.2;
+  }
+
+  .card .text-muted {
+    color: var(--text-light) !important;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .card .text-success {
+    color: #10b981 !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .card .text-danger {
+    color: #ef4444 !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .card .icon-circle,
+  .card .mb-2,
+  .card .loan-icon {
+    margin-bottom: 8px;
+  }
+
+  .card .icon-circle i,
+  .card .mb-2 i,
+  .card .loan-icon i {
+    font-size: 1.5rem;
+    color: var(--light-blue);
+  }
+
+  .card .fa-2x {
+    font-size: 1.5rem !important;
+  }
+
+  .view-details {
+    background: linear-gradient(
+      135deg,
+      var(--light-blue) 0%,
+      var(--dark-blue) 100%
+    );
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-top: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .view-details:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .main-content {
+      padding: 20px;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .action-section-title {
+      font-size: 1.2rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      padding: 14px;
+      min-height: 120px;
+    }
+
+    .card h3 {
+      font-size: 1.5rem;
+    }
+
+    .card .text-muted {
+      font-size: 0.7rem;
+    }
+
+    .card .icon-circle i,
+    .card .mb-2 i,
+    .card .loan-icon i {
+      font-size: 1.3rem;
+    }
+  }
+
+  .btn-close {
+    background-color: red;
+  }
+
+  .stats-grid.hide {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .stats-grid.show {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 2000px;
+  }
+
+  #show-btn {
+    border: none;
+    
+    padding: 2px 6px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+ 
+
+  /* Full screen modal with 10px gap */
+  .modal-fullscreen .modal-dialog {
+    margin: 10px;
+    max-width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+  }
+
+  .modal-fullscreen .modal-content {
+    height: 100%;
+  }
+
+  .modal-backdrop {
+    --bs-backdrop-opacity: 0.12;
+  }
+
+  .hide {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+  }
+
+  .show {
+    max-height: 1000px;
+    opacity: 1;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+  }
+  
+</style>
+
+<!-- Dashboard -->
+<div class="dashboard-content">
+  <div class="modal fade" id="eventModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">📅 Today's Events</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <ul id="eventList" class="list-group"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% set header = "15 CORPS ENGINEERING SIGNAL REGIMENT" %} {% set subscript =
+  'Welcome ' ~ role ~ ' ' ~ current_user_name %} {% include 'navbar/navbar.html'
+  %}
+
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <div style="margin-bottom: 10px">
+      {% include 'modals/alarm/alarm.html' %}
+       {% include
+      'modals/alarm/attachment_alarm.html' %} {% include
+      'modals/alarm/leave_alarm.html' %} {% include
+      'modals/alarm/agniveer_test_alarms.html' %}
+      {% include 'modals/alarm/event_alarm.html' %}
+    </div>
+
+    <div class="action-buttons">
+      <button id="show-btn">
+        <i class="fas fa-chevron-down"></i>
+      </button>
+
+      <button
+        class="btn btn-primary position-relative"
+        data-bs-toggle="modal"
+        data-bs-target="#coRejectedModal"
+        id="coRejectedBtn"
+      >
+        REJECTED LEAVES
+        <span
+          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+          id="coRejectedCount"
+        >
+          <span class="shimmer-line" style="width: 20px; height: 8px; display: inline-block;"></span>
+          <span class="visually-hidden">unread messages</span>
+        </span>
+      </button>
+
+      
+
+      <button
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#addEventModal"
+      >
+        ADD EVENT
+      </button>
+    </div>
+
+    <div id="stats-card-grid" class="stats-grid show">
+      <!-- First Row Cards -->
+      <div
+        class="card p-3 text-center"
+        style="cursor: pointer"
+        data-bs-target="#paradeStateModal"
+        data-bs-toggle="modal"
+        id="card-parade"
+      >
+        <div class="icon-circle">
+          <i class="fas fa-book-open"></i>
+        </div>
+
+        <small class="text-muted">PARADE STATE</small>
+        <h3 id="mainPower">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+
+      <div
+        class="card p-3 text-center"
+        style="cursor: pointer"
+        data-bs-toggle="modal"
+        data-bs-target="#attachmentModal"
+        id="card-attachment"
+      >
+      <div class="icon-circle mb-2">
+        <i class="fas fa-cloud-upload-alt"></i>
+      </div>
+        <small class="text-muted">TD/ATTACHMENT</small>
+        <h3 id="attachment-count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+
+      <div
+        class="card p-3 text-center"
+        style="cursor: pointer"
+        id="openCourses"
+      >
+        <div class="icon-circle mb-2">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+        <small class="text-muted">COURSE</small>
+        <h3 id="totalCoursesDone">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+
+      <div
+        class="card p-3 text-center"
+        style="cursor: pointer"
+        id="interview-card"
+      >
+        <div class="icon-circle mb-2">
+          <i class="fa fa-male" aria-hidden="true"></i>
+        </div>
+        <small class="text-muted">KUNBA INTERVIEW</small>
+        <h3>
+          <span id="interview-Count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>/<span id="total-count"><div class="shimmer-line" style="width: 30px; height: 24px; display: inline-block;"></div></span>
+        </h3>
+        <span id="interview%" class="text-danger">
+          <div class="shimmer-line" style="width: 50px; height: 14px; display: inline-block;"></div>
+        </span>
+      </div>
+
+      <div
+        class="card p-3 text-center"
+        style="cursor: pointer"
+        id="viewDetailsBtn"
+      >
+        <div class="mb-2">
+          <i class="fas fa-user-plus fa-2x text-primary"></i>
+        </div>
+        <small class="text-muted">DETACHMENT</small>
+        <h3 id="locationCount">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+
+      <div
+        class="card p-3 text-center"
+        style="cursor: pointer"
+        id="openSensitive"
+      >
+      <div class="icon-circle mb-2">
+        <i class="fas fa-exclamation-circle"></i>
+      </div>
+        <small class="text-muted">SENSITIVE INDL</small>
+        <h3 id="sensitive-count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+      
+      
+      <div class="card p-3 text-center" id="openBoardDetails">
+        <div class="icon-circle mb-2">
+          <i class="fas fa-user-tie me-1"></i>
+        </div>
+        <small class="text-muted">BOO's</small>
+        <h3 id="board-count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+
+      <div
+        class="card p-3 text-center"
+        style="cursor: pointer"
+        id="loanDetailGraph"
+        data-bs-toggle="modal"
+        data-bs-target="#loanModal"
+      >
+        <div class="loan-icon">
+          <i class="fa-solid fa-hand-holding-dollar"></i>
+        </div>
+        <small class="text-muted">LOAN</small>
+        <h3 id="active-loan-count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+
+      <div
+        class="card p-3 text-center"
+        style="cursor: pointer; transition: all 0.3s ease"
+        id="openProjects"
+      >
+      <div class="icon-circle mb-2">
+      <i class="fas fa-rocket"></i>
+    </div>
+        <small class="text-muted">TOTAL PROJECTS</small>
+        <h3 class="mb-0" id="get_projects_count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+
+      <!-- Second Row Cards -->
+      <div
+        class="card p-3 text-center"
+        style="cursor: pointer"
+        data-bs-toggle="modal"
+        data-bs-target="#centerRollCallModal"
+        id="card-rollcall"
+      >
+        <div class="mb-2">
+          <i class="fas fa-clipboard-list fa-2x text-primary"></i>
+        </div>
+
+        <small class="text-muted">CENTRAL ROLL CALL</small>
+        <h3 id="center-roll-points">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+
+      <div
+        class="card p-3 text-center"
+        style="cursor: pointer"
+        data-bs-toggle="modal"
+        data-bs-target="#agniveersModal"
+        id="card-agniveer"
+      >
+        <div class="icon-circle">
+          <i class="fas fa-user-shield"></i>
+        </div>
+
+        <small class="text-muted">AGNIVEER</small>
+        <h3 id="agniveer_count">
+          <div class="shimmer-number mx-auto"></div>
+        </h3>
+      </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div class="modal fade" id="addEventModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Today's Event</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="eventForm">
+              <label>Event Date:</label>
+              <input
+                type="date"
+                class="form-control"
+                name="event_date"
+                value="{{ today }}"
+                required
+              />
+
+              <label class="mt-2">Event Name:</label>
+              <input
+                type="text"
+                class="form-control"
+                name="event_name"
+                required
+              />
+
+              <label class="mt-2">Venue:</label>
+              <input type="text" class="form-control" name="venue" required />
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-success" onclick="saveEvent()">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include 'modals/detachmentModal/detachment.html' %} 
+    {% include
+    'modals/personnelModal/personal_modal.html' %}
+     {% include
+    'modals/salesmodal/salesModal.html' %} 
+    {% include
+    'modals/leaverequest/leave_request.html' %} 
+    {% include
+    'modals/interview_pending/modal.html' %} 
+    {% include
+    'modals/count_parade/modal.html' %}
+     {% include
+    'modals/attachment-modal/modal.html' %}
+     {% include 'modals/loan/loans.html'
+    %} {% include 'modals/roll_call/modal.html' %}
+     {% include
+    'modals/roll_call/view_roll_call.html' %}
+     {% include
+    'modals/course/courses.html' %} 
+    {% include
+    'modals/interview_pending/jco-update-modal.html' %} 
+    {% include
+    'modals/success-modal/modal.html' %}
+     {% include
+    'task_manager/update_task_by_jco.html' %}
+     {% include
+    'modals/adduser/user.html' %}
+     {% include 'modals/oncourses/modal.html' %} {%
+    include 'modals/leaverequest/co-rejected-view.html' %}
+     {% include
+    'modals/alarm/agniveer_test_alarms.html' %}
+     {% include
+    'modals/agniveer/modal.html' %}
+
+    <!-- Parade State Modal -->
+    <div
+      class="modal fade modal-fullscreen"
+      id="paradeStateModal"
+      tabindex="-1"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Parade State</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            {% include 'modals/parade_state/index.html' %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  document.addEventListener("hidden.bs.modal", function () {
+    document.querySelectorAll(".modal-backdrop").forEach((b) => b.remove());
+    document.body.classList.remove("modal-open");
+    document.body.style.overflow = "";
+  });
+</script>
+
+<script>
+  // ========== SAFE ELEMENT CHECKER ==========
+  function safeQuerySelector(selector) {
+    const element = document.querySelector(selector);
+    if (!element) {
+      console.warn(`Element not found: ${selector}`);
+    }
+    return element;
+  }
+
+  function safeAddEventListener(selector, event, handler) {
+    const element = safeQuerySelector(selector);
+    if (element) {
+      element.addEventListener(event, handler);
+    }
+  }
+
+  // ========== CONDITIONAL EVENT LISTENERS ==========
+  function setupConditionalEventListeners() {
+    // Only add listeners if elements exist
+    const openBoardDetails = safeQuerySelector("#openBoardDetails");
+    if (openBoardDetails) {
+      openBoardDetails.addEventListener("click", function () {
+        window.location.href = "/board_details";
+      });
+    }
+
+    const openSensitive = safeQuerySelector("#openSensitive");
+    if (openSensitive) {
+      openSensitive.addEventListener("click", function () {
+        window.location.href = "/mark_personnel";
+      });
+    }
+
+    const overAllParadeState = safeQuerySelector("#overAllParadeState");
+    if (overAllParadeState) {
+      overAllParadeState.addEventListener("click", function () {
+        window.location.href = "/paradeState";
+      });
+    }
+
+    const openProjects = safeQuerySelector("#openProjects");
+    if (openProjects) {
+      openProjects.addEventListener("click", function () {
+        window.location.href = "/projects";
+      });
+    }
+
+    const showBtn = safeQuerySelector("#show-btn");
+    const statsGrid = safeQuerySelector("#stats-card-grid");
+    if (showBtn && statsGrid) {
+      showBtn.addEventListener("click", function () {
+        if (statsGrid.classList.contains("hide")) {
+          statsGrid.classList.remove("hide");
+          statsGrid.classList.add("show");
+          this.innerHTML = '<i class="fas fa-chevron-down me-1"></i>';
+        } else {
+          statsGrid.classList.remove("show");
+          statsGrid.classList.add("hide");
+          this.innerHTML = '<i class="fas fa-chevron-up"></i>';
+        }
+      });
+    }
+
+    // Leave Requests Button
+    const leaveRequestsBtn = safeQuerySelector("#leaveRequestsBtn");
+    if (leaveRequestsBtn) {
+      leaveRequestsBtn.addEventListener("click", function () {
+        // Your leave request logic here
+        console.log("Leave requests clicked");
+      });
+    }
+  }
+
+  // ========== EVENT HANDLING ==========
+  function saveEvent() {
+    const eventForm = safeQuerySelector("#eventForm");
+    if (!eventForm) return;
+
+    let formData = new FormData(eventForm);
+
+    fetch("/add_event", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "success") {
+          alert("Event Added!");
+          location.reload();
+        }
+      });
+  }
+
+  document
+    .getElementById("openBoardDetails")
+    .addEventListener("click", function () {
+      window.location.href = "/board_details";
+    });
+
+  document
+    .getElementById("openSensitive")
+    .addEventListener("click", function () {
+      window.location.href = "/mark_personnel";
+    });
+
+  document
+    .getElementById("openProjects")
+    .addEventListener("click", function () {
+      window.location.href = "/projects";
+    });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const testModal = document.getElementById("testDetailsModal");
+    const modalBody = document.getElementById("testDetailsModalBody");
+
+    testModal.addEventListener("show.bs.modal", function () {
+      modalBody.innerHTML = `
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary"></div>
+            </div>
+          `;
+
+      fetch("/fill-up-test-details")
+        .then((res) => res.text())
+        .then((html) => {
+          modalBody.innerHTML = html;
+          initFillUpTestForm();
+        })
+        .catch(() => {
+          modalBody.innerHTML =
+            "<p class='text-danger'>Failed to load form</p>";
+        });
+    });
+
+    function initFillUpTestForm() {
+      // Enable date only if Done
+      modalBody.querySelectorAll(".test-status").forEach((select) => {
+        select.addEventListener("change", function () {
+          const dateInput = this.closest(".row").querySelector(".test-date");
+          dateInput.disabled = this.value !== "Done";
+        });
+      });
+
+      const form = modalBody.querySelector("#fillTestForm");
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const payload = {
+          army_number: form.army_number.value,
+          tests: [
+            {
+              test: "1st",
+              status: form.test1.value,
+              date: form.test1_date.value,
+            },
+            {
+              test: "2nd",
+              status: form.test2.value,
+              date: form.test2_date.value,
+            },
+            {
+              test: "3rd",
+              status: form.test3.value,
+              date: form.test3_date.value,
+            },
+            {
+              test: "4th",
+              status: form.test4.value,
+              date: form.test4_date.value,
+            },
+          ],
+        };
+
+        fetch("/api/fill-up-test", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then((res) => res.json())
+          .then(() => {
+            alert("Test details saved");
+            bootstrap.Modal.getInstance(testModal).hide();
+            location.reload();
+          })
+          .catch(() => alert("Save failed"));
+      });
+    }
+  });
+</script>
+
+<script>
+  async function loadTodayEvents() {
+    try {
+      const res = await fetch("/api/today_event_alarm");
+      const data = await res.json();
+      console.log('data for todays events',data)
+
+      const list = safeQuerySelector("#eventList");
+      if (!list) return;
+      
+      list.innerHTML = "";
+
+      if (!data.rows || data.rows.length === 0) {
+        list.innerHTML = `
+              <li class="list-group-item text-muted text-center">
+                No events for today
+              </li>`;
+        return;
+      }
+      console.log(data.rows)
+      console.log(data.rows.length)
+      data.rows.forEach((event) => {
+        console.log(event)
+        list.innerHTML += `
+              <li class="list-group-item">
+                <strong>${event.event_name}</strong><br>
+                <small class="text-muted">Location :  ${event.venue}</small>
+              </li>
+            `;
+      });
+    } catch (err) {
+      console.error("Error loading events:", err);
+    }
+  }
+
+  function updateIfExists(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.innerText = value ?? "0";
+    }
+  }
+
+  // ========== MAIN DASHBOARD DATA LOAD ==========
+  async function loadDashboardDataSingleAPI() {
+    try {
+      const res = await fetch("/api/dashboard_summary");
+      if (!res.ok) throw new Error("Failed to fetch dashboard data");
+  
+      const {
+        detachments,
+        manpower = {},
+        interview = {},
+        attachment_count,
+        agniveer_count,
+        projects,
+        sensitive_count,
+        loan_count,
+        courses_count,
+        roll_call_pending_points,
+        boards_count,
+        tasks = {}
+      } = await res.json();
+  
+      // Calculate task stats
+      const pendingTasks = tasks.pending ?? 0;
+      const totalTasks = tasks.total ?? 0;
+      const taskPercentage =
+        totalTasks > 0 ? ((pendingTasks / totalTasks) * 100).toFixed(1) : "0";
+  
+      // All DOM updates in one place
+      const dashboardMap = {
+        locationCount: detachments,
+        mainPower: `${manpower.officerCount ?? 0} - ${manpower.jcoCount ?? 0} - ${manpower.orCount ?? 0}`,
+        "interview-Count": interview.pending_count ?? 0,
+        "total-count": interview.total_count ?? 0,
+        "interview%": `Pending ${interview.percentage ?? 0}%`,
+        "attachment-count": attachment_count ?? 0,
+        agniveer_count,
+        get_projects_count: projects ?? 0,
+        "sensitive-count": sensitive_count ?? 0,
+        "active-loan-count": loan_count ?? 0,
+        totalCoursesDone: courses_count ?? 0,
+        "center-roll-points": roll_call_pending_points ?? 0,
+        "board-count": boards_count ?? 0,
+        "task-count": `${pendingTasks} / ${totalTasks}`,
+        "task-pending": `${taskPercentage}%`
+      };
+  
+      // Update DOM
+      Object.entries(dashboardMap).forEach(([id, value]) =>
+        updateIfExists(id, value)
+      );
+  
+    } catch (err) {
+      console.error("Error loading dashboard data:", err);
+    }
+  }
+
+  async function updateRejectedLeaveCount() {
+    try {
+      const res = await fetch("/apply_leave/rejected_leaves");
+      if (!res.ok) throw new Error("Failed to fetch rejected leaves");
+
+      const { data } = await res.json();
+      const count = data ? data.length : 0;
+
+      const badge = document.getElementById("coRejectedCount");
+      badge.innerText = count;
+
+      // Optional: hide badge if 0
+      badge.style.display = count > 0 ? "inline-block" : "none";
+    } catch (err) {
+      console.error("Error fetching rejected leaves count:", err);
+    }
+  }
+
+  // ========== INITIALIZATION ==========
+  function initializeDashboard() {
+    console.log("Dashboard initialized for role:", "{{ role }}");
+
+    // Setup event listeners only for elements that exist
+    setupConditionalEventListeners();
+
+    // Load dashboard data
+    loadDashboardDataSingleAPI();
+
+    // Load events if needed
+    loadTodayEvents();
+
+    // Initialize date display if element exists
+    const dateDisplay = safeQuerySelector("#currentDateDisplay");
+    if (dateDisplay) {
+      const today = new Date();
+      const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      dateDisplay.textContent = today.toLocaleDateString("en-US", options);
+    }
+  }
+
+  // ========== DOM READY ==========
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM fully loaded for role:", "{{ role }}");
+    initializeDashboard();
+    updateRejectedLeaveCount();
+  });
+
+  // ========== SAFE UPDATE DATE DISPLAY ==========
+  function updateDateDisplay() {
+    const dateDisplay = safeQuerySelector("#currentDateDisplay");
+    if (dateDisplay) {
+      const today = new Date();
+      const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      dateDisplay.textContent = today.toLocaleDateString("en-US", options);
+    }
+  }
+
+  // ========== COMPANY FILTER EVENT DELEGATION ==========
+  document.addEventListener("change", (e) => {
+    if (e.target && e.target.id === "companyFilter") {
+      const selectedCompany = e.target.value || "All";
+      loadUnfitGraph(selectedCompany);
+    }
+  });
+
+  // ========== INITIAL CHART LOAD ==========
+  document.addEventListener("DOMContentLoaded", () => {
+    const companySelect = safeQuerySelector("#companyFilter");
+    if (companySelect) {
+      const defaultCompany = companySelect.value || "All";
+      console.log("Initial company for chart:", defaultCompany);
+      loadUnfitGraph(defaultCompany);
+    }
+  });
+</script>
+
+{% endblock %}
