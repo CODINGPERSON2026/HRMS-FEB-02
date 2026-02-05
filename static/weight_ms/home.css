@@ -1067,43 +1067,6 @@ canvas {
     color: var(--danger);
     border: 1px solid var(--danger);
 }
-<<<<<<< HEAD
-=======
-.theme-switcher {
-  position: relative;
-  display: inline-block;
-}
-.theme-icon {
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--text-color);
-}
-.theme-dropdown {
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  box-shadow: 0 2px 8px var(--shadow);
-  z-index: 1000;
-  min-width: 100px;
-}
-.theme-switcher:hover .theme-dropdown {
-  display: block;
-}
-.theme-dropdown-item {
-  padding: 8px 16px;
-  cursor: pointer;
-  color: var(--text-color);
-  font-size: 0.9rem;
-}
-.theme-dropdown-item:hover {
-  background-color: var(--primary-light);
-  color: white;
-}
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 
 @keyframes spin {
     to { transform: rotate(360deg); }

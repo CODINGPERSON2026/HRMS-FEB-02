@@ -2,24 +2,14 @@
 
 {% block content %}
 <style>
-<<<<<<< HEAD
     /* Weight Management Page Styles - Using Theme Variables from baseView.html */
     
-=======
-    /* Adjust for sidebar from baseView.html */
-   
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     body {
         margin: 0;
         font-family: sans-serif;
     }
 
-<<<<<<< HEAD
     /* Decorative navbar */
-=======
-    /* Optional: Add the decorative navbar if you want to keep it */
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     .secondary-navbar {
         margin-top: 4px;
         height: 80px;
@@ -87,53 +77,6 @@
         max-width: 100px;
     }
 
-<<<<<<< HEAD
-=======
-    /* Styles for the theme switcher with hover dropdown */
-    .theme-switcher {
-        position: relative;
-        display: inline-block;
-    }
-
-    .theme-icon {
-        font-size: 1.5rem;
-        color: var(--text-color);
-        cursor: pointer;
-        padding: 5px;
-        transition: color 0.3s;
-    }
-
-    .theme-icon:hover {
-        color: var(--primary);
-    }
-
-    .theme-dropdown {
-        display: none;
-        position: absolute;
-        right: 0;
-        background-color: var(--background);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-radius: 4px;
-        z-index: 1000;
-        min-width: 100px;
-    }
-
-    .theme-switcher:hover .theme-dropdown {
-        display: block;
-    }
-
-    .theme-dropdown-item {
-        padding: 8px 12px;
-        color: var(--text-color);
-        cursor: pointer;
-    }
-
-    .theme-dropdown-item:hover {
-        background-color: var(--primary-light);
-        color: var(--text-color-inverse);
-    }
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     /* Validation Popup Styles */
     .validation-popup {
         display: none;
@@ -153,15 +96,9 @@
         padding: 20px;
         border-radius: 8px;
         text-align: center;
-<<<<<<< HEAD
         box-shadow: 0 4px 6px var(--shadow);
         width: 300px;
         color: var(--text-primary);
-=======
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        width: 300px;
-        color: var(--text-color);
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     }
 
     .validation-popup-icon {
@@ -172,7 +109,6 @@
     .validation-popup-close {
         margin-top: 15px;
         padding: 5px 15px;
-<<<<<<< HEAD
         background: var(--primary-color);
         color: white;
         border: none;
@@ -248,23 +184,6 @@
         transition: all 0.4s ease;
     }
 
-=======
-        background-color: var(--primary);
-        color: var(--text-color-inverse);
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .validation-popup-close:hover {
-        background-color: var(--primary-dark);
-    }
-
-   
-
-     
-    
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     .cards.hidden {
         opacity: 0;
         height: 0;
@@ -273,7 +192,6 @@
         overflow: hidden;
         pointer-events: none;
         transform: translateY(-10px);
-<<<<<<< HEAD
     }
 
     .card {
@@ -843,9 +761,6 @@
             flex-direction: column;
             align-items: stretch;
         }
-=======
-        
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     }
 
     @media (min-width: 1200px) {
@@ -853,33 +768,13 @@
             font-size: 0.9rem;
         }
     }
-<<<<<<< HEAD
-=======
-    #toggle-cards-btn{
-        
-        border: none;
-        padding: 2px 4px;
-        font-size: 10px;
-        border-radius: 6px;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: background 0.2s ease;
-    }
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 </style>
 
 <div class="wrapper">
     {% set header = "Weight Management" %}
     {% set subscript = "View Weight Analysis → Update weight" %}
     {% include 'navbar/navbar.html' %}
-<<<<<<< HEAD
 </div>
-=======
-     </div>
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 
 <!-- Link external CSS and JS -->
 <link rel="stylesheet" href="/static/weight_ms/home.css">
@@ -888,19 +783,10 @@
 <link rel="stylesheet" href="/static/fontawesome-free-7.1.0-web/css/all.min.css">
 
 <div class="weight-container" style="position: relative;">
-<<<<<<< HEAD
     <!-- Fullscreen Loader -->
     <div class="fullscreen-loader" id="fullscreen-loader">
         <div class="spinner"></div>
     </div>
-=======
-    <!-- Optional: Keep the decorative navbar or remove this section -->
-    <div class="fullscreen-loader" id="fullscreen-loader">
-        <div class="spinner"></div>
-    </div>
-    
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 
     <!-- Validation Popup Modal -->
     <div id="validation-popup" class="validation-popup" style="display: none;">
@@ -911,10 +797,7 @@
         </div>
     </div>
 
-<<<<<<< HEAD
     <!-- Dashboard Header (Theme switcher removed - now in parent template) -->
-=======
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     <div class="dashboard-header">
         <div class="header-controls">
             <div class="company-filter">
@@ -923,43 +806,15 @@
                     <option value="All">15 CESR</option>
                 </select>
             </div>
-<<<<<<< HEAD
         </div>
     </div>
 
-=======
-
-            <button id="add-user-btn" class="btn-primary" style="white-space: nowrap;">
-                + Add User
-            </button>
-            <button id="update-user-btn" class="btn-primary" style="white-space: nowrap; margin-left: 10px;">
-                + Update User
-            </button>
-        </div>
-        <div class="theme-switcher">
-            <i class="fas fa-palette theme-icon" title="Change Theme"></i>
-            <div class="theme-dropdown" id="theme-dropdown">
-                <div class="theme-dropdown-item" data-theme="light">Light</div>
-                <div class="theme-dropdown-item" data-theme="dark">Dark</div>
-                <div class="theme-dropdown-item" data-theme="olive">Olive</div>
-                <div class="theme-dropdown-item" data-theme="blue">Blue</div>
-            </div>
-        </div>
-    </div>
-
-
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     <div class="cards-toggle-container">
         <button id="toggle-cards-btn">
             <i class="fas fa-chevron-down"></i>
         </button>
     </div>
 
-<<<<<<< HEAD
-=======
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     <!-- Add User Modal -->
     <div id="add-user-modal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -1126,10 +981,7 @@
         </div>
     </div>
 
-<<<<<<< HEAD
     <!-- Success Toast -->
-=======
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     <div id="success-toast" class="toast" style="display: none;">
         <div class="toast-content">
             <span class="toast-icon">✓</span>
@@ -1137,12 +989,8 @@
         </div>
     </div>
 
-<<<<<<< HEAD
     <!-- Summary Cards -->
     <div class="cards" id="summary-cards">
-=======
-    <div class="cards" id="summary-cards" >
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <div class="card card-info">
             <div class="card-content">
                 <div>
@@ -1214,37 +1062,16 @@
         </div>
     </div>
 
-<<<<<<< HEAD
     <!-- Charts Container -->
     <div class="bar-charts-container" id="bar-charts-container">
         <!-- Left column charts -->
         <div class="chart-column-wrapper">
             <div class="chart-column-header">
-=======
-    <div class="bar-charts-container" id="bar-charts-container">
-        <!-- Left column charts -->
-        <div class="chart-column-wrapper">
-            <div class="chart-column-header" style="
-                text-align: center;
-                background: linear-gradient(90deg, var(--primary), var(--primary-light));
-                color: white;
-                padding: 10px 0;
-                border-radius: 8px;
-                font-size: 1.25rem;
-                font-weight: bold;
-                margin-bottom: 15px;
-                box-shadow: 0 2px 8px var(--shadow);
-            ">
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
                 Weight Based Analysis
             </div>
             <div class="chart-column">
                 <div class="chart-box">
-<<<<<<< HEAD
                     <h3>Fitness Analysis</h3>
-=======
-                    <h3>Fitness  Analysis</h3>
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
                     <div class="bar-chart-wrapper" style="height: 300px;">
                         <canvas id="fitUnfitChart"></canvas>
                     </div>
@@ -1268,21 +1095,7 @@
         <div class="vertical-divider"></div>
         <!-- Right column charts -->
         <div class="chart-column-wrapper">
-<<<<<<< HEAD
             <div class="chart-column-header">
-=======
-            <div class="chart-column-header" style="
-                text-align: center;
-                background: linear-gradient(90deg, var(--primary), var(--primary-light));
-                color: white;
-                padding: 10px 0;
-                border-radius: 8px;
-                font-size: 1.25rem;
-                font-weight: bold;
-                margin-bottom: 15px;
-                box-shadow: 0 2px 8px var(--shadow);
-            ">
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
                 Shape Based Analysis
             </div>
             <div class="chart-column">
@@ -1297,11 +1110,7 @@
                     <div class="chart-filter">
                         <label for="jco-safe-or-filter">Filter:</label>
                         <select id="jco-safe-or-filter" class="chart-select">
-<<<<<<< HEAD
                             <option value="shape">SHAPE I</option>
-=======
-                            <option value="safe">SHAPE I</option>
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
                             <option value="category">CATEGORY</option>
                         </select>
                     </div>
@@ -1313,10 +1122,7 @@
         </div>
     </div>
 
-<<<<<<< HEAD
     <!-- Table Wrapper -->
-=======
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     <div class="table-wrapper" id="table-wrapper" style="position: relative;">
         <div class="table-spinner" id="table-spinner" style="display: none;">
             <div class="spinner"></div>
@@ -1362,17 +1168,11 @@
         </table>
     </div>
 </div>
-<<<<<<< HEAD
 
 {% include 'weight_system/modals/modal.html'%}
 <script type="module" src="/static/weight_ms/home.js"></script>
 <script>
     // Toggle cards visibility
-=======
-{% include 'weight_system/modals/modal.html'%}
-<script type="module" src="/static/weight_ms/home.js"></script>
-<script>
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     document.getElementById('toggle-cards-btn').addEventListener('click', function () {
         const cards = document.getElementById('summary-cards');
         const btn = this;

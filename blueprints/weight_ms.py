@@ -511,7 +511,6 @@ def api_status_data():
 def api_bar_graph_data():
     company = request.args.get('company', 'All')
     fit_unfit_filter = request.args.get('fitUnfitFilter', 'Fit')
-<<<<<<< HEAD
     safe_category_filter = request.args.get('safeCategoryFilter', 'shape')
 
     print("\n================ API /bar-graph-data =================")
@@ -637,71 +636,10 @@ def api_bar_graph_data():
         else:
             print("MODE: CATEGORY (Temporary / Permanent)")
 
-=======
-    safe_category_filter = request.args.get('safeCategoryFilter', 'shape')  # 'shape' or 'category'
-    
-    connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
-    
-    try:
-        # === 1. Fit / Unfit counts (unchanged) ===
-        data = compute_authorization(company)
-        fit_count = sum(1 for d in data if d['status'] == "Fit")
-        unfit_count = sum(1 for d in data if d['status'] == "UnFit")
-        
-        # === 2. JCO / OR counts for selected Fit/Unfit (unchanged) ===
-        jco_status_count = sum(1 for d in data if d['status'] == fit_unfit_filter and d['rank'] == "JCO")
-        or_status_count = sum(1 for d in data if d['status'] == fit_unfit_filter and d['rank'] != "JCO")
-        
-        # === 3. Total Safe & Category counts (unchanged) ===
-        if company != "All":
-            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE company = %s AND status_type = 'shape'", (company,))
-        else:
-            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'shape'")
-        total_safe_count = cursor.fetchone()['count'] or 0
-        
-        if company != "All":
-            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE company = %s AND status_type = 'category'", (company,))
-        else:
-            cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'category'")
-        total_category_count = cursor.fetchone()['count'] or 0
-
-
-        # === 4. jcoSafeOrCategory – SMART LOGIC BASED ON FILTER ===
-        if safe_category_filter == 'shape':
-            # For "safe" → no temporary/permanent → just show total JCO vs OR
-            if company != "All":
-                cursor.execute("""
-                    SELECT COUNT(*) as count FROM weight_info 
-                    WHERE company = %s AND status_type = 'shape' AND `rank` = 'JCO'
-                """, (company,))
-            else:
-                cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'shape' AND `rank` = 'JCO'")
-            jco_val = cursor.fetchone()['count'] or 0
-
-            if company != "All":
-                cursor.execute("""
-                    SELECT COUNT(*) as count FROM weight_info 
-                    WHERE company = %s AND status_type = 'shape' AND `rank` != 'JCO'
-                """, (company,))
-            else:
-                cursor.execute("SELECT COUNT(*) as count FROM weight_info WHERE status_type = 'shape' AND `rank` != 'JCO'")
-            or_val = cursor.fetchone()['count'] or 0
-
-            jcoSafeOrCategory = {
-                "labels": ["JCO Safe", "OR Safe"],
-                "data": [jco_val, or_val],
-                
-            }
-
-        else:  # safe_category_filter == 'category'
-            # For "category" → split into Temporary & Permanent
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
             query = """
                 SELECT `rank`,
                        COALESCE(LOWER(TRIM(category_type)), 'unknown') AS cat_type,
                        COUNT(*) AS cnt
-<<<<<<< HEAD
                 FROM weight_info
                 WHERE status_type = 'category'
             """
@@ -720,20 +658,6 @@ def api_bar_graph_data():
             results = cursor.fetchall()
 
             print("Category rows:", results)
-=======
-                FROM weight_info 
-                WHERE status_type = 'category'
-            """
-            params = []
-            if company != "All":
-                query += " AND company = %s"
-                params.append(company)
-            query += " GROUP BY `rank`, category_type"
-
-            cursor.execute(query, params)
-            results = cursor.fetchall()
-            #results,"these are results")
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 
             jco_temp = jco_perm = or_temp = or_perm = 0
 
@@ -742,7 +666,6 @@ def api_bar_graph_data():
                 cat_type = row['cat_type']
                 cnt = row['cnt']
 
-<<<<<<< HEAD
                 is_jco = rank in JCO_RANKS
 
                 print(f"Row → Rank:{rank}, Type:{cat_type}, Count:{cnt}, Is JCO:{is_jco}")
@@ -778,50 +701,19 @@ def api_bar_graph_data():
         # ============================================================
         # RESPONSE
         # ============================================================
-=======
-                if rank == 'JCO':
-                    if cat_type in ('temporary', 'temp'):
-                        jco_temp += cnt
-                    elif cat_type in ('permanent', 'perm'):
-                        jco_perm += cnt
-                else:
-                    # All other ranks = OR (including AGNIVEER, Havaldar, MAJOR, etc.)
-                    if cat_type in ('temporary', 'temp'):
-                        or_temp += cnt
-                    elif cat_type in ('permanent', 'perm'):
-                        or_perm += cnt
-
-            #jco_temp, jco_perm, or_temp, or_perm)
-
-            jcoSafeOrCategory = {
-                "labels": ["JCO Temporary", "JCO Permanent", "OR Temporary", "OR Permanent"],
-                "data": [jco_temp, jco_perm, or_temp, or_perm],
-                
-            }
-
-
-        #total_safe_count, total_category_count, "→ bar graph")
-        #jco_status_count, or_status_count, "→ donut graph (fit)")
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         return jsonify({
             "fitUnfit": {
                 "labels": ["Fit", "Unfit"],
                 "data": [fit_count, unfit_count]
             },
             "safeCategory": {
-<<<<<<< HEAD
                 "labels": ["Shape 1", "Category"],
-=======
-                "labels": ["Safe", "Category"],
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
                 "data": [total_safe_count, total_category_count]
             },
             "jcoOrFit": {
                 "labels": [f"JCO {fit_unfit_filter}", f"OR {fit_unfit_filter}"],
                 "data": [jco_status_count, or_status_count]
             },
-<<<<<<< HEAD
             "jcoSafeOrCategory": jcoSafeOrCategory
         })
 
@@ -838,100 +730,6 @@ def api_bar_graph_data():
 # API Route to Get User by Army Number
 
 
-=======
-            "jcoSafeOrCategory": jcoSafeOrCategory   # ← Smart response
-        })
-        
-    except mysql.connector.Error as err:
-        print(f"DB Error: {err}")
-        return jsonify({'error': 'Database error occurred'}), 500
-    finally:
-        cursor.close()
-        connection.close()
-
-# API Route to Get User by Army Number
-@weight_ms.route('/api/user/<army_number>', methods=['GET'])
-def get_user(army_number):
-    connection = get_db_connection()
-    if not connection:
-        return jsonify({'error': 'Database connection failed'}), 500
-
-    cursor = connection.cursor(dictionary=True)
-    try:
-        query = "SELECT * FROM weight_info WHERE army_number = %s"
-        cursor.execute(query, (army_number,))
-        
-        user = cursor.fetchone()
-
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-
-        return jsonify({
-            'name': user['name'],
-            'army_number': user['army_number'],
-            'rank': user['rank'],
-            'age': user['age'],
-            'height_cm': user['height'],
-            'actual_weight': user['actual_weight'],
-            'company': user['company'],
-            'status_type': user['status_type'],
-            'category_type': user['category_type'],
-            'restrictions': user['restrictions']
-        })
-    except mysql.connector.Error as e:
-        print(f"Error fetching user: {e}")
-        return jsonify({'error': 'Error fetching user'}), 500
-    finally:
-        cursor.close()
-        connection.close()
-
-# API Route to Update User
-@weight_ms.route('/api/update-user', methods=['PUT'])
-def update_user():
-    connection = get_db_connection()
-    if not connection:
-        return jsonify({'error': 'Da;tabase connection failed'}), 500
-
-    cursor = connection.cursor()
-    data = request.get_json();
-    army_number = data.get('army_number')
-
-    try:
-        # Check if user exists
-        check_query = "SELECT COUNT(*) FROM weight_info WHERE army_number = %s"
-        cursor.execute(check_query, (army_number,))
-        if cursor.fetchone()[0] == 0:
-            return jsonify({'error': 'User not found'}), 404
-
-        # Update user data
-        update_query = """
-            UPDATE weight_info 
-            SET name = %s, `rank`= %s, age = %s, height = %s, actual_weight = %s, 
-                company = %s, status_type = %s, category_type = %s, restrictions = %s
-            WHERE army_number = %s
-        """
-        cursor.execute(update_query, (
-            data.get('name'),
-            data.get('rank'),
-            data.get('age'),
-           data.get('height_cm'),
-            data.get('actual_weight'),
-            data.get('company'),
-            data.get('status_type'),
-            data.get('category_type'),
-            data.get('restrictions'),
-            army_number
-        ))
-        connection.commit()
-        return jsonify({'message': 'User updated successfully'}), 200
-    except mysql.connector.Error as e:
-        connection.rollback()
-        print(f"Error updating user: {e}")
-        return jsonify({'error': 'Error updating user'}), 500
-    finally:
-        cursor.close()
-        connection.close()
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 @weight_ms.route('/api/unfit-graph')
 def unfit_graph():
     company = request.args.get('company', 'ALL')

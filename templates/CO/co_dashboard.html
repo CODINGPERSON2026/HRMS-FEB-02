@@ -1,63 +1,26 @@
-<<<<<<< HEAD
 {% extends "baseView.html" %} 
 {% block content %}
 
 <style>
   /* Dashboard-specific styles (theme variables inherited from baseView.html) */
   
-=======
-{% extends "baseView.html" %} {% block content %}
-
-<style>
-  :root {
-    --light-blue: #3b82f6;
-    --dark-blue: #2563eb;
-    --text-dark: #1f2937;
-    --text-light: #6b7280;
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: #f0f4f8;
-    overflow-x: hidden;
-    min-height: 100vh;
-  }
-
-  /* Dashboard Wrapper */
-  .dashboard-content {
-    position: relative;
-    min-height: 100vh;
-  }
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   /* Shimmer Effect */
   .shimmer-wrapper {
     position: relative;
     overflow: hidden;
-<<<<<<< HEAD
     background: var(--border-color);
-=======
-    background: #f6f7f8;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     border-radius: 12px;
   }
 
   .shimmer {
     position: relative;
     overflow: hidden;
-<<<<<<< HEAD
     background: linear-gradient(90deg, var(--border-color) 25%, var(--text-secondary) 50%, var(--border-color) 75%);
-=======
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
 
   @keyframes shimmer {
-<<<<<<< HEAD
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
   }
@@ -67,21 +30,6 @@
     border-radius: 16px;
     padding: 16px;
     border: 1px solid var(--border-color);
-=======
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
-  }
-
-  .shimmer-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 16px;
-    padding: 16px;
-    border: 1px solid #e2e8f0;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     min-height: 140px;
     display: flex;
     flex-direction: column;
@@ -90,7 +38,6 @@
     gap: 10px;
   }
 
-<<<<<<< HEAD
   .shimmer-circle,
   .shimmer-line,
   .shimmer-title,
@@ -101,65 +48,29 @@
     border-radius: 5px;
   }
 
-=======
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   .shimmer-circle {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-<<<<<<< HEAD
-=======
-    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   }
 
   .shimmer-line {
     height: 10px;
-<<<<<<< HEAD
   }
 
   .shimmer-line.short { width: 60%; }
   .shimmer-line.medium { width: 80%; }
   .shimmer-line.long { width: 100%; }
-=======
-    border-radius: 5px;
-    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-
-  .shimmer-line.short {
-    width: 60%;
-  }
-
-  .shimmer-line.medium {
-    width: 80%;
-  }
-
-  .shimmer-line.long {
-    width: 100%;
-  }
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 
   .shimmer-title {
     height: 18px;
     width: 90px;
-<<<<<<< HEAD
-=======
-    border-radius: 5px;
-    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   }
 
   .shimmer-number {
     height: 30px;
     width: 70px;
     border-radius: 6px;
-<<<<<<< HEAD
   }
 
   /* Action Buttons Progress Loader */
@@ -192,11 +103,6 @@
   @keyframes loader-shimmer-progress {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
-=======
-    background: linear-gradient(90deg, #e0e0e0 25%, #d0d0d0 50%, #e0e0e0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   }
 
   /* Main Content */
@@ -207,21 +113,12 @@
 
   /* Action Section */
   .action-section {
-<<<<<<< HEAD
     background: var(--card-background);
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 8px 30px var(--shadow);
     margin-bottom: 35px;
     border: 1px solid var(--border-color);
-=======
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    margin-bottom: 35px;
-    border: 1px solid #e2e8f0;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     position: relative;
     overflow: hidden;
   }
@@ -233,28 +130,13 @@
     left: 0;
     right: 0;
     height: 5px;
-<<<<<<< HEAD
     background: linear-gradient(90deg, #ff9933 0%, #ff9933 33%, #ffffff 33%, #ffffff 66%, #138808 66%);
-=======
-    background: linear-gradient(
-      90deg,
-      #ff9933 0%,
-      #ff9933 33%,
-      #ffffff 33%,
-      #ffffff 66%,
-      #138808 66%
-    );
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   }
 
   .action-section-title {
     font-size: 1.4rem;
     font-weight: 700;
-<<<<<<< HEAD
     color: var(--text-primary);
-=======
-    color: #1e293b;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -266,7 +148,6 @@
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
-<<<<<<< HEAD
     opacity: 0;
     transition: opacity 0.4s ease;
   }
@@ -285,8 +166,6 @@
   .action-buttons .btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px var(--shadow);
-=======
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   }
 
   /* Stats Grid */
@@ -295,31 +174,18 @@
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 15px;
     margin-bottom: 10px;
-<<<<<<< HEAD
     transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.5s ease, padding 0.3s ease, margin 0.3s ease;
-=======
-    transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.5s ease,
-      padding 0.3s ease, margin 0.3s ease;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     overflow: hidden;
   }
 
   .card {
     border: none;
     border-radius: 16px;
-<<<<<<< HEAD
     box-shadow: 0 4px 15px var(--shadow);
     transition: all 0.3s ease;
     overflow: hidden;
     background: var(--card-background);
     border: 1px solid var(--border-color);
-=======
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    overflow: hidden;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid #e2e8f0;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     text-align: center;
     padding: 16px;
     position: relative;
@@ -337,26 +203,14 @@
     left: 0;
     right: 0;
     height: 3px;
-<<<<<<< HEAD
     background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-=======
-    background: linear-gradient(
-      90deg,
-      var(--light-blue) 0%,
-      var(--dark-blue) 100%
-    );
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     opacity: 0;
     transition: opacity 0.3s ease;
   }
 
   .card:hover {
     transform: translateY(-3px);
-<<<<<<< HEAD
     box-shadow: 0 10px 30px var(--shadow);
-=======
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   }
 
   .card:hover::before {
@@ -367,20 +221,12 @@
     font-size: 1.8rem;
     margin: 10px 0 5px 0;
     font-weight: 700;
-<<<<<<< HEAD
     color: var(--text-primary);
-=======
-    color: var(--text-dark);
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     line-height: 1.2;
   }
 
   .card .text-muted {
-<<<<<<< HEAD
     color: var(--text-secondary) !important;
-=======
-    color: var(--text-light) !important;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     font-weight: 600;
     font-size: 0.75rem;
     text-transform: uppercase;
@@ -389,21 +235,13 @@
   }
 
   .card .text-success {
-<<<<<<< HEAD
     color: var(--success-color) !important;
-=======
-    color: #10b981 !important;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     font-weight: 600;
     font-size: 0.85rem;
   }
 
   .card .text-danger {
-<<<<<<< HEAD
     color: var(--danger-color) !important;
-=======
-    color: #ef4444 !important;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     font-weight: 600;
     font-size: 0.85rem;
   }
@@ -418,31 +256,16 @@
   .card .mb-2 i,
   .card .loan-icon i {
     font-size: 1.5rem;
-<<<<<<< HEAD
     color: var(--icon-color);
-=======
-    color: var(--light-blue);
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   }
 
   .card .fa-2x {
     font-size: 1.5rem !important;
-<<<<<<< HEAD
     color: var(--icon-color);
   }
 
   .view-details {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-=======
-  }
-
-  .view-details {
-    background: linear-gradient(
-      135deg,
-      var(--light-blue) 0%,
-      var(--dark-blue) 100%
-    );
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     color: white;
     border: none;
     padding: 8px 16px;
@@ -455,7 +278,6 @@
 
   .view-details:hover {
     transform: translateY(-2px);
-<<<<<<< HEAD
     box-shadow: 0 6px 16px var(--shadow);
   }
 
@@ -516,9 +338,6 @@
     max-height: 1000px;
     opacity: 1;
     transition: max-height 0.4s ease, opacity 0.3s ease;
-=======
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   }
 
   @media (max-width: 768px) {
@@ -558,74 +377,6 @@
       font-size: 1.3rem;
     }
   }
-<<<<<<< HEAD
-=======
-
-  .btn-close {
-    background-color: red;
-  }
-
-  .stats-grid.hide {
-    opacity: 0;
-    transform: translateY(-10px);
-    max-height: 0;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    margin-top: 0 !important;
-  }
-
-  .stats-grid.show {
-    opacity: 1;
-    transform: translateY(0);
-    max-height: 2000px;
-  }
-
-  #show-btn {
-    border: none;
-    
-    padding: 2px 6px;
-    font-size: 14px;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-
- 
-
-  /* Full screen modal with 10px gap */
-  .modal-fullscreen .modal-dialog {
-    margin: 10px;
-    max-width: calc(100vw - 20px);
-    max-height: calc(100vh - 20px);
-  }
-
-  .modal-fullscreen .modal-content {
-    height: 100%;
-  }
-
-  .modal-backdrop {
-    --bs-backdrop-opacity: 0.12;
-  }
-
-  .hide {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease, opacity 0.3s ease;
-  }
-
-  .show {
-    max-height: 1000px;
-    opacity: 1;
-    transition: max-height 0.4s ease, opacity 0.3s ease;
-  }
-  
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 </style>
 
 <!-- Dashboard -->
@@ -635,18 +386,8 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">📅 Today's Events</h5>
-<<<<<<< HEAD
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-=======
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-          ></button>
-        </div>
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <div class="modal-body">
           <ul id="eventList" class="list-group"></ul>
         </div>
@@ -654,21 +395,14 @@
     </div>
   </div>
 
-<<<<<<< HEAD
   {% set header = "15 CORPS ENGINEERING SIGNAL REGIMENT" %} 
   {% set subscript = 'Welcome ' ~ role ~ ' ' ~ current_user_name %} 
   {% include 'navbar/navbar.html' %}
-=======
-  {% set header = "15 CORPS ENGINEERING SIGNAL REGIMENT" %} {% set subscript =
-  'Welcome ' ~ role ~ ' ' ~ current_user_name %} {% include 'navbar/navbar.html'
-  %}
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 
   <!-- Main Content -->
   <div class="main-content" id="mainContent">
     <div style="margin-bottom: 10px">
       {% include 'modals/alarm/alarm.html' %}
-<<<<<<< HEAD
       {% include 'modals/alarm/attachment_alarm.html' %} 
       {% include 'modals/alarm/leave_alarm.html' %} 
       {% include 'modals/alarm/agniveer_test_alarms.html' %}
@@ -682,116 +416,46 @@
 
     <!-- Action Buttons -->
     <div class="action-buttons" id="actionButtonsContainer">
-=======
-       {% include
-      'modals/alarm/attachment_alarm.html' %} {% include
-      'modals/alarm/leave_alarm.html' %} {% include
-      'modals/alarm/agniveer_test_alarms.html' %}
-      {% include 'modals/alarm/event_alarm.html' %}
-    </div>
-
-    <div class="action-buttons">
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
       <button id="show-btn">
         <i class="fas fa-chevron-down"></i>
       </button>
 
-<<<<<<< HEAD
       <button class="btn btn-primary position-relative" data-bs-toggle="modal" data-bs-target="#coRejectedModal" id="coRejectedBtn">
         REJECTED LEAVES
         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="coRejectedCount">
-=======
-      <button
-        class="btn btn-primary position-relative"
-        data-bs-toggle="modal"
-        data-bs-target="#coRejectedModal"
-        id="coRejectedBtn"
-      >
-        REJECTED LEAVES
-        <span
-          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-          id="coRejectedCount"
-        >
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
           <span class="shimmer-line" style="width: 20px; height: 8px; display: inline-block;"></span>
           <span class="visually-hidden">unread messages</span>
         </span>
       </button>
 
-<<<<<<< HEAD
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">
-=======
-      
-
-      <button
-        class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#addEventModal"
-      >
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         ADD EVENT
       </button>
     </div>
 
     <div id="stats-card-grid" class="stats-grid show">
-<<<<<<< HEAD
       <!-- Dashboard Cards -->
       <div class="card p-3 text-center" style="cursor: pointer" data-bs-target="#paradeStateModal" data-bs-toggle="modal" id="card-parade">
         <div class="icon-circle">
           <i class="fas fa-book-open"></i>
         </div>
-=======
-      <!-- First Row Cards -->
-      <div
-        class="card p-3 text-center"
-        style="cursor: pointer"
-        data-bs-target="#paradeStateModal"
-        data-bs-toggle="modal"
-        id="card-parade"
-      >
-        <div class="icon-circle">
-          <i class="fas fa-book-open"></i>
-        </div>
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <small class="text-muted">PARADE STATE</small>
         <h3 id="mainPower">
           <div class="shimmer-number mx-auto"></div>
         </h3>
       </div>
 
-<<<<<<< HEAD
       <div class="card p-3 text-center" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#attachmentModal" id="card-attachment">
         <div class="icon-circle mb-2">
           <i class="fas fa-cloud-upload-alt"></i>
         </div>
-=======
-      <div
-        class="card p-3 text-center"
-        style="cursor: pointer"
-        data-bs-toggle="modal"
-        data-bs-target="#attachmentModal"
-        id="card-attachment"
-      >
-      <div class="icon-circle mb-2">
-        <i class="fas fa-cloud-upload-alt"></i>
-      </div>
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <small class="text-muted">TD/ATTACHMENT</small>
         <h3 id="attachment-count">
           <div class="shimmer-number mx-auto"></div>
         </h3>
       </div>
 
-<<<<<<< HEAD
       <div class="card p-3 text-center" style="cursor: pointer" id="openCourses">
-=======
-      <div
-        class="card p-3 text-center"
-        style="cursor: pointer"
-        id="openCourses"
-      >
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <div class="icon-circle mb-2">
           <i class="fas fa-graduation-cap"></i>
         </div>
@@ -801,15 +465,7 @@
         </h3>
       </div>
 
-<<<<<<< HEAD
       <div class="card p-3 text-center" style="cursor: pointer" id="interview-card">
-=======
-      <div
-        class="card p-3 text-center"
-        style="cursor: pointer"
-        id="interview-card"
-      >
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <div class="icon-circle mb-2">
           <i class="fa fa-male" aria-hidden="true"></i>
         </div>
@@ -822,15 +478,7 @@
         </span>
       </div>
 
-<<<<<<< HEAD
       <div class="card p-3 text-center" style="cursor: pointer" id="viewDetailsBtn">
-=======
-      <div
-        class="card p-3 text-center"
-        style="cursor: pointer"
-        id="viewDetailsBtn"
-      >
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <div class="mb-2">
           <i class="fas fa-user-plus fa-2x text-primary"></i>
         </div>
@@ -840,31 +488,16 @@
         </h3>
       </div>
 
-<<<<<<< HEAD
       <div class="card p-3 text-center" style="cursor: pointer" id="openSensitive">
         <div class="icon-circle mb-2">
           <i class="fas fa-exclamation-circle"></i>
         </div>
-=======
-      <div
-        class="card p-3 text-center"
-        style="cursor: pointer"
-        id="openSensitive"
-      >
-      <div class="icon-circle mb-2">
-        <i class="fas fa-exclamation-circle"></i>
-      </div>
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <small class="text-muted">SENSITIVE INDL</small>
         <h3 id="sensitive-count">
           <div class="shimmer-number mx-auto"></div>
         </h3>
       </div>
       
-<<<<<<< HEAD
-=======
-      
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
       <div class="card p-3 text-center" id="openBoardDetails">
         <div class="icon-circle mb-2">
           <i class="fas fa-user-tie me-1"></i>
@@ -875,17 +508,7 @@
         </h3>
       </div>
 
-<<<<<<< HEAD
       <div class="card p-3 text-center" style="cursor: pointer" id="loanDetailGraph" data-bs-toggle="modal" data-bs-target="#loanModal">
-=======
-      <div
-        class="card p-3 text-center"
-        style="cursor: pointer"
-        id="loanDetailGraph"
-        data-bs-toggle="modal"
-        data-bs-target="#loanModal"
-      >
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <div class="loan-icon">
           <i class="fa-solid fa-hand-holding-dollar"></i>
         </div>
@@ -895,70 +518,30 @@
         </h3>
       </div>
 
-<<<<<<< HEAD
       <div class="card p-3 text-center" style="cursor: pointer; transition: all 0.3s ease" id="openProjects">
         <div class="icon-circle mb-2">
           <i class="fas fa-rocket"></i>
         </div>
-=======
-      <div
-        class="card p-3 text-center"
-        style="cursor: pointer; transition: all 0.3s ease"
-        id="openProjects"
-      >
-      <div class="icon-circle mb-2">
-      <i class="fas fa-rocket"></i>
-    </div>
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <small class="text-muted">TOTAL PROJECTS</small>
         <h3 class="mb-0" id="get_projects_count">
           <div class="shimmer-number mx-auto"></div>
         </h3>
       </div>
 
-<<<<<<< HEAD
       <div class="card p-3 text-center" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#centerRollCallModal" id="card-rollcall">
         <div class="mb-2">
           <i class="fas fa-clipboard-list fa-2x text-primary"></i>
         </div>
-=======
-      <!-- Second Row Cards -->
-      <div
-        class="card p-3 text-center"
-        style="cursor: pointer"
-        data-bs-toggle="modal"
-        data-bs-target="#centerRollCallModal"
-        id="card-rollcall"
-      >
-        <div class="mb-2">
-          <i class="fas fa-clipboard-list fa-2x text-primary"></i>
-        </div>
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <small class="text-muted">CENTRAL ROLL CALL</small>
         <h3 id="center-roll-points">
           <div class="shimmer-number mx-auto"></div>
         </h3>
       </div>
 
-<<<<<<< HEAD
       <div class="card p-3 text-center" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#agniveersModal" id="card-agniveer">
         <div class="icon-circle">
           <i class="fas fa-user-shield"></i>
         </div>
-=======
-      <div
-        class="card p-3 text-center"
-        style="cursor: pointer"
-        data-bs-toggle="modal"
-        data-bs-target="#agniveersModal"
-        id="card-agniveer"
-      >
-        <div class="icon-circle">
-          <i class="fas fa-user-shield"></i>
-        </div>
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         <small class="text-muted">AGNIVEER</small>
         <h3 id="agniveer_count">
           <div class="shimmer-number mx-auto"></div>
@@ -972,41 +555,14 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Add Today's Event</h5>
-<<<<<<< HEAD
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-=======
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
           </div>
           <div class="modal-body">
             <form id="eventForm">
               <label>Event Date:</label>
-<<<<<<< HEAD
               <input type="date" class="form-control" name="event_date" value="{{ today }}" required />
               <label class="mt-2">Event Name:</label>
               <input type="text" class="form-control" name="event_name" required />
-=======
-              <input
-                type="date"
-                class="form-control"
-                name="event_date"
-                value="{{ today }}"
-                required
-              />
-
-              <label class="mt-2">Event Name:</label>
-              <input
-                type="text"
-                class="form-control"
-                name="event_name"
-                required
-              />
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
               <label class="mt-2">Venue:</label>
               <input type="text" class="form-control" name="venue" required />
             </form>
@@ -1019,7 +575,6 @@
     </div>
 
     {% include 'modals/detachmentModal/detachment.html' %} 
-<<<<<<< HEAD
     {% include 'modals/personnelModal/personal_modal.html' %}
     {% include 'modals/salesmodal/salesModal.html' %} 
     {% include 'modals/leaverequest/leave_request.html' %} 
@@ -1041,60 +596,11 @@
 
     <!-- Parade State Modal -->
     <div class="modal fade modal-fullscreen" id="paradeStateModal" tabindex="-1">
-=======
-    {% include
-    'modals/personnelModal/personal_modal.html' %}
-     {% include
-    'modals/salesmodal/salesModal.html' %} 
-    {% include
-    'modals/leaverequest/leave_request.html' %} 
-    {% include
-    'modals/interview_pending/modal.html' %} 
-    {% include
-    'modals/count_parade/modal.html' %}
-     {% include
-    'modals/attachment-modal/modal.html' %}
-     {% include 'modals/loan/loans.html'
-    %} {% include 'modals/roll_call/modal.html' %}
-     {% include
-    'modals/roll_call/view_roll_call.html' %}
-     {% include
-    'modals/course/courses.html' %} 
-    {% include
-    'modals/interview_pending/jco-update-modal.html' %} 
-    {% include
-    'modals/success-modal/modal.html' %}
-     {% include
-    'task_manager/update_task_by_jco.html' %}
-     {% include
-    'modals/adduser/user.html' %}
-     {% include 'modals/oncourses/modal.html' %} {%
-    include 'modals/leaverequest/co-rejected-view.html' %}
-     {% include
-    'modals/alarm/agniveer_test_alarms.html' %}
-     {% include
-    'modals/agniveer/modal.html' %}
-
-    <!-- Parade State Modal -->
-    <div
-      class="modal fade modal-fullscreen"
-      id="paradeStateModal"
-      tabindex="-1"
-    >
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Parade State</h5>
-<<<<<<< HEAD
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-=======
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
           </div>
           <div class="modal-body">
             {% include 'modals/parade_state/index.html' %}
@@ -1105,11 +611,6 @@
   </div>
 </div>
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 <script>
   document.addEventListener("hidden.bs.modal", function () {
     document.querySelectorAll(".modal-backdrop").forEach((b) => b.remove());
@@ -1135,7 +636,6 @@
     }
   }
 
-<<<<<<< HEAD
   // ========== START LOADER ==========
   function startActionButtonsLoader() {
     const loader = document.getElementById('actionBtnProgressLoader');
@@ -1175,11 +675,6 @@
 
   // ========== CONDITIONAL EVENT LISTENERS ==========
   function setupConditionalEventListeners() {
-=======
-  // ========== CONDITIONAL EVENT LISTENERS ==========
-  function setupConditionalEventListeners() {
-    // Only add listeners if elements exist
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     const openBoardDetails = safeQuerySelector("#openBoardDetails");
     if (openBoardDetails) {
       openBoardDetails.addEventListener("click", function () {
@@ -1194,16 +689,6 @@
       });
     }
 
-<<<<<<< HEAD
-=======
-    const overAllParadeState = safeQuerySelector("#overAllParadeState");
-    if (overAllParadeState) {
-      overAllParadeState.addEventListener("click", function () {
-        window.location.href = "/paradeState";
-      });
-    }
-
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     const openProjects = safeQuerySelector("#openProjects");
     if (openProjects) {
       openProjects.addEventListener("click", function () {
@@ -1226,18 +711,6 @@
         }
       });
     }
-<<<<<<< HEAD
-=======
-
-    // Leave Requests Button
-    const leaveRequestsBtn = safeQuerySelector("#leaveRequestsBtn");
-    if (leaveRequestsBtn) {
-      leaveRequestsBtn.addEventListener("click", function () {
-        // Your leave request logic here
-        console.log("Leave requests clicked");
-      });
-    }
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   }
 
   // ========== EVENT HANDLING ==========
@@ -1259,27 +732,6 @@
         }
       });
   }
-<<<<<<< HEAD
-=======
-
-  document
-    .getElementById("openBoardDetails")
-    .addEventListener("click", function () {
-      window.location.href = "/board_details";
-    });
-
-  document
-    .getElementById("openSensitive")
-    .addEventListener("click", function () {
-      window.location.href = "/mark_personnel";
-    });
-
-  document
-    .getElementById("openProjects")
-    .addEventListener("click", function () {
-      window.location.href = "/projects";
-    });
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 </script>
 
 <script>
@@ -1287,7 +739,6 @@
     const testModal = document.getElementById("testDetailsModal");
     const modalBody = document.getElementById("testDetailsModalBody");
 
-<<<<<<< HEAD
     if (testModal && modalBody) {
       testModal.addEventListener("show.bs.modal", function () {
         modalBody.innerHTML = `
@@ -1344,80 +795,6 @@
             .catch(() => alert("Save failed"));
         });
       }
-=======
-    testModal.addEventListener("show.bs.modal", function () {
-      modalBody.innerHTML = `
-            <div class="text-center py-4">
-              <div class="spinner-border text-primary"></div>
-            </div>
-          `;
-
-      fetch("/fill-up-test-details")
-        .then((res) => res.text())
-        .then((html) => {
-          modalBody.innerHTML = html;
-          initFillUpTestForm();
-        })
-        .catch(() => {
-          modalBody.innerHTML =
-            "<p class='text-danger'>Failed to load form</p>";
-        });
-    });
-
-    function initFillUpTestForm() {
-      // Enable date only if Done
-      modalBody.querySelectorAll(".test-status").forEach((select) => {
-        select.addEventListener("change", function () {
-          const dateInput = this.closest(".row").querySelector(".test-date");
-          dateInput.disabled = this.value !== "Done";
-        });
-      });
-
-      const form = modalBody.querySelector("#fillTestForm");
-
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        const payload = {
-          army_number: form.army_number.value,
-          tests: [
-            {
-              test: "1st",
-              status: form.test1.value,
-              date: form.test1_date.value,
-            },
-            {
-              test: "2nd",
-              status: form.test2.value,
-              date: form.test2_date.value,
-            },
-            {
-              test: "3rd",
-              status: form.test3.value,
-              date: form.test3_date.value,
-            },
-            {
-              test: "4th",
-              status: form.test4.value,
-              date: form.test4_date.value,
-            },
-          ],
-        };
-
-        fetch("/api/fill-up-test", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        })
-          .then((res) => res.json())
-          .then(() => {
-            alert("Test details saved");
-            bootstrap.Modal.getInstance(testModal).hide();
-            location.reload();
-          })
-          .catch(() => alert("Save failed"));
-      });
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     }
   });
 </script>
@@ -1427,10 +804,6 @@
     try {
       const res = await fetch("/api/today_event_alarm");
       const data = await res.json();
-<<<<<<< HEAD
-=======
-      console.log('data for todays events',data)
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 
       const list = safeQuerySelector("#eventList");
       if (!list) return;
@@ -1439,7 +812,6 @@
 
       if (!data.rows || data.rows.length === 0) {
         list.innerHTML = `
-<<<<<<< HEAD
           <li class="list-group-item text-muted text-center">
             No events for today
           </li>`;
@@ -1453,23 +825,6 @@
             <small class="text-muted">Location: ${event.venue}</small>
           </li>
         `;
-=======
-              <li class="list-group-item text-muted text-center">
-                No events for today
-              </li>`;
-        return;
-      }
-      console.log(data.rows)
-      console.log(data.rows.length)
-      data.rows.forEach((event) => {
-        console.log(event)
-        list.innerHTML += `
-              <li class="list-group-item">
-                <strong>${event.event_name}</strong><br>
-                <small class="text-muted">Location :  ${event.venue}</small>
-              </li>
-            `;
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
       });
     } catch (err) {
       console.error("Error loading events:", err);
@@ -1486,7 +841,6 @@
   // ========== MAIN DASHBOARD DATA LOAD ==========
   async function loadDashboardDataSingleAPI() {
     try {
-<<<<<<< HEAD
       updateLoaderProgress(10);
       
       const res = await fetch("/api/dashboard_summary");
@@ -1494,11 +848,6 @@
   
       updateLoaderProgress(30);
       
-=======
-      const res = await fetch("/api/dashboard_summary");
-      if (!res.ok) throw new Error("Failed to fetch dashboard data");
-  
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
       const {
         detachments,
         manpower = {},
@@ -1514,22 +863,12 @@
         tasks = {}
       } = await res.json();
   
-<<<<<<< HEAD
       updateLoaderProgress(50);
       
       const pendingTasks = tasks.pending ?? 0;
       const totalTasks = tasks.total ?? 0;
       const taskPercentage = totalTasks > 0 ? ((pendingTasks / totalTasks) * 100).toFixed(1) : "0";
   
-=======
-      // Calculate task stats
-      const pendingTasks = tasks.pending ?? 0;
-      const totalTasks = tasks.total ?? 0;
-      const taskPercentage =
-        totalTasks > 0 ? ((pendingTasks / totalTasks) * 100).toFixed(1) : "0";
-  
-      // All DOM updates in one place
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
       const dashboardMap = {
         locationCount: detachments,
         mainPower: `${manpower.officerCount ?? 0} - ${manpower.jcoCount ?? 0} - ${manpower.orCount ?? 0}`,
@@ -1544,7 +883,6 @@
         totalCoursesDone: courses_count ?? 0,
         "center-roll-points": roll_call_pending_points ?? 0,
         "board-count": boards_count ?? 0,
-<<<<<<< HEAD
       };
   
       Object.entries(dashboardMap).forEach(([id, value]) =>
@@ -1562,19 +900,6 @@
       console.error("Error loading dashboard data:", err);
       updateLoaderProgress(100);
       showActionButtons();
-=======
-        "task-count": `${pendingTasks} / ${totalTasks}`,
-        "task-pending": `${taskPercentage}%`
-      };
-  
-      // Update DOM
-      Object.entries(dashboardMap).forEach(([id, value]) =>
-        updateIfExists(id, value)
-      );
-  
-    } catch (err) {
-      console.error("Error loading dashboard data:", err);
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
     }
   }
 
@@ -1588,11 +913,6 @@
 
       const badge = document.getElementById("coRejectedCount");
       badge.innerText = count;
-<<<<<<< HEAD
-=======
-
-      // Optional: hide badge if 0
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
       badge.style.display = count > 0 ? "inline-block" : "none";
     } catch (err) {
       console.error("Error fetching rejected leaves count:", err);
@@ -1601,80 +921,15 @@
 
   // ========== INITIALIZATION ==========
   function initializeDashboard() {
-<<<<<<< HEAD
     console.log("Dashboard initialized");
     startActionButtonsLoader();
     setupConditionalEventListeners();
     loadDashboardDataSingleAPI();
-=======
-    console.log("Dashboard initialized for role:", "{{ role }}");
-
-    // Setup event listeners only for elements that exist
-    setupConditionalEventListeners();
-
-    // Load dashboard data
-    loadDashboardDataSingleAPI();
-
-    // Load events if needed
-    loadTodayEvents();
-
-    // Initialize date display if element exists
-    const dateDisplay = safeQuerySelector("#currentDateDisplay");
-    if (dateDisplay) {
-      const today = new Date();
-      const options = {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      };
-      dateDisplay.textContent = today.toLocaleDateString("en-US", options);
-    }
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   }
 
   // ========== DOM READY ==========
   document.addEventListener("DOMContentLoaded", () => {
-<<<<<<< HEAD
     initializeDashboard();
-=======
-    console.log("DOM fully loaded for role:", "{{ role }}");
-    initializeDashboard();
-    updateRejectedLeaveCount();
-  });
-
-  // ========== SAFE UPDATE DATE DISPLAY ==========
-  function updateDateDisplay() {
-    const dateDisplay = safeQuerySelector("#currentDateDisplay");
-    if (dateDisplay) {
-      const today = new Date();
-      const options = {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      };
-      dateDisplay.textContent = today.toLocaleDateString("en-US", options);
-    }
-  }
-
-  // ========== COMPANY FILTER EVENT DELEGATION ==========
-  document.addEventListener("change", (e) => {
-    if (e.target && e.target.id === "companyFilter") {
-      const selectedCompany = e.target.value || "All";
-      loadUnfitGraph(selectedCompany);
-    }
-  });
-
-  // ========== INITIAL CHART LOAD ==========
-  document.addEventListener("DOMContentLoaded", () => {
-    const companySelect = safeQuerySelector("#companyFilter");
-    if (companySelect) {
-      const defaultCompany = companySelect.value || "All";
-      console.log("Initial company for chart:", defaultCompany);
-      loadUnfitGraph(defaultCompany);
-    }
->>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
   });
 </script>
 
