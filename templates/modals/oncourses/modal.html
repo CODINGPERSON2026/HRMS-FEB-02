@@ -15,6 +15,14 @@
           <label class="form-label">Army Number <span class="text-danger">*</span></label>
           <input type="text" class="form-control" id="army_number" required>
         </div>
+        <div class="mb-3">
+          <label class="form-label">Rank <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="rank" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="name" required>
+        </div>
 
         <!-- Course Name -->
         <div class="mb-3">
@@ -59,6 +67,8 @@
     document.getElementById('save_course_btn').addEventListener('click', () => {
       // Get values
       const army_number = document.getElementById('army_number').value.trim();
+      const rank = document.getElementById('rank').value.trim();
+      const name = document.getElementById('name').value.trim();
       const course_name = document.getElementById('course_name').value.trim();
       const institute_name = document.getElementById('institute_name').value.trim();
       const course_starting_date = document.getElementById('course_starting_date').value;
@@ -77,6 +87,8 @@
       // Payload for POST request
       const payload = {
         army_number: army_number,
+        rank: rank,
+        name: name,
         course_name: course_name,
         institute_name: institute_name,
         course_starting_date: course_starting_date,
