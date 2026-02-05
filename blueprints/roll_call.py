@@ -94,10 +94,12 @@ def get_pending_roll_call_points():
         '''
 
         params = [status]
+        print('compnay',company)
 
-        if company != "Admin" and role !='Subedar Major':
-            query += " AND p.company = %s"
-            params.append(company)
+        # if company != "Admin" or company == 'Center':
+        #     print('filtered')
+        #     query += " AND p.company = %s"
+        #     params.append(company)
 
         query += " ORDER BY rcp.created_at DESC"
 
