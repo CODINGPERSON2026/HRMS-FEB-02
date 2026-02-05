@@ -11,6 +11,10 @@ from functools import wraps
 
 app = Flask(__name__)
 
+<<<<<<< HEAD
+=======
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
+>>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 app.secret_key = os.urandom(24)
 
 

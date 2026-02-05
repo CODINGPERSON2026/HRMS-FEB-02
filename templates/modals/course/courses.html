@@ -45,7 +45,11 @@
     });
     
     function loadCourses() {
+<<<<<<< HEAD
       fetch("/api/get-all-courses")
+=======
+      fetch("/api/get-all-coursse")
+>>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
         .then(res => res.json())
         .then(data => {
           const tbody = document.getElementById("coursesTableBody");

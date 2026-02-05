@@ -93,13 +93,18 @@ async function fetchBarGraphData() {
               data: [50, 60]
           },
           jcoSafeOrCategory: {
+<<<<<<< HEAD
               labels: ['JCO Shape I', 'OR Category'],
+=======
+              labels: ['JCO Safe', 'OR Category'],
+>>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
               data: [34, 118]
           }
       });
   }
 }
 
+<<<<<<< HEAD
 
 
 function drawBarGraphs(data) {
@@ -373,6 +378,241 @@ function updateDoughnutCharts() {
       console.error("❌ Error updating doughnut charts:", err);
       showValidationPopup("Failed to update chart data. Please try again.");
     });
+=======
+function drawBarGraphs(data) {
+  if (window.fitUnfitChartInstance) {
+      window.fitUnfitChartInstance.destroy();
+  }
+  if (window.safeCategoryChartInstance) {
+      window.safeCategoryChartInstance.destroy();
+  }
+  if (window.jcoOrFitChartInstance) {
+      window.jcoOrFitChartInstance.destroy();
+  }
+  if (window.jcoSafeOrCategoryChartInstance) {
+      window.jcoSafeOrCategoryChartInstance.destroy();
+  }
+
+  const commonBarOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+          legend: { display: false },
+          tooltip: {
+              callbacks: {
+                  label: function(context) {
+                      return `${context.dataset.label}: ${context.parsed.y}`;
+                  }
+              }
+          }
+      },
+      scales: {
+          x: {
+              grid: { display: false },
+              ticks: { color: '#4a5568', font: { weight: '600' } },
+              offset: false
+          },
+          y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(0, 0, 0, 0.1)' },
+              ticks: { color: '#4a5568', stepSize: 20 }
+          }
+      },
+      animation: { duration: 1000, easing: 'easeOutQuart' },
+      layout: { padding: { right: 50 } }
+  };
+
+  const commonDonutOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+          legend: {
+              position: 'bottom',
+              labels: { color: '#4a5568', font: { size: 12 } }
+          },
+          tooltip: {
+              callbacks: {
+                  label: function(context) {
+                      return `${context.label}: ${context.parsed}`;
+                  }
+              }
+          }
+      },
+      animation: { duration: 1000, easing: 'easeOutQuart' }
+  };
+
+  const fitUnfitCtx = document.getElementById('fitUnfitChart').getContext('2d');
+  window.fitUnfitChartInstance = new Chart(fitUnfitCtx, {
+      type: 'bar',
+      data: {
+          labels: data.fitUnfit?.labels || ['Fit', 'Unfit'],
+          datasets: [{
+              label: 'Fit',
+              data: data.fitUnfit?.data || [110, 42],
+              backgroundColor: ['#38a169', '#e53e3e'],
+              borderColor: ['#2f855a', '#c53030'],
+              borderWidth: 1,
+              borderRadius: 4,
+              borderSkipped: false,
+              barPercentage: 0.7
+          }]
+      },
+      options: commonBarOptions
+  });
+
+  const safeCategoryCtx = document.getElementById('safeCategoryChart').getContext('2d');
+  window.safeCategoryChartInstance = new Chart(safeCategoryCtx, {
+      type: 'bar',
+      data: {
+          labels: data.safeCategory?.labels || ['shape', 'Category'],
+          datasets: [{
+              label: 'shape',
+              data: data.safeCategory?.data || [34, 118],
+              backgroundColor: ['#3182ce', '#d69e2e'],
+              borderColor: ['#2c5282', '#b7791f'],
+              borderWidth: 1,
+              borderRadius: 4,
+              borderSkipped: false,
+              barPercentage: 0.7
+          }]
+      },
+      options: commonBarOptions
+  });
+
+  const jcoOrFilter = document.getElementById('jco-or-filter').value;
+  const jcoOrFitCtx = document.getElementById('jcoOrFitChart').getContext('2d');
+  window.jcoOrFitChartInstance = new Chart(jcoOrFitCtx, {
+      type: 'doughnut',
+      data: {
+          labels: data.jcoOrFit?.labels || [`JCO ${jcoOrFilter.charAt(0).toUpperCase() + jcoOrFilter.slice(1)}`, `OR ${jcoOrFilter.charAt(0).toUpperCase() + jcoOrFilter.slice(1)}`],
+          datasets: [{
+              label: `JCO vs OR ${jcoOrFilter.charAt(0).toUpperCase() + jcoOrFilter.slice(1)}`,
+              data: data.jcoOrFit?.data || [50, 60],
+              backgroundColor: ['#2b6cb0', '#ed8936'],
+              borderColor: ['#2c5282', '#dd6b20'],
+              borderWidth: 1
+          }]
+      },
+      options: commonDonutOptions
+  });
+
+  const jcoSafeOrFilter = document.getElementById('jco-safe-or-filter').value;
+  const jcoSafeOrCategoryCtx = document.getElementById('jcoSafeOrCategoryChart').getContext('2d');
+  window.jcoSafeOrCategoryChartInstance = new Chart(jcoSafeOrCategoryCtx, {
+      type: 'doughnut',
+      data: {
+          labels: data.jcoSafeOrCategory?.labels || [`JCO ${jcoSafeOrFilter.charAt(0).toUpperCase() + jcoSafeOrFilter.slice(1)}`, `OR ${jcoSafeOrFilter.charAt(0).toUpperCase() + jcoSafeOrFilter.slice(1)}`],
+          datasets: [{
+              label: `JCO vs OR ${jcoSafeOrFilter.charAt(0).toUpperCase() + jcoSafeOrFilter.slice(1)}`,
+              data: data.jcoSafeOrCategory?.data || [34, 118],
+              backgroundColor: ['#3182ce', '#d69e2e'],
+              borderColor: ['#2c5282', '#b7791f'],
+              borderWidth: 1
+          }]
+      },
+      options: commonDonutOptions
+  });
+}
+
+function updateDoughnutCharts() {
+  const jcoOrFilter = document.getElementById('jco-or-filter').value;
+  const jcoSafeOrFilter = document.getElementById('jco-safe-or-filter').value;
+  const url = currentCompany === "All" 
+      ? `/weight_system/api/bar-graph-data?fitUnfitFilter=${jcoOrFilter}&safeCategoryFilter=${jcoSafeOrFilter}`
+      : `/weight_system/api/bar-graph-data?company=${encodeURIComponent(currentCompany)}&fitUnfitFilter=${jcoOrFilter}&safeCategoryFilter=${jcoSafeOrFilter}`;
+  
+  fetch(url)
+      .then(res => {
+          if (!res.ok) throw new Error("Failed to fetch bar graph data");
+          return res.json();
+      })
+      .then(data => {
+          if (window.jcoOrFitChartInstance) {
+              window.jcoOrFitChartInstance.destroy();
+          }
+          if (window.jcoSafeOrCategoryChartInstance) {
+              window.jcoSafeOrCategoryChartInstance.destroy();
+          }
+
+          const commonDonutOptions = {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                  legend: {
+                      position: 'bottom',
+                      labels: { color: '#4a5568', font: { size: 12 } }
+                  },
+                  tooltip: {
+                      callbacks: {
+                          label: function(context) {
+                              return `${context.label}: ${context.parsed}`;
+                          }
+                      }
+                  }
+              },
+              animation: { duration: 1000, easing: 'easeOutQuart' }
+          };
+
+          const jcoOrFitCtx = document.getElementById('jcoOrFitChart').getContext('2d');
+          window.jcoOrFitChartInstance = new Chart(jcoOrFitCtx, {
+              type: 'doughnut',
+              data: {
+                  labels: data.jcoOrFit?.labels || [`JCO ${jcoOrFilter.charAt(0).toUpperCase() + jcoOrFilter.slice(1)}`, `OR ${jcoOrFilter.charAt(0).toUpperCase() + jcoOrFilter.slice(1)}`],
+                  datasets: [{
+                      label: `JCO vs OR ${jcoOrFilter.charAt(0).toUpperCase() + jcoOrFilter.slice(1)}`,
+                      data: data.jcoOrFit?.data || [50, 60],
+                      backgroundColor: ['#2b6cb0', '#ed8936'],
+                      borderColor: ['#2c5282', '#dd6b20'],
+                      borderWidth: 1
+                  }]
+              },
+              options: commonDonutOptions
+          });
+
+          const jcoSafeOrCategoryCtx = document.getElementById('jcoSafeOrCategoryChart').getContext('2d');
+          window.jcoSafeOrCategoryChartInstance = new Chart(jcoSafeOrCategoryCtx, {
+              type: 'doughnut',
+              data: {
+                labels: data.jcoSafeOrCategory?.labels || [
+                    `JCO ${jcoSafeOrFilter.charAt(0).toUpperCase()}`, 
+                    `OR ${jcoSafeOrFilter.charAt(0).toUpperCase()}`
+                ],
+                
+                  datasets: [{
+                      label: `JCO vs OR ${jcoSafeOrFilter.charAt(0).toUpperCase() + jcoSafeOrFilter.slice(1)}`,
+                      data: data.jcoSafeOrCategory?.data || [34, 118],
+                      "backgroundColor": [
+                        "#3182ce",  
+                        "#2c5282",   
+                        "#d69e2e",   
+                        "#b7791f"    
+                    ],
+                      borderColor: ['#2c5282', '#b7791f'],
+                      borderWidth: 1
+                  }]
+              },
+              options: {
+                ...commonDonutOptions,  // keep your shared options
+                plugins: {
+                    legend: {
+                        position: 'top',   // move legend to the right to prevent stacking
+                        labels: {
+                            boxWidth: 15,
+                            font: {
+                                size: 12      // reduce font size if needed
+                            }
+                        }
+                    }
+                }
+            }
+            
+          });
+      })
+      .catch(err => {
+          console.error("Error updating doughnut charts:", err);
+          showValidationPopup("Failed to update chart data. Please try again.");
+      });
+>>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 }
 
 function resetChartVisibility() {
@@ -685,7 +925,11 @@ function handleScroll() {
 
 document.getElementById("load-unauth-btn").addEventListener("click", () => fetchAndShow("/weight_system/api/unauthorized", "unauth"));
 document.getElementById("load-auth-btn").addEventListener("click", () => fetchAndShow("/weight_system/api/authorized", "auth"));
+<<<<<<< HEAD
 document.getElementById("load-safe-btn").addEventListener("click", () => fetchStatusData("shape"));
+=======
+document.getElementById("load-safe-btn").addEventListener("click", () => fetchStatusData("sHape"));
+>>>>>>> e8e994c03789b9dcaf247f862cf5d55063c08bf5
 document.getElementById("load-category-btn").addEventListener("click", () => fetchStatusData("category"));
 document.getElementById("close-table-btn").addEventListener("click", closeTable);
 document.getElementById("table-wrapper").addEventListener("scroll", handleScroll);
